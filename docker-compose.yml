@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: glowy-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: glowy
+    ports:
+      - "5432:5432"
+    volumes:
+      - glowy_pg_data:/var/lib/postgresql/data
+
+volumes:
+  glowy_pg_data:
