@@ -1,4 +1,4 @@
-# Glowy Skin 3D Commerce Starter
+# zupwell 3D Commerce Starter
 
 This repository now contains a production-style starter for your requested experience:
 
