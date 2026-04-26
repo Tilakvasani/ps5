@@ -49,58 +49,68 @@ async function main() {
   console.log("✅ GST rates seeded");
 
   // ── Categories ────────────────────────────────────
+  // Deactivate all old categories
+  await prisma.category.updateMany({ data: { isActive: false } });
+
   const catData = [
-    { name: "BOPP Tape",           slug: "bopp-tape",          sortOrder: 1 },
-    { name: "Stretch Film",        slug: "stretch-film",       sortOrder: 2 },
-    { name: "Bubble Wrap",         slug: "bubble-wrap",        sortOrder: 3 },
-    { name: "Courier Bags",        slug: "courier-bags",       sortOrder: 4 },
-    { name: "Carton Box",          slug: "carton-box",         sortOrder: 5 },
-    { name: "Foam Rolls",          slug: "foam-rolls",         sortOrder: 6 },
-    { name: "Packaging Tape",      slug: "packaging-tape",     sortOrder: 7 },
-    { name: "Industrial Supplies", slug: "industrial-supplies",sortOrder: 8 },
+    { name: "Effervescent", slug: "effervescent", sortOrder: 1, isActive: true },
   ];
   const categories = {};
   for (const c of catData) {
-    const cat = await prisma.category.upsert({ where: { slug: c.slug }, update: {}, create: c });
+    const cat = await prisma.category.upsert({ where: { slug: c.slug }, update: { isActive: true }, create: c });
     categories[c.slug] = cat;
   }
   console.log("✅ Categories seeded");
 
   // ── Sample Products ───────────────────────────────
+  // Deactivate ALL existing products first
+  await prisma.product.updateMany({ data: { isActive: false } });
+
   const products = [
-    { name: "BOPP Tape 2 Inch 65m Brown", sku: "BOPP-BRN-2IN-65M", hsnCode: "3919", categorySlug: "bopp-tape",    basePrice: 35, sellingPrice: 28, discountPercent: 20, unit: "ROLL", brand: "Zupwell",  description: "Premium quality brown BOPP tape. Excellent adhesion. Ideal for carton sealing." },
-    { name: "BOPP Tape 3 Inch 65m Brown", sku: "BOPP-BRN-3IN-65M", hsnCode: "3919", categorySlug: "bopp-tape",    basePrice: 50, sellingPrice: 42, discountPercent: 16, unit: "ROLL", brand: "Zupwell",  description: "Heavy duty 3 inch BOPP tape for large carton sealing." },
-    { name: "BOPP Tape 2 Inch Transparent",sku:"BOPP-CLR-2IN-65M", hsnCode: "3919", categorySlug: "bopp-tape",    basePrice: 32, sellingPrice: 26, discountPercent: 18, unit: "ROLL", brand: "Zupwell",  description: "Crystal clear transparent BOPP tape. Invisible after application." },
-    { name: "Stretch Film 500mm x 200m",  sku: "STRCH-500-200",    hsnCode: "3920", categorySlug: "stretch-film", basePrice: 280, sellingPrice: 220, discountPercent: 21, unit: "ROLL", brand: "Zupwell", description: "Machine grade stretch film. 17 micron thickness. High clarity and strength." },
-    { name: "Bubble Wrap Roll 1m x 50m",  sku: "BWRAP-1M-50M",     hsnCode: "3921", categorySlug: "bubble-wrap",  basePrice: 950, sellingPrice: 780, discountPercent: 17, unit: "ROLL", brand: "Zupwell", description: "Standard 10mm bubble size. Ideal for fragile item protection during transit." },
-    { name: "Courier Bag 12x16 inch 100pc",sku:"CBAG-12X16-100",   hsnCode: "3923", categorySlug: "courier-bags", basePrice: 220, sellingPrice: 180, discountPercent: 18, unit: "PACK", brand: "Zupwell", description: "Tamper-proof courier bags with POD sleeve. Matte finish with self-seal closure." },
-    { name: "Courier Bag 14x20 inch 100pc",sku:"CBAG-14X20-100",   hsnCode: "3923", categorySlug: "courier-bags", basePrice: 320, sellingPrice: 260, discountPercent: 18, unit: "PACK", brand: "Zupwell", description: "Large courier bags for bulky ecommerce shipments." },
-    { name: "Single Wall Carton Box 12x8x6",sku:"CTN-12X8X6-SW",   hsnCode: "4819", categorySlug: "carton-box",   basePrice: 22, sellingPrice: 18, discountPercent: 18, unit: "NOS",  brand: "Zupwell",  description: "3-ply single wall corrugated carton box. 150 GSM kraft. Strong and lightweight." },
-    { name: "PE Foam Roll 1m x 100m 3mm", sku: "FOAM-1M-100M-3MM", hsnCode: "3921", categorySlug: "foam-rolls",   basePrice: 1400, sellingPrice: 1150, discountPercent: 17, unit: "ROLL", brand: "Zupwell", description: "Closed cell polyethylene foam roll. Excellent cushioning for fragile items." },
-    { name: "Masking Tape 1 Inch 30m",    sku: "MASK-1IN-30M",     hsnCode: "3919", categorySlug: "packaging-tape",basePrice: 18, sellingPrice: 14, discountPercent: 22, unit: "ROLL", brand: "Zupwell",  description: "Crepe paper masking tape. Easy tear and clean removal. Painting grade." },
+    { name: "Zupwell Electrolyte Effervescent Tablet - Orange Flavour (15 Tablets)", sku: "ZW-ELEC-ORG-15", hsnCode: "2106", categorySlug: "effervescent", basePrice: 199, sellingPrice: 149, discountPercent: 25, unit: "TUBE", brand: "Zupwell", description: "Zupwell Electrolyte Effervescent Tablet in refreshing Orange Flavour. Fast dissolving formula supports hydration, stamina, electrolyte balance, and nerve function. Helps reduce fatigue. 15 tablets per tube. Health Supplement — suitable for active lifestyles." },
   ];
 
   for (const p of products) {
-    const existing = await prisma.product.findUnique({ where: { sku: p.sku } });
-    if (existing) continue;
     const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const cat  = categories[p.categorySlug];
-    const product = await prisma.product.create({
-      data: {
-        name: p.name, slug, sku: p.sku, hsnCode: p.hsnCode,
-        categoryId:     cat?.id || null,
-        basePrice:      p.basePrice,
-        sellingPrice:   p.sellingPrice,
-        discountPercent: p.discountPercent,
-        unit:           p.unit,
-        brand:          p.brand,
-        description:    p.description,
-        shortDescription: p.description.slice(0, 80),
-        isActive:   true,
-        isFeatured: Math.random() > 0.6,
-      },
-    });
-    await prisma.inventory.create({ data: { productId: product.id, qtyInStock: Math.floor(Math.random() * 200) + 20, lowStockThreshold: 10 } });
+    const existing = await prisma.product.findUnique({ where: { sku: p.sku } });
+    let product;
+    if (existing) {
+      product = await prisma.product.update({
+        where: { sku: p.sku },
+        data: {
+          name: p.name, slug, hsnCode: p.hsnCode,
+          categoryId:      cat?.id || null,
+          basePrice:       p.basePrice,
+          sellingPrice:    p.sellingPrice,
+          discountPercent: p.discountPercent,
+          unit:            p.unit,
+          brand:           p.brand,
+          description:     p.description,
+          shortDescription: p.description.slice(0, 80),
+          isActive:   true,
+          isFeatured: true,
+        },
+      });
+    } else {
+      product = await prisma.product.create({
+        data: {
+          name: p.name, slug, sku: p.sku, hsnCode: p.hsnCode,
+          categoryId:      cat?.id || null,
+          basePrice:       p.basePrice,
+          sellingPrice:    p.sellingPrice,
+          discountPercent: p.discountPercent,
+          unit:            p.unit,
+          brand:           p.brand,
+          description:     p.description,
+          shortDescription: p.description.slice(0, 80),
+          isActive:   true,
+          isFeatured: true,
+        },
+      });
+      await prisma.inventory.create({ data: { productId: product.id, qtyInStock: 500, lowStockThreshold: 20 } });
+      await prisma.productImage.create({ data: { productId: product.id, imageUrl: "/products/zupwell-electrolyte-orange.jpg", altText: "Zupwell Electrolyte Effervescent Tablet Orange Flavour", isPrimary: true, sortOrder: 0 } });
+    }
   }
   console.log("✅ Products seeded");
 

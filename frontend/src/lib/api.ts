@@ -10,11 +10,21 @@ const api = axios.create({
 // Attach token from localStorage if present
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const raw = localStorage.getItem("zupwell-store");
-    if (raw) {
-      const store = JSON.parse(raw);
-      const token = store?.state?.token;
-      if (token) config.headers.Authorization = `Bearer ${token}`;
+    const isAdminRoute = config.url?.includes("/admin/");
+    if (isAdminRoute) {
+      const adminRaw = localStorage.getItem("zupwell-admin");
+      if (adminRaw) {
+        const adminData = JSON.parse(adminRaw);
+        const token = adminData?.token;
+        if (token) config.headers.Authorization = `Bearer ${token}`;
+      }
+    } else {
+      const raw = localStorage.getItem("zupwell-store");
+      if (raw) {
+        const store = JSON.parse(raw);
+        const token = store?.state?.token;
+        if (token) config.headers.Authorization = `Bearer ${token}`;
+      }
     }
   }
   return config;

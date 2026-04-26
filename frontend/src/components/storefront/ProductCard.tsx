@@ -79,7 +79,7 @@ export default function ProductCard({ product }: { product: Product }) {
           {/* Info */}
           <div className="p-4">
             {product.brand && (
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "#00F0FF" }}>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "#F47C41" }}>
                 {product.brand}
               </p>
             )}

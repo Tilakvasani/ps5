@@ -46,8 +46,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-8">
           {[
             ["Products", "/products"],
-            ["BOPP Tape", "/products?category=bopp-tape"],
-            ["Packaging", "/products?category=packaging"],
+            ["Effervescent", "/products?category=effervescent"],
           ].map(([label, href]) => (
             <Link
               key={label}
