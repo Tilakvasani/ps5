@@ -23,20 +23,22 @@ export default function Navbar() {
   return (
     <nav
       className="fixed top-0 z-50 w-full backdrop-blur-xl"
-      style={{ background: "rgba(255,255,255,0.95)", borderBottom: "1px solid #D9DEE8" }}
+      style={{ background: "rgba(255,255,255,0.97)", borderBottom: "1px solid #D9DEE8" }}
     >
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
 
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5">
-          <div
-            className="h-9 w-9 rounded-xl flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #F47C41, #0B2C6F)" }}
+        {/* Logo — text only, orange→blue gradient, bigger */}
+        <Link href="/" className="flex items-center">
+          <span
+            className="text-2xl font-display font-black"
+            style={{
+              background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
           >
-            <Package size={18} className="text-[#111827]" />
-          </div>
-          <span className="text-xl font-display font-black" style={{ color: "#111827" }}>
-            Zup<span style={{ color: "#F47C41" }}>well</span>
+            Zupwell
           </span>
         </Link>
 
@@ -50,10 +52,7 @@ export default function Navbar() {
             <Link
               key={label}
               href={href}
-              className="text-sm font-medium transition-colors"
-              style={{ color: "#6B7280" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#F47C41")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#6B7280")}
+              className="text-sm font-medium text-[#6B7280] hover:text-[#F47C41] transition-colors"
             >
               {label}
             </Link>
@@ -63,14 +62,14 @@ export default function Navbar() {
         {/* Right */}
         <div className="flex items-center gap-3">
           {/* Cart */}
-          <Link href="/cart" className="relative p-2 transition-colors" style={{ color: "#6B7280" }}>
+          <Link href="/cart" className="relative p-2 text-[#6B7280] hover:text-[#F47C41] transition-colors">
             <ShoppingCart size={20} />
             <AnimatePresence>
               {cartCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full text-[10px] font-bold text-[#111827] flex items-center justify-center"
-                  style={{ background: "#F47C41", boxShadow: "0 0 10px rgba(244,124,65,0.6)" }}
+                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+                  style={{ background: "#F47C41" }}
                 >
                   {cartCount}
                 </motion.span>
@@ -83,47 +82,35 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setUserDropOpen(!userDropOpen)}
-                className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-all"
-                style={{
-                  border: "1.5px solid rgba(11,44,111,0.08)",
-                  background: "rgba(11,44,111,0.03)",
-                  color: "#111827",
-                }}
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-all hover:bg-[#F4F6FA]"
+                style={{ border: "1.5px solid #D9DEE8", color: "#111827" }}
               >
                 <div
-                  className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold text-[#111827]"
+                  className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
                   style={{ background: "linear-gradient(135deg, #F47C41, #0B2C6F)" }}
                 >
                   {user.name[0].toUpperCase()}
                 </div>
-                <span className="hidden md:inline">{user.name.split(" ")[0]}</span>
+                <span className="hidden md:inline text-[#374151]">{user.name.split(" ")[0]}</span>
               </button>
               <AnimatePresence>
                 {userDropOpen && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
-                    className="absolute right-0 top-12 w-48 rounded-xl overflow-hidden shadow-2xl"
+                    className="absolute right-0 top-12 w-48 rounded-xl overflow-hidden shadow-lg"
                     style={{ background: "#FFFFFF", border: "1px solid #D9DEE8" }}
                   >
                     <Link href="/account" onClick={() => setUserDropOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm transition-all"
-                      style={{ color: "#374151" }}
-                      onMouseEnter={e => { e.currentTarget.style.background = "rgba(244,124,65,0.1)"; e.currentTarget.style.color = "#F47C41"; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#374151"; }}
-                    >
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-[#374151] hover:bg-[#F4F6FA] hover:text-[#F47C41] transition-all">
                       <User size={14} /> My Account
                     </Link>
                     <Link href="/account?tab=orders" onClick={() => setUserDropOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm transition-all"
-                      style={{ color: "#374151" }}
-                      onMouseEnter={e => { e.currentTarget.style.background = "rgba(244,124,65,0.1)"; e.currentTarget.style.color = "#F47C41"; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#374151"; }}
-                    >
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-[#374151] hover:bg-[#F4F6FA] hover:text-[#F47C41] transition-all">
                       <Package size={14} /> My Orders
                     </Link>
-                    <div style={{ borderTop: "1px solid rgba(11,44,111,0.06)" }} />
+                    <div className="h-px bg-[#D9DEE8]" />
                     <button onClick={handleLogout}
-                      className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-all">
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-all">
                       <LogOut size={14} /> Sign Out
                     </button>
                   </motion.div>
@@ -138,8 +125,7 @@ export default function Navbar() {
           )}
 
           <button
-            className="md:hidden transition-colors"
-            style={{ color: "#6B7280" }}
+            className="md:hidden text-[#6B7280] hover:text-[#0B2C6F] transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -156,12 +142,12 @@ export default function Navbar() {
             style={{ background: "#FFFFFF", borderTop: "1px solid #D9DEE8" }}
           >
             <div className="px-6 py-4 flex flex-col gap-3">
-              <Link href="/products" className="text-sm py-2 transition-colors" style={{ color: "#374151" }} onClick={() => setMenuOpen(false)}>Products</Link>
-              <Link href="/cart" className="text-sm py-2 transition-colors" style={{ color: "#374151" }} onClick={() => setMenuOpen(false)}>Cart ({cartCount})</Link>
+              <Link href="/products" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Products</Link>
+              <Link href="/cart" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Cart ({cartCount})</Link>
               {user ? (
                 <>
-                  <Link href="/account" className="text-sm py-2" style={{ color: "#374151" }} onClick={() => setMenuOpen(false)}>Account</Link>
-                  <button onClick={handleLogout} className="text-red-400 text-sm text-left py-2">Sign Out</button>
+                  <Link href="/account" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Account</Link>
+                  <button onClick={handleLogout} className="text-red-500 text-sm text-left py-2">Sign Out</button>
                 </>
               ) : (
                 <>

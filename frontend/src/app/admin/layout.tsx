@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Package, Tag, Boxes, ShoppingBag, FileText,
-  Users, Ticket, Star, Settings, Bell, LogOut, Menu, X, Package2, ChevronRight
+  Users, Ticket, Star, Settings, Bell, LogOut, Menu, X, ChevronRight
 } from "lucide-react";
 
 const NAV = [
@@ -60,11 +60,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto`}>
         {/* Logo */}
         <div className="flex items-center gap-2 px-5 py-5 border-b border-[#D9DEE8]">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#F47C41] to-[#FFD166] flex items-center justify-center">
-            <Package2 size={16} className="text-black" />
-          </div>
-          <span className="text-lg font-display font-black gradient-text">Zupwell</span>
-          <span className="ml-auto text-xs text-[#111827]/30 border border-[#D9DEE8] rounded px-1.5 py-0.5">Admin</span>
+          <span className="text-xl font-display font-black" style={{ background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Zupwell</span>
+          <span className="ml-auto text-xs text-[#6B7280] border border-[#D9DEE8] rounded px-1.5 py-0.5">Admin</span>
           <button className="lg:hidden text-[#6B7280] hover:text-[#0B2C6F] ml-1" onClick={() => setSidebarOpen(false)}><X size={18} /></button>
         </div>
 
@@ -95,7 +92,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <p className="text-xs text-[#6B7280]">Administrator</p>
             </div>
           </div>
-          <button onClick={handleLogout} className="w-full flex items-center gap-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 px-3 py-2 rounded-lg transition-all">
+          <button onClick={handleLogout} className="w-full flex items-center gap-2 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition-all">
             <LogOut size={14} /> Sign Out
           </button>
         </div>

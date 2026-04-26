@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -9,13 +9,14 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="md:col-span-1">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="h-9 w-9 rounded-xl flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #F47C41, #0B2C6F)" }}>
-                <Package size={18} className="text-[#111827]" />
-              </div>
-              <span className="text-xl font-display font-black" style={{ color: "#111827" }}>
-                Zup<span style={{ color: "#F47C41" }}>well</span>
+            <div className="flex items-center mb-4">
+              <span className="text-2xl font-display font-black" style={{
+                background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
+                Zupwell
               </span>
             </div>
             <p className="text-sm leading-relaxed mb-4" style={{ color: "#6B7280" }}>
