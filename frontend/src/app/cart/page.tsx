@@ -15,8 +15,8 @@ export default function CartPage() {
   const [couponDiscount, setCouponDiscount] = useState(0);
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const cgst = subtotal * 0.09;
-  const sgst = subtotal * 0.09;
+  const cgst = subtotal * 0.025;
+  const sgst = subtotal * 0.025;
   const shipping = subtotal > 500 ? 0 : 50;
   const discount = couponApplied ? couponDiscount : 0;
   const total = subtotal + cgst + sgst + shipping - discount;
@@ -120,8 +120,8 @@ export default function CartPage() {
               <h2 className="font-display font-bold text-[#111827] mb-4">Order Summary</h2>
               <div className="space-y-2 text-sm mb-4">
                 <div className="flex justify-between text-[#374151]"><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>
-                <div className="flex justify-between text-[#374151]"><span>CGST @9%</span><span>₹{cgst.toFixed(2)}</span></div>
-                <div className="flex justify-between text-[#374151]"><span>SGST @9%</span><span>₹{sgst.toFixed(2)}</span></div>
+                <div className="flex justify-between text-[#374151]"><span>CGST @2.5%</span><span>₹{cgst.toFixed(2)}</span></div>
+                <div className="flex justify-between text-[#374151]"><span>SGST @2.5%</span><span>₹{sgst.toFixed(2)}</span></div>
                 <div className="flex justify-between text-[#374151]">
                   <span>Shipping</span>
                   <span>{shipping === 0 ? <span className="text-emerald-400">FREE</span> : `₹${shipping.toFixed(2)}`}</span>

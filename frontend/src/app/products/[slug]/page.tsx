@@ -40,8 +40,8 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   );
 
   const price = selectedVariant ? Number(selectedVariant.price) : Number(product.sellingPrice);
-  const cgst = price * qty * 0.09;
-  const sgst = price * qty * 0.09;
+  const cgst = price * qty * 0.025;
+  const sgst = price * qty * 0.025;
   const total = price * qty + cgst + sgst;
   const primaryImage = product.images?.find((i: any) => i.isPrimary)?.imageUrl || product.images?.[0]?.imageUrl;
   const images = product.images?.length ? product.images : [{ imageUrl: null }];
@@ -131,8 +131,8 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               </div>
               <div className="border-t border-[#D9DEE8] pt-3 text-sm space-y-1 text-[#6B7280]">
                 <div className="flex justify-between"><span>Price (×{qty})</span><span>₹{(price * qty).toFixed(2)}</span></div>
-                <div className="flex justify-between"><span>CGST @9%</span><span>₹{cgst.toFixed(2)}</span></div>
-                <div className="flex justify-between"><span>SGST @9%</span><span>₹{sgst.toFixed(2)}</span></div>
+                <div className="flex justify-between"><span>CGST @2.5%</span><span>₹{cgst.toFixed(2)}</span></div>
+                <div className="flex justify-between"><span>SGST @2.5%</span><span>₹{sgst.toFixed(2)}</span></div>
                 <div className="flex justify-between font-bold text-[#111827] border-t border-[#D9DEE8] pt-2 mt-1"><span>Total</span><span>₹{total.toFixed(2)}</span></div>
               </div>
             </div>

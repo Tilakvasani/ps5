@@ -1,9 +1,17 @@
 const router = require("express").Router();
 const PDFDocument = require("pdfkit");
 const prisma = require("../utils/prisma");
+const { verifyAccess } = require("../utils/jwt");
 
 // GET /api/invoices/:invoiceNumber/pdf
+// Auth: accepts either admin token or user token (user can only view their own invoice)
 router.get("/:invoiceNumber/pdf", async (req, res) => {
+  // Validate token
+  const header = req.headers.authorization;
+  if (!header?.startsWith("Bearer ")) return res.status(401).json({ error: "Not authenticated" });
+  let payload;
+  try { payload = verifyAccess(header.slice(7)); } catch { return res.status(401).json({ error: "Invalid token" }); }
+
   const invoice = await prisma.invoice.findUnique({
     where:   { invoiceNumber: req.params.invoiceNumber },
     include: {
@@ -18,6 +26,11 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
   });
 
   if (!invoice) return res.status(404).json({ error: "Invoice not found" });
+
+  // Users can only download their own invoices; admins can download any
+  if (payload.role === "user" && invoice.userId !== payload.id) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", `inline; filename="${invoice.invoiceNumber}.pdf"`);
@@ -62,7 +75,7 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
   const tableY = 250;
   doc.rect(40, tableY, W, 20).fill(colors.dark);
   const cols = [40, 220, 285, 340, 390, 445, 495];
-  const headers = ["ITEM / DESCRIPTION", "HSN", "QTY", "UNIT", "RATE", "CGST 9%", "AMOUNT"];
+  const headers = ["ITEM / DESCRIPTION", "HSN", "QTY", "UNIT", "RATE", "CGST 2.5%", "AMOUNT"];
   headers.forEach((h, i) => {
     doc.fillColor("white").font("Helvetica-Bold").fontSize(7).text(h, cols[i] + 3, tableY + 6, { width: cols[i + 1] ? cols[i + 1] - cols[i] - 6 : 50 });
   });
@@ -82,7 +95,7 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
       .text(item.qty.toString(), cols[2] + 3, rowY + 5)
       .text(item.product?.unit || "NOS", cols[3] + 3, rowY + 5)
       .text(`₹${Number(item.unitPrice).toFixed(2)}`, cols[4] + 3, rowY + 5)
-      .text(`₹${(baseAmt * 0.09).toFixed(2)}`, cols[5] + 3, rowY + 5)
+      .text(`₹${(baseAmt * 0.025).toFixed(2)}`, cols[5] + 3, rowY + 5)
       .text(`₹${baseAmt.toFixed(2)}`, cols[6] + 3, rowY + 5);
     rowY += 18;
   });
