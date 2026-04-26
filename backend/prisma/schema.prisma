@@ -1,0 +1,297 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id             Int             @id @default(autoincrement())
+  name           String          @db.VarChar(120)
+  email          String          @unique @db.VarChar(255)
+  passwordHash   String          @map("password_hash") @db.VarChar(255)
+  role           String          @default("staff") @db.VarChar(20)
+  avatarUrl      String?         @map("avatar_url")
+  isActive       Boolean         @default(true) @map("is_active")
+  lastLoginAt    DateTime?       @map("last_login_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  stockMovements StockMovement[]
+  @@map("admins")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  name         String        @db.VarChar(120)
+  email        String        @unique @db.VarChar(255)
+  phone        String?       @unique @db.VarChar(15)
+  passwordHash String        @map("password_hash") @db.VarChar(255)
+  isVerified   Boolean       @default(false) @map("is_verified")
+  isActive     Boolean       @default(true) @map("is_active")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  addresses    UserAddress[]
+  orders       Order[]
+  reviews      Review[]
+  invoices     Invoice[]
+  @@map("users")
+}
+
+model UserAddress {
+  id           Int     @id @default(autoincrement())
+  userId       Int     @map("user_id")
+  label        String  @default("home") @db.VarChar(20)
+  fullName     String  @map("full_name") @db.VarChar(120)
+  phone        String  @db.VarChar(15)
+  addressLine1 String  @map("address_line1")
+  addressLine2 String? @map("address_line2")
+  city         String  @db.VarChar(80)
+  state        String  @default("Gujarat") @db.VarChar(80)
+  pincode      String  @db.VarChar(10)
+  gstin        String? @db.VarChar(20)
+  isDefault    Boolean @default(false) @map("is_default")
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders       Order[]
+  @@map("user_addresses")
+}
+
+model Category {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(120)
+  slug        String     @unique @db.VarChar(140)
+  description String?
+  imageUrl    String?    @map("image_url")
+  parentId    Int?       @map("parent_id")
+  isActive    Boolean    @default(true) @map("is_active")
+  sortOrder   Int        @default(0) @map("sort_order")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  parent      Category?  @relation("CategoryParent", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryParent")
+  products    Product[]
+  @@map("categories")
+}
+
+model GstRate {
+  id            Int      @id @default(autoincrement())
+  hsnCode       String   @unique @map("hsn_code") @db.VarChar(10)
+  description   String?
+  cgstRate      Decimal  @default(0) @map("cgst_rate") @db.Decimal(5, 2)
+  sgstRate      Decimal  @default(0) @map("sgst_rate") @db.Decimal(5, 2)
+  igstRate      Decimal  @default(0) @map("igst_rate") @db.Decimal(5, 2)
+  cessRate      Decimal  @default(0) @map("cess_rate") @db.Decimal(5, 2)
+  effectiveFrom DateTime @default(now()) @map("effective_from") @db.Date
+  @@map("gst_rates")
+}
+
+model Product {
+  id               Int              @id @default(autoincrement())
+  categoryId       Int?             @map("category_id")
+  name             String           @db.VarChar(255)
+  slug             String           @unique @db.VarChar(280)
+  description      String?
+  shortDescription String?          @map("short_description")
+  sku              String           @unique @db.VarChar(60)
+  hsnCode          String           @default("3919") @map("hsn_code") @db.VarChar(10)
+  brand            String?          @db.VarChar(100)
+  unit             String           @default("NOS") @db.VarChar(20)
+  basePrice        Decimal          @map("base_price") @db.Decimal(10, 2)
+  sellingPrice     Decimal          @map("selling_price") @db.Decimal(10, 2)
+  discountPercent  Decimal          @default(0) @map("discount_percent") @db.Decimal(5, 2)
+  isActive         Boolean          @default(true) @map("is_active")
+  isFeatured       Boolean          @default(false) @map("is_featured")
+  metaTitle        String?          @map("meta_title") @db.VarChar(160)
+  metaDescription  String?          @map("meta_description") @db.VarChar(300)
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  category         Category?        @relation(fields: [categoryId], references: [id])
+  images           ProductImage[]
+  variants         ProductVariant[]
+  inventory        Inventory[]
+  stockMovements   StockMovement[]
+  orderItems       OrderItem[]
+  reviews          Review[]
+  @@map("products")
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  productId Int     @map("product_id")
+  imageUrl  String  @map("image_url")
+  altText   String? @map("alt_text") @db.VarChar(200)
+  isPrimary Boolean @default(false) @map("is_primary")
+  sortOrder Int     @default(0) @map("sort_order")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  @@map("product_images")
+}
+
+model ProductVariant {
+  id             Int             @id @default(autoincrement())
+  productId      Int             @map("product_id")
+  variantName    String          @map("variant_name") @db.VarChar(120)
+  sku            String          @unique @db.VarChar(60)
+  price          Decimal         @db.Decimal(10, 2)
+  stockQty       Int             @default(0) @map("stock_qty")
+  isActive       Boolean         @default(true) @map("is_active")
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventory      Inventory[]
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]
+  @@map("product_variants")
+}
+
+model Inventory {
+  id                Int             @id @default(autoincrement())
+  productId         Int             @map("product_id")
+  variantId         Int?            @map("variant_id")
+  qtyInStock        Int             @default(0) @map("qty_in_stock")
+  reservedQty       Int             @default(0) @map("reserved_qty")
+  lowStockThreshold Int             @default(10) @map("low_stock_threshold")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  product           Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant           ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  @@unique([productId, variantId])
+  @@map("inventory")
+}
+
+model StockMovement {
+  id            Int             @id @default(autoincrement())
+  productId     Int             @map("product_id")
+  variantId     Int?            @map("variant_id")
+  movementType  String          @map("movement_type") @db.VarChar(20)
+  qty           Int
+  qtyBefore     Int             @map("qty_before")
+  qtyAfter      Int             @map("qty_after")
+  referenceType String?         @map("reference_type") @db.VarChar(30)
+  referenceId   Int?            @map("reference_id")
+  notes         String?
+  createdBy     Int?            @map("created_by")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  product       Product         @relation(fields: [productId], references: [id])
+  variant       ProductVariant? @relation(fields: [variantId], references: [id])
+  admin         Admin?          @relation(fields: [createdBy], references: [id])
+  @@map("stock_movements")
+}
+
+model Coupon {
+  id            Int       @id @default(autoincrement())
+  code          String    @unique @db.VarChar(30)
+  description   String?
+  discountType  String    @default("percent") @map("discount_type") @db.VarChar(10)
+  discountValue Decimal   @map("discount_value") @db.Decimal(10, 2)
+  minOrderValue Decimal   @default(0) @map("min_order_value") @db.Decimal(10, 2)
+  maxDiscount   Decimal?  @map("max_discount") @db.Decimal(10, 2)
+  usageLimit    Int?      @map("usage_limit")
+  usedCount     Int       @default(0) @map("used_count")
+  validFrom     DateTime? @map("valid_from")
+  validTo       DateTime? @map("valid_to")
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  orders        Order[]
+  @@map("coupons")
+}
+
+model Order {
+  id                 Int         @id @default(autoincrement())
+  orderNumber        String      @unique @map("order_number") @db.VarChar(30)
+  userId             Int         @map("user_id")
+  addressId          Int         @map("address_id")
+  couponId           Int?        @map("coupon_id")
+  couponCode         String?     @map("coupon_code") @db.VarChar(30)
+  status             String      @default("pending") @db.VarChar(20)
+  paymentMethod      String      @map("payment_method") @db.VarChar(20)
+  paymentStatus      String      @default("pending") @map("payment_status") @db.VarChar(20)
+  razorpayOrderId    String?     @map("razorpay_order_id")
+  razorpayPaymentId  String?     @map("razorpay_payment_id")
+  subtotal           Decimal     @db.Decimal(10, 2)
+  discountAmount     Decimal     @default(0) @map("discount_amount") @db.Decimal(10, 2)
+  cgstAmount         Decimal     @default(0) @map("cgst_amount") @db.Decimal(10, 2)
+  sgstAmount         Decimal     @default(0) @map("sgst_amount") @db.Decimal(10, 2)
+  igstAmount         Decimal     @default(0) @map("igst_amount") @db.Decimal(10, 2)
+  shippingCharge     Decimal     @default(0) @map("shipping_charge") @db.Decimal(10, 2)
+  totalAmount        Decimal     @map("total_amount") @db.Decimal(10, 2)
+  notes              String?
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+  user               User        @relation(fields: [userId], references: [id])
+  address            UserAddress @relation(fields: [addressId], references: [id])
+  coupon             Coupon?     @relation(fields: [couponId], references: [id])
+  items              OrderItem[]
+  invoice            Invoice?
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int             @id @default(autoincrement())
+  orderId   Int             @map("order_id")
+  productId Int             @map("product_id")
+  variantId Int?            @map("variant_id")
+  qty       Int
+  unitPrice Decimal         @map("unit_price") @db.Decimal(10, 2)
+  hsnCode   String          @default("3919") @map("hsn_code") @db.VarChar(10)
+  order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  @@map("order_items")
+}
+
+model Invoice {
+  id             Int      @id @default(autoincrement())
+  invoiceNumber  String   @unique @map("invoice_number") @db.VarChar(30)
+  orderId        Int      @unique @map("order_id")
+  userId         Int      @map("user_id")
+  status         String   @default("issued") @db.VarChar(20)
+  subtotal       Decimal  @db.Decimal(10, 2)
+  discountAmount Decimal  @default(0) @map("discount_amount") @db.Decimal(10, 2)
+  cgstRate       Decimal  @default(9) @map("cgst_rate") @db.Decimal(5, 2)
+  sgstRate       Decimal  @default(9) @map("sgst_rate") @db.Decimal(5, 2)
+  igstRate       Decimal  @default(0) @map("igst_rate") @db.Decimal(5, 2)
+  cgstAmount     Decimal  @default(0) @map("cgst_amount") @db.Decimal(10, 2)
+  sgstAmount     Decimal  @default(0) @map("sgst_amount") @db.Decimal(10, 2)
+  igstAmount     Decimal  @default(0) @map("igst_amount") @db.Decimal(10, 2)
+  totalAmount    Decimal  @map("total_amount") @db.Decimal(10, 2)
+  sellerName     String   @map("seller_name") @db.VarChar(120)
+  sellerAddress  String   @map("seller_address")
+  sellerGstin    String   @map("seller_gstin") @db.VarChar(20)
+  buyerName      String?  @map("buyer_name") @db.VarChar(120)
+  buyerAddress   String?  @map("buyer_address")
+  buyerGstin     String?  @map("buyer_gstin") @db.VarChar(20)
+  createdAt      DateTime @default(now()) @map("created_at")
+  order          Order    @relation(fields: [orderId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
+  @@map("invoices")
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  productId  Int      @map("product_id")
+  userId     Int      @map("user_id")
+  rating     Int
+  title      String?  @db.VarChar(160)
+  body       String?
+  isApproved Boolean  @default(false) @map("is_approved")
+  createdAt  DateTime @default(now()) @map("created_at")
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([productId, userId])
+  @@map("reviews")
+}
+
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(80)
+  value     String
+  group     String   @default("general") @db.VarChar(40)
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("settings")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  type      String   @db.VarChar(40)
+  title     String   @db.VarChar(160)
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  @@map("notifications")
+}

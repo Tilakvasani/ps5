@@ -1,103 +1,82 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-.venv/
-venv/
-ENV/
-env/
-.venv3/
-venv3/
-.env
-
-# FastAPI/Uvicorn
-*.db
-*.sqlite
-*.sqlite3
-
-# Pytest
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Node.js / Next.js
+# ------------------------------
+# Node.js dependencies
+# ------------------------------
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ------------------------------
+# Next.js build output
+# ------------------------------
 .next/
 out/
-.nuxt
-dist/
-.cache/
-.vuepress/dist
-.serverless/
-.fusebox/
-.dynamodb/
-.tern-port
-.vscode-test
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.yarn/install-state.gz
-.pnp.*
+build/
 
-# Environment variables
+# ------------------------------
+# Environment variables (IMPORTANT)
+# ------------------------------
+.env
 .env.local
-.env.*.local
-.env.production.local
 .env.development.local
 .env.test.local
+.env.production.local
 
-# IDE
+# Prisma environment
+prisma/.env
+
+# ------------------------------
+# Logs
+# ------------------------------
+logs/
+*.log
+
+# ------------------------------
+# OS files
+# ------------------------------
+.DS_Store
+Thumbs.db
+
+# ------------------------------
+# IDE / Editor files
+# ------------------------------
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
-.project
-.pydevproject
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-.DS_Store
-.AppleDouble
-.LSOverride
-*.sublime-project
 
-# OS
-Thumbs.db
-Desktop.ini
+# ------------------------------
+# TypeScript
+# ------------------------------
+*.tsbuildinfo
 
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
+# ------------------------------
+# Cache / Temporary files
+# ------------------------------
+.cache/
+.tmp/
+.temp/
 
+# ------------------------------
+# Coverage / Testing
+# ------------------------------
+coverage/
+
+# ------------------------------
+# Build artifacts
+# ------------------------------
+dist/
+
+# ------------------------------
 # Misc
-*.bak
-*.tmp
-.env.example.local
+# ------------------------------
+*.pem
+*.key
+
+# ------------------------------
+# Optional: lock files (keep if you want reproducible builds)
+# ------------------------------
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
