@@ -46,26 +46,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="flex h-screen bg-[#050505] overflow-hidden">
+    <div className="flex h-screen bg-[#F4F6FA] overflow-hidden">
       {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={() => setSidebarOpen(false)} />
+            className="fixed inset-0 z-40 bg-white/60 lg:hidden" onClick={() => setSidebarOpen(false)} />
         )}
       </AnimatePresence>
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0 border-r border-white/10 bg-black/80 backdrop-blur-xl flex flex-col transition-transform duration-300
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0 border-r border-[#D9DEE8] bg-white backdrop-blur-xl flex flex-col transition-transform duration-300
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto`}>
         {/* Logo */}
-        <div className="flex items-center gap-2 px-5 py-5 border-b border-white/10">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-pink-500 to-yellow-400 flex items-center justify-center">
+        <div className="flex items-center gap-2 px-5 py-5 border-b border-[#D9DEE8]">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#F47C41] to-[#FFD166] flex items-center justify-center">
             <Package2 size={16} className="text-black" />
           </div>
           <span className="text-lg font-display font-black gradient-text">Zupwell</span>
-          <span className="ml-auto text-xs text-white/20 border border-white/10 rounded px-1.5 py-0.5">Admin</span>
-          <button className="lg:hidden text-white/40 hover:text-white ml-1" onClick={() => setSidebarOpen(false)}><X size={18} /></button>
+          <span className="ml-auto text-xs text-[#111827]/30 border border-[#D9DEE8] rounded px-1.5 py-0.5">Admin</span>
+          <button className="lg:hidden text-[#6B7280] hover:text-[#0B2C6F] ml-1" onClick={() => setSidebarOpen(false)}><X size={18} /></button>
         </div>
 
         {/* Nav */}
@@ -75,8 +75,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             return (
               <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all group ${
-                  active ? "bg-pink-500/20 text-pink-400" : "text-white/40 hover:text-white hover:bg-white/5"}`}>
-                <item.icon size={16} className={active ? "text-pink-400" : "text-white/30 group-hover:text-white"} />
+                  active ? "bg-[#F47C41]/20 text-[#F47C41]" : "text-[#6B7280] hover:text-[#0B2C6F] hover:bg-[#F4F6FA]"}`}>
+                <item.icon size={16} className={active ? "text-[#F47C41]" : "text-[#6B7280] group-hover:text-[#0B2C6F]"} />
                 {item.label}
                 {active && <ChevronRight size={12} className="ml-auto" />}
               </Link>
@@ -85,14 +85,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* Admin user */}
-        <div className="border-t border-white/10 p-4">
+        <div className="border-t border-[#D9DEE8] p-4">
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-pink-500 to-yellow-400 flex items-center justify-center text-sm font-black text-black">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#F47C41] to-[#FFD166] flex items-center justify-center text-sm font-black text-black">
               {adminName[0]?.toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-white truncate">{adminName}</p>
-              <p className="text-xs text-white/30">Administrator</p>
+              <p className="text-sm font-bold text-[#111827] truncate">{adminName}</p>
+              <p className="text-xs text-[#6B7280]">Administrator</p>
             </div>
           </div>
           <button onClick={handleLogout} className="w-full flex items-center gap-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 px-3 py-2 rounded-lg transition-all">
@@ -104,18 +104,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
-        <header className="flex items-center gap-4 border-b border-white/10 bg-black/40 backdrop-blur-sm px-6 py-3 flex-shrink-0">
-          <button className="lg:hidden text-white/60 hover:text-white" onClick={() => setSidebarOpen(true)}>
+        <header className="flex items-center gap-4 border-b border-[#D9DEE8] bg-white/40 backdrop-blur-sm px-6 py-3 flex-shrink-0">
+          <button className="lg:hidden text-[#374151] hover:text-[#0B2C6F]" onClick={() => setSidebarOpen(true)}>
             <Menu size={22} />
           </button>
           <div className="flex-1" />
-          <Link href="/" target="_blank" className="text-xs text-white/30 hover:text-white transition-colors border border-white/10 rounded-lg px-3 py-1.5">
+          <Link href="/" target="_blank" className="text-xs text-[#6B7280] hover:text-[#0B2C6F] transition-colors border border-[#D9DEE8] rounded-lg px-3 py-1.5">
             View Store ↗
           </Link>
           <Link href="/admin/notifications">
-            <div className="relative p-2 text-white/40 hover:text-white cursor-pointer">
+            <div className="relative p-2 text-[#6B7280] hover:text-[#0B2C6F] cursor-pointer">
               <Bell size={18} />
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-pink-500" />
+              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[#F47C41]" />
             </div>
           </Link>
         </header>

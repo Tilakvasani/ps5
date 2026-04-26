@@ -59,17 +59,17 @@ export default function ProductsPage() {
   const clearFilters = () => { setSelectedCat(""); setPriceMin(""); setPriceMax(""); setSearch(""); setPage(1); };
 
   return (
-    <main className="min-h-screen bg-[#050505]">
+    <main className="min-h-screen bg-[#F4F6FA]">
       <Navbar />
       <div className="pt-20">
         {/* Header */}
-        <div className="relative border-b border-white/10 py-12 px-6">
+        <div className="relative border-b border-[#D9DEE8] py-12 px-6">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute -top-20 left-1/4 h-[300px] w-[300px] rounded-full bg-pink-500/8 blur-[80px]" />
+            <div className="absolute -top-20 left-1/4 h-[300px] w-[300px] rounded-full bg-[#F47C41]/8 blur-[80px]" />
           </div>
           <div className="relative mx-auto max-w-7xl">
-            <h1 className="text-4xl font-display font-black text-white mb-2">All <span className="gradient-text">Products</span></h1>
-            <p className="text-white/40">{total} products available</p>
+            <h1 className="text-4xl font-display font-black text-[#111827] mb-2">All <span className="gradient-text">Products</span></h1>
+            <p className="text-[#6B7280]">{total} products available</p>
           </div>
         </div>
 
@@ -78,15 +78,15 @@ export default function ProductsPage() {
           <aside className={`lg:w-64 flex-shrink-0 ${filterOpen ? "block" : "hidden lg:block"}`}>
             <div className="card sticky top-24 space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="font-display font-bold text-white">Filters</h2>
-                <button onClick={clearFilters} className="text-xs text-pink-400 hover:text-pink-300">Clear all</button>
+                <h2 className="font-display font-bold text-[#111827]">Filters</h2>
+                <button onClick={clearFilters} className="text-xs text-[#F47C41] hover:text-[#f79b6e]">Clear all</button>
               </div>
 
               {/* Search */}
               <div>
-                <label className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2 block">Search</label>
+                <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-2 block">Search</label>
                 <div className="relative">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
                   <input
                     type="text" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                     placeholder="Search products..." className="input-field pl-9 text-sm"
@@ -96,15 +96,15 @@ export default function ProductsPage() {
 
               {/* Category */}
               <div>
-                <label className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2 block">Category</label>
+                <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-2 block">Category</label>
                 <div className="space-y-1">
                   <button onClick={() => { setSelectedCat(""); setPage(1); }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${!selectedCat ? "bg-pink-500/20 text-pink-400" : "text-white/50 hover:text-white hover:bg-white/5"}`}>
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${!selectedCat ? "bg-[#F47C41]/20 text-[#F47C41]" : "text-[#6B7280] hover:text-[#0B2C6F] hover:bg-[#F4F6FA]"}`}>
                     All Categories
                   </button>
                   {categories.map((cat) => (
                     <button key={cat.id} onClick={() => { setSelectedCat(cat.slug); setPage(1); }}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${selectedCat === cat.slug ? "bg-pink-500/20 text-pink-400" : "text-white/50 hover:text-white hover:bg-white/5"}`}>
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${selectedCat === cat.slug ? "bg-[#F47C41]/20 text-[#F47C41]" : "text-[#6B7280] hover:text-[#0B2C6F] hover:bg-[#F4F6FA]"}`}>
                       {cat.name}
                     </button>
                   ))}
@@ -113,7 +113,7 @@ export default function ProductsPage() {
 
               {/* Price Range */}
               <div>
-                <label className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2 block">Price Range (₹)</label>
+                <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-2 block">Price Range (₹)</label>
                 <div className="flex gap-2">
                   <input type="number" value={priceMin} onChange={(e) => setPriceMin(e.target.value)} placeholder="Min" className="input-field text-sm" />
                   <input type="number" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} placeholder="Max" className="input-field text-sm" />
@@ -148,13 +148,13 @@ export default function ProductsPage() {
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {Array.from({ length: 9 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl border border-white/10 bg-white/5 aspect-[3/4] animate-pulse" />
+                  <div key={i} className="rounded-2xl border border-[#D9DEE8] bg-[#F4F6FA] aspect-[3/4] animate-pulse" />
                 ))}
               </div>
             ) : products.length === 0 ? (
-              <div className="text-center py-24 text-white/30">
+              <div className="text-center py-24 text-[#6B7280]">
                 <p className="text-2xl mb-2">No products found</p>
-                <button onClick={clearFilters} className="text-pink-400 hover:text-pink-300 text-sm">Clear filters</button>
+                <button onClick={clearFilters} className="text-[#F47C41] hover:text-[#f79b6e] text-sm">Clear filters</button>
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -168,7 +168,7 @@ export default function ProductsPage() {
                 {Array.from({ length: totalPages }).map((_, i) => (
                   <motion.button key={i} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                     onClick={() => setPage(i + 1)}
-                    className={`h-9 w-9 rounded-lg text-sm font-semibold transition-all ${page === i + 1 ? "bg-pink-500 text-white" : "border border-white/10 text-white/50 hover:border-white/30 hover:text-white"}`}>
+                    className={`h-9 w-9 rounded-lg text-sm font-semibold transition-all ${page === i + 1 ? "bg-[#F47C41] text-[#111827]" : "border border-[#D9DEE8] text-[#6B7280] hover:border-[#D9DEE8] hover:text-[#0B2C6F]"}`}>
                     {i + 1}
                   </motion.button>
                 ))}

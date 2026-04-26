@@ -47,22 +47,22 @@ export default function AdminOrdersPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-display font-black text-white">Orders</h1>
-          <p className="text-white/40 text-sm mt-1">{total} total orders</p>
+          <h1 className="text-3xl font-display font-black text-[#111827]">Orders</h1>
+          <p className="text-[#6B7280] text-sm mt-1">{total} total orders</p>
         </div>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-4">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
           <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="Order #, customer..." className="input-field pl-9 text-sm" />
         </div>
         <div className="flex gap-1 flex-wrap">
           {STATUSES.map(s => (
             <button key={s} onClick={() => { setStatus(s); setPage(1); }}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-all ${status === s ? "bg-pink-500 text-white" : "border border-white/10 text-white/40 hover:text-white hover:border-white/30"}`}>
+              className={`px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-all ${status === s ? "bg-[#F47C41] text-[#111827]" : "border border-[#D9DEE8] text-[#6B7280] hover:text-[#0B2C6F] hover:border-[#D9DEE8]"}`}>
               {s}
             </button>
           ))}
@@ -74,7 +74,7 @@ export default function AdminOrdersPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-white/30 text-left">
+              <tr className="border-b border-[#D9DEE8] text-[#6B7280] text-left">
                 {["Order #", "Customer", "Items", "Total", "Payment", "Status", "Date", "Invoice", "Action"].map(h => (
                   <th key={h} className="px-4 py-3 font-semibold whitespace-nowrap">{h}</th>
                 ))}
@@ -82,19 +82,19 @@ export default function AdminOrdersPage() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? Array.from({ length: 10 }).map((_, i) => (
-                <tr key={i}><td colSpan={9} className="px-4 py-3"><div className="h-4 rounded bg-white/5 animate-pulse" /></td></tr>
+                <tr key={i}><td colSpan={9} className="px-4 py-3"><div className="h-4 rounded bg-[#F4F6FA] animate-pulse" /></td></tr>
               )) : orders.length === 0 ? (
-                <tr><td colSpan={9} className="px-4 py-12 text-center text-white/30">No orders found</td></tr>
+                <tr><td colSpan={9} className="px-4 py-12 text-center text-[#6B7280]">No orders found</td></tr>
               ) : orders.map(o => (
-                <tr key={o.id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-4 py-3 font-mono font-bold text-white text-xs">{o.orderNumber}</td>
+                <tr key={o.id} className="hover:bg-[#F4F6FA] transition-colors">
+                  <td className="px-4 py-3 font-mono font-bold text-[#111827] text-xs">{o.orderNumber}</td>
                   <td className="px-4 py-3">
-                    <p className="text-white font-semibold">{o.user?.name || "—"}</p>
-                    <p className="text-xs text-white/30">{o.user?.email}</p>
+                    <p className="text-[#111827] font-semibold">{o.user?.name || "—"}</p>
+                    <p className="text-xs text-[#6B7280]">{o.user?.email}</p>
                   </td>
-                  <td className="px-4 py-3 text-white/60">{o._count?.items || o.items?.length || 0} items</td>
-                  <td className="px-4 py-3 font-bold text-white">₹{Number(o.totalAmount).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-white/60 capitalize">{o.paymentMethod}</td>
+                  <td className="px-4 py-3 text-[#374151]">{o._count?.items || o.items?.length || 0} items</td>
+                  <td className="px-4 py-3 font-bold text-[#111827]">₹{Number(o.totalAmount).toFixed(2)}</td>
+                  <td className="px-4 py-3 text-[#374151] capitalize">{o.paymentMethod}</td>
                   <td className="px-4 py-3">
                     <select value={o.status} onChange={e => updateStatus(o.id, e.target.value)}
                       className={`rounded-lg border px-2 py-1 text-xs font-semibold cursor-pointer bg-transparent capitalize
@@ -104,21 +104,21 @@ export default function AdminOrdersPage() {
                           STATUS_BADGE[o.status] === "badge-purple" ? "border-purple-500/30 text-purple-400" :
                           "border-blue-500/30 text-blue-400"}`}>
                       {["pending","confirmed","processing","shipped","delivered","cancelled"].map(s => (
-                        <option key={s} value={s} className="bg-[#111] text-white capitalize">{s}</option>
+                        <option key={s} value={s} className="bg-[#F4F6FA] text-[#111827] capitalize">{s}</option>
                       ))}
                     </select>
                   </td>
-                  <td className="px-4 py-3 text-white/40 text-xs whitespace-nowrap">{new Date(o.createdAt).toLocaleDateString("en-IN")}</td>
+                  <td className="px-4 py-3 text-[#6B7280] text-xs whitespace-nowrap">{new Date(o.createdAt).toLocaleDateString("en-IN")}</td>
                   <td className="px-4 py-3">
                     {o.invoice ? (
                       <a href={invoicesApi.getPdf(o.invoice.invoiceNumber)} target="_blank" rel="noopener noreferrer">
-                        <button className="flex items-center gap-1 text-xs text-pink-400 hover:text-pink-300"><Download size={12} /> PDF</button>
+                        <button className="flex items-center gap-1 text-xs text-[#F47C41] hover:text-[#f79b6e]"><Download size={12} /> PDF</button>
                       </a>
-                    ) : <span className="text-white/20 text-xs">—</span>}
+                    ) : <span className="text-[#111827]/30 text-xs">—</span>}
                   </td>
                   <td className="px-4 py-3">
                     <Link href={`/admin/orders/${o.id}`}>
-                      <button className="flex items-center gap-1 text-xs text-white/40 hover:text-white transition-colors">
+                      <button className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#0B2C6F] transition-colors">
                         View <ChevronRight size={12} />
                       </button>
                     </Link>
@@ -129,8 +129,8 @@ export default function AdminOrdersPage() {
           </table>
         </div>
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-white/10">
-            <p className="text-xs text-white/30">Page {page} of {totalPages}</p>
+          <div className="flex items-center justify-between px-4 py-3 border-t border-[#D9DEE8]">
+            <p className="text-xs text-[#6B7280]">Page {page} of {totalPages}</p>
             <div className="flex gap-1">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-outline text-xs px-3 py-1.5 disabled:opacity-30">← Prev</button>
               <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="btn-outline text-xs px-3 py-1.5 disabled:opacity-30">Next →</button>

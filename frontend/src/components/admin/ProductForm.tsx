@@ -80,7 +80,7 @@ export default function ProductForm({ productId }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Info */}
         <div className="card md:col-span-2">
-          <h2 className="font-display font-bold text-white mb-4">Basic Information</h2>
+          <h2 className="font-display font-bold text-[#111827] mb-4">Basic Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="label-text">Product Name *</label>
@@ -112,7 +112,7 @@ export default function ProductForm({ productId }: Props) {
 
         {/* Pricing */}
         <div className="card">
-          <h2 className="font-display font-bold text-white mb-4">Pricing & GST</h2>
+          <h2 className="font-display font-bold text-[#111827] mb-4">Pricing & GST</h2>
           <div className="space-y-3">
             <div>
               <label className="label-text">HSN Code</label>
@@ -138,21 +138,21 @@ export default function ProductForm({ productId }: Props) {
 
         {/* Flags */}
         <div className="card">
-          <h2 className="font-display font-bold text-white mb-4">Visibility</h2>
+          <h2 className="font-display font-bold text-[#111827] mb-4">Visibility</h2>
           <div className="space-y-4">
             {[["isActive", "Active (visible on store)"], ["isFeatured", "Featured on homepage"]].map(([k, label]) => (
               <label key={k} className="flex items-center justify-between cursor-pointer">
-                <span className="text-sm text-white/70">{label}</span>
+                <span className="text-sm text-[#374151]">{label}</span>
                 <button type="button" onClick={() => setForm(f => ({ ...f, [k]: !(f as any)[k] }))}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${(form as any)[k] ? "bg-pink-500" : "bg-white/10"}`}>
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${(form as any)[k] ? "bg-[#F47C41]" : "bg-[#FFFFFF]"}`}>
                   <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${(form as any)[k] ? "translate-x-6" : "translate-x-1"}`} />
                 </button>
               </label>
             ))}
           </div>
 
-          <div className="border-t border-white/10 mt-4 pt-4">
-            <h3 className="text-sm font-bold text-white mb-3">Short Description</h3>
+          <div className="border-t border-[#D9DEE8] mt-4 pt-4">
+            <h3 className="text-sm font-bold text-[#111827] mb-3">Short Description</h3>
             <textarea value={form.shortDescription} onChange={update("shortDescription")} rows={3}
               className="input-field resize-none text-sm" placeholder="Brief one-liner shown on product card" />
           </div>
@@ -160,33 +160,33 @@ export default function ProductForm({ productId }: Props) {
 
         {/* Description */}
         <div className="card md:col-span-2">
-          <h2 className="font-display font-bold text-white mb-4">Description</h2>
+          <h2 className="font-display font-bold text-[#111827] mb-4">Description</h2>
           <textarea value={form.description} onChange={update("description")} rows={6}
             className="input-field resize-y text-sm" placeholder="Full product description (HTML supported)" />
         </div>
 
         {/* Images */}
         <div className="card md:col-span-2">
-          <h2 className="font-display font-bold text-white mb-4">Product Images</h2>
+          <h2 className="font-display font-bold text-[#111827] mb-4">Product Images</h2>
           <div className="flex flex-wrap gap-3 mb-3">
             {existingImages.map(img => (
-              <div key={img.id} className="relative h-20 w-20 rounded-xl overflow-hidden border border-white/10">
+              <div key={img.id} className="relative h-20 w-20 rounded-xl overflow-hidden border border-[#D9DEE8]">
                 <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
-                {img.isPrimary && <span className="absolute bottom-0 left-0 right-0 bg-pink-500/80 text-[9px] text-white text-center py-0.5">Primary</span>}
+                {img.isPrimary && <span className="absolute bottom-0 left-0 right-0 bg-[#F47C41]/80 text-[9px] text-[#111827] text-center py-0.5">Primary</span>}
               </div>
             ))}
             {images.map((img, i) => (
-              <div key={i} className="relative h-20 w-20 rounded-xl overflow-hidden border border-pink-500/30">
+              <div key={i} className="relative h-20 w-20 rounded-xl overflow-hidden border border-[#F47C41]/30">
                 <img src={URL.createObjectURL(img)} alt="" className="w-full h-full object-cover" />
                 <button type="button" onClick={() => setImages(imgs => imgs.filter((_, j) => j !== i))}
-                  className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-red-500/80">
+                  className="absolute top-1 right-1 h-5 w-5 rounded-full bg-white/60 flex items-center justify-center text-[#111827] hover:bg-red-500/80">
                   <X size={10} />
                 </button>
               </div>
             ))}
-            <label className="h-20 w-20 rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center cursor-pointer hover:border-pink-500/50 transition-colors">
-              <Upload size={18} className="text-white/30 mb-1" />
-              <span className="text-[10px] text-white/30">Upload</span>
+            <label className="h-20 w-20 rounded-xl border-2 border-dashed border-[#D9DEE8] flex flex-col items-center justify-center cursor-pointer hover:border-[#F47C41]/50 transition-colors">
+              <Upload size={18} className="text-[#6B7280] mb-1" />
+              <span className="text-[10px] text-[#6B7280]">Upload</span>
               <input type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" />
             </label>
           </div>
@@ -195,13 +195,13 @@ export default function ProductForm({ productId }: Props) {
         {/* Variants */}
         <div className="card md:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-bold text-white">Variants (optional)</h2>
+            <h2 className="font-display font-bold text-[#111827]">Variants (optional)</h2>
             <button type="button" onClick={() => setVariants(v => [...v, { variantName: "", sku: "", price: "" }])}
-              className="flex items-center gap-1.5 text-sm text-pink-400 hover:text-pink-300">
+              className="flex items-center gap-1.5 text-sm text-[#F47C41] hover:text-[#f79b6e]">
               <Plus size={14} /> Add Variant
             </button>
           </div>
-          {variants.length === 0 && <p className="text-sm text-white/30">No variants — single SKU product.</p>}
+          {variants.length === 0 && <p className="text-sm text-[#6B7280]">No variants — single SKU product.</p>}
           {variants.map((v, i) => (
             <div key={i} className="grid grid-cols-3 gap-3 mb-3">
               <input value={v.variantName} onChange={e => setVariants(vs => vs.map((x, j) => j === i ? { ...x, variantName: e.target.value } : x))}
@@ -220,7 +220,7 @@ export default function ProductForm({ productId }: Props) {
 
         {/* SEO */}
         <div className="card md:col-span-2">
-          <h2 className="font-display font-bold text-white mb-4">SEO (optional)</h2>
+          <h2 className="font-display font-bold text-[#111827] mb-4">SEO (optional)</h2>
           <div className="space-y-3">
             <div>
               <label className="label-text">Meta Title</label>
@@ -237,7 +237,7 @@ export default function ProductForm({ productId }: Props) {
 
       <div className="flex gap-3">
         <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="btn-primary px-8 py-3 disabled:opacity-50">
-          {loading ? <span className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />{productId ? "Updating..." : "Creating..."}</span> : productId ? "Update Product" : "Create Product"}
+          {loading ? <span className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-[#D9DEE8] border-t-transparent animate-spin" />{productId ? "Updating..." : "Creating..."}</span> : productId ? "Update Product" : "Create Product"}
         </motion.button>
         <button type="button" onClick={() => router.push("/admin/products")} className="btn-outline px-6 py-3">Cancel</button>
       </div>

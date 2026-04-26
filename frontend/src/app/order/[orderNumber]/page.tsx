@@ -16,14 +16,14 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
   }, [params.orderNumber]);
 
   if (loading) return (
-    <main className="min-h-screen bg-[#050505] flex items-center justify-center">
+    <main className="min-h-screen bg-[#F4F6FA] flex items-center justify-center">
       <Navbar />
-      <div className="h-8 w-8 rounded-full border-2 border-pink-500 border-t-transparent animate-spin mt-20" />
+      <div className="h-8 w-8 rounded-full border-2 border-[#F47C41] border-t-transparent animate-spin mt-20" />
     </main>
   );
 
   return (
-    <main className="min-h-screen bg-[#050505]">
+    <main className="min-h-screen bg-[#F4F6FA]">
       <Navbar />
       <div className="pt-24 pb-16 px-6 mx-auto max-w-3xl">
         {/* Success Header */}
@@ -31,40 +31,40 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-500/30 mb-4">
             <CheckCircle size={40} className="text-emerald-400" />
           </div>
-          <h1 className="text-4xl font-display font-black text-white mb-2">Order Confirmed! 🎉</h1>
-          <p className="text-white/50">Order <span className="text-pink-400 font-mono font-bold">{params.orderNumber}</span> has been placed successfully.</p>
+          <h1 className="text-4xl font-display font-black text-[#111827] mb-2">Order Confirmed! 🎉</h1>
+          <p className="text-[#6B7280]">Order <span className="text-[#F47C41] font-mono font-bold">{params.orderNumber}</span> has been placed successfully.</p>
         </motion.div>
 
         {order && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-4">
             {/* Order Details */}
             <div className="card">
-              <h2 className="font-display font-bold text-white mb-4 flex items-center gap-2"><Package size={18} className="text-pink-400" /> Order Details</h2>
+              <h2 className="font-display font-bold text-[#111827] mb-4 flex items-center gap-2"><Package size={18} className="text-[#F47C41]" /> Order Details</h2>
               <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                 {[["Order Number", order.orderNumber], ["Status", order.status], ["Payment", order.paymentMethod], ["Date", new Date(order.createdAt).toLocaleDateString("en-IN")]].map(([k, v]) => (
                   <div key={k}>
-                    <p className="text-white/40 mb-0.5">{k}</p>
-                    <p className="text-white font-semibold capitalize">{v}</p>
+                    <p className="text-[#6B7280] mb-0.5">{k}</p>
+                    <p className="text-[#111827] font-semibold capitalize">{v}</p>
                   </div>
                 ))}
               </div>
 
               {/* Items */}
-              <div className="border-t border-white/10 pt-4 space-y-2">
+              <div className="border-t border-[#D9DEE8] pt-4 space-y-2">
                 {order.items?.map((item: any) => (
                   <div key={item.id} className="flex justify-between text-sm">
-                    <span className="text-white/60">{item.product?.name} × {item.qty}</span>
-                    <span className="text-white font-semibold">₹{Number(item.unitPrice * item.qty).toFixed(2)}</span>
+                    <span className="text-[#374151]">{item.product?.name} × {item.qty}</span>
+                    <span className="text-[#111827] font-semibold">₹{Number(item.unitPrice * item.qty).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
 
               {/* Totals */}
-              <div className="border-t border-white/10 pt-4 mt-4 space-y-1 text-sm">
-                <div className="flex justify-between text-white/50"><span>Subtotal</span><span>₹{Number(order.subtotal).toFixed(2)}</span></div>
-                <div className="flex justify-between text-white/50"><span>CGST</span><span>₹{Number(order.cgstAmount).toFixed(2)}</span></div>
-                <div className="flex justify-between text-white/50"><span>SGST</span><span>₹{Number(order.sgstAmount).toFixed(2)}</span></div>
-                <div className="flex justify-between font-bold text-white border-t border-white/10 pt-2 mt-1">
+              <div className="border-t border-[#D9DEE8] pt-4 mt-4 space-y-1 text-sm">
+                <div className="flex justify-between text-[#6B7280]"><span>Subtotal</span><span>₹{Number(order.subtotal).toFixed(2)}</span></div>
+                <div className="flex justify-between text-[#6B7280]"><span>CGST</span><span>₹{Number(order.cgstAmount).toFixed(2)}</span></div>
+                <div className="flex justify-between text-[#6B7280]"><span>SGST</span><span>₹{Number(order.sgstAmount).toFixed(2)}</span></div>
+                <div className="flex justify-between font-bold text-[#111827] border-t border-[#D9DEE8] pt-2 mt-1">
                   <span>Total Paid</span><span className="gradient-text text-lg">₹{Number(order.totalAmount).toFixed(2)}</span>
                 </div>
               </div>
@@ -73,12 +73,12 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
             {/* Delivery Address */}
             {order.address && (
               <div className="card">
-                <h2 className="font-display font-bold text-white mb-3">Delivery Address</h2>
-                <p className="text-sm text-white/60 leading-relaxed">
+                <h2 className="font-display font-bold text-[#111827] mb-3">Delivery Address</h2>
+                <p className="text-sm text-[#374151] leading-relaxed">
                   {order.address.fullName}<br />
                   {order.address.addressLine1}, {order.address.city}, {order.address.state} - {order.address.pincode}<br />
                   📞 {order.address.phone}
-                  {order.address.gstin && <><br /><span className="text-pink-400">GSTIN: {order.address.gstin}</span></>}
+                  {order.address.gstin && <><br /><span className="text-[#F47C41]">GSTIN: {order.address.gstin}</span></>}
                 </p>
               </div>
             )}
@@ -87,8 +87,8 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
             {order.invoice && (
               <div className="card flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-white">GST Invoice Ready</p>
-                  <p className="text-sm text-white/40">{order.invoice.invoiceNumber}</p>
+                  <p className="font-bold text-[#111827]">GST Invoice Ready</p>
+                  <p className="text-sm text-[#6B7280]">{order.invoice.invoiceNumber}</p>
                 </div>
                 <a href={invoicesApi.getPdf(order.invoice.invoiceNumber)} target="_blank" rel="noopener noreferrer">
                   <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} className="btn-primary flex items-center gap-2 text-sm px-4 py-2">

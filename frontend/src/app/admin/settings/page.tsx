@@ -73,16 +73,16 @@ export default function AdminSettingsPage() {
     setSaving(false);
   };
 
-  if (loading) return <div className="flex justify-center py-20"><div className="h-8 w-8 rounded-full border-2 border-pink-500 border-t-transparent animate-spin" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><div className="h-8 w-8 rounded-full border-2 border-[#F47C41] border-t-transparent animate-spin" /></div>;
 
   return (
     <div>
-      <h1 className="text-3xl font-display font-black text-white mb-6">Settings</h1>
+      <h1 className="text-3xl font-display font-black text-[#111827] mb-6">Settings</h1>
       <form onSubmit={handleSave}>
         <div className="space-y-6 max-w-3xl">
           {SETTING_GROUPS.map(group => (
             <div key={group.label} className="card">
-              <h2 className="font-display font-bold text-white mb-4 pb-3 border-b border-white/10">{group.label}</h2>
+              <h2 className="font-display font-bold text-[#111827] mb-4 pb-3 border-b border-[#D9DEE8]">{group.label}</h2>
               <div className="space-y-3">
                 {group.keys.map(({ key, label, type }) => (
                   <div key={key}>

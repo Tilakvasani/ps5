@@ -69,13 +69,13 @@ export default function AccountPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#050505]">
+    <main className="min-h-screen bg-[#F4F6FA]">
       <Navbar />
       <div className="pt-24 pb-16 px-6 mx-auto max-w-6xl">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-display font-black text-white">My Account</h1>
-            <p className="text-white/40 text-sm mt-1">{user?.email}</p>
+            <h1 className="text-3xl font-display font-black text-[#111827]">My Account</h1>
+            <p className="text-[#6B7280] text-sm mt-1">{user?.email}</p>
           </div>
           <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 border border-red-400/20 hover:border-red-400/40 px-4 py-2 rounded-xl transition-all">
             <LogOut size={14} /> Sign Out
@@ -86,18 +86,18 @@ export default function AccountPage() {
           {/* Sidebar */}
           <aside className="lg:col-span-1">
             <div className="card space-y-1">
-              <div className="flex items-center gap-3 pb-4 mb-2 border-b border-white/10">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-pink-500 to-yellow-400 flex items-center justify-center text-lg font-black text-black">
+              <div className="flex items-center gap-3 pb-4 mb-2 border-b border-[#D9DEE8]">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#F47C41] to-[#FFD166] flex items-center justify-center text-lg font-black text-black">
                   {user?.name?.[0]?.toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-bold text-white text-sm">{user?.name}</p>
-                  <p className="text-xs text-white/40">Customer</p>
+                  <p className="font-bold text-[#111827] text-sm">{user?.name}</p>
+                  <p className="text-xs text-[#6B7280]">Customer</p>
                 </div>
               </div>
               {TABS.map((t) => (
                 <button key={t.id} onClick={() => setTab(t.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === t.id ? "bg-pink-500/20 text-pink-400" : "text-white/50 hover:text-white hover:bg-white/5"}`}>
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === t.id ? "bg-[#F47C41]/20 text-[#F47C41]" : "text-[#6B7280] hover:text-[#0B2C6F] hover:bg-[#F4F6FA]"}`}>
                   <t.icon size={15} /> {t.label}
                 </button>
               ))}
@@ -109,18 +109,18 @@ export default function AccountPage() {
             {/* Profile Tab */}
             {tab === "profile" && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="card">
-                <h2 className="font-display font-bold text-white mb-6">Profile Information</h2>
+                <h2 className="font-display font-bold text-[#111827] mb-6">Profile Information</h2>
                 <div className="space-y-4 max-w-md">
                   <div>
-                    <label className="text-sm font-semibold text-white/60 mb-1.5 block">Full Name</label>
+                    <label className="text-sm font-semibold text-[#374151] mb-1.5 block">Full Name</label>
                     <input value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} className="input-field" />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold text-white/60 mb-1.5 block">Email</label>
+                    <label className="text-sm font-semibold text-[#374151] mb-1.5 block">Email</label>
                     <input value={user?.email || ""} disabled className="input-field opacity-50 cursor-not-allowed" />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold text-white/60 mb-1.5 block">Phone</label>
+                    <label className="text-sm font-semibold text-[#374151] mb-1.5 block">Phone</label>
                     <input value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} className="input-field" />
                   </div>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleUpdateProfile} className="btn-primary px-6 py-2.5">
@@ -133,30 +133,30 @@ export default function AccountPage() {
             {/* Orders Tab */}
             {tab === "orders" && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                <h2 className="font-display font-bold text-white mb-4">Order History</h2>
+                <h2 className="font-display font-bold text-[#111827] mb-4">Order History</h2>
                 {orders.length === 0 ? (
-                  <div className="card text-center py-12 text-white/30">
+                  <div className="card text-center py-12 text-[#6B7280]">
                     <Package size={40} className="mx-auto mb-3 opacity-30" />
                     <p>No orders yet</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {orders.map(order => (
-                      <div key={order.id} className="card hover:border-white/20 transition-all">
+                      <div key={order.id} className="card hover:border-[#D9DEE8] transition-all">
                         <div className="flex items-start justify-between gap-4 flex-wrap">
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="font-mono text-sm font-bold text-white">{order.orderNumber}</span>
+                              <span className="font-mono text-sm font-bold text-[#111827]">{order.orderNumber}</span>
                               <span className={`badge ${STATUS_BADGE[order.status] || "badge-info"}`}>{order.status}</span>
                             </div>
-                            <p className="text-xs text-white/40">{new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
-                            <p className="text-sm text-white/60 mt-1">{order.items?.length} item(s)</p>
+                            <p className="text-xs text-[#6B7280]">{new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+                            <p className="text-sm text-[#374151] mt-1">{order.items?.length} item(s)</p>
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-display font-black gradient-text">₹{Number(order.totalAmount).toFixed(2)}</p>
                             {order.invoice && (
                               <a href={invoicesApi.getPdf(order.invoice.invoiceNumber)} target="_blank" rel="noopener noreferrer">
-                                <button className="flex items-center gap-1 text-xs text-pink-400 hover:text-pink-300 mt-1">
+                                <button className="flex items-center gap-1 text-xs text-[#F47C41] hover:text-[#f79b6e] mt-1">
                                   <Download size={11} /> Invoice PDF
                                 </button>
                               </a>
@@ -174,7 +174,7 @@ export default function AccountPage() {
             {tab === "addresses" && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-display font-bold text-white">Saved Addresses</h2>
+                  <h2 className="font-display font-bold text-[#111827]">Saved Addresses</h2>
                   <button onClick={() => setAddingAddr(!addingAddr)} className="btn-primary text-sm px-4 py-2 flex items-center gap-1.5">
                     <Plus size={14} /> Add Address
                   </button>
@@ -182,10 +182,10 @@ export default function AccountPage() {
 
                 {addingAddr && (
                   <div className="card mb-4 space-y-3">
-                    <h3 className="font-semibold text-white text-sm">New Address</h3>
+                    <h3 className="font-semibold text-[#111827] text-sm">New Address</h3>
                     {[["fullName","Full Name"],["phone","Phone"],["addressLine1","Address Line 1"],["city","City"],["state","State"],["pincode","Pincode"],["gstin","GSTIN (optional)"]].map(([k, label]) => (
                       <div key={k}>
-                        <label className="text-xs text-white/40 mb-1 block">{label}</label>
+                        <label className="text-xs text-[#6B7280] mb-1 block">{label}</label>
                         <input value={(newAddr as any)[k]} onChange={e => setNewAddr(n => ({ ...n, [k]: e.target.value }))} className="input-field text-sm" placeholder={label} />
                       </div>
                     ))}
@@ -203,10 +203,10 @@ export default function AccountPage() {
                         <span className="badge badge-info capitalize">{addr.label}</span>
                         {addr.isDefault && <span className="badge badge-success">Default</span>}
                       </div>
-                      <p className="font-bold text-white text-sm">{addr.fullName}</p>
-                      <p className="text-sm text-white/50 mt-1 leading-relaxed">{addr.addressLine1}<br />{addr.city}, {addr.state} - {addr.pincode}</p>
-                      <p className="text-sm text-white/40 mt-1">{addr.phone}</p>
-                      {addr.gstin && <p className="text-xs text-pink-400 mt-1">GSTIN: {addr.gstin}</p>}
+                      <p className="font-bold text-[#111827] text-sm">{addr.fullName}</p>
+                      <p className="text-sm text-[#6B7280] mt-1 leading-relaxed">{addr.addressLine1}<br />{addr.city}, {addr.state} - {addr.pincode}</p>
+                      <p className="text-sm text-[#6B7280] mt-1">{addr.phone}</p>
+                      {addr.gstin && <p className="text-xs text-[#F47C41] mt-1">GSTIN: {addr.gstin}</p>}
                       <button onClick={() => handleDeleteAddress(addr.id)}
                         className="absolute top-4 right-4 h-8 w-8 flex items-center justify-center rounded-lg text-red-400/40 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100">
                         <Trash2 size={14} />

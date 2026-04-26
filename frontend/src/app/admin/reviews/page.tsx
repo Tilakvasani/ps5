@@ -25,28 +25,28 @@ export default function AdminReviewsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-display font-black text-white">Reviews</h1>
+        <h1 className="text-3xl font-display font-black text-[#111827]">Reviews</h1>
       </div>
       <div className="flex gap-1 mb-4">
         {["pending", "approved", "all"].map(t => (
-          <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all ${tab === t ? "bg-pink-500 text-white" : "border border-white/10 text-white/40 hover:text-white"}`}>{t}</button>
+          <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all ${tab === t ? "bg-[#F47C41] text-[#111827]" : "border border-[#D9DEE8] text-[#6B7280] hover:text-[#0B2C6F]"}`}>{t}</button>
         ))}
       </div>
       <div className="space-y-3">
-        {loading ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="card h-20 animate-pulse bg-white/5" />)
+        {loading ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="card h-20 animate-pulse bg-[#F4F6FA]" />)
           : filtered.map((r: any) => (
           <div key={r.id} className="card">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-1">
                   <div className="flex gap-0.5">{Array.from({ length: r.rating }).map((_, i) => <Star key={i} size={12} className="fill-yellow-400 text-yellow-400" />)}</div>
-                  <span className="font-bold text-white text-sm">{r.user?.name}</span>
-                  <span className="text-xs text-white/30">{new Date(r.createdAt).toLocaleDateString("en-IN")}</span>
+                  <span className="font-bold text-[#111827] text-sm">{r.user?.name}</span>
+                  <span className="text-xs text-[#6B7280]">{new Date(r.createdAt).toLocaleDateString("en-IN")}</span>
                   {r.isApproved ? <span className="badge badge-success text-[10px]">Approved</span> : <span className="badge badge-warning text-[10px]">Pending</span>}
                 </div>
-                <p className="text-sm text-white/80 font-medium">{r.title}</p>
-                <p className="text-sm text-white/50 mt-0.5">{r.body}</p>
-                <p className="text-xs text-white/30 mt-1">Product: {r.product?.name}</p>
+                <p className="text-sm text-[#111827] font-medium">{r.title}</p>
+                <p className="text-sm text-[#6B7280] mt-0.5">{r.body}</p>
+                <p className="text-xs text-[#6B7280] mt-1">Product: {r.product?.name}</p>
               </div>
               <div className="flex gap-1 flex-shrink-0">
                 {!r.isApproved && (
@@ -57,7 +57,7 @@ export default function AdminReviewsPage() {
             </div>
           </div>
         ))}
-        {!loading && filtered.length === 0 && <div className="card text-center py-10 text-white/30">No {tab} reviews</div>}
+        {!loading && filtered.length === 0 && <div className="card text-center py-10 text-[#6B7280]">No {tab} reviews</div>}
       </div>
     </div>
   );

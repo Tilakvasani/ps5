@@ -50,8 +50,8 @@ export default function AdminProductsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-display font-black text-white">Products</h1>
-          <p className="text-white/40 text-sm mt-1">{total} total products</p>
+          <h1 className="text-3xl font-display font-black text-[#111827]">Products</h1>
+          <p className="text-[#6B7280] text-sm mt-1">{total} total products</p>
         </div>
         <Link href="/admin/products/new">
           <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="btn-primary flex items-center gap-2">
@@ -63,7 +63,7 @@ export default function AdminProductsPage() {
       {/* Toolbar */}
       <div className="flex gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
           <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search products..." className="input-field pl-9 text-sm" />
         </div>
@@ -75,7 +75,7 @@ export default function AdminProductsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-white/30 text-left">
+              <tr className="border-b border-[#D9DEE8] text-[#6B7280] text-left">
                 {["Image", "Name", "SKU", "Category", "Price", "Stock", "Status", "Actions"].map(h => (
                   <th key={h} className="px-4 py-3 font-semibold whitespace-nowrap">{h}</th>
                 ))}
@@ -84,25 +84,25 @@ export default function AdminProductsPage() {
             <tbody className="divide-y divide-white/5">
               {loading ? (
                 Array.from({ length: 8 }).map((_, i) => (
-                  <tr key={i}><td colSpan={8} className="px-4 py-3"><div className="h-4 rounded bg-white/5 animate-pulse" /></td></tr>
+                  <tr key={i}><td colSpan={8} className="px-4 py-3"><div className="h-4 rounded bg-[#F4F6FA] animate-pulse" /></td></tr>
                 ))
               ) : products.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-12 text-center text-white/30">No products found</td></tr>
+                <tr><td colSpan={8} className="px-4 py-12 text-center text-[#6B7280]">No products found</td></tr>
               ) : products.map(p => (
-                <motion.tr key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-white/5 transition-colors">
+                <motion.tr key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-[#F4F6FA] transition-colors">
                   <td className="px-4 py-3">
-                    <div className="h-10 w-10 rounded-lg bg-white/5 overflow-hidden border border-white/10">
+                    <div className="h-10 w-10 rounded-lg bg-[#F4F6FA] overflow-hidden border border-[#D9DEE8]">
                       {p.images?.[0]?.imageUrl ? <img src={p.images[0].imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full" />}
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-white line-clamp-1 max-w-[200px]">{p.name}</p>
-                    {p.brand && <p className="text-xs text-white/30">{p.brand}</p>}
+                    <p className="font-semibold text-[#111827] line-clamp-1 max-w-[200px]">{p.name}</p>
+                    {p.brand && <p className="text-xs text-[#6B7280]">{p.brand}</p>}
                   </td>
-                  <td className="px-4 py-3 font-mono text-white/60 text-xs">{p.sku}</td>
-                  <td className="px-4 py-3 text-white/60">{p.category?.name || "—"}</td>
+                  <td className="px-4 py-3 font-mono text-[#374151] text-xs">{p.sku}</td>
+                  <td className="px-4 py-3 text-[#374151]">{p.category?.name || "—"}</td>
                   <td className="px-4 py-3">
-                    <p className="font-bold text-white">₹{Number(p.sellingPrice).toFixed(2)}</p>
+                    <p className="font-bold text-[#111827]">₹{Number(p.sellingPrice).toFixed(2)}</p>
                     {Number(p.discountPercent) > 0 && <p className="text-xs text-emerald-400">-{p.discountPercent}% off</p>}
                   </td>
                   <td className="px-4 py-3">
@@ -110,24 +110,24 @@ export default function AdminProductsPage() {
                       <span className={`badge ${p.inventory[0].qtyInStock <= p.inventory[0].lowStockThreshold ? "badge-warning" : "badge-success"}`}>
                         {p.inventory[0].qtyInStock}
                       </span>
-                    ) : <span className="text-white/30">—</span>}
+                    ) : <span className="text-[#6B7280]">—</span>}
                   </td>
                   <td className="px-4 py-3">
                     <button onClick={() => toggleActive(p)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${p.isActive ? "bg-pink-500" : "bg-white/10"}`}>
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${p.isActive ? "bg-[#F47C41]" : "bg-[#FFFFFF]"}`}>
                       <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${p.isActive ? "translate-x-6" : "translate-x-1"}`} />
                     </button>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
                       <Link href={`/products/${p.slug}`} target="_blank">
-                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-all"><Eye size={14} /></button>
+                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#6B7280] hover:text-[#0B2C6F] hover:bg-[#FFFFFF] transition-all"><Eye size={14} /></button>
                       </Link>
                       <Link href={`/admin/products/${p.id}`}>
-                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-white/30 hover:text-blue-400 hover:bg-blue-400/10 transition-all"><Edit3 size={14} /></button>
+                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#6B7280] hover:text-blue-400 hover:bg-blue-400/10 transition-all"><Edit3 size={14} /></button>
                       </Link>
                       <button onClick={() => handleDelete(p.id, p.name)}
-                        className="h-8 w-8 flex items-center justify-center rounded-lg text-white/30 hover:text-red-400 hover:bg-red-400/10 transition-all">
+                        className="h-8 w-8 flex items-center justify-center rounded-lg text-[#6B7280] hover:text-red-400 hover:bg-red-400/10 transition-all">
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -140,12 +140,12 @@ export default function AdminProductsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-white/10">
-            <p className="text-xs text-white/30">Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}</p>
+          <div className="flex items-center justify-between px-4 py-3 border-t border-[#D9DEE8]">
+            <p className="text-xs text-[#6B7280]">Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}</p>
             <div className="flex gap-1">
               {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => (
                 <button key={i} onClick={() => setPage(i + 1)}
-                  className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all ${page === i + 1 ? "bg-pink-500 text-white" : "text-white/40 hover:bg-white/10"}`}>
+                  className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all ${page === i + 1 ? "bg-[#F47C41] text-[#111827]" : "text-[#6B7280] hover:bg-[#FFFFFF]"}`}>
                   {i + 1}
                 </button>
               ))}

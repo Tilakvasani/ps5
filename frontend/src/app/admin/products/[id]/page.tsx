@@ -7,13 +7,13 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/products" className="flex items-center gap-1 text-white/40 hover:text-white text-sm transition-colors">
+        <Link href="/admin/products" className="flex items-center gap-1 text-[#6B7280] hover:text-[#0B2C6F] text-sm transition-colors">
           <ChevronLeft size={16} /> Products
         </Link>
-        <span className="text-white/20">/</span>
-        <span className="text-white font-semibold">Edit Product</span>
+        <span className="text-[#111827]/30">/</span>
+        <span className="text-[#111827] font-semibold">Edit Product</span>
       </div>
-      <h1 className="text-3xl font-display font-black text-white mb-6">Edit Product</h1>
+      <h1 className="text-3xl font-display font-black text-[#111827] mb-6">Edit Product</h1>
       <ProductForm productId={Number(params.id)} />
     </div>
   );
