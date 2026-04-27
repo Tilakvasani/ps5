@@ -8,7 +8,7 @@ import Footer from "@/components/storefront/Footer";
 import { useStore } from "@/lib/store";
 import { accountApi, ordersApi, invoicesApi, authApi } from "@/lib/api";
 import toast from "react-hot-toast";
-
+export const dynamic = "force-dynamic";
 const STATUS_BADGE: Record<string, string> = {
   pending: "badge-warning", confirmed: "badge-info", processing: "badge-info",
   shipped: "badge-purple", delivered: "badge-success", cancelled: "badge-danger",
