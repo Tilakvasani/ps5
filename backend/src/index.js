@@ -11,7 +11,10 @@ const app = express();
 // ── Security ────────────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: [
+    "http://localhost:3000",
+    "https://ps5-frontend.vercel.app", // your Vercel URL (update after step 5)
+  ],
   credentials: true,
 }));
 app.use(express.json({ limit: "10mb" }));
