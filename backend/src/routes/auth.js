@@ -25,8 +25,6 @@ const BACKEND_URL  = process.env.BACKEND_URL  || "https://ps5-ufm2.onrender.com"
 passport.use(new GoogleStrategy({
   clientID:     process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-
-  // FIX 1: Hard-coded style — use env var but with explicit fallback, no template ambiguity
   callbackURL: `${BACKEND_URL}/api/auth/google/callback`,
 
 }, async (accessToken, refreshToken, profile, done) => {
@@ -36,40 +34,31 @@ passport.use(new GoogleStrategy({
 
     if (!email) return done(new Error("No email returned from Google"));
 
-    // Find or create user
-    let user = await prisma.user.findUnique({ where: { email } });
+    // ✅ FIXED: upsert replaces find + create/update
+    // This is atomic — no race condition when 1000 users login at once
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {
+        googleId: profile.id, // link Google if account already exists
+      },
+      create: {
+        name,
+        email,
+        passwordHash: await bcrypt.hash(Math.random().toString(36), 12),
+        googleId: profile.id,
+        isActive: true,
+      },
+    });
 
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          name,
-          email,
-          passwordHash: await bcrypt.hash(Math.random().toString(36), 12),
-          googleId: profile.id,
-          isActive: true,
-        },
-      });
-      console.log("✅ New Google user created:", email);
-    } else if (!user.googleId) {
-      // Link Google to existing email account
-      user = await prisma.user.update({
-        where: { id: user.id },
-        data: { googleId: profile.id },
-      });
-      console.log("✅ Google linked to existing account:", email);
-    } else {
-      console.log("✅ Existing Google user signed in:", email);
-    }
-
+    console.log("✅ Google login success:", email);
     return done(null, user);
+
   } catch (err) {
-    // FIX 2: Log the error so it's visible in Render logs
     console.error("❌ GOOGLE AUTH ERROR:", err);
     return done(err);
   }
 }));
 
-// FIX 3: Removed serializeUser / deserializeUser — not needed with session: false
 router.use(passport.initialize());
 
 // ── Google OAuth Routes ──────────────────────────────
@@ -77,7 +66,6 @@ router.get("/google",
   passport.authenticate("google", { scope: ["profile", "email"], session: false })
 );
 
-// FIX 4: Custom callback handler — errors are no longer hidden
 router.get("/google/callback", (req, res, next) => {
   passport.authenticate("google", { session: false }, (err, user) => {
     if (err) {
