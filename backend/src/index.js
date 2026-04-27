@@ -13,8 +13,9 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(cors({
   origin: [
     "http://localhost:3000",
-    "https://ps5-frontend.vercel.app", // your Vercel URL (update after step 5)
-  ],
+    "https://ps5-hhvf.vercel.app",
+    process.env.FRONTEND_URL,
+  ].filter(Boolean),
   credentials: true,
 }));
 app.use(express.json({ limit: "10mb" }));
@@ -92,7 +93,7 @@ app.listen(PORT, async () => {
     for (const s of defaultSettings) {
       await prisma.setting.upsert({
         where:  { key: s.key },
-        update: {},  // don't overwrite admin-saved values
+        update: {},
         create: { key: s.key, value: s.value, group: s.group },
       });
     }
