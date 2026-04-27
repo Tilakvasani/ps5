@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { User, Package, MapPin, LogOut, Download, Plus, Trash2, Edit3 } from "lucide-react";
@@ -8,13 +8,15 @@ import Footer from "@/components/storefront/Footer";
 import { useStore } from "@/lib/store";
 import { accountApi, ordersApi, invoicesApi, authApi } from "@/lib/api";
 import toast from "react-hot-toast";
+
 export const dynamic = "force-dynamic";
+
 const STATUS_BADGE: Record<string, string> = {
   pending: "badge-warning", confirmed: "badge-info", processing: "badge-info",
   shipped: "badge-purple", delivered: "badge-success", cancelled: "badge-danger",
 };
 
-export default function AccountPage() {
+function AccountPageContent() {
   const { user, setUser, logout } = useStore();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -221,5 +223,13 @@ export default function AccountPage() {
       </div>
       <Footer />
     </main>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F4F6FA] flex items-center justify-center"><div className="h-8 w-8 rounded-full border-2 border-[#F47C41]/40 border-t-[#F47C41] animate-spin" /></div>}>
+      <AccountPageContent />
+    </Suspense>
   );
 }
