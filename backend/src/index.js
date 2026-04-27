@@ -48,14 +48,14 @@ const adminLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, message: { e
 app.use("/api/admin/", adminLimiter);
 
 // ── Routes ───────────────────────────────────────────
-app.use("/api/auth",      require("./routes/auth"));
-app.use("/api/products",  require("./routes/products"));
-app.use("/api/categories",require("./routes/categories"));
-app.use("/api/orders",    require("./routes/orders"));
-app.use("/api/payments",  require("./routes/payments"));
-app.use("/api/invoices",  require("./routes/invoices"));
-app.use("/api/account",   require("./routes/account"));
-app.use("/api/admin",     require("./routes/admin"));
+app.use("/api/auth",       require("./routes/auth"));
+app.use("/api/products",   require("./routes/products"));
+app.use("/api/categories", require("./routes/categories"));
+app.use("/api/orders",     require("./routes/orders"));
+app.use("/api/payments",   require("./routes/payments"));
+app.use("/api/invoices",   require("./routes/invoices"));
+app.use("/api/account",    require("./routes/account"));
+app.use("/api/admin",      require("./routes/admin"));
 
 // ── Public Settings ──────────────────────────────────
 app.get("/api/settings", async (req, res) => {
@@ -73,8 +73,39 @@ app.get("/api/settings", async (req, res) => {
 // ── Health Check ─────────────────────────────────────
 app.get("/health", (req, res) => res.json({ status: "ok", time: new Date().toISOString() }));
 
-// ── 404 ──────────────────────────────────────────────
-app.use((req, res) => res.status(404).json({ error: "Not found" }));
+// ── 404 — Nice HTML for browser, JSON for API ────────
+app.use((req, res) => {
+  const acceptsHtml = req.headers.accept?.includes("text/html");
+  if (acceptsHtml) {
+    return res.status(404).send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>404 - Not Found | Zupwell</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #F4F6FA; }
+            .box { text-align: center; padding: 2rem; }
+            h1 { font-size: 8rem; font-weight: 900; background: linear-gradient(90deg, #F47C41, #0B2C6F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+            h2 { font-size: 1.5rem; font-weight: 700; color: #111827; margin: 1rem 0 0.5rem; }
+            p { color: #6B7280; font-size: 1rem; margin-bottom: 2rem; }
+            a { background: #F47C41; color: white; padding: 12px 28px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: opacity 0.2s; }
+            a:hover { opacity: 0.9; }
+          </style>
+        </head>
+        <body>
+          <div class="box">
+            <h1>404</h1>
+            <h2>Page not found</h2>
+            <p>The page you're looking for doesn't exist.</p>
+            <a href="https://ps5-hhvf.vercel.app">Go to Zupwell ↗</a>
+          </div>
+        </body>
+      </html>
+    `);
+  }
+  res.status(404).json({ error: "Not found" });
+});
 
 // ── Global Error Handler ─────────────────────────────
 app.use((err, req, res, next) => {
@@ -89,7 +120,6 @@ app.use((err, req, res, next) => {
   if (err.code === "P2025") {
     return res.status(404).json({ error: "Record not found" });
   }
-  // In production, hide real error details from users
   res.status(err.status || 500).json({
     error: isProd ? "Something went wrong. Please try again." : err.message,
   });

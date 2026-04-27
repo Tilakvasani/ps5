@@ -25,6 +25,11 @@ const LinkedInIcon = () => (
     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
   </svg>
 );
+const XIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+  </svg>
+);
 
 export default function Footer() {
   const [s, setS] = useState<Record<string, string>>({});
@@ -43,6 +48,14 @@ export default function Footer() {
   const gstin     = s.site_gstin      || "24XXXXXXXXXXXXX";
   const stateCode = s.site_state_code || "24 (Gujarat)";
 
+  const socials = [
+    { href: s.social_instagram || "https://instagram.com", icon: <InstagramIcon />, label: "Instagram" },
+    { href: s.social_facebook  || "https://facebook.com",  icon: <FacebookIcon />,  label: "Facebook" },
+    { href: s.social_youtube   || "https://youtube.com",   icon: <YoutubeIcon />,   label: "YouTube" },
+    { href: s.social_linkedin  || "https://linkedin.com",  icon: <LinkedInIcon />,  label: "LinkedIn" },
+    { href: s.social_x         || "https://x.com",         icon: <XIcon />,         label: "X" },
+  ];
+
   return (
     <footer style={{ background: "#F4F6FA", borderTop: "1px solid #D9DEE8" }}>
       <div className="mx-auto max-w-7xl px-6 py-16">
@@ -53,21 +66,10 @@ export default function Footer() {
             <div className="flex items-center mb-4">
               <span className="text-2xl font-display font-black inline-flex items-start" style={{
                 background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
               }}>
                 {name}
-                <sup style={{
-                  fontSize: "0.45em",
-                  fontWeight: 700,
-                  lineHeight: 1,
-                  marginTop: "2px",
-                  background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}>™</sup>
+                <sup style={{ fontSize: "0.45em", fontWeight: 700, lineHeight: 1, marginTop: "2px", background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>™</sup>
               </span>
             </div>
             <p className="text-sm leading-relaxed mb-4" style={{ color: "#6B7280" }}>
@@ -77,22 +79,21 @@ export default function Footer() {
               <p>GSTIN: {gstin}</p>
               <p>State Code: {stateCode}</p>
             </div>
-            {/* Social Media */}
-            <div className="flex gap-3">
-              {[
-                { href: s.social_instagram || "https://instagram.com", icon: <InstagramIcon />, label: "Instagram" },
-                { href: s.social_facebook  || "https://facebook.com",  icon: <FacebookIcon />,  label: "Facebook" },
-                { href: s.social_youtube   || "https://youtube.com",   icon: <YoutubeIcon />,   label: "YouTube" },
-                { href: s.social_linkedin  || "https://linkedin.com",  icon: <LinkedInIcon />,  label: "LinkedIn" },
-              ].map(({ href, icon, label }) => (
+
+            {/* Social icons WITH names side by side */}
+            <div className="flex flex-col gap-2">
+              {socials.map(({ href, icon, label }) => (
                 <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-                  aria-label={label}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
-                  style={{ background: "#E5E7EB", color: "#6B7280" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#F47C41"; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#E5E7EB"; (e.currentTarget as HTMLElement).style.color = "#6B7280"; }}
+                  className="flex items-center gap-2.5 text-sm transition-colors group w-fit"
+                  style={{ color: "#6B7280" }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#F47C41"}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#6B7280"}
                 >
-                  {icon}
+                  <span className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
+                    style={{ background: "#E5E7EB" }}>
+                    {icon}
+                  </span>
+                  <span className="font-medium">{label}</span>
                 </a>
               ))}
             </div>
@@ -102,12 +103,7 @@ export default function Footer() {
           <div>
             <h4 className="font-display font-bold text-[#111827] mb-4 text-sm uppercase tracking-wider">Follow Us</h4>
             <ul className="space-y-2 text-sm" style={{ color: "#6B7280" }}>
-              {[
-                { label: "Instagram", href: s.social_instagram || "https://instagram.com" },
-                { label: "Facebook",  href: s.social_facebook  || "https://facebook.com" },
-                { label: "YouTube",   href: s.social_youtube   || "https://youtube.com" },
-                { label: "LinkedIn",  href: s.social_linkedin  || "https://linkedin.com" },
-              ].map(({ label, href }) => (
+              {socials.map(({ label, href }) => (
                 <li key={label}>
                   <a href={href} target="_blank" rel="noopener noreferrer"
                     className="transition-colors hover:text-[#F47C41]">{label}</a>
@@ -148,10 +144,8 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div
-          className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4"
-          style={{ borderTop: "1px solid rgba(11,44,111,0.06)" }}
-        >
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4"
+          style={{ borderTop: "1px solid rgba(11,44,111,0.06)" }}>
           <p className="text-sm" style={{ color: "#6B7280" }}>
             © {new Date().getFullYear()} {name}™. All rights reserved.
           </p>
