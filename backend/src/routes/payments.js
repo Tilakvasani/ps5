@@ -42,13 +42,27 @@ router.post("/verify", authUser, async (req, res) => {
   const order = await prisma.order.findFirst({ where: { id: Number(orderId), userId: req.user.id }, include: { address: true } });
   if (!order) return res.status(404).json({ error: "Order not found" });
 
+  // Fetch store settings for seller info
+  const settingRows = await prisma.setting.findMany();
+  const settings = {};
+  settingRows.forEach(r => { settings[r.key] = r.value; });
+
+  // Recalculate correct 2.5% GST
+  const subtotal    = Number(order.subtotal);
+  const discount    = Number(order.discountAmount || 0);
+  const cgstAmount  = +((subtotal - discount) * 0.025).toFixed(2);
+  const sgstAmount  = +((subtotal - discount) * 0.025).toFixed(2);
+  const shipping    = Number(order.shippingCharge || 0);
+  const rawTotal    = (subtotal - discount) + cgstAmount + sgstAmount + shipping;
+  const totalAmount = Math.round(rawTotal);
+
   await prisma.$transaction(async (tx) => {
     await tx.order.update({
       where: { id: order.id },
-      data:  { paymentStatus: "paid", status: "confirmed", razorpayPaymentId: razorpay_payment_id },
+      data:  { paymentStatus: "paid", status: "confirmed", razorpayPaymentId: razorpay_payment_id, cgstAmount, sgstAmount, totalAmount },
     });
 
-    // Create GST invoice
+    // Create GST invoice with correct 2.5% rates
     const invoiceNumber = await generateInvoiceNumber();
     await tx.invoice.create({
       data: {
@@ -56,14 +70,12 @@ router.post("/verify", authUser, async (req, res) => {
         status: "issued",
         subtotal:       order.subtotal,
         discountAmount: order.discountAmount,
-        cgstRate: 9, sgstRate: 9, igstRate: 0,
-        cgstAmount: order.cgstAmount,
-        sgstAmount: order.sgstAmount,
-        igstAmount: 0,
-        totalAmount: order.totalAmount,
-        sellerName:    "Zupwell",
-        sellerAddress: "A-102, Adarsh Lifestyle, Ahmedabad, Gujarat 382350",
-        sellerGstin:   "24XXXXXXXXXXXXX",
+        cgstRate: 2.5, sgstRate: 2.5, igstRate: 0,
+        cgstAmount, sgstAmount, igstAmount: 0,
+        totalAmount,
+        sellerName:    settings.site_name    || "Zupwell",
+        sellerAddress: settings.site_address || "A-102, Adarsh Lifestyle, Ahmedabad, Gujarat 382350",
+        sellerGstin:   settings.site_gstin   || "24XXXXXXXXXXXXX",
         buyerName:    order.address?.fullName || req.user.name,
         buyerAddress: order.address ? `${order.address.addressLine1}, ${order.address.city}, ${order.address.state} - ${order.address.pincode}` : "",
         buyerGstin:   order.address?.gstin || null,

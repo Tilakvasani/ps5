@@ -29,7 +29,11 @@ router.post("/auth/login", async (req, res) => {
 router.get("/dashboard/stats", authAdmin, async (req, res) => {
   try {
     const [totalRevenue, totalOrders, totalUsers, totalProducts, recentOrders] = await Promise.all([
-      prisma.order.aggregate({ where: { paymentStatus: "paid" }, _sum: { totalAmount: true } }),
+      // Count revenue from ALL orders (paid online + COD pending/delivered)
+      prisma.order.aggregate({
+        where: { status: { notIn: ["cancelled"] } },
+        _sum: { totalAmount: true }
+      }),
       prisma.order.count(),
       prisma.user.count(),
       prisma.product.count({ where: { isActive: true } }),
@@ -49,7 +53,7 @@ router.get("/dashboard/revenue-chart", authAdmin, async (req, res) => {
     const days = 30;
     const from = new Date(); from.setDate(from.getDate() - days);
     const orders = await prisma.order.findMany({
-      where: { createdAt: { gte: from }, paymentStatus: "paid" },
+      where: { createdAt: { gte: from }, status: { notIn: ["cancelled"] } },
       select: { createdAt: true, totalAmount: true },
     });
     const map = {};
@@ -71,13 +75,19 @@ router.get("/dashboard/top-products", authAdmin, async (req, res) => {
   try {
     const top = await prisma.orderItem.groupBy({
       by: ["productId"],
-      _sum: { qty: true, unitPrice: true },
+      _sum: { qty: true },
       orderBy: { _sum: { qty: "desc" } },
       take: 8,
     });
     const products = await Promise.all(top.map(async t => {
       const p = await prisma.product.findUnique({ where: { id: t.productId }, select: { id: true, name: true } });
-      return { ...p, totalSold: t._sum.qty, totalRevenue: (t._sum.unitPrice || 0) * (t._sum.qty || 0) };
+      // Calculate revenue: sum of (unitPrice * qty) for all items of this product
+      const items = await prisma.orderItem.findMany({
+        where: { productId: t.productId },
+        select: { unitPrice: true, qty: true },
+      });
+      const totalRevenue = items.reduce((s, i) => s + Number(i.unitPrice) * i.qty, 0);
+      return { ...p, totalSold: t._sum.qty, totalRevenue };
     }));
     res.json(products);
   } catch (err) {

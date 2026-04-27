@@ -33,6 +33,19 @@ app.use("/api/invoices", require("./routes/invoices"));
 app.use("/api/account",  require("./routes/account"));
 app.use("/api/admin",    require("./routes/admin"));
 
+// Public settings endpoint (no auth) — used by storefront footer etc.
+app.get("/api/settings", async (req, res) => {
+  try {
+    const prisma = require("./utils/prisma");
+    const rows = await prisma.setting.findMany();
+    const settings = {};
+    rows.forEach(r => { settings[r.key] = r.value; });
+    res.json(settings);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch settings" });
+  }
+});
+
 // Health check
 app.get("/health", (req, res) => res.json({ status: "ok", time: new Date().toISOString() }));
 
@@ -55,6 +68,33 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Zupwell API running on http://localhost:${PORT}`);
+
+  // Auto-seed default settings if not present
+  try {
+    const prisma = require("./utils/prisma");
+    const defaultSettings = [
+      { key: "site_name",        value: "Zupwell",                    group: "general" },
+      { key: "site_email",       value: "info@zupwell.com",           group: "general" },
+      { key: "site_phone",       value: "+91 6355466208",             group: "general" },
+      { key: "site_address",     value: "A-102 Adarsh Lifestyle, New India Colony, Ahmedabad, Gujarat - 382350", group: "general" },
+      { key: "site_gstin",       value: "24XXXXXXXXXXXXX",            group: "general" },
+      { key: "site_state_code",  value: "24 (Gujarat)",               group: "general" },
+      { key: "social_instagram", value: "https://instagram.com",      group: "social" },
+      { key: "social_facebook",  value: "https://facebook.com",       group: "social" },
+      { key: "social_youtube",   value: "https://youtube.com",        group: "social" },
+      { key: "social_linkedin",  value: "https://linkedin.com",       group: "social" },
+    ];
+    for (const s of defaultSettings) {
+      await prisma.setting.upsert({
+        where:  { key: s.key },
+        update: {},  // don't overwrite admin-saved values
+        create: { key: s.key, value: s.value, group: s.group },
+      });
+    }
+    console.log("✅ Settings initialized");
+  } catch (e) {
+    console.error("⚠️  Settings seed failed:", e.message);
+  }
 });

@@ -28,7 +28,9 @@ export default function CheckoutPage() {
   const cgst = subtotal * 0.025;
   const sgst = subtotal * 0.025;
   const shipping = subtotal > 500 ? 0 : 50;
-  const total = subtotal + cgst + sgst + shipping;
+  const rawTotal = subtotal + cgst + sgst + shipping;
+  const total = Math.round(rawTotal);
+  const roundOffDiff = total - rawTotal;
 
   useEffect(() => {
     if (!user) { router.push("/login"); return; }
@@ -216,7 +218,7 @@ export default function CheckoutPage() {
                   <button onClick={() => setStep(1)} className="btn-outline py-3 px-6">← Back</button>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handlePlaceOrder} disabled={loading}
                     className="btn-primary flex-1 py-3 disabled:opacity-50">
-                    {loading ? <span className="flex items-center justify-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-[#D9DEE8] border-t-transparent animate-spin" />Placing Order...</span> : `Place Order · ₹${total.toFixed(2)}`}
+                    {loading ? <span className="flex items-center justify-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-[#D9DEE8] border-t-transparent animate-spin" />Placing Order...</span> : `Place Order · ₹${total.toFixed(0)}`}
                   </motion.button>
                 </div>
               </motion.div>
@@ -231,10 +233,13 @@ export default function CheckoutPage() {
               <div className="flex justify-between text-[#374151]"><span>CGST @2.5%</span><span>₹{cgst.toFixed(2)}</span></div>
               <div className="flex justify-between text-[#374151]"><span>SGST @2.5%</span><span>₹{sgst.toFixed(2)}</span></div>
               <div className="flex justify-between text-[#374151]"><span>Shipping</span><span>{shipping === 0 ? <span className="text-emerald-400">FREE</span> : `₹${shipping}`}</span></div>
+              {roundOffDiff !== 0 && (
+                <div className="flex justify-between text-[#9CA3AF] text-xs italic"><span>Round Off</span><span>{roundOffDiff > 0 ? "+" : ""}₹{roundOffDiff.toFixed(2)}</span></div>
+              )}
             </div>
             <div className="border-t border-[#D9DEE8] pt-4 flex justify-between items-center">
               <span className="font-display font-bold text-[#111827]">Total</span>
-              <span className="text-2xl font-display font-black gradient-text">₹{total.toFixed(2)}</span>
+              <span className="text-2xl font-display font-black gradient-text">₹{total.toFixed(0)}</span>
             </div>
             <p className="text-xs text-[#6B7280] mt-1">Inclusive of all taxes</p>
           </div>

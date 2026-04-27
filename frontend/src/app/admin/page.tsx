@@ -140,7 +140,7 @@ export default function AdminDashboard() {
                   <tr key={o.id} className="hover:bg-[#F4F6FA] transition-colors">
                     <td className="py-3 pr-4 font-mono text-[#111827] font-semibold">{o.orderNumber}</td>
                     <td className="py-3 pr-4 text-[#374151]">{o.user?.name || "—"}</td>
-                    <td className="py-3 pr-4 font-bold text-[#111827]">₹{Number(o.totalAmount).toFixed(2)}</td>
+                    <td className="py-3 pr-4 font-bold text-[#111827]">₹{Math.round(Number(o.totalAmount)).toLocaleString("en-IN")}</td>
                     <td className="py-3 pr-4">
                       <span className={`badge ${({ pending:"badge-warning",delivered:"badge-success",cancelled:"badge-danger",shipped:"badge-purple" } as any)[o.status] || "badge-info"}`}>{o.status}</span>
                     </td>

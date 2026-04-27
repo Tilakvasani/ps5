@@ -155,7 +155,7 @@ export default function AccountPage() {
                           <div className="text-right">
                             <p className="text-lg font-display font-black gradient-text">₹{Number(order.totalAmount).toFixed(2)}</p>
                             {order.invoice && (
-                              <a href={invoicesApi.getPdf(order.invoice.invoiceNumber)} target="_blank" rel="noopener noreferrer">
+                              <a href={invoicesApi.getPdf(order.invoice.invoiceNumber)} download={`${order.invoice.invoiceNumber}.pdf`}>
                                 <button className="flex items-center gap-1 text-xs text-[#F47C41] hover:text-[#f79b6e] mt-1">
                                   <Download size={11} /> Invoice PDF
                                 </button>

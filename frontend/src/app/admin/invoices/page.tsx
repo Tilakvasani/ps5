@@ -51,7 +51,7 @@ export default function AdminInvoicesPage() {
                   <td className="px-4 py-3"><span className={`badge ${STATUS_BADGE[inv.status] || "badge-info"}`}>{inv.status}</span></td>
                   <td className="px-4 py-3 text-[#6B7280] text-xs">{new Date(inv.createdAt).toLocaleDateString("en-IN")}</td>
                   <td className="px-4 py-3">
-                    <a href={invoicesApi.getPdf(inv.invoiceNumber)} target="_blank" rel="noopener noreferrer">
+                    <a href={invoicesApi.getPdf(inv.invoiceNumber)} download={`${inv.invoiceNumber}.pdf`}>
                       <button className="flex items-center gap-1 text-xs text-[#F47C41] hover:text-[#f79b6e]"><Download size={12} /> PDF</button>
                     </a>
                   </td>

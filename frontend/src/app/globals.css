@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Squada+One&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -32,12 +32,11 @@
     @apply antialiased;
     background-color: #F4F6FA;
     color: #111827;
-    font-family: 'DM Sans', sans-serif;
-    font-feature-settings: "ss01", "ss02";
+    font-family: 'Rajdhani', sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Squada One', sans-serif;
     color: #111827;
   }
 }

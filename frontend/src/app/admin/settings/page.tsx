@@ -9,18 +9,21 @@ const SETTING_GROUPS = [
   {
     label: "Store Information",
     keys: [
-      { key: "site_name", label: "Store Name", type: "text" },
-      { key: "site_email", label: "Contact Email", type: "email" },
-      { key: "site_phone", label: "Contact Phone", type: "text" },
-      { key: "site_address", label: "Address", type: "textarea" },
+      { key: "site_name",       label: "Store Name",    type: "text" },
+      { key: "site_email",      label: "Contact Email", type: "email" },
+      { key: "site_phone",      label: "Contact Phone", type: "text" },
+      { key: "site_address",    label: "Address",       type: "textarea" },
+      { key: "site_gstin",      label: "GSTIN",         type: "text" },
+      { key: "site_state_code", label: "State Code",    type: "text" },
     ],
   },
   {
-    label: "GST & Tax",
+    label: "Social Media",
     keys: [
-      { key: "gstin", label: "GSTIN", type: "text" },
-      { key: "state_code", label: "State Code", type: "text" },
-      { key: "state_name", label: "State Name", type: "text" },
+      { key: "social_instagram", label: "Instagram URL", type: "text" },
+      { key: "social_facebook",  label: "Facebook URL",  type: "text" },
+      { key: "social_youtube",   label: "YouTube URL",   type: "text" },
+      { key: "social_linkedin",  label: "LinkedIn URL",  type: "text" },
     ],
   },
   {

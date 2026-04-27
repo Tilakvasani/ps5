@@ -93,7 +93,7 @@ export default function AdminOrdersPage() {
                     <p className="text-xs text-[#6B7280]">{o.user?.email}</p>
                   </td>
                   <td className="px-4 py-3 text-[#374151]">{o._count?.items || o.items?.length || 0} items</td>
-                  <td className="px-4 py-3 font-bold text-[#111827]">₹{Number(o.totalAmount).toFixed(2)}</td>
+                  <td className="px-4 py-3 font-bold text-[#111827]">₹{Math.round(Number(o.totalAmount)).toLocaleString("en-IN")}</td>
                   <td className="px-4 py-3 text-[#374151] capitalize">{o.paymentMethod}</td>
                   <td className="px-4 py-3">
                     <select value={o.status} onChange={e => updateStatus(o.id, e.target.value)}

@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               border: "1px solid #D9DEE8",
               boxShadow: "0 4px 16px rgba(11,44,111,0.1)",
               borderRadius: "12px",
-              fontFamily: "DM Sans, sans-serif",
+              fontFamily: "Rajdhani, sans-serif",
               fontSize: "14px",
             },
             success: {

@@ -19,7 +19,9 @@ export default function CartPage() {
   const sgst = subtotal * 0.025;
   const shipping = subtotal > 500 ? 0 : 50;
   const discount = couponApplied ? couponDiscount : 0;
-  const total = subtotal + cgst + sgst + shipping - discount;
+  const rawTotal = subtotal + cgst + sgst + shipping - discount;
+  const total = Math.round(rawTotal);
+  const roundOffDiff = total - rawTotal;
 
   const applyCoupon = () => {
     if (coupon.toUpperCase() === "ZUPWELL10") {
@@ -127,10 +129,13 @@ export default function CartPage() {
                   <span>{shipping === 0 ? <span className="text-emerald-400">FREE</span> : `₹${shipping.toFixed(2)}`}</span>
                 </div>
                 {discount > 0 && <div className="flex justify-between text-emerald-400"><span>Discount</span><span>-₹{discount.toFixed(2)}</span></div>}
+                {roundOffDiff !== 0 && (
+                  <div className="flex justify-between text-[#9CA3AF] text-xs italic"><span>Round Off</span><span>{roundOffDiff > 0 ? "+" : ""}₹{roundOffDiff.toFixed(2)}</span></div>
+                )}
               </div>
               <div className="border-t border-[#D9DEE8] pt-4 flex justify-between items-center">
                 <span className="font-display font-bold text-[#111827]">Total</span>
-                <span className="text-2xl font-display font-black gradient-text">₹{total.toFixed(2)}</span>
+                <span className="text-2xl font-display font-black gradient-text">₹{total.toFixed(0)}</span>
               </div>
               <p className="text-xs text-[#6B7280] mt-1 text-right">Inclusive of GST</p>
 

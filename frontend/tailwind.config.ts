@@ -39,8 +39,8 @@ const config: Config = {
         "zupwell-orange": "#F47C41",
       },
       fontFamily: {
-        sans:    ["DM Sans", "sans-serif"],
-        display: ["Syne", "sans-serif"],
+        sans:    ["Rajdhani", "sans-serif"],
+        display: ["Squada One", "sans-serif"],
       },
       backgroundImage: {
         "gradient-brand":  "linear-gradient(135deg, #F47C41, #1E5AA8)",

@@ -42,7 +42,9 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const price = selectedVariant ? Number(selectedVariant.price) : Number(product.sellingPrice);
   const cgst = price * qty * 0.025;
   const sgst = price * qty * 0.025;
-  const total = price * qty + cgst + sgst;
+  const rawTotal = price * qty + cgst + sgst;
+  const total = Math.round(rawTotal);
+  const roundOffDiff = total - rawTotal;
   const primaryImage = product.images?.find((i: any) => i.isPrimary)?.imageUrl || product.images?.[0]?.imageUrl;
   const images = product.images?.length ? product.images : [{ imageUrl: null }];
 
@@ -133,7 +135,13 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 <div className="flex justify-between"><span>Price (×{qty})</span><span>₹{(price * qty).toFixed(2)}</span></div>
                 <div className="flex justify-between"><span>CGST @2.5%</span><span>₹{cgst.toFixed(2)}</span></div>
                 <div className="flex justify-between"><span>SGST @2.5%</span><span>₹{sgst.toFixed(2)}</span></div>
-                <div className="flex justify-between font-bold text-[#111827] border-t border-[#D9DEE8] pt-2 mt-1"><span>Total</span><span>₹{total.toFixed(2)}</span></div>
+                {roundOffDiff !== 0 && (
+                  <div className="flex justify-between text-xs text-[#9CA3AF] italic">
+                    <span>Round Off</span>
+                    <span>{roundOffDiff > 0 ? "+" : ""}₹{roundOffDiff.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-[#111827] border-t border-[#D9DEE8] pt-2 mt-1"><span>Total</span><span>₹{total.toFixed(0)}</span></div>
               </div>
             </div>
 

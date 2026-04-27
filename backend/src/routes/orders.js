@@ -45,13 +45,18 @@ router.post("/", authUser, async (req, res) => {
     }
   }
 
-  // GST (18% = 9% CGST + 9% SGST for intra-state Gujarat)
+  // GST (5% = 2.5% CGST + 2.5% SGST for intra-state Gujarat)
   const taxableAmount = subtotal - discountAmount;
-  const cgstRate = 9, sgstRate = 9;
-  const cgstAmount = taxableAmount * cgstRate / 100;
-  const sgstAmount = taxableAmount * sgstRate / 100;
+  const cgstRate = 2.5, sgstRate = 2.5;
+  const cgstAmount = +(taxableAmount * cgstRate / 100).toFixed(2);
+  const sgstAmount = +(taxableAmount * sgstRate / 100).toFixed(2);
   const shippingCharge = subtotal > 500 ? 0 : 50;
   const totalAmount = taxableAmount + cgstAmount + sgstAmount + shippingCharge;
+
+  // Fetch store settings for seller info
+  const settingRows = await prisma.setting.findMany();
+  const cfg = {};
+  settingRows.forEach(r => { cfg[r.key] = r.value; });
 
   const orderNumber = await generateOrderNumber();
 
@@ -76,18 +81,19 @@ router.post("/", authUser, async (req, res) => {
       }
     }
 
-    // Create invoice for confirmed orders
+    // Create invoice for COD orders
     if (paymentMethod === "cod") {
       const invoiceNumber = await generateInvoiceNumber();
       await tx.invoice.create({
         data: {
           invoiceNumber, orderId: newOrder.id, userId: req.user.id,
           status: "issued",
-          subtotal, discountAmount, cgstRate, sgstRate, igstRate: 0,
+          subtotal, discountAmount, cgstRate: 2.5, sgstRate: 2.5, igstRate: 0,
           cgstAmount, sgstAmount, igstAmount: 0,
           totalAmount,
-          sellerName: "Zupwell", sellerAddress: "A-102, Adarsh Lifestyle, Ahmedabad, Gujarat 382350",
-          sellerGstin: "24XXXXXXXXXXXXX",
+          sellerName:    cfg.site_name    || "Zupwell",
+          sellerAddress: cfg.site_address || "A-102, Adarsh Lifestyle, Ahmedabad, Gujarat 382350",
+          sellerGstin:   cfg.site_gstin   || "24XXXXXXXXXXXXX",
           buyerName: address.fullName, buyerAddress: `${address.addressLine1}, ${address.city}, ${address.state} - ${address.pincode}`,
           buyerGstin: address.gstin || null,
         },

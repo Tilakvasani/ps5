@@ -90,8 +90,20 @@ export const paymentsApi = {
 
 // ── Invoices ──────────────────────────────────────
 export const invoicesApi = {
-  getPdf: (invoiceNumber: string) =>
-    `${API_URL}/api/invoices/${invoiceNumber}/pdf`,
+  getPdf: (invoiceNumber: string) => {
+    const base = `${API_URL}/api/invoices/${invoiceNumber}/pdf`;
+    try {
+      // Try user token first, then admin token
+      const userRaw = localStorage.getItem("zupwell-store");
+      const userToken = userRaw ? JSON.parse(userRaw)?.state?.token : null;
+      if (userToken) return `${base}?token=${encodeURIComponent(userToken)}`;
+
+      const adminRaw = localStorage.getItem("zupwell-admin");
+      const adminToken = adminRaw ? JSON.parse(adminRaw)?.token : null;
+      if (adminToken) return `${base}?token=${encodeURIComponent(adminToken)}`;
+    } catch {}
+    return base;
+  },
 };
 
 // ── Account ───────────────────────────────────────
