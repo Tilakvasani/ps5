@@ -20,19 +20,25 @@ const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 // ── Google OAuth Setup ───────────────────────────────
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://ps5-hhvf.vercel.app";
+const BACKEND_URL  = process.env.BACKEND_URL  || "https://ps5-ufm2.onrender.com";
 
 passport.use(new GoogleStrategy({
   clientID:     process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL:  `${process.env.BACKEND_URL || "https://ps5-ufm2.onrender.com"}/api/auth/google/callback`,
+
+  // FIX 1: Hard-coded style — use env var but with explicit fallback, no template ambiguity
+  callbackURL: `${BACKEND_URL}/api/auth/google/callback`,
+
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     const email = profile.emails?.[0]?.value;
     const name  = profile.displayName;
-    if (!email) return done(new Error("No email from Google"));
+
+    if (!email) return done(new Error("No email returned from Google"));
 
     // Find or create user
     let user = await prisma.user.findUnique({ where: { email } });
+
     if (!user) {
       user = await prisma.user.create({
         data: {
@@ -43,25 +49,27 @@ passport.use(new GoogleStrategy({
           isActive: true,
         },
       });
+      console.log("✅ New Google user created:", email);
     } else if (!user.googleId) {
-      // Link Google to existing account
+      // Link Google to existing email account
       user = await prisma.user.update({
         where: { id: user.id },
         data: { googleId: profile.id },
       });
+      console.log("✅ Google linked to existing account:", email);
+    } else {
+      console.log("✅ Existing Google user signed in:", email);
     }
+
     return done(null, user);
   } catch (err) {
+    // FIX 2: Log the error so it's visible in Render logs
+    console.error("❌ GOOGLE AUTH ERROR:", err);
     return done(err);
   }
 }));
 
-passport.serializeUser((user, done) => done(null, user.id));
-passport.deserializeUser(async (id, done) => {
-  const user = await prisma.user.findUnique({ where: { id } });
-  done(null, user);
-});
-
+// FIX 3: Removed serializeUser / deserializeUser — not needed with session: false
 router.use(passport.initialize());
 
 // ── Google OAuth Routes ──────────────────────────────
@@ -69,14 +77,24 @@ router.get("/google",
   passport.authenticate("google", { scope: ["profile", "email"], session: false })
 );
 
-router.get("/google/callback",
-  passport.authenticate("google", { session: false, failureRedirect: `${FRONTEND_URL}/login?error=google_failed` }),
-  (req, res) => {
-    const token = signAccess({ id: req.user.id, role: "user" });
-    // Redirect to frontend with token
-    res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}&name=${encodeURIComponent(req.user.name)}`);
-  }
-);
+// FIX 4: Custom callback handler — errors are no longer hidden
+router.get("/google/callback", (req, res, next) => {
+  passport.authenticate("google", { session: false }, (err, user) => {
+    if (err) {
+      console.error("❌ GOOGLE CALLBACK ERROR:", err.message);
+      return res.redirect(`${FRONTEND_URL}/login?error=google_failed`);
+    }
+
+    if (!user) {
+      console.error("❌ GOOGLE CALLBACK: No user returned");
+      return res.redirect(`${FRONTEND_URL}/login?error=google_failed`);
+    }
+
+    const token = signAccess({ id: user.id, role: "user" });
+    console.log("✅ Google login success, redirecting to frontend");
+    res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}&name=${encodeURIComponent(user.name)}`);
+  })(req, res, next);
+});
 
 // ── Register ─────────────────────────────────────────
 router.post("/register", async (req, res) => {

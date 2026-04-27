@@ -60,13 +60,14 @@ export default function LoginPage() {
     }
   };
 
+  // ── FIX: Use production backend URL as fallback (not localhost) ──
   const handleGoogleLogin = () => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com";
     window.location.href = `${API_URL}/api/auth/google`;
   };
 
   const handleFacebookLogin = () => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com";
     window.location.href = `${API_URL}/api/auth/facebook`;
   };
 
