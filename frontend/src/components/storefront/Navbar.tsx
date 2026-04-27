@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Menu, X, Package, User, LogOut } from "lucide-react";
+import { ShoppingCart, Menu, X, HeartPulse, User, LogOut } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api";
@@ -12,7 +12,19 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userDropOpen, setUserDropOpen] = useState(false);
   const router = useRouter();
+  const dropRef = useRef<HTMLDivElement>(null);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+
+  // BUG FIX: close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropRef.current && !dropRef.current.contains(e.target as Node)) {
+        setUserDropOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const handleLogout = async () => {
     try { await authApi.logout(); } catch {}
@@ -27,10 +39,10 @@ export default function Navbar() {
     >
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
 
-        {/* Logo — text only, orange→blue gradient, bigger */}
+        {/* Logo */}
         <Link href="/" className="flex items-center">
           <span
-            className="text-2xl font-display font-black"
+            className="text-2xl font-display font-black inline-flex items-start gap-0"
             style={{
               background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)",
               WebkitBackgroundClip: "text",
@@ -39,6 +51,19 @@ export default function Navbar() {
             }}
           >
             Zupwell
+            <sup
+              style={{
+                fontSize: "0.45em",
+                fontWeight: 700,
+                lineHeight: 1,
+                marginTop: "2px",
+                letterSpacing: 0,
+                background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >™</sup>
           </span>
         </Link>
 
@@ -46,7 +71,8 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-8">
           {[
             ["Products", "/products"],
-            ["Effervescent", "/products?category=effervescent"],
+            ["Electrolytes", "/products?category=electrolytes"],
+            ["Vitamins", "/products?category=vitamins"],
           ].map(([label, href]) => (
             <Link
               key={label}
@@ -78,7 +104,7 @@ export default function Navbar() {
 
           {/* Auth */}
           {user ? (
-            <div className="relative">
+            <div className="relative" ref={dropRef}>
               <button
                 onClick={() => setUserDropOpen(!userDropOpen)}
                 className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-all hover:bg-[#F4F6FA]"
@@ -105,7 +131,7 @@ export default function Navbar() {
                     </Link>
                     <Link href="/account?tab=orders" onClick={() => setUserDropOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm text-[#374151] hover:bg-[#F4F6FA] hover:text-[#F47C41] transition-all">
-                      <Package size={14} /> My Orders
+                      <HeartPulse size={14} /> My Orders
                     </Link>
                     <div className="h-px bg-[#D9DEE8]" />
                     <button onClick={handleLogout}
@@ -142,6 +168,7 @@ export default function Navbar() {
           >
             <div className="px-6 py-4 flex flex-col gap-3">
               <Link href="/products" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Products</Link>
+              <Link href="/products?category=electrolytes" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Electrolytes</Link>
               <Link href="/cart" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Cart ({cartCount})</Link>
               {user ? (
                 <>

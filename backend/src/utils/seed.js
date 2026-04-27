@@ -36,12 +36,12 @@ async function main() {
 
   // ── GST Rates ─────────────────────────────────────
   const gstRates = [
-    { hsnCode: "3919", description: "Adhesive Tapes (BOPP / Packaging)", cgstRate: 9, sgstRate: 9, igstRate: 18 },
+    { hsnCode: "3919", description: "Adhesive Sheets & Films", cgstRate: 9, sgstRate: 9, igstRate: 18 },
     { hsnCode: "3920", description: "Other Plastic Plates / Films",        cgstRate: 9, sgstRate: 9, igstRate: 18 },
-    { hsnCode: "3923", description: "Polythene Bags / Courier Bags",       cgstRate: 9, sgstRate: 9, igstRate: 18 },
+    { hsnCode: "3923", description: "Polythene Bags / Immunity",       cgstRate: 9, sgstRate: 9, igstRate: 18 },
     { hsnCode: "4819", description: "Cartons / Boxes (Paper/Paperboard)",  cgstRate: 6, sgstRate: 6, igstRate: 12 },
-    { hsnCode: "3921", description: "Bubble Wrap / PE Foam",              cgstRate: 9, sgstRate: 9, igstRate: 18 },
-    { hsnCode: "5806", description: "Stretch Film / Wrapping Film",        cgstRate: 6, sgstRate: 6, igstRate: 12 },
+    { hsnCode: "3921", description: "Vitamins / PE Foam",              cgstRate: 9, sgstRate: 9, igstRate: 18 },
+    { hsnCode: "5806", description: "Protein / Wrapping Film",        cgstRate: 6, sgstRate: 6, igstRate: 12 },
   ];
   for (const r of gstRates) {
     await prisma.gstRate.upsert({ where: { hsnCode: r.hsnCode }, update: {}, create: { ...r, cgstRate: r.cgstRate, sgstRate: r.sgstRate, igstRate: r.igstRate } });

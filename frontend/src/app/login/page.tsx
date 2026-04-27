@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { authApi } from "@/lib/api";
+import { authApi, adminApi } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import toast from "react-hot-toast";
 
@@ -19,6 +19,22 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // 1. Try admin login first (silently)
+    try {
+      const adminData = await adminApi.login(email, password);
+      localStorage.setItem(
+        "zupwell-admin",
+        JSON.stringify({ name: adminData.admin.name, token: adminData.accessToken })
+      );
+      toast.success(`Welcome, ${adminData.admin.name}!`);
+      router.push("/admin");
+      return;
+    } catch {
+      // Not an admin — continue to try regular user login
+    }
+
+    // 2. Try regular user login
     try {
       const data = await authApi.login(email, password);
       setUser(data.user);
@@ -26,7 +42,7 @@ export default function LoginPage() {
       toast.success(`Welcome back, ${data.user.name}!`);
       router.push("/");
     } catch (err: any) {
-      toast.error(err.message || "Login failed");
+      toast.error(err.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -57,13 +73,23 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center mb-4">
-            <span className="text-4xl font-display font-black" style={{
+            <span className="text-4xl font-display font-black inline-flex items-start" style={{
               background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
             }}>
               Zupwell
+              <sup style={{
+                fontSize: "0.4em",
+                fontWeight: 700,
+                lineHeight: 1,
+                marginTop: "4px",
+                background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>™</sup>
             </span>
           </Link>
           <h1 className="text-3xl font-display font-black text-[#111827]">Welcome back</h1>
@@ -119,12 +145,8 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-sm text-[#6B7280]">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/register" className="font-semibold text-[#F47C41] hover:text-[#d9673a]">Create one free</Link>
-          </p>
-          <p className="text-center text-sm text-[#6B7280] mt-2">
-            Admin?{" "}
-            <Link href="/admin/login" className="font-semibold text-[#374151] hover:text-[#0B2C6F]">Admin login →</Link>
           </p>
         </div>
       </motion.div>

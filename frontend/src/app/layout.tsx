@@ -3,9 +3,9 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
-  title: "Zupwell — B2B/B2C Packaging Materials",
-  description: "Premium BOPP Tape, packaging materials and industrial supplies. GST compliant invoicing. Based in Ahmedabad, Gujarat.",
-  keywords: "BOPP tape, packaging materials, industrial supplies, Ahmedabad, Gujarat",
+  title: "Zupwell — Premium Health & Wellness Products",
+  description: "Shop premium health supplements, electrolytes, vitamins, and wellness products. Fast delivery across India. GST compliant invoicing.",
+  keywords: "health supplements, electrolytes, vitamins, immunity, protein, wellness products, India",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

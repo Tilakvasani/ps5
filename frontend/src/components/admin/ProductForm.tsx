@@ -17,7 +17,7 @@ export default function ProductForm({ productId }: Props) {
   const [existingImages, setExistingImages] = useState<any[]>([]);
   const [variants, setVariants] = useState<{ variantName: string; sku: string; price: string; }[]>([]);
   const [form, setForm] = useState({
-    name: "", sku: "", hsnCode: "3919", brand: "", unit: "NOS",
+    name: "", sku: "", hsnCode: "2106", brand: "", unit: "NOS",
     categoryId: "", basePrice: "", sellingPrice: "", discountPercent: "0",
     description: "", shortDescription: "", metaTitle: "", metaDescription: "",
     isActive: true, isFeatured: false,
@@ -84,11 +84,11 @@ export default function ProductForm({ productId }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="label-text">Product Name *</label>
-              <input value={form.name} onChange={update("name")} required className="input-field" placeholder="e.g. BOPP Tape 2 inch Brown 65m" />
+              <input value={form.name} onChange={update("name")} required className="input-field" placeholder="e.g. Electrolyte Orange 30 Sachets" />
             </div>
             <div>
               <label className="label-text">SKU *</label>
-              <input value={form.sku} onChange={update("sku")} required className="input-field" placeholder="e.g. BOPP-BRN-2IN-65M" />
+              <input value={form.sku} onChange={update("sku")} required className="input-field" placeholder="e.g. ELEC-ORG-30S" />
             </div>
             <div>
               <label className="label-text">Brand</label>

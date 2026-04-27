@@ -26,9 +26,11 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   }, [params.slug]);
 
   if (loading) return (
-    <main className="min-h-screen bg-[#F4F6FA] flex items-center justify-center">
+    <main className="min-h-screen bg-[#F4F6FA]">
       <Navbar />
-      <div className="h-8 w-8 rounded-full border-2 border-[#F47C41] border-t-transparent animate-spin mt-20" />
+      <div className="flex items-center justify-center pt-40">
+        <div className="h-8 w-8 rounded-full border-2 border-[#F47C41] border-t-transparent animate-spin" />
+      </div>
     </main>
   );
 

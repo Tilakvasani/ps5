@@ -74,7 +74,7 @@ export default function CheckoutPage() {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
           amount: rzp.amount,
           currency: "INR",
-          name: "Zupwell",
+          name: process.env.NEXT_PUBLIC_SITE_NAME || "Zupwell",
           description: `Order ${order.orderNumber}`,
           order_id: rzp.razorpayOrderId,
           handler: async (response: any) => {

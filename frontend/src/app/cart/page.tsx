@@ -23,13 +23,16 @@ export default function CartPage() {
   const total = Math.round(rawTotal);
   const roundOffDiff = total - rawTotal;
 
-  const applyCoupon = () => {
-    if (coupon.toUpperCase() === "ZUPWELL10") {
-      setCouponDiscount(subtotal * 0.1);
+  const applyCoupon = async () => {
+    if (!coupon.trim()) { toast.error("Enter a coupon code"); return; }
+    try {
+      const { cartApi } = await import("@/lib/api");
+      const data = await cartApi.applyCoupon(coupon.trim());
+      setCouponDiscount(data.discountAmount || subtotal * (data.discountPercent / 100));
       setCouponApplied(true);
-      toast.success("Coupon applied! 10% off");
-    } else {
-      toast.error("Invalid coupon code");
+      toast.success(`Coupon applied! ${data.discountPercent}% off`);
+    } catch (err: any) {
+      toast.error(err.message || "Invalid coupon code");
     }
   };
 

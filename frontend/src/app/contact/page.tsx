@@ -6,7 +6,7 @@ export default function Contact() {
   return (
     <>
       <Navbar />
-      <main className="max-w-4xl mx-auto px-6 py-16">
+      <main className="max-w-4xl mx-auto px-6 pt-28 pb-16">
         <h1 className="text-3xl font-display font-black text-[#111827] mb-2">Contact Us</h1>
         <p className="text-[#6B7280] mb-12">We're here to help. Reach out to us through any of the channels below.</p>
         <div className="grid md:grid-cols-2 gap-8">

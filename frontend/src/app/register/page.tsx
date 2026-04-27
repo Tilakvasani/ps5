@@ -58,17 +58,27 @@ export default function RegisterPage() {
       >
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center mb-4">
-            <span className="text-4xl font-display font-black" style={{
+            <span className="text-4xl font-display font-black inline-flex items-start" style={{
               background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
             }}>
               Zupwell
+              <sup style={{
+                fontSize: "0.4em",
+                fontWeight: 700,
+                lineHeight: 1,
+                marginTop: "4px",
+                background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>™</sup>
             </span>
           </Link>
           <h1 className="text-3xl font-display font-black text-[#111827]">Create account</h1>
-          <p className="text-[#6B7280] mt-1">Start ordering packaging materials today</p>
+          <p className="text-[#6B7280] mt-1">Start your wellness journey today</p>
         </div>
 
         <div className="card p-8">
