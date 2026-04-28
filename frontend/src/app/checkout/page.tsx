@@ -102,12 +102,17 @@ export default function CheckoutPage() {
               toast.success("Payment successful! 🎉");
               router.push(`/order/${order.orderNumber}`);
             } catch {
-              toast.error("Payment verification failed. Contact support with your order number: " + order.orderNumber);
+              // Verification failed — cancel the order so it doesn't pollute admin
+              try { await ordersApi.cancel(order.id); } catch {}
+              toast.error("Payment verification failed. Please try again.");
+              setLoading(false);
             }
           },
           modal: {
-            ondismiss: () => {
-              toast.error("Payment cancelled. Your order is saved — complete payment from your orders page.");
+            ondismiss: async () => {
+              // User closed Razorpay without paying — cancel the pending order
+              try { await ordersApi.cancel(order.id); } catch {}
+              toast.error("Payment cancelled.");
               setLoading(false);
             },
           },

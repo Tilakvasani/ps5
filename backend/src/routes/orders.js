@@ -1,159 +1,283 @@
-const router = require("express").Router();
-const prisma = require("../utils/prisma");
-const { authUser } = require("../middleware/auth");
-const { generateOrderNumber, generateInvoiceNumber } = require("../utils/orderNumber");
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { ChevronRight, MapPin, CreditCard, CheckCircle, Plus } from "lucide-react";
+import Navbar from "@/components/storefront/Navbar";
+import Footer from "@/components/storefront/Footer";
+import { useStore } from "@/lib/store";
+import { ordersApi, accountApi, paymentsApi } from "@/lib/api";
+import Link from "next/link";
+import toast from "react-hot-toast";
 
-// POST /api/orders - create order
-router.post("/", authUser, async (req, res) => {
-  const { addressId, paymentMethod, couponCode, items } = req.body;
-  if (!addressId || !paymentMethod || !items?.length) {
-    return res.status(400).json({ error: "Address, payment method, and items required" });
-  }
+const STEPS = ["Address", "Payment", "Review"];
 
-  const address = await prisma.userAddress.findFirst({ where: { id: Number(addressId), userId: req.user.id } });
-  if (!address) return res.status(404).json({ error: "Address not found" });
+// FIX: load Razorpay script on demand and wait for it to be ready
+function loadRazorpay(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if ((window as any).Razorpay) return resolve();
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("Failed to load Razorpay. Please refresh the page."));
+    document.body.appendChild(s);
+  });
+}
 
-  // Validate and price items
-  let subtotal = 0;
-  const orderItems = [];
-  for (const item of items) {
-    const product = await prisma.product.findUnique({
-      where: { id: item.productId },
-      include: { variants: true, inventory: true },
-    });
-    if (!product || !product.isActive) return res.status(400).json({ error: `Product ${item.productId} not found` });
+export default function CheckoutPage() {
+  const { cart, user, clearCart } = useStore();
+  const router = useRouter();
+  const [step, setStep] = useState(0);
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod">("razorpay");
+  const [couponCode, setCouponCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [newAddr, setNewAddr] = useState({ fullName: "", phone: "", addressLine1: "", city: "Ahmedabad", state: "Gujarat", pincode: "", gstin: "" });
+  const [addingAddr, setAddingAddr] = useState(false);
 
-    // FIX: check stock before accepting order
-    const inv = product.inventory.find(i => i.variantId === (item.variantId || null));
-    if (!inv || inv.qtyInStock < item.qty) {
-      return res.status(400).json({ error: `Not enough stock for "${product.name}"` });
-    }
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const cgst = subtotal * 0.025;
+  const sgst = subtotal * 0.025;
+  const shipping = subtotal > 500 ? 0 : 50;
+  const rawTotal = subtotal + cgst + sgst + shipping;
+  const total = Math.round(rawTotal);
+  const roundOffDiff = total - rawTotal;
 
-    const unitPrice = item.variantId
-      ? product.variants.find(v => v.id === item.variantId)?.price || product.sellingPrice
-      : product.sellingPrice;
+  useEffect(() => {
+    if (!user) { router.push("/login"); return; }
+    // FIX: show error if address fetch fails instead of silently swallowing it
+    accountApi.getAddresses()
+      .then(setAddresses)
+      .catch(() => toast.error("Could not load your addresses. Please refresh."));
+  }, [user, router]);
 
-    subtotal += Number(unitPrice) * item.qty;
-    orderItems.push({ productId: item.productId, variantId: item.variantId || null, qty: item.qty, unitPrice, hsnCode: product.hsnCode });
-  }
+  if (cart.length === 0) return (
+    <main className="min-h-screen bg-[#F4F6FA]">
+      <Navbar />
+      <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
+        <p className="text-2xl font-bold text-[#111827] mb-4">Your cart is empty</p>
+        <Link href="/products"><button className="btn-primary px-6 py-3">Shop Now</button></Link>
+      </div>
+    </main>
+  );
 
-  // Coupon
-  let discountAmount = 0;
-  let coupon = null;
-  if (couponCode) {
-    coupon = await prisma.coupon.findFirst({ where: { code: couponCode.toUpperCase(), isActive: true } });
-    if (coupon) {
-      if (subtotal >= Number(coupon.minOrderValue)) {
-        discountAmount = coupon.discountType === "percent"
-          ? Math.min(subtotal * Number(coupon.discountValue) / 100, coupon.maxDiscount ? Number(coupon.maxDiscount) : Infinity)
-          : Number(coupon.discountValue);
-      }
-    }
-  }
+  const handleSaveAddress = async () => {
+    try {
+      const addr = await accountApi.addAddress(newAddr);
+      setAddresses([...addresses, addr]);
+      setSelectedAddress(addr.id);
+      setAddingAddr(false);
+      toast.success("Address saved!");
+    } catch (err: any) { toast.error(err.message); }
+  };
 
-  // GST (5% = 2.5% CGST + 2.5% SGST for intra-state Gujarat)
-  const taxableAmount = subtotal - discountAmount;
-  const cgstRate = 2.5, sgstRate = 2.5;
-  const cgstAmount = +(taxableAmount * cgstRate / 100).toFixed(2);
-  const sgstAmount = +(taxableAmount * sgstRate / 100).toFixed(2);
-  const shippingCharge = subtotal > 500 ? 0 : 50;
-  const totalAmount = taxableAmount + cgstAmount + sgstAmount + shippingCharge;
-
-  // Fetch store settings for seller info
-  const settingRows = await prisma.setting.findMany();
-  const cfg = {};
-  settingRows.forEach(r => { cfg[r.key] = r.value; });
-
-  const orderNumber = await generateOrderNumber();
-
-  const order = await prisma.$transaction(async (tx) => {
-    const newOrder = await tx.order.create({
-      data: {
-        orderNumber, userId: req.user.id, addressId: address.id,
-        paymentMethod, paymentStatus: "pending",
-        status: "pending",
-        subtotal, discountAmount, cgstAmount, sgstAmount, shippingCharge, totalAmount,
-        couponCode: coupon?.code || null,
-        items: { create: orderItems },
-      },
-      include: { items: true },
-    });
-
-    // FIX: For Razorpay orders, do NOT deduct stock or increment coupon here.
-    // Stock and coupon are handled in /api/payments/verify after payment is confirmed.
-    if (paymentMethod === "cod") {
-      // Deduct stock for COD immediately (payment guaranteed on delivery)
-      for (const item of orderItems) {
-        const inv = await tx.inventory.findFirst({ where: { productId: item.productId, variantId: item.variantId } });
-        if (inv) {
-          if (inv.qtyInStock < item.qty) throw new Error(`Stock changed for product ${item.productId}`);
-          await tx.inventory.update({ where: { id: inv.id }, data: { qtyInStock: { decrement: item.qty } } });
-        }
-      }
-
-      // Create invoice for COD orders immediately
-      const invoiceNumber = await generateInvoiceNumber();
-      await tx.invoice.create({
-        data: {
-          invoiceNumber, orderId: newOrder.id, userId: req.user.id,
-          status: "issued",
-          subtotal, discountAmount, cgstRate: 2.5, sgstRate: 2.5, igstRate: 0,
-          cgstAmount, sgstAmount, igstAmount: 0,
-          totalAmount,
-          sellerName:    cfg.site_name    || "Zupwell",
-          sellerAddress: cfg.site_address || "A-102, Adarsh Lifestyle, Ahmedabad, Gujarat 382350",
-          sellerGstin:   cfg.site_gstin   || "24XXXXXXXXXXXXX",
-          buyerName: address.fullName, buyerAddress: `${address.addressLine1}, ${address.city}, ${address.state} - ${address.pincode}`,
-          buyerGstin: address.gstin || null,
-        },
+  const handlePlaceOrder = async () => {
+    if (!selectedAddress) { toast.error("Please select a delivery address"); return; }
+    setLoading(true);
+    try {
+      const order = await ordersApi.create({
+        addressId: selectedAddress,
+        paymentMethod,
+        couponCode: couponCode || undefined,
+        items: cart.map(i => ({ productId: i.productId, variantId: i.variantId, qty: i.qty })),
       });
 
-      // Increment coupon usage for COD only — Razorpay coupon is incremented in /verify
-      if (coupon) await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+      if (paymentMethod === "razorpay") {
+        // FIX: load Razorpay script on demand — wait for it to be ready
+        await loadRazorpay();
+
+        const rzp = await paymentsApi.createRazorpayOrder(order.id);
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          amount: rzp.amount,
+          currency: "INR",
+          name: process.env.NEXT_PUBLIC_SITE_NAME || "Zupwell",
+          description: `Order ${order.orderNumber}`,
+          order_id: rzp.razorpayOrderId,
+          handler: async (response: any) => {
+            try {
+              await paymentsApi.verify({ ...response, orderId: order.id });
+              clearCart();
+              toast.success("Payment successful! 🎉");
+              router.push(`/order/${order.orderNumber}`);
+            } catch {
+              // Verification failed — cancel the order so it doesn't pollute admin
+              try { await ordersApi.cancel(order.id); } catch {}
+              toast.error("Payment verification failed. Please try again.");
+              setLoading(false);
+            }
+          },
+          modal: {
+            ondismiss: async () => {
+              // User closed Razorpay without paying — cancel the pending order
+              try { await ordersApi.cancel(order.id); } catch {}
+              toast.error("Payment cancelled.");
+              setLoading(false);
+            },
+          },
+          prefill: { name: user?.name, email: user?.email },
+          theme: { color: "#F47C41" },
+        };
+        new (window as any).Razorpay(options).open();
+        // Note: setLoading(false) is handled by ondismiss or handler above
+      } else {
+        clearCart();
+        toast.success("Order placed! You'll pay on delivery.");
+        router.push(`/order/${order.orderNumber}`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Order failed");
+      setLoading(false);
+    } finally {
+      if (paymentMethod === "cod") setLoading(false);
     }
+  };
 
-    // Notification
-    await tx.notification.create({
-      data: { type: "new_order", title: "New Order", message: `Order ${orderNumber} placed by ${req.user.name}` },
-    }).catch(() => {});
+  return (
+    <main className="min-h-screen bg-[#F4F6FA]">
+      <Navbar />
+      <div className="pt-24 pb-16 px-6 mx-auto max-w-6xl">
+        <h1 className="text-4xl font-display font-black text-[#111827] mb-8">Checkout</h1>
 
-    return newOrder;
-  });
+        {/* Steps */}
+        <div className="flex items-center gap-4 mb-10">
+          {STEPS.map((s, i) => (
+            <div key={s} className="flex items-center gap-2">
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i <= step ? "bg-[#F47C41] text-[#111827]" : "bg-[#FFFFFF] text-[#6B7280]"}`}>
+                {i < step ? <CheckCircle size={16} /> : i + 1}
+              </div>
+              <span className={`text-sm font-semibold ${i <= step ? "text-[#111827]" : "text-[#6B7280]"}`}>{s}</span>
+              {i < STEPS.length - 1 && <ChevronRight size={14} className="text-[#111827]/30 mx-2" />}
+            </div>
+          ))}
+        </div>
 
-  const full = await prisma.order.findUnique({
-    where: { id: order.id },
-    include: {
-      items:   { include: { product: { select: { name: true } } } },
-      address: true,
-      invoice: true,
-    },
-  });
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Step 0: Address */}
+            {step === 0 && (
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                <div className="card mb-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <MapPin size={18} className="text-[#F47C41]" />
+                    <h2 className="font-display font-bold text-[#111827]">Delivery Address</h2>
+                  </div>
+                  {addresses.map((addr) => (
+                    <label key={addr.id} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${selectedAddress === addr.id ? "border-[#F47C41] bg-[#F47C41]/10" : "border-[#D9DEE8] hover:border-[#D9DEE8]"}`}>
+                      <input type="radio" name="address" checked={selectedAddress === addr.id} onChange={() => setSelectedAddress(addr.id)} className="mt-1 accent-[#F47C41]" />
+                      <div className="text-sm">
+                        <p className="font-bold text-[#111827]">{addr.fullName}</p>
+                        <p className="text-[#374151]">{addr.addressLine1}, {addr.city}, {addr.state} - {addr.pincode}</p>
+                        <p className="text-[#6B7280]">{addr.phone}</p>
+                        {addr.gstin && <p className="text-xs text-[#F47C41] mt-1">GSTIN: {addr.gstin}</p>}
+                      </div>
+                    </label>
+                  ))}
+                  <button onClick={() => setAddingAddr(!addingAddr)} className="flex items-center gap-2 text-sm text-[#F47C41] hover:text-[#f79b6e] mt-2">
+                    <Plus size={14} /> Add new address
+                  </button>
+                  {addingAddr && (
+                    <div className="mt-4 space-y-3 border-t border-[#D9DEE8] pt-4">
+                      {[["fullName", "Full Name"], ["phone", "Phone"], ["addressLine1", "Address Line 1"], ["city", "City"], ["state", "State"], ["pincode", "Pincode"], ["gstin", "GSTIN (optional)"]].map(([k, label]) => (
+                        <div key={k}>
+                          <label className="text-xs text-[#6B7280] mb-1 block">{label}</label>
+                          <input type="text" value={(newAddr as any)[k]} onChange={(e) => setNewAddr(n => ({ ...n, [k]: e.target.value }))}
+                            className="input-field text-sm" placeholder={label} />
+                        </div>
+                      ))}
+                      <button onClick={handleSaveAddress} className="btn-primary text-sm px-4 py-2">Save Address</button>
+                    </div>
+                  )}
+                </div>
+                <button onClick={() => { if (!selectedAddress) { toast.error("Select an address"); return; } setStep(1); }}
+                  className="btn-primary w-full py-3 flex items-center justify-center gap-2">
+                  Continue to Payment <ChevronRight size={16} />
+                </button>
+              </motion.div>
+            )}
 
-  res.status(201).json(full);
-});
+            {/* Step 1: Payment */}
+            {step === 1 && (
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                <div className="card mb-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <CreditCard size={18} className="text-[#F47C41]" />
+                    <h2 className="font-display font-bold text-[#111827]">Payment Method</h2>
+                  </div>
+                  {[["razorpay", "Razorpay (UPI, Card, Netbanking)", "🔐"], ["cod", "Cash on Delivery", "💵"]].map(([val, label, icon]) => (
+                    <label key={val} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${paymentMethod === val ? "border-[#F47C41] bg-[#F47C41]/10" : "border-[#D9DEE8] hover:border-[#D9DEE8]"}`}>
+                      <input type="radio" name="payment" checked={paymentMethod === val as any} onChange={() => setPaymentMethod(val as any)} className="mt-1 accent-[#F47C41]" />
+                      <div>
+                        <span className="text-sm font-semibold text-[#111827]">{icon} {label}</span>
+                        {val === "razorpay" && <p className="text-xs text-[#6B7280] mt-0.5">Secure payments powered by Razorpay</p>}
+                        {val === "cod" && <p className="text-xs text-[#6B7280] mt-0.5">Pay when your order arrives</p>}
+                      </div>
+                    </label>
+                  ))}
+                  <div className="mt-4">
+                    <label className="text-sm font-semibold text-[#374151] mb-2 block">Coupon Code (optional)</label>
+                    <div className="flex gap-2">
+                      <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="input-field text-sm flex-1" placeholder="Enter coupon" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => setStep(0)} className="btn-outline py-3 px-6">← Back</button>
+                  <button onClick={() => setStep(2)} className="btn-primary flex-1 py-3 flex items-center justify-center gap-2">
+                    Review Order <ChevronRight size={16} />
+                  </button>
+                </div>
+              </motion.div>
+            )}
 
-// GET /api/orders - user's orders
-router.get("/", authUser, async (req, res) => {
-  const orders = await prisma.order.findMany({
-    where:   { userId: req.user.id },
-    orderBy: { createdAt: "desc" },
-    include: { items: { include: { product: { select: { name: true } } } }, invoice: true },
-  });
-  res.json(orders);
-});
+            {/* Step 2: Review */}
+            {step === 2 && (
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                <div className="card mb-4">
+                  <h2 className="font-display font-bold text-[#111827] mb-4">Order Items</h2>
+                  <div className="space-y-3">
+                    {cart.map((item) => (
+                      <div key={`${item.productId}-${item.variantId}`} className="flex justify-between text-sm">
+                        <span className="text-[#374151]">{item.name} × {item.qty}</span>
+                        <span className="text-[#111827] font-semibold">₹{(item.price * item.qty).toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => setStep(1)} className="btn-outline py-3 px-6">← Back</button>
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handlePlaceOrder} disabled={loading}
+                    className="btn-primary flex-1 py-3 disabled:opacity-50">
+                    {loading ? <span className="flex items-center justify-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-[#D9DEE8] border-t-transparent animate-spin" />Placing Order...</span> : `Place Order · ₹${total.toFixed(0)}`}
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </div>
 
-// GET /api/orders/:orderNumber
-router.get("/:orderNumber", authUser, async (req, res) => {
-  const order = await prisma.order.findFirst({
-    where:   { orderNumber: req.params.orderNumber, userId: req.user.id },
-    include: {
-      items:   { include: { product: { select: { name: true, images: true } } } },
-      address: true,
-      invoice: true,
-    },
-  });
-  if (!order) return res.status(404).json({ error: "Order not found" });
-  res.json(order);
-});
-
-module.exports = router;
+          {/* Order Summary sidebar */}
+          <div className="card h-fit sticky top-24">
+            <h2 className="font-display font-bold text-[#111827] mb-4">Summary</h2>
+            <div className="space-y-2 text-sm mb-4">
+              <div className="flex justify-between text-[#374151]"><span>Subtotal ({cart.length} items)</span><span>₹{subtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[#374151]"><span>CGST @2.5%</span><span>₹{cgst.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[#374151]"><span>SGST @2.5%</span><span>₹{sgst.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[#374151]"><span>Shipping</span><span>{shipping === 0 ? <span className="text-emerald-400">FREE</span> : `₹${shipping}`}</span></div>
+              {roundOffDiff !== 0 && (
+                <div className="flex justify-between text-[#9CA3AF] text-xs italic"><span>Round Off</span><span>{roundOffDiff > 0 ? "+" : ""}₹{roundOffDiff.toFixed(2)}</span></div>
+              )}
+            </div>
+            <div className="border-t border-[#D9DEE8] pt-4 flex justify-between items-center">
+              <span className="font-display font-bold text-[#111827]">Total</span>
+              <span className="text-2xl font-display font-black gradient-text">₹{total.toFixed(0)}</span>
+            </div>
+            <p className="text-xs text-[#6B7280] mt-1">Inclusive of all taxes</p>
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </main>
+  );
+}

@@ -78,6 +78,9 @@ export const ordersApi = {
   list: () => api.get("/api/orders").then((r) => r.data),
   get: (orderNumber: string) =>
     api.get(`/api/orders/${orderNumber}`).then((r) => r.data),
+  // Cancel a pending unpaid order (called when Razorpay is dismissed or fails)
+  cancel: (orderId: number) =>
+    api.delete(`/api/orders/${orderId}/cancel`).then((r) => r.data),
 };
 
 // ── Payments ──────────────────────────────────────
