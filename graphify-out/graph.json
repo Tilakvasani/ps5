@@ -126,7 +126,7 @@
       "source_file": "backend\\src\\routes\\auth.js",
       "source_location": "L1",
       "id": "backend_src_routes_auth_js",
-      "community": 11,
+      "community": 12,
       "norm_label": "auth.js"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "backend\\src\\routes\\auth.js",
       "source_location": "L10",
       "id": "routes_auth_isstrongpassword",
-      "community": 11,
+      "community": 12,
       "norm_label": "isstrongpassword()"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "backend\\src\\routes\\auth.js",
       "source_location": "L19",
       "id": "routes_auth_isvalidemail",
-      "community": 11,
+      "community": 12,
       "norm_label": "isvalidemail()"
     },
     {
@@ -162,7 +162,7 @@
       "source_file": "backend\\src\\routes\\invoices.js",
       "source_location": "L1",
       "id": "backend_src_routes_invoices_js",
-      "community": 12,
+      "community": 13,
       "norm_label": "invoices.js"
     },
     {
@@ -171,7 +171,7 @@
       "source_file": "backend\\src\\routes\\invoices.js",
       "source_location": "L53",
       "id": "routes_invoices_rs",
-      "community": 12,
+      "community": 13,
       "norm_label": "rs()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "backend\\src\\routes\\invoices.js",
       "source_location": "L54",
       "id": "routes_invoices_rsround",
-      "community": 12,
+      "community": 13,
       "norm_label": "rsround()"
     },
     {
@@ -223,7 +223,7 @@
       "label": "signAccess()",
       "file_type": "code",
       "source_file": "backend\\src\\utils\\jwt.js",
-      "source_location": "L6",
+      "source_location": "L9",
       "id": "utils_jwt_signaccess",
       "community": 0,
       "norm_label": "signaccess()"
@@ -232,7 +232,7 @@
       "label": "signRefresh()",
       "file_type": "code",
       "source_file": "backend\\src\\utils\\jwt.js",
-      "source_location": "L7",
+      "source_location": "L10",
       "id": "utils_jwt_signrefresh",
       "community": 0,
       "norm_label": "signrefresh()"
@@ -241,7 +241,7 @@
       "label": "verifyAccess()",
       "file_type": "code",
       "source_file": "backend\\src\\utils\\jwt.js",
-      "source_location": "L9",
+      "source_location": "L12",
       "id": "utils_jwt_verifyaccess",
       "community": 0,
       "norm_label": "verifyaccess()"
@@ -250,7 +250,7 @@
       "label": "verifyRefresh()",
       "file_type": "code",
       "source_file": "backend\\src\\utils\\jwt.js",
-      "source_location": "L10",
+      "source_location": "L13",
       "id": "utils_jwt_verifyrefresh",
       "community": 0,
       "norm_label": "verifyrefresh()"
@@ -261,7 +261,7 @@
       "source_file": "backend\\src\\utils\\orderNumber.js",
       "source_location": "L1",
       "id": "backend_src_utils_ordernumber_js",
-      "community": 13,
+      "community": 14,
       "norm_label": "ordernumber.js"
     },
     {
@@ -270,7 +270,7 @@
       "source_file": "backend\\src\\utils\\orderNumber.js",
       "source_location": "L3",
       "id": "utils_ordernumber_generateordernumber",
-      "community": 13,
+      "community": 14,
       "norm_label": "generateordernumber()"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "backend\\src\\utils\\orderNumber.js",
       "source_location": "L9",
       "id": "utils_ordernumber_generateinvoicenumber",
-      "community": 13,
+      "community": 14,
       "norm_label": "generateinvoicenumber()"
     },
     {
@@ -612,7 +612,7 @@
       "source_file": "frontend\\src\\app\\admin\\inventory\\page.tsx",
       "source_location": "L1",
       "id": "frontend_src_app_admin_inventory_page_tsx",
-      "community": 14,
+      "community": 15,
       "norm_label": "page.tsx"
     },
     {
@@ -621,7 +621,7 @@
       "source_file": "frontend\\src\\app\\admin\\inventory\\page.tsx",
       "source_location": "L15",
       "id": "inventory_page_fetchinventory",
-      "community": 14,
+      "community": 15,
       "norm_label": "fetchinventory()"
     },
     {
@@ -630,7 +630,7 @@
       "source_file": "frontend\\src\\app\\admin\\inventory\\page.tsx",
       "source_location": "L28",
       "id": "inventory_page_handlemovement",
-      "community": 14,
+      "community": 15,
       "norm_label": "handlemovement()"
     },
     {
@@ -639,7 +639,7 @@
       "source_file": "frontend\\src\\app\\admin\\invoices\\page.tsx",
       "source_location": "L1",
       "id": "frontend_src_app_admin_invoices_page_tsx",
-      "community": 15,
+      "community": 16,
       "norm_label": "page.tsx"
     },
     {
@@ -648,7 +648,7 @@
       "source_file": "frontend\\src\\app\\admin\\invoices\\page.tsx",
       "source_location": "L16",
       "id": "invoices_page_fetch",
-      "community": 15,
+      "community": 16,
       "norm_label": "fetch()"
     },
     {
@@ -657,7 +657,7 @@
       "source_file": "frontend\\src\\app\\admin\\invoices\\page.tsx",
       "source_location": "L19",
       "id": "invoices_page_cancel",
-      "community": 15,
+      "community": 16,
       "norm_label": "cancel()"
     },
     {
@@ -720,7 +720,7 @@
       "source_file": "frontend\\src\\app\\admin\\orders\\page.tsx",
       "source_location": "L1",
       "id": "frontend_src_app_admin_orders_page_tsx",
-      "community": 16,
+      "community": 17,
       "norm_label": "page.tsx"
     },
     {
@@ -729,7 +729,7 @@
       "source_file": "frontend\\src\\app\\admin\\orders\\page.tsx",
       "source_location": "L24",
       "id": "orders_page_fetchorders",
-      "community": 16,
+      "community": 17,
       "norm_label": "fetchorders()"
     },
     {
@@ -738,7 +738,7 @@
       "source_file": "frontend\\src\\app\\admin\\orders\\page.tsx",
       "source_location": "L36",
       "id": "orders_page_updatestatus",
-      "community": 16,
+      "community": 17,
       "norm_label": "updatestatus()"
     },
     {
@@ -882,25 +882,25 @@
       "source_file": "frontend\\src\\app\\auth\\callback\\page.tsx",
       "source_location": "L1",
       "id": "frontend_src_app_auth_callback_page_tsx",
-      "community": 17,
+      "community": 18,
       "norm_label": "page.tsx"
     },
     {
       "label": "CallbackHandler()",
       "file_type": "code",
       "source_file": "frontend\\src\\app\\auth\\callback\\page.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "id": "callback_page_callbackhandler",
-      "community": 17,
+      "community": 18,
       "norm_label": "callbackhandler()"
     },
     {
       "label": "AuthCallbackPage()",
       "file_type": "code",
       "source_file": "frontend\\src\\app\\auth\\callback\\page.tsx",
-      "source_location": "L39",
+      "source_location": "L48",
       "id": "callback_page_authcallbackpage",
-      "community": 17,
+      "community": 18,
       "norm_label": "authcallbackpage()"
     },
     {
@@ -927,25 +927,34 @@
       "source_file": "frontend\\src\\app\\checkout\\page.tsx",
       "source_location": "L1",
       "id": "frontend_src_app_checkout_page_tsx",
-      "community": 18,
+      "community": 11,
       "norm_label": "page.tsx"
+    },
+    {
+      "label": "loadRazorpay()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\app\\checkout\\page.tsx",
+      "source_location": "L16",
+      "id": "checkout_page_loadrazorpay",
+      "community": 11,
+      "norm_label": "loadrazorpay()"
     },
     {
       "label": "handleSaveAddress()",
       "file_type": "code",
       "source_file": "frontend\\src\\app\\checkout\\page.tsx",
-      "source_location": "L50",
+      "source_location": "L65",
       "id": "checkout_page_handlesaveaddress",
-      "community": 18,
+      "community": 11,
       "norm_label": "handlesaveaddress()"
     },
     {
       "label": "handlePlaceOrder()",
       "file_type": "code",
       "source_file": "frontend\\src\\app\\checkout\\page.tsx",
-      "source_location": "L60",
+      "source_location": "L75",
       "id": "checkout_page_handleplaceorder",
-      "community": 18,
+      "community": 11,
       "norm_label": "handleplaceorder()"
     },
     {
@@ -997,7 +1006,7 @@
       "label": "handleGoogleLogin()",
       "file_type": "code",
       "source_file": "frontend\\src\\app\\login\\page.tsx",
-      "source_location": "L64",
+      "source_location": "L65",
       "id": "login_page_handlegooglelogin",
       "community": 4,
       "norm_label": "handlegooglelogin()"
@@ -1006,7 +1015,7 @@
       "label": "handleFacebookLogin()",
       "file_type": "code",
       "source_file": "frontend\\src\\app\\login\\page.tsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "id": "login_page_handlefacebooklogin",
       "community": 4,
       "norm_label": "handlefacebooklogin()"
@@ -1473,7 +1482,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend\\src\\utils\\jwt.js",
-      "source_location": "L6",
+      "source_location": "L9",
       "weight": 1.0,
       "_src": "backend_src_utils_jwt_js",
       "_tgt": "utils_jwt_signaccess",
@@ -1485,7 +1494,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend\\src\\utils\\jwt.js",
-      "source_location": "L7",
+      "source_location": "L10",
       "weight": 1.0,
       "_src": "backend_src_utils_jwt_js",
       "_tgt": "utils_jwt_signrefresh",
@@ -1497,7 +1506,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend\\src\\utils\\jwt.js",
-      "source_location": "L9",
+      "source_location": "L12",
       "weight": 1.0,
       "_src": "backend_src_utils_jwt_js",
       "_tgt": "utils_jwt_verifyaccess",
@@ -1509,7 +1518,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend\\src\\utils\\jwt.js",
-      "source_location": "L10",
+      "source_location": "L13",
       "weight": 1.0,
       "_src": "backend_src_utils_jwt_js",
       "_tgt": "utils_jwt_verifyrefresh",
@@ -2133,7 +2142,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend\\src\\app\\auth\\callback\\page.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0,
       "_src": "frontend_src_app_auth_callback_page_tsx",
       "_tgt": "callback_page_callbackhandler",
@@ -2145,7 +2154,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend\\src\\app\\auth\\callback\\page.tsx",
-      "source_location": "L39",
+      "source_location": "L48",
       "weight": 1.0,
       "_src": "frontend_src_app_auth_callback_page_tsx",
       "_tgt": "callback_page_authcallbackpage",
@@ -2169,7 +2178,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend\\src\\app\\checkout\\page.tsx",
-      "source_location": "L50",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "frontend_src_app_checkout_page_tsx",
+      "_tgt": "checkout_page_loadrazorpay",
+      "source": "frontend_src_app_checkout_page_tsx",
+      "target": "checkout_page_loadrazorpay",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\app\\checkout\\page.tsx",
+      "source_location": "L65",
       "weight": 1.0,
       "_src": "frontend_src_app_checkout_page_tsx",
       "_tgt": "checkout_page_handlesaveaddress",
@@ -2181,11 +2202,23 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend\\src\\app\\checkout\\page.tsx",
-      "source_location": "L60",
+      "source_location": "L75",
       "weight": 1.0,
       "_src": "frontend_src_app_checkout_page_tsx",
       "_tgt": "checkout_page_handleplaceorder",
       "source": "frontend_src_app_checkout_page_tsx",
+      "target": "checkout_page_handleplaceorder",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\app\\checkout\\page.tsx",
+      "source_location": "L88",
+      "weight": 1.0,
+      "_src": "checkout_page_handleplaceorder",
+      "_tgt": "checkout_page_loadrazorpay",
+      "source": "checkout_page_loadrazorpay",
       "target": "checkout_page_handleplaceorder",
       "confidence_score": 1.0
     },
@@ -2229,7 +2262,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend\\src\\app\\login\\page.tsx",
-      "source_location": "L64",
+      "source_location": "L65",
       "weight": 1.0,
       "_src": "frontend_src_app_login_page_tsx",
       "_tgt": "login_page_handlegooglelogin",
@@ -2241,7 +2274,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend\\src\\app\\login\\page.tsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "weight": 1.0,
       "_src": "frontend_src_app_login_page_tsx",
       "_tgt": "login_page_handlefacebooklogin",
