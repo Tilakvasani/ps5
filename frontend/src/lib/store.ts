@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { clearAuthCookie } from "./auth-cookie";
 
 interface CartItem {
   productId: number;
@@ -83,7 +84,10 @@ export const useStore = create<AppStore>()(
 
       clearCart: () => set({ cart: [] }),
 
-      logout: () => set({ user: null, token: null, cart: [] }),
+      logout: () => {
+        clearAuthCookie();
+        set({ user: null, token: null, cart: [] });
+      },
     }),
     { name: "zupwell-store" }
   )

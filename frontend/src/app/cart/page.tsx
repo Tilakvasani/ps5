@@ -9,7 +9,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CartPage() {
-  const { cart, updateCartQty, removeFromCart } = useStore();
+  const { cart, updateCartQty, removeFromCart, user } = useStore();
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
@@ -142,7 +142,7 @@ export default function CartPage() {
               </div>
               <p className="text-xs text-[#6B7280] mt-1 text-right">Inclusive of GST</p>
 
-              <Link href="/checkout" className="block mt-6">
+              <Link href={user ? "/checkout" : "/login?next=/checkout"} className="block mt-6">
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   className="btn-primary w-full flex items-center justify-center gap-2 py-3">
                   Proceed to Checkout <ArrowRight size={16} />

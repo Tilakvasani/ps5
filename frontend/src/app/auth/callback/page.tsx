@@ -3,6 +3,7 @@ import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { authApi } from "@/lib/api";
+import { setAuthCookie } from "@/lib/auth-cookie";
 import toast from "react-hot-toast";
 
 function CallbackHandler() {
@@ -23,6 +24,7 @@ function CallbackHandler() {
 
     // FIX: store token first, then fetch real user data from backend
     setToken(token);
+    setAuthCookie(token); // sync cookie so middleware lets user through
     authApi.me()
       .then((me) => {
         setUser(me);

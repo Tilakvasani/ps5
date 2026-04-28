@@ -1,11 +1,12 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { authApi, adminApi } from "@/lib/api";
 import { useStore } from "@/lib/store";
+import { setAuthCookie } from "@/lib/auth-cookie";
 import toast from "react-hot-toast";
 
 const GoogleIcon = () => (
@@ -24,12 +25,22 @@ const FacebookIcon = () => (
 );
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F4F6FA] flex items-center justify-center"><div className="h-8 w-8 rounded-full border-4 border-[#F47C41]/30 border-t-[#F47C41] animate-spin" /></div>}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const { setUser, setToken } = useStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get("next") || "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,8 +63,9 @@ export default function LoginPage() {
       const data = await authApi.login(email, password);
       setUser(data.user);
       setToken(data.accessToken);
+      setAuthCookie(data.accessToken); // sync cookie so middleware lets user through
       toast.success(`Welcome back, ${data.user.name}!`);
-      router.push("/");
+      router.push(nextUrl);
     } catch (err: any) {
       toast.error(err.message || "Invalid email or password");
     } finally {
@@ -167,3 +179,4 @@ export default function LoginPage() {
     </main>
   );
 }
+// LoginForm ends above; LoginPage wraps it in Suspense

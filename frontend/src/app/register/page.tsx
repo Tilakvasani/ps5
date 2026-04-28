@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowLeft, Check, X } from "lucide-react";
 import { authApi } from "@/lib/api";
 import { useStore } from "@/lib/store";
+import { setAuthCookie } from "@/lib/auth-cookie";
 import toast from "react-hot-toast";
 
 // Password strength rules
@@ -55,6 +56,7 @@ export default function RegisterPage() {
       const data = await authApi.register(form);
       setUser(data.user);
       setToken(data.accessToken);
+      setAuthCookie(data.accessToken); // sync cookie so middleware lets user through
       toast.success("Account created! Welcome to Zupwell 🎉");
       router.push("/");
     } catch (err: any) {

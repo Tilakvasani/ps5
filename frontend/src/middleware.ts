@@ -15,7 +15,9 @@ export function middleware(request: NextRequest) {
   ) {
     const userToken = request.cookies.get("user-token");
     if (!userToken) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("next", path);
+      return NextResponse.redirect(loginUrl);
     }
   }
 

@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import dynamic from "next/dynamic";
+
+// ssr: false — AuthSync reads document.cookie and localStorage (browser-only).
+// Dynamic import prevents Next.js from trying to run it on the server.
+const AuthSync = dynamic(() => import("@/components/AuthSync"), { ssr: false });
 
 export const metadata: Metadata = {
   title: "Zupwell — Premium Health & Wellness Products",
@@ -12,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <AuthSync />
         {children}
         <Toaster
           position="top-right"
