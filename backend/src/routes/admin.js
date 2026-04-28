@@ -63,8 +63,8 @@ router.get("/dashboard/stats", authAdmin, async (req, res) => {
     // Profit = revenue - cost (basePrice * qty) for all non-cancelled orders
     const profitData = await prisma.$queryRaw`
       SELECT
-        COALESCE(SUM(oi.unit_price * oi.qty), 0)                        AS total_revenue,
-        COALESCE(SUM(p.base_price  * oi.qty), 0)                        AS total_cost
+        COALESCE(SUM(oi.unit_price * oi.qty), 0)::float AS total_revenue,
+        COALESCE(SUM(p.base_price  * oi.qty), 0)::float AS total_cost
       FROM order_items oi
       JOIN products p ON p.id = oi.product_id
       JOIN orders o   ON o.id = oi.order_id
@@ -78,8 +78,8 @@ router.get("/dashboard/stats", authAdmin, async (req, res) => {
     // This month profit
     const thisMonthProfitData = await prisma.$queryRaw`
       SELECT
-        COALESCE(SUM(oi.unit_price * oi.qty), 0) AS total_revenue,
-        COALESCE(SUM(p.base_price  * oi.qty), 0) AS total_cost
+        COALESCE(SUM(oi.unit_price * oi.qty), 0)::float AS total_revenue,
+        COALESCE(SUM(p.base_price  * oi.qty), 0)::float AS total_cost
       FROM order_items oi
       JOIN products p ON p.id = oi.product_id
       JOIN orders o   ON o.id = oi.order_id
@@ -87,8 +87,8 @@ router.get("/dashboard/stats", authAdmin, async (req, res) => {
     `;
     const lastMonthProfitData = await prisma.$queryRaw`
       SELECT
-        COALESCE(SUM(oi.unit_price * oi.qty), 0) AS total_revenue,
-        COALESCE(SUM(p.base_price  * oi.qty), 0) AS total_cost
+        COALESCE(SUM(oi.unit_price * oi.qty), 0)::float AS total_revenue,
+        COALESCE(SUM(p.base_price  * oi.qty), 0)::float AS total_cost
       FROM order_items oi
       JOIN products p ON p.id = oi.product_id
       JOIN orders o   ON o.id = oi.order_id
@@ -170,7 +170,6 @@ router.get("/dashboard/revenue-chart", authAdmin, async (req, res) => {
     const from = new Date(); from.setDate(from.getDate() - days);
     const orders = await prisma.order.findMany({
       where: { createdAt: { gte: from }, status: { notIn: ["cancelled"] } },
-      select: { createdAt: true, totalAmount: true },
       include: { items: { select: { qty: true, product: { select: { basePrice: true } } } } },
     });
 
