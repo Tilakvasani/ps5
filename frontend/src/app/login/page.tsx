@@ -40,6 +40,7 @@ export default function LoginPage() {
       const adminData = await adminApi.login(email, password);
       localStorage.setItem("zupwell-admin", JSON.stringify({ name: adminData.admin.name, token: adminData.accessToken }));
       toast.success(`Welcome, ${adminData.admin.name}!`);
+      setLoading(false);
       router.push("/admin");
       return;
     } catch {

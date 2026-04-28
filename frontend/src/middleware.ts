@@ -4,13 +4,8 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  // Protect all /admin routes
-  if (path.startsWith("/admin")) {
-    const adminToken = request.cookies.get("admin-token");
-    if (!adminToken) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-  }
+  // Admin auth is handled by admin/layout.tsx (reads localStorage via useEffect)
+  // Middleware cannot read localStorage — so no admin check here.
 
   // Protect user account/checkout/order routes
   if (
@@ -28,5 +23,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/account/:path*", "/checkout/:path*", "/order/:path*"],
+  matcher: ["/account/:path*", "/checkout/:path*", "/order/:path*"],
 };

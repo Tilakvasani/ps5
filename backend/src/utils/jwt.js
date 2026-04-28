@@ -1,7 +1,10 @@
 const jwt = require("jsonwebtoken");
 
-const ACCESS_SECRET  = process.env.JWT_SECRET         || "zupwell_access_secret";
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "zupwell_refresh_secret";
+if (!process.env.JWT_SECRET)         throw new Error("JWT_SECRET env var is required");
+if (!process.env.JWT_REFRESH_SECRET) throw new Error("JWT_REFRESH_SECRET env var is required");
+
+const ACCESS_SECRET  = process.env.JWT_SECRET;
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
 const signAccess  = (payload) => jwt.sign(payload, ACCESS_SECRET,  { expiresIn: "7d"  });
 const signRefresh = (payload) => jwt.sign(payload, REFRESH_SECRET, { expiresIn: "30d" });

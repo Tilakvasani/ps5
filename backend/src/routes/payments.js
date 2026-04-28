@@ -30,6 +30,7 @@ router.post("/create-razorpay-order", authUser, async (req, res) => {
 router.post("/verify", authUser, async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
 
+  // Verify Razorpay signature
   const expectedSig = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -39,8 +40,16 @@ router.post("/verify", authUser, async (req, res) => {
     return res.status(400).json({ error: "Payment verification failed" });
   }
 
-  const order = await prisma.order.findFirst({ where: { id: Number(orderId), userId: req.user.id }, include: { address: true } });
+  const order = await prisma.order.findFirst({
+    where: { id: Number(orderId), userId: req.user.id },
+    include: { address: true, items: true },
+  });
   if (!order) return res.status(404).json({ error: "Order not found" });
+
+  // Prevent double-processing if webhook already confirmed it
+  if (order.paymentStatus === "paid") {
+    return res.json({ message: "Payment already verified" });
+  }
 
   // Fetch store settings for seller info
   const settingRows = await prisma.setting.findMany();
@@ -57,12 +66,30 @@ router.post("/verify", authUser, async (req, res) => {
   const totalAmount = Math.round(rawTotal);
 
   await prisma.$transaction(async (tx) => {
+    // Mark order as paid
     await tx.order.update({
       where: { id: order.id },
       data:  { paymentStatus: "paid", status: "confirmed", razorpayPaymentId: razorpay_payment_id, cgstAmount, sgstAmount, totalAmount },
     });
 
-    // Create GST invoice with correct 2.5% rates
+    // FIX: Deduct stock now — only after payment confirmed
+    for (const item of order.items) {
+      const inv = await tx.inventory.findFirst({ where: { productId: item.productId, variantId: item.variantId } });
+      if (inv) {
+        if (inv.qtyInStock < item.qty) throw new Error(`Stock insufficient for product ${item.productId}`);
+        await tx.inventory.update({ where: { id: inv.id }, data: { qtyInStock: { decrement: item.qty } } });
+      }
+    }
+
+    // FIX: Increment coupon usage now — only after payment confirmed
+    if (order.couponCode) {
+      const coupon = await tx.coupon.findFirst({ where: { code: order.couponCode } });
+      if (coupon) {
+        await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+      }
+    }
+
+    // Create GST invoice
     const invoiceNumber = await generateInvoiceNumber();
     await tx.invoice.create({
       data: {

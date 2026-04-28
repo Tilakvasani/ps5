@@ -23,6 +23,12 @@ router.post("/", authUser, async (req, res) => {
     });
     if (!product || !product.isActive) return res.status(400).json({ error: `Product ${item.productId} not found` });
 
+    // FIX: check stock before accepting order
+    const inv = product.inventory.find(i => i.variantId === (item.variantId || null));
+    if (!inv || inv.qtyInStock < item.qty) {
+      return res.status(400).json({ error: `Not enough stock for "${product.name}"` });
+    }
+
     const unitPrice = item.variantId
       ? product.variants.find(v => v.id === item.variantId)?.price || product.sellingPrice
       : product.sellingPrice;
@@ -64,7 +70,7 @@ router.post("/", authUser, async (req, res) => {
     const newOrder = await tx.order.create({
       data: {
         orderNumber, userId: req.user.id, addressId: address.id,
-        paymentMethod, paymentStatus: paymentMethod === "cod" ? "pending" : "pending",
+        paymentMethod, paymentStatus: "pending",
         status: "pending",
         subtotal, discountAmount, cgstAmount, sgstAmount, shippingCharge, totalAmount,
         couponCode: coupon?.code || null,
@@ -73,16 +79,19 @@ router.post("/", authUser, async (req, res) => {
       include: { items: true },
     });
 
-    // Deduct stock
-    for (const item of orderItems) {
-      const inv = await tx.inventory.findFirst({ where: { productId: item.productId, variantId: item.variantId } });
-      if (inv) {
-        await tx.inventory.update({ where: { id: inv.id }, data: { qtyInStock: { decrement: item.qty } } });
-      }
-    }
-
-    // Create invoice for COD orders
+    // FIX: For Razorpay orders, do NOT deduct stock or increment coupon here.
+    // Stock and coupon are handled in /api/payments/verify after payment is confirmed.
     if (paymentMethod === "cod") {
+      // Deduct stock for COD immediately (payment guaranteed on delivery)
+      for (const item of orderItems) {
+        const inv = await tx.inventory.findFirst({ where: { productId: item.productId, variantId: item.variantId } });
+        if (inv) {
+          if (inv.qtyInStock < item.qty) throw new Error(`Stock changed for product ${item.productId}`);
+          await tx.inventory.update({ where: { id: inv.id }, data: { qtyInStock: { decrement: item.qty } } });
+        }
+      }
+
+      // Create invoice for COD orders immediately
       const invoiceNumber = await generateInvoiceNumber();
       await tx.invoice.create({
         data: {
@@ -98,10 +107,10 @@ router.post("/", authUser, async (req, res) => {
           buyerGstin: address.gstin || null,
         },
       });
-    }
 
-    // Increment coupon usage
-    if (coupon) await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+      // Increment coupon usage for COD only — Razorpay coupon is incremented in /verify
+      if (coupon) await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+    }
 
     // Notification
     await tx.notification.create({

@@ -12,6 +12,18 @@ import toast from "react-hot-toast";
 
 const STEPS = ["Address", "Payment", "Review"];
 
+// FIX: load Razorpay script on demand and wait for it to be ready
+function loadRazorpay(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if ((window as any).Razorpay) return resolve();
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("Failed to load Razorpay. Please refresh the page."));
+    document.body.appendChild(s);
+  });
+}
+
 export default function CheckoutPage() {
   const { cart, user, clearCart } = useStore();
   const router = useRouter();
@@ -34,7 +46,10 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!user) { router.push("/login"); return; }
-    accountApi.getAddresses().then(setAddresses).catch(() => {});
+    // FIX: show error if address fetch fails instead of silently swallowing it
+    accountApi.getAddresses()
+      .then(setAddresses)
+      .catch(() => toast.error("Could not load your addresses. Please refresh."));
   }, [user, router]);
 
   if (cart.length === 0) return (
@@ -69,6 +84,9 @@ export default function CheckoutPage() {
       });
 
       if (paymentMethod === "razorpay") {
+        // FIX: load Razorpay script on demand — wait for it to be ready
+        await loadRazorpay();
+
         const rzp = await paymentsApi.createRazorpayOrder(order.id);
         const options = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -78,17 +96,26 @@ export default function CheckoutPage() {
           description: `Order ${order.orderNumber}`,
           order_id: rzp.razorpayOrderId,
           handler: async (response: any) => {
-            await paymentsApi.verify({ ...response, orderId: order.id });
-            clearCart();
-            toast.success("Payment successful! 🎉");
-            router.push(`/order/${order.orderNumber}`);
+            try {
+              await paymentsApi.verify({ ...response, orderId: order.id });
+              clearCart();
+              toast.success("Payment successful! 🎉");
+              router.push(`/order/${order.orderNumber}`);
+            } catch {
+              toast.error("Payment verification failed. Contact support with your order number: " + order.orderNumber);
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              toast.error("Payment cancelled. Your order is saved — complete payment from your orders page.");
+              setLoading(false);
+            },
           },
           prefill: { name: user?.name, email: user?.email },
           theme: { color: "#F47C41" },
         };
-        const Razorpay = (window as any).Razorpay;
-        if (Razorpay) { new Razorpay(options).open(); }
-        else { toast.error("Razorpay not loaded"); }
+        new (window as any).Razorpay(options).open();
+        // Note: setLoading(false) is handled by ondismiss or handler above
       } else {
         clearCart();
         toast.success("Order placed! You'll pay on delivery.");
@@ -96,15 +123,15 @@ export default function CheckoutPage() {
       }
     } catch (err: any) {
       toast.error(err.message || "Order failed");
-    } finally {
       setLoading(false);
+    } finally {
+      if (paymentMethod === "cod") setLoading(false);
     }
   };
 
   return (
     <main className="min-h-screen bg-[#F4F6FA]">
       <Navbar />
-      <script src="https://checkout.razorpay.com/v1/checkout.js" async />
       <div className="pt-24 pb-16 px-6 mx-auto max-w-6xl">
         <h1 className="text-4xl font-display font-black text-[#111827] mb-8">Checkout</h1>
 

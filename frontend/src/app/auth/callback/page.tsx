@@ -2,6 +2,7 @@
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { authApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
 function CallbackHandler() {
@@ -20,12 +21,20 @@ function CallbackHandler() {
       return;
     }
 
+    // FIX: store token first, then fetch real user data from backend
     setToken(token);
-    // id: 0 (number), phone is optional so just omit it
-    setUser({ id: 0, name: name || "User", email: "" });
-
-    toast.success(`Welcome, ${name || "User"}!`);
-    router.replace("/");
+    authApi.me()
+      .then((me) => {
+        setUser(me);
+        toast.success(`Welcome, ${me.name || name || "User"}!`);
+        router.replace("/");
+      })
+      .catch(() => {
+        // Fallback: use name from URL param if /me fails
+        setUser({ id: 0, name: name || "User", email: "" });
+        toast.success(`Welcome, ${name || "User"}!`);
+        router.replace("/");
+      });
   }, [searchParams, router, setToken, setUser]);
 
   return (
