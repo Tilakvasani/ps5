@@ -128,7 +128,7 @@ export const adminApi = {
     api.post("/api/admin/auth/login", { email, password }).then((r) => r.data),
 
   dashboard: () => api.get("/api/admin/dashboard/stats").then((r) => r.data),
-  revenueChart: () => api.get("/api/admin/dashboard/revenue-chart").then((r) => r.data),
+  revenueChart: (days = 30) => api.get(`/api/admin/dashboard/revenue-chart?days=${days}`).then((r) => r.data),
   topProducts: () => api.get("/api/admin/dashboard/top-products").then((r) => r.data),
 
   // Products

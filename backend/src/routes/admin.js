@@ -28,21 +28,137 @@ router.post("/auth/login", async (req, res) => {
 // ── Dashboard ─────────────────────────────────────────
 router.get("/dashboard/stats", authAdmin, async (req, res) => {
   try {
-    const [totalRevenue, totalOrders, totalUsers, totalProducts, recentOrders] = await Promise.all([
-      // Count revenue from ALL orders (paid online + COD pending/delivered)
-      prisma.order.aggregate({
-        where: { status: { notIn: ["cancelled"] } },
-        _sum: { totalAmount: true }
-      }),
-      prisma.order.count(),
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    const startOfToday     = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const [
+      totalRevenueAgg, thisMonthRevenueAgg, lastMonthRevenueAgg,
+      todayRevenueAgg,
+      totalOrders, thisMonthOrders, lastMonthOrders,
+      totalUsers, thisMonthUsers, lastMonthUsers,
+      totalProducts,
+      recentOrders,
+      orderStatusGroups,
+      paymentMethodGroups,
+    ] = await Promise.all([
+      prisma.order.aggregate({ where: { status: { notIn: ["cancelled"] } }, _sum: { totalAmount: true } }),
+      prisma.order.aggregate({ where: { status: { notIn: ["cancelled"] }, createdAt: { gte: startOfThisMonth } }, _sum: { totalAmount: true } }),
+      prisma.order.aggregate({ where: { status: { notIn: ["cancelled"] }, createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } }, _sum: { totalAmount: true } }),
+      prisma.order.aggregate({ where: { status: { notIn: ["cancelled"] }, createdAt: { gte: startOfToday } }, _sum: { totalAmount: true } }),
+      prisma.order.count({ where: { status: { notIn: ["cancelled"] } } }),
+      prisma.order.count({ where: { status: { notIn: ["cancelled"] }, createdAt: { gte: startOfThisMonth } } }),
+      prisma.order.count({ where: { status: { notIn: ["cancelled"] }, createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } } }),
       prisma.user.count(),
+      prisma.user.count({ where: { createdAt: { gte: startOfThisMonth } } }),
+      prisma.user.count({ where: { createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } } }),
       prisma.product.count({ where: { isActive: true } }),
       prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 10, include: { user: { select: { name: true, email: true } } } }),
+      prisma.order.groupBy({ by: ["status"], _count: { id: true } }),
+      prisma.order.groupBy({ by: ["paymentMethod"], where: { status: { notIn: ["cancelled"] } }, _count: { id: true }, _sum: { totalAmount: true } }),
     ]);
-    // Raw SQL needed for field-to-field comparison — use actual DB table/column names
+
+    // Profit = revenue - cost (basePrice * qty) for all non-cancelled orders
+    const profitData = await prisma.$queryRaw`
+      SELECT
+        COALESCE(SUM(oi.unit_price * oi.qty), 0)                        AS total_revenue,
+        COALESCE(SUM(p.base_price  * oi.qty), 0)                        AS total_cost
+      FROM order_items oi
+      JOIN products p ON p.id = oi.product_id
+      JOIN orders o   ON o.id = oi.order_id
+      WHERE o.status NOT IN ('cancelled')
+    `;
+    const totalRevenue = Number(profitData[0]?.total_revenue ?? 0);
+    const totalCost    = Number(profitData[0]?.total_cost    ?? 0);
+    const totalProfit  = totalRevenue - totalCost;
+    const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : "0.0";
+
+    // This month profit
+    const thisMonthProfitData = await prisma.$queryRaw`
+      SELECT
+        COALESCE(SUM(oi.unit_price * oi.qty), 0) AS total_revenue,
+        COALESCE(SUM(p.base_price  * oi.qty), 0) AS total_cost
+      FROM order_items oi
+      JOIN products p ON p.id = oi.product_id
+      JOIN orders o   ON o.id = oi.order_id
+      WHERE o.status NOT IN ('cancelled') AND o.created_at >= ${startOfThisMonth}
+    `;
+    const lastMonthProfitData = await prisma.$queryRaw`
+      SELECT
+        COALESCE(SUM(oi.unit_price * oi.qty), 0) AS total_revenue,
+        COALESCE(SUM(p.base_price  * oi.qty), 0) AS total_cost
+      FROM order_items oi
+      JOIN products p ON p.id = oi.product_id
+      JOIN orders o   ON o.id = oi.order_id
+      WHERE o.status NOT IN ('cancelled') AND o.created_at >= ${startOfLastMonth} AND o.created_at <= ${endOfLastMonth}
+    `;
+
+    const thisMonthProfit = Number(thisMonthProfitData[0]?.total_revenue ?? 0) - Number(thisMonthProfitData[0]?.total_cost ?? 0);
+    const lastMonthProfit = Number(lastMonthProfitData[0]?.total_revenue ?? 0) - Number(lastMonthProfitData[0]?.total_cost ?? 0);
+
+    // Change % helper: compare this month vs last month
+    const changePct = (curr, prev) => {
+      if (prev === 0) return curr > 0 ? 100 : 0;
+      return Math.round(((curr - prev) / prev) * 100);
+    };
+
+    const thisMonthRev  = Number(thisMonthRevenueAgg._sum.totalAmount ?? 0);
+    const lastMonthRev  = Number(lastMonthRevenueAgg._sum.totalAmount ?? 0);
+    const todayRevenue  = Number(todayRevenueAgg._sum.totalAmount ?? 0);
+
+    // Order status breakdown
+    const statusBreakdown = {};
+    orderStatusGroups.forEach(g => { statusBreakdown[g.status] = g._count.id; });
+
+    // Payment method split
+    const paymentSplit = paymentMethodGroups.map(g => ({
+      method: g.paymentMethod,
+      count: g._count.id,
+      revenue: Number(g._sum.totalAmount ?? 0),
+    }));
+
+    // Top customers by total spend
+    const topCustomers = await prisma.order.groupBy({
+      by: ["userId"],
+      where: { status: { notIn: ["cancelled"] } },
+      _sum: { totalAmount: true },
+      _count: { id: true },
+      orderBy: { _sum: { totalAmount: "desc" } },
+      take: 5,
+    });
+    const topCustomersWithDetails = await Promise.all(topCustomers.map(async c => {
+      const user = await prisma.user.findUnique({ where: { id: c.userId }, select: { id: true, name: true, email: true } });
+      return { ...user, totalSpent: Number(c._sum.totalAmount ?? 0), orderCount: c._count.id };
+    }));
+
+    // Low stock
     const lowStockItems = await prisma.$queryRaw`SELECT COUNT(*) as count FROM "inventory" WHERE "qty_in_stock" <= "low_stock_threshold"`;
     const lowStock = Number(lowStockItems[0]?.count ?? 0);
-    res.json({ totalRevenue: totalRevenue._sum.totalAmount || 0, totalOrders, totalUsers, totalProducts, lowStockCount: lowStock, recentOrders });
+
+    // Average order value
+    const avgOrderValue = totalOrders > 0 ? (Number(totalRevenueAgg._sum.totalAmount ?? 0) / totalOrders) : 0;
+
+    res.json({
+      totalRevenue: Number(totalRevenueAgg._sum.totalAmount ?? 0),
+      totalProfit,
+      profitMargin,
+      todayRevenue,
+      avgOrderValue,
+      totalOrders,
+      totalUsers,
+      totalProducts,
+      lowStockCount: lowStock,
+      recentOrders,
+      statusBreakdown,
+      paymentSplit,
+      topCustomers: topCustomersWithDetails,
+      revenueChange: changePct(thisMonthRev, lastMonthRev),
+      profitChange:  changePct(thisMonthProfit, lastMonthProfit),
+      ordersChange:  changePct(thisMonthOrders, lastMonthOrders),
+      usersChange:   changePct(thisMonthUsers, lastMonthUsers),
+    });
   } catch (err) {
     res.status(500).json({ error: err.message || "Failed to load dashboard stats" });
   }
@@ -50,22 +166,37 @@ router.get("/dashboard/stats", authAdmin, async (req, res) => {
 
 router.get("/dashboard/revenue-chart", authAdmin, async (req, res) => {
   try {
-    const days = 30;
+    const days = Number(req.query.days) || 30;
     const from = new Date(); from.setDate(from.getDate() - days);
     const orders = await prisma.order.findMany({
       where: { createdAt: { gte: from }, status: { notIn: ["cancelled"] } },
       select: { createdAt: true, totalAmount: true },
+      include: { items: { select: { qty: true, product: { select: { basePrice: true } } } } },
     });
-    const map = {};
+
+    const revenueMap = {};
+    const profitMap  = {};
     for (let i = 0; i < days; i++) {
       const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
-      map[d.toISOString().slice(0, 10)] = 0;
+      const key = d.toISOString().slice(0, 10);
+      revenueMap[key] = 0;
+      profitMap[key]  = 0;
     }
+
     orders.forEach(o => {
       const key = o.createdAt.toISOString().slice(0, 10);
-      if (map[key] !== undefined) map[key] += Number(o.totalAmount);
+      if (revenueMap[key] === undefined) return;
+      const rev  = Number(o.totalAmount);
+      const cost = (o.items || []).reduce((s, it) => s + Number(it.product?.basePrice ?? 0) * it.qty, 0);
+      revenueMap[key] += rev;
+      profitMap[key]  += rev - cost;
     });
-    res.json(Object.entries(map).map(([date, revenue]) => ({ date: date.slice(5), revenue })));
+
+    res.json(Object.keys(revenueMap).map(date => ({
+      date:    date.slice(5),
+      revenue: Math.round(revenueMap[date]),
+      profit:  Math.round(profitMap[date]),
+    })));
   } catch (err) {
     res.status(500).json({ error: err.message || "Failed to load revenue chart" });
   }
@@ -80,14 +211,16 @@ router.get("/dashboard/top-products", authAdmin, async (req, res) => {
       take: 8,
     });
     const products = await Promise.all(top.map(async t => {
-      const p = await prisma.product.findUnique({ where: { id: t.productId }, select: { id: true, name: true } });
-      // Calculate revenue: sum of (unitPrice * qty) for all items of this product
+      const p = await prisma.product.findUnique({ where: { id: t.productId }, select: { id: true, name: true, basePrice: true } });
       const items = await prisma.orderItem.findMany({
         where: { productId: t.productId },
         select: { unitPrice: true, qty: true },
       });
       const totalRevenue = items.reduce((s, i) => s + Number(i.unitPrice) * i.qty, 0);
-      return { ...p, totalSold: t._sum.qty, totalRevenue };
+      const totalCost    = Number(p?.basePrice ?? 0) * (t._sum.qty ?? 0);
+      const totalProfit  = totalRevenue - totalCost;
+      const marginPct    = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : "0.0";
+      return { ...p, totalSold: t._sum.qty, totalRevenue, totalProfit, marginPct };
     }));
     res.json(products);
   } catch (err) {
