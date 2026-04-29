@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 
 const STEPS = ["Address", "Payment", "Review"];
 
-// Load Razorpay script on demand and wait for it to be ready
+// FIX: load Razorpay script on demand and wait for it to be ready
 function loadRazorpay(): Promise<void> {
   return new Promise((resolve, reject) => {
     if ((window as any).Razorpay) return resolve();
@@ -24,21 +24,6 @@ function loadRazorpay(): Promise<void> {
   });
 }
 
-// FIX: Retry helper — attempts fn up to `times` times with exponential backoff
-async function retryAsync(fn: () => Promise<void>, times = 3, delayMs = 600): Promise<boolean> {
-  for (let i = 0; i < times; i++) {
-    try {
-      await fn();
-      return true; // success
-    } catch {
-      if (i < times - 1) {
-        await new Promise((r) => setTimeout(r, delayMs * (i + 1)));
-      }
-    }
-  }
-  return false; // all attempts failed
-}
-
 export default function CheckoutPage() {
   const { cart, user, clearCart } = useStore();
   const router = useRouter();
@@ -48,27 +33,20 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod">("razorpay");
   const [couponCode, setCouponCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [newAddr, setNewAddr] = useState({
-    fullName: "",
-    phone: "",
-    addressLine1: "",
-    city: "Ahmedabad",
-    state: "Gujarat",
-    pincode: "",
-    gstin: "",
-  });
+  const [newAddr, setNewAddr] = useState({ fullName: "", phone: "", addressLine1: "", city: "Ahmedabad", state: "Gujarat", pincode: "", gstin: "" });
   const [addingAddr, setAddingAddr] = useState(false);
 
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
   const cgst = subtotal * 0.025;
   const sgst = subtotal * 0.025;
-  const shipping = subtotal > 500 ? 0 : 50;
+  const shipping = subtotal >= 500 ? 0 : 50;
   const rawTotal = subtotal + cgst + sgst + shipping;
   const total = Math.round(rawTotal);
   const roundOffDiff = total - rawTotal;
 
   useEffect(() => {
     if (!user) { router.push("/login"); return; }
+    // FIX: show error if address fetch fails instead of silently swallowing it
     accountApi.getAddresses()
       .then(setAddresses)
       .catch(() => toast.error("Could not load your addresses. Please refresh."));
@@ -94,15 +72,6 @@ export default function CheckoutPage() {
     } catch (err: any) { toast.error(err.message); }
   };
 
-  // FIX: Safe cancel helper — retries 3 times, logs failure, never throws
-  const safeCancelOrder = async (orderId: number): Promise<void> => {
-    const cancelled = await retryAsync(() => ordersApi.cancel(orderId), 3, 600);
-    if (!cancelled) {
-      // All retries failed — log for debugging; user sees a specific message
-      console.error(`[Checkout] Failed to cancel order ${orderId} after 3 retries`);
-    }
-  };
-
   const handlePlaceOrder = async () => {
     if (!selectedAddress) { toast.error("Please select a delivery address"); return; }
     setLoading(true);
@@ -111,14 +80,14 @@ export default function CheckoutPage() {
         addressId: selectedAddress,
         paymentMethod,
         couponCode: couponCode || undefined,
-        items: cart.map((i) => ({ productId: i.productId, variantId: i.variantId, qty: i.qty })),
+        items: cart.map(i => ({ productId: i.productId, variantId: i.variantId, qty: i.qty })),
       });
 
       if (paymentMethod === "razorpay") {
+        // FIX: load Razorpay script on demand — wait for it to be ready
         await loadRazorpay();
 
         const rzp = await paymentsApi.createRazorpayOrder(order.id);
-
         const options = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
           amount: rzp.amount,
@@ -126,62 +95,42 @@ export default function CheckoutPage() {
           name: process.env.NEXT_PUBLIC_SITE_NAME || "Zupwell",
           description: `Order ${order.orderNumber}`,
           order_id: rzp.razorpayOrderId,
-
           handler: async (response: any) => {
-            // FIX: payment succeeded — verify on backend
             try {
               await paymentsApi.verify({ ...response, orderId: order.id });
               clearCart();
               toast.success("Payment successful! 🎉");
               router.push(`/order/${order.orderNumber}`);
-            } catch (verifyErr) {
-              // Verification failed — cancel the pending order with retry
-              console.error("[Checkout] Payment verification failed:", verifyErr);
-              await safeCancelOrder(order.id);
-              toast.error("Payment verification failed. Please contact support if amount was deducted.");
+            } catch {
+              // Verification failed — cancel the order so it doesn't pollute admin
+              try { await ordersApi.cancel(order.id); } catch {}
+              toast.error("Payment verification failed. Please try again.");
               setLoading(false);
             }
           },
-
           modal: {
-            // FIX: User closed Razorpay without paying — cancel with retry + proper messaging
             ondismiss: async () => {
-              const cancelled = await retryAsync(() => ordersApi.cancel(order.id), 3, 600);
-
-              if (cancelled) {
-                toast.error("Payment cancelled. Your order has been removed.");
-              } else {
-                // Cancel failed even after retries — tell user explicitly
-                console.error(`[Checkout] ondismiss: could not cancel order ${order.id}`);
-                toast.error(
-                  "Payment cancelled. If you see a pending order in your account, please contact support to remove it.",
-                  { duration: 6000 }
-                );
-              }
-
+              // User closed Razorpay without paying — cancel the pending order
+              try { await ordersApi.cancel(order.id); } catch {}
+              toast.error("Payment cancelled.");
               setLoading(false);
             },
-
-            // FIX: Also handle escape key / backdrop click which fires confirm:false
-            confirm_close: false,
           },
-
           prefill: { name: user?.name, email: user?.email },
           theme: { color: "#F47C41" },
         };
-
         new (window as any).Razorpay(options).open();
-        // Note: setLoading(false) is handled inside handler or ondismiss
+        // Note: setLoading(false) is handled by ondismiss or handler above
       } else {
-        // COD — no payment needed
         clearCart();
         toast.success("Order placed! You'll pay on delivery.");
         router.push(`/order/${order.orderNumber}`);
-        setLoading(false);
       }
     } catch (err: any) {
-      toast.error(err.message || "Order failed. Please try again.");
+      toast.error(err.message || "Order failed");
       setLoading(false);
+    } finally {
+      if (paymentMethod === "cod") setLoading(false);
     }
   };
 
@@ -207,7 +156,6 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-
             {/* Step 0: Address */}
             {step === 0 && (
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
@@ -235,7 +183,7 @@ export default function CheckoutPage() {
                       {[["fullName", "Full Name"], ["phone", "Phone"], ["addressLine1", "Address Line 1"], ["city", "City"], ["state", "State"], ["pincode", "Pincode"], ["gstin", "GSTIN (optional)"]].map(([k, label]) => (
                         <div key={k}>
                           <label className="text-xs text-[#6B7280] mb-1 block">{label}</label>
-                          <input type="text" value={(newAddr as any)[k]} onChange={(e) => setNewAddr((n) => ({ ...n, [k]: e.target.value }))}
+                          <input type="text" value={(newAddr as any)[k]} onChange={(e) => setNewAddr(n => ({ ...n, [k]: e.target.value }))}
                             className="input-field text-sm" placeholder={label} />
                         </div>
                       ))}
@@ -300,20 +248,9 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex gap-3">
                   <button onClick={() => setStep(1)} className="btn-outline py-3 px-6">← Back</button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handlePlaceOrder}
-                    disabled={loading}
-                    className="btn-primary flex-1 py-3 disabled:opacity-50"
-                  >
-                    {loading
-                      ? <span className="flex items-center justify-center gap-2">
-                          <span className="h-4 w-4 rounded-full border-2 border-[#D9DEE8] border-t-transparent animate-spin" />
-                          Placing Order...
-                        </span>
-                      : `Place Order · ₹${total.toFixed(0)}`
-                    }
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handlePlaceOrder} disabled={loading}
+                    className="btn-primary flex-1 py-3 disabled:opacity-50">
+                    {loading ? <span className="flex items-center justify-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-[#D9DEE8] border-t-transparent animate-spin" />Placing Order...</span> : `Place Order · ₹${total.toFixed(0)}`}
                   </motion.button>
                 </div>
               </motion.div>

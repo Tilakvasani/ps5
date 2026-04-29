@@ -70,9 +70,11 @@ export default function Navbar() {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
           {[
-            ["Products", "/products"],
-            ["Electrolytes", "/products?category=electrolytes"],
-            ["Vitamins", "/products?category=vitamins"],
+            ["Home", "/"],
+            ["Shop", "/products"],
+            ["About Us", "/about"],
+            ["FAQs", "/faqs"],
+            ["Contact", "/contact"],
           ].map(([label, href]) => (
             <Link
               key={label}
@@ -167,8 +169,11 @@ export default function Navbar() {
             style={{ background: "#FFFFFF", borderTop: "1px solid #D9DEE8" }}
           >
             <div className="px-6 py-4 flex flex-col gap-3">
-              <Link href="/products" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Products</Link>
-              <Link href="/products?category=electrolytes" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Electrolytes</Link>
+              <Link href="/" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Home</Link>
+              <Link href="/products" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Shop / Products</Link>
+              <Link href="/about" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>About Us</Link>
+              <Link href="/faqs" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>FAQs</Link>
+              <Link href="/contact" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Contact Us</Link>
               <Link href="/cart" className="text-sm py-2 text-[#374151] hover:text-[#F47C41] transition-colors" onClick={() => setMenuOpen(false)}>Cart ({cartCount})</Link>
               {user ? (
                 <>
