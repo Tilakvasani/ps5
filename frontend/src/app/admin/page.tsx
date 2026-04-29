@@ -1,339 +1,259 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import {
-  TrendingUp, ShoppingBag, Users, Package, IndianRupee,
-  AlertTriangle, ArrowUpRight, ArrowDownRight, Clock, Zap,
-} from "lucide-react";
-import { adminApi } from "@/lib/api";
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from "recharts";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle } from "lucide-react";
+import Navbar from "@/components/storefront/Navbar";
+import Footer from "@/components/storefront/Footer";
+import { publicApi } from "@/lib/api";
 
-const fmt  = (n: number) => Math.round(n).toLocaleString("en-IN");
-const fmtK = (n: number) => n >= 1000 ? `₹${(n / 1000).toFixed(1)}k` : `₹${Math.round(n)}`;
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, delay },
+});
 
-function ChangeBadge({ pct }: { pct?: number }) {
-  if (pct === undefined || pct === null) return null;
-  const up = pct >= 0;
-  return (
-    <span className={`flex items-center gap-0.5 text-xs font-semibold ${up ? "text-emerald-500" : "text-red-400"}`}>
-      {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}{Math.abs(pct)}%
-    </span>
-  );
-}
+const FEATURE_ICONS = [Zap, Shield, Truck, Award];
 
-const StatCard = ({ title, value, sub, icon: Icon, change, color, href }: any) => (
-  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-    className="card hover:shadow-sm transition-all">
-    <div className="flex items-start justify-between mb-3">
-      <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${color}`}>
-        <Icon size={18} className="text-white" />
-      </div>
-      <ChangeBadge pct={change} />
-    </div>
-    <p className="text-2xl font-display font-black text-[#111827]">{value}</p>
-    <p className="text-sm text-[#6B7280] mt-0.5">{title}</p>
-    {sub && <p className="text-xs text-[#9CA3AF] mt-1">{sub}</p>}
-    {href && <Link href={href} className="text-xs text-[#F47C41] hover:underline mt-2 block">View →</Link>}
-  </motion.div>
-);
+const CATEGORIES = [
+  { name: "Electrolytes", emoji: "⚡", slug: "electrolytes", desc: "Hydration & recovery drinks" },
+  { name: "Protein",      emoji: "💪", slug: "protein",      desc: "Whey, plant & blends" },
+  { name: "Vitamins",     emoji: "🌿", slug: "vitamins",     desc: "Daily essentials & multis" },
+  { name: "Immunity",     emoji: "🛡️", slug: "immunity",     desc: "Zinc, Vitamin C & more" },
+  { name: "Effervescent", emoji: "🫧", slug: "effervescent", desc: "Fizzy tablets & sachets" },
+  { name: "Wellness",     emoji: "🧘", slug: "wellness",     desc: "Sleep, stress & gut health" },
+];
 
-const ChartTip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-xl border border-[#D9DEE8] bg-white p-3 text-sm shadow-sm">
-      <p className="text-[#374151] mb-2 font-semibold">{label}</p>
-      {payload.map((p: any) => (
-        <p key={p.name} style={{ color: p.color }} className="font-bold">
-          {p.name === "profit" ? "Profit" : "Revenue"}: ₹{fmt(p.value)}
-        </p>
-      ))}
-    </div>
-  );
+// Default values — used until settings load or if setting is empty
+const D = {
+  hero_badge:       "Ahmedabad's #1 Health Supplement Store",
+  hero_title:       "A True Companion to Your Health",
+  hero_tagline:     "તમારા સ્વાસ્થ્ય સાથે ચાલો — ઝુપવેલ!",
+  hero_subtext:     "Science-backed electrolytes, vitamins, protein, and wellness products. Quality is our mantra.",
+  hero_stat1_value: "200+",  hero_stat1_label: "Products",
+  hero_stat2_value: "50K+",  hero_stat2_label: "Happy Customers",
+  hero_stat3_value: "100%",  hero_stat3_label: "Authentic",
+  feature1_title: "Science-Backed",   feature1_desc: "Formulated with clinically studied ingredients for maximum effectiveness.",
+  feature2_title: "Sugar-Free",       feature2_desc: "Great taste without the sugar load. Health that's actually delicious.",
+  feature3_title: "Instant Energy",   feature3_desc: "Fast-absorbing effervescent formula. Drop, fizz, drink, go.",
+  feature4_title: "Best Flavour",     feature4_desc: "We believe health shouldn't taste boring. Every sip is a vibe.",
+  founder_name:    "Parag Hirpara",
+  founder_title:   "Founder & CEO",
+  founder_message: "At Zupwell, I started with a simple observation: traditional supplements often feel like a chore — hard to swallow, slow to absorb, and difficult to integrate into a busy life. I founded Zupwell to bridge the gap between clinical effectiveness and modern convenience. Through Zupwell, my endeavor is to ensure that everyone can fulfil their dreams without compromising their health.",
+  founder_photo:   "",
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  pending: "#F59E0B", confirmed: "#3B82F6", processing: "#8B5CF6",
-  shipped: "#06B6D4", delivered: "#10B981", cancelled: "#EF4444",
-};
-const STATUS_BADGE: Record<string, string> = {
-  pending: "badge-warning", confirmed: "badge-info", processing: "badge-purple",
-  shipped: "badge-purple", delivered: "badge-success", cancelled: "badge-danger",
-};
+const s = (settings: Record<string, string>, key: string) =>
+  settings[key] || D[key as keyof typeof D] || "";
 
-export default function AdminDashboard() {
-  const [stats, setStats]             = useState<any>(null);
-  const [revenue, setRevenue]         = useState<any[]>([]);
-  const [topProducts, setTopProducts] = useState<any[]>([]);
-  const [chartDays, setChartDays]     = useState(30);
-  const [loading, setLoading]         = useState(true);
+export default function HomePage() {
+  const [settings, setSettings] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    Promise.all([adminApi.dashboard(), adminApi.revenueChart(30), adminApi.topProducts()])
-      .then(([s, r, t]) => { setStats(s); setRevenue(r); setTopProducts(t); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    publicApi.getSettings().then(setSettings).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    adminApi.revenueChart(chartDays).then(setRevenue).catch(() => {});
-  }, [chartDays]);
+  const features = [1, 2, 3, 4].map(n => ({
+    icon: FEATURE_ICONS[n - 1],
+    title: s(settings, `feature${n}_title`),
+    desc:  s(settings, `feature${n}_desc`),
+  }));
 
-  const statusData  = stats ? Object.entries(stats.statusBreakdown || {}) : [];
-  const maxRevenue  = Math.max(...topProducts.map((p: any) => p.totalRevenue || 0), 1);
-  const statusTotal = statusData.reduce((s, [, v]) => s + (v as number), 0);
+  const stats = [
+    [s(settings, "hero_stat1_value"), s(settings, "hero_stat1_label")],
+    [s(settings, "hero_stat2_value"), s(settings, "hero_stat2_label")],
+    [s(settings, "hero_stat3_value"), s(settings, "hero_stat3_label")],
+  ];
+
+  const hasCerts = s(settings, "cert_fssai_logo") || s(settings, "cert_iso_logo") || s(settings, "cert_gmp_logo");
 
   return (
-    <div className="space-y-8">
+    <main className="relative min-h-screen bg-[#F4F6FA] overflow-x-hidden">
+      <Navbar />
 
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-display font-black text-[#111827]">Dashboard</h1>
-          <p className="text-[#6B7280] text-sm mt-1">
-            {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </p>
+      {/* ── Hero ── */}
+      <section className="relative min-h-screen flex items-center justify-center pt-20 px-6">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-[#F47C41]/8 blur-[120px]" />
+          <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-yellow-400/10 blur-[120px]" />
         </div>
-        <div className="flex items-center gap-3">
-          <Link href="/admin/orders?status=pending">
-            <button className="btn-outline text-sm px-4 py-2 flex items-center gap-2">
-              <Clock size={14} /> Pending
-              {stats?.statusBreakdown?.pending > 0 && (
-                <span className="bg-[#F47C41] text-white text-xs rounded-full px-1.5 py-0.5 font-bold leading-none">
-                  {stats.statusBreakdown.pending}
-                </span>
+        <div className="relative z-10 mx-auto max-w-5xl text-center">
+          <motion.div {...fadeUp(0)}>
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#F47C41]/30 bg-[#F47C41]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-[#F47C41] mb-8">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#F47C41] animate-pulse" />
+              {s(settings, "hero_badge")}
+            </span>
+          </motion.div>
+
+          <motion.h1 {...fadeUp(0.1)} className="text-5xl md:text-7xl font-display font-black leading-[1.05] mb-4">
+            <span className="gradient-text">{s(settings, "hero_title")}</span>
+          </motion.h1>
+
+          {s(settings, "hero_tagline") && (
+            <motion.p {...fadeUp(0.15)} className="text-lg text-[#F47C41] font-semibold mb-4">
+              {s(settings, "hero_tagline")}
+            </motion.p>
+          )}
+
+          <motion.p {...fadeUp(0.2)} className="mx-auto max-w-2xl text-lg text-[#6B7280] leading-relaxed mb-10">
+            {s(settings, "hero_subtext")}
+          </motion.p>
+
+          <motion.div {...fadeUp(0.3)} className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/products">
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+                className="btn-primary flex items-center gap-2 px-8 py-4 text-base">
+                Browse Products <ArrowRight size={16} />
+              </motion.button>
+            </Link>
+            <Link href="/register">
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+                className="btn-outline flex items-center gap-2 px-8 py-4 text-base">
+                Create Account <ChevronRight size={16} />
+              </motion.button>
+            </Link>
+          </motion.div>
+
+          {/* Stats */}
+          <motion.div {...fadeUp(0.4)} className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
+            {stats.map(([val, label]) => (
+              <div key={label} className="text-center">
+                <div className="text-2xl font-display font-black gradient-text">{val}</div>
+                <div className="text-xs text-[#6B7280] mt-1">{label}</div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Why is our product special ── */}
+      <section className="py-20 px-6 bg-white">
+        <div className="mx-auto max-w-7xl">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-display font-black text-[#111827] mb-3">Why is our product <span className="gradient-text">special?</span></h2>
+            <p className="text-[#6B7280]">Everything you need, nothing you don't</p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((f, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}
+                className="card group hover:border-[#F47C41]/20 transition-all duration-300 text-center">
+                <div className="h-14 w-14 mx-auto rounded-2xl bg-[#F47C41]/10 flex items-center justify-center mb-4 group-hover:bg-[#F47C41]/20 transition-all">
+                  <f.icon size={24} className="text-[#F47C41]" />
+                </div>
+                <h3 className="font-display font-bold text-[#111827] mb-2">{f.title}</h3>
+                <p className="text-sm text-[#6B7280] leading-relaxed">{f.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Certificate logos ── */}
+      {hasCerts && (
+        <section className="py-12 px-6 bg-[#F4F6FA]">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#9CA3AF] mb-6">Certified & Compliant</p>
+            <div className="flex items-center justify-center gap-10 flex-wrap">
+              {[
+                { key: "cert_fssai_logo", label: "FSSAI" },
+                { key: "cert_iso_logo",   label: "ISO" },
+                { key: "cert_gmp_logo",   label: "GMP" },
+              ].map(({ key, label }) =>
+                s(settings, key) ? (
+                  <img key={key} src={s(settings, key)} alt={label} className="h-12 object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                ) : (
+                  <div key={key} className="flex items-center gap-1.5 text-sm font-semibold text-[#6B7280] border border-[#D9DEE8] rounded-lg px-4 py-2">
+                    <CheckCircle size={14} className="text-emerald-500" /> {label} Certified
+                  </div>
+                )
               )}
-            </button>
-          </Link>
-          <Link href="/admin/products/new">
-            <button className="btn-primary text-sm px-4 py-2 flex items-center gap-2">
-              <Zap size={14} /> Add Product
-            </button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Low stock alert */}
-      {stats?.lowStockCount > 0 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="flex items-center gap-3 rounded-xl border border-yellow-400/40 bg-yellow-50 px-4 py-3 text-sm">
-          <AlertTriangle size={16} className="text-yellow-500 flex-shrink-0" />
-          <span className="text-yellow-800">
-            <span className="font-bold">{stats.lowStockCount} product{stats.lowStockCount > 1 ? "s" : ""}</span> are low on stock.
-          </span>
-          <Link href="/admin/inventory" className="ml-auto text-yellow-600 hover:text-yellow-800 font-semibold">Fix now →</Link>
-        </motion.div>
+            </div>
+          </div>
+        </section>
       )}
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Revenue"  icon={IndianRupee} color="bg-[#F47C41]"
-          value={stats ? `₹${fmt(stats.totalRevenue)}` : "—"}
-          sub={stats ? `Today ₹${fmt(stats.todayRevenue)}` : undefined}
-          change={stats?.revenueChange} />
-        <StatCard title="Total Profit" icon={TrendingUp} color="bg-emerald-500"
-          value={stats ? `₹${fmt(stats.totalProfit)}` : "—"}
-          sub={stats ? `Margin ${stats.profitMargin}%` : undefined}
-          change={stats?.profitChange} />
-        <StatCard title="Total Orders" icon={ShoppingBag} color="bg-[#2EC4B6]"
-          value={stats?.totalOrders ?? "—"}
-          sub={stats ? `Avg ₹${fmt(stats.avgOrderValue)}` : undefined}
-          change={stats?.ordersChange} href="/admin/orders" />
-        <StatCard title="Total Users" icon={Users} color="bg-blue-500"
-          value={stats?.totalUsers ?? "—"}
-          change={stats?.usersChange} href="/admin/users" />
-      </div>
-
-      {/* Revenue + Profit Chart */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2">
-            <TrendingUp size={16} className="text-[#F47C41]" />
-            <h2 className="font-display font-bold text-[#111827]">Revenue & Profit</h2>
-          </div>
-          <div className="flex items-center gap-1 bg-[#F4F6FA] rounded-lg p-1">
-            {[7, 30, 90].map(d => (
-              <button key={d} onClick={() => setChartDays(d)}
-                className={`text-xs px-3 py-1.5 rounded-md font-semibold transition-all ${chartDays === d ? "bg-white text-[#F47C41] shadow-sm" : "text-[#6B7280] hover:text-[#111827]"}`}>
-                {d}d
-              </button>
+      {/* ── Categories ── */}
+      <section className="py-24 px-6">
+        <div className="mx-auto max-w-7xl">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-display font-black text-[#111827] mb-3">Shop by <span className="gradient-text">Category</span></h2>
+            <p className="text-[#6B7280]">Everything you need for your health and wellness journey</p>
+          </motion.div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {CATEGORIES.map((cat, i) => (
+              <motion.div key={cat.slug} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>
+                <Link href={`/products?category=${cat.slug}`}>
+                  <motion.div whileHover={{ scale: 1.02 }} className="card cursor-pointer group transition-all duration-300 hover:bg-[#FFFFFF]">
+                    <div className="text-3xl mb-3">{cat.emoji}</div>
+                    <h3 className="font-display font-bold text-[#111827] mb-1">{cat.name}</h3>
+                    <p className="text-sm text-[#6B7280]">{cat.desc}</p>
+                    <div className="mt-4 flex items-center gap-1 text-[#F47C41] text-xs font-semibold">
+                      Shop now <ChevronRight size={12} />
+                    </div>
+                  </motion.div>
+                </Link>
+              </motion.div>
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-4 mb-4 text-xs text-[#6B7280]">
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-[#F47C41] rounded" />Revenue</span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-emerald-500 rounded" />Profit</span>
-        </div>
-        <ResponsiveContainer width="100%" height={240}>
-          <AreaChart data={revenue}>
-            <defs>
-              <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#F47C41" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#F47C41" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="profGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#10B981" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
-            <XAxis dataKey="date" tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
-            <Tooltip content={<ChartTip />} />
-            <Area type="monotone" dataKey="revenue" name="revenue" stroke="#F47C41" fill="url(#revGrad)" strokeWidth={2} dot={false} />
-            <Area type="monotone" dataKey="profit"  name="profit"  stroke="#10B981" fill="url(#profGrad)" strokeWidth={2} dot={false} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      </section>
 
-      {/* Order Pipeline + Payment Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card">
-          <h2 className="font-display font-bold text-[#111827] mb-4">Order Pipeline</h2>
-          {statusData.length > 0 ? (
-            <div className="space-y-2">
-              {statusData.map(([name, value]: any) => {
-                const pct = statusTotal > 0 ? Math.round((value / statusTotal) * 100) : 0;
-                return (
-                  <Link key={name} href={`/admin/orders?status=${name}`}>
-                    <div className="flex items-center gap-3 hover:bg-[#F4F6FA] rounded-lg p-2 -mx-2 transition-all cursor-pointer">
-                      <span className={`badge ${STATUS_BADGE[name] || "badge-info"} w-24 text-center shrink-0`}>{name}</span>
-                      <div className="flex-1 h-2 bg-[#F4F6FA] rounded-full overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-500"
-                          style={{ width: `${pct}%`, backgroundColor: STATUS_COLORS[name] || "#6B7280" }} />
-                      </div>
-                      <span className="text-sm font-bold text-[#111827] w-6 text-right">{value}</span>
-                      <span className="text-xs text-[#9CA3AF] w-8 text-right">{pct}%</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : <p className="text-[#6B7280] text-sm py-4">No orders yet</p>}
-        </div>
-
-        <div className="card">
-          <h2 className="font-display font-bold text-[#111827] mb-4">Payment Methods</h2>
-          {stats?.paymentSplit?.length > 0 ? (
-            <div className="space-y-4">
-              {stats.paymentSplit.map((p: any) => (
-                <div key={p.method} className="flex items-center gap-3">
-                  <div className={`h-9 w-9 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${p.method === "razorpay" ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"}`}>
-                    {p.method === "razorpay" ? "R" : "C"}
+      {/* ── Founder's Message ── */}
+      {s(settings, "founder_message") && (
+        <section className="py-24 px-6 bg-white">
+          <div className="mx-auto max-w-4xl">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              className="card flex flex-col md:flex-row gap-8 items-center">
+              {/* Photo */}
+              <div className="shrink-0">
+                {s(settings, "founder_photo") ? (
+                  <img src={s(settings, "founder_photo")} alt={s(settings, "founder_name")}
+                    className="h-32 w-32 rounded-full object-cover border-4 border-[#F47C41]/20" />
+                ) : (
+                  <div className="h-32 w-32 rounded-full bg-[#F47C41]/10 flex items-center justify-center text-4xl font-display font-black text-[#F47C41]">
+                    {s(settings, "founder_name").charAt(0)}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm font-semibold text-[#111827]">{p.method === "razorpay" ? "Razorpay" : "Cash on Delivery"}</span>
-                      <span className="text-sm font-bold text-[#F47C41]">₹{fmt(p.revenue)}</span>
-                    </div>
-                    <p className="text-xs text-[#6B7280]">{p.count} order{p.count !== 1 ? "s" : ""}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : <p className="text-[#6B7280] text-sm py-4">No payment data yet</p>}
-        </div>
-      </div>
-
-      {/* Top Products + Top Customers */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-bold text-[#111827]">Top Products</h2>
-            <Link href="/admin/products" className="text-xs text-[#F47C41] hover:underline">View all →</Link>
-          </div>
-          <div className="space-y-4">
-            {topProducts.slice(0, 6).map((p: any, i: number) => (
-              <div key={p.id} className="flex items-center gap-3">
-                <span className="text-xs font-bold text-[#D1D5DB] w-5 shrink-0">#{i + 1}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#111827] truncate">{p.name}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-1.5 bg-[#F4F6FA] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#F47C41] rounded-full"
-                        style={{ width: `${Math.round((p.totalRevenue / maxRevenue) * 100)}%` }} />
-                    </div>
-                    <span className="text-xs text-[#9CA3AF] shrink-0">{p.totalSold} sold</span>
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-bold text-[#F47C41]">₹{fmt(p.totalRevenue)}</p>
-                  <p className="text-xs text-emerald-500 font-semibold">+₹{fmt(p.totalProfit)} · {p.marginPct}%</p>
-                </div>
+                )}
               </div>
-            ))}
-            {topProducts.length === 0 && <p className="text-[#6B7280] text-sm">No data yet</p>}
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-bold text-[#111827]">Top Customers</h2>
-            <Link href="/admin/users" className="text-xs text-[#F47C41] hover:underline">View all →</Link>
-          </div>
-          <div className="space-y-3">
-            {stats?.topCustomers?.length > 0 ? stats.topCustomers.map((c: any) => (
-              <div key={c.id} className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-[#F47C41]/10 flex items-center justify-center text-sm font-bold text-[#F47C41] shrink-0">
-                  {c.name?.charAt(0)?.toUpperCase() || "?"}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#111827] truncate">{c.name || "—"}</p>
-                  <p className="text-xs text-[#6B7280] truncate">{c.email}</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-bold text-[#111827]">₹{fmt(c.totalSpent)}</p>
-                  <p className="text-xs text-[#9CA3AF]">{c.orderCount} order{c.orderCount !== 1 ? "s" : ""}</p>
-                </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-[#F47C41] mb-3">Founder's Message</p>
+                <p className="text-[#374151] leading-relaxed italic mb-4">"{s(settings, "founder_message")}"</p>
+                <p className="font-display font-bold text-[#111827]">— {s(settings, "founder_name")}</p>
+                <p className="text-sm text-[#6B7280]">{s(settings, "founder_title")}</p>
               </div>
-            )) : <p className="text-[#6B7280] text-sm py-4">No customer data yet</p>}
+            </motion.div>
           </div>
-        </div>
-      </div>
+        </section>
+      )}
 
-      {/* Recent Orders */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display font-bold text-[#111827]">Recent Orders</h2>
-          <Link href="/admin/orders" className="text-sm text-[#F47C41] hover:text-[#f79b6e]">View all →</Link>
+      {/* ── CTA ── */}
+      <section className="py-24 px-6">
+        <div className="mx-auto max-w-4xl">
+          <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
+            className="rounded-3xl border border-[#F47C41]/20 bg-gradient-to-br from-[#F47C41]/10 to-[#FFD166]/5 p-12 text-center">
+            <h2 className="text-3xl md:text-4xl font-display font-black text-[#111827] mb-4">
+              Start Your <span className="gradient-text">Wellness Journey</span>
+            </h2>
+            <p className="text-[#6B7280] mb-8 max-w-lg mx-auto">
+              Create a free account to access exclusive pricing and your complete order history.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/register">
+                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="btn-primary px-8 py-4">
+                  Get Started Free
+                </motion.button>
+              </Link>
+              <Link href="/products">
+                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="btn-outline px-8 py-4">
+                  View Products
+                </motion.button>
+              </Link>
+            </div>
+          </motion.div>
         </div>
-        {stats?.recentOrders?.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-[#6B7280] border-b border-[#D9DEE8]">
-                  {["Order #", "Customer", "Amount", "Payment", "Status", "Date"].map(h => (
-                    <th key={h} className="pb-3 font-semibold pr-4 whitespace-nowrap">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F4F6FA]">
-                {stats.recentOrders.map((o: any) => (
-                  <tr key={o.id} className="hover:bg-[#F4F6FA] transition-colors">
-                    <td className="py-3 pr-4 font-mono text-[#111827] font-semibold text-xs">{o.orderNumber}</td>
-                    <td className="py-3 pr-4 text-[#374151]">{o.user?.name || "—"}</td>
-                    <td className="py-3 pr-4 font-bold text-[#111827]">₹{fmt(Number(o.totalAmount))}</td>
-                    <td className="py-3 pr-4">
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${o.paymentMethod === "razorpay" ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"}`}>
-                        {o.paymentMethod === "razorpay" ? "Online" : "COD"}
-                      </span>
-                    </td>
-                    <td className="py-3 pr-4">
-                      <span className={`badge ${STATUS_BADGE[o.status] || "badge-info"}`}>{o.status}</span>
-                    </td>
-                    <td className="py-3 text-[#6B7280] text-xs whitespace-nowrap">
-                      {new Date(o.createdAt).toLocaleDateString("en-IN")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : <p className="text-[#6B7280] text-sm py-4">No orders yet</p>}
-      </div>
+      </section>
 
-    </div>
+      <Footer />
+    </main>
   );
 }

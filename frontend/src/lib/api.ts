@@ -207,3 +207,8 @@ export const adminApi = {
 };
 
 export default api;
+// Public settings — no auth needed, used by storefront pages
+export const publicApi = {
+  getSettings: (): Promise<Record<string, string>> =>
+    api.get("/api/settings").then((r) => r.data),
+};
