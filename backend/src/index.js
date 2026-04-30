@@ -14,13 +14,30 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 // ── CORS ─────────────────────────────────────────────
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://ps5-hhvf.vercel.app",
-    process.env.FRONTEND_URL,
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "https://ps5-phi.vercel.app",
+      "https://ps5-hhvf.vercel.app",
+      process.env.FRONTEND_URL,
+    ].filter(Boolean);
+
+    // Allow requests with no origin (mobile apps, curl, Render health checks)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 }));
+
+// Handle OPTIONS preflight for ALL routes
+app.options("*", cors());
 
 // ── Block Direct Browser Access to API ───────────────
 app.use((req, res, next) => {
