@@ -1,4 +1,5 @@
 "use client";
+import { useSettings } from "@/lib/useSettings";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ShoppingCart, Star, Package, ChevronLeft, Minus, Plus } from "lucide-react";
@@ -17,6 +18,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const [activeImage, setActiveImage] = useState(0);
   const [activeTab, setActiveTab] = useState<"desc" | "specs" | "reviews">("desc");
   const { addToCart } = useStore();
+  const { cgstRate, sgstRate } = useSettings();
 
   useEffect(() => {
     productsApi.get(params.slug)
@@ -42,8 +44,8 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   );
 
   const price = selectedVariant ? Number(selectedVariant.price) : Number(product.sellingPrice);
-  const cgst = price * qty * 0.025;
-  const sgst = price * qty * 0.025;
+  const cgst = price * qty * cgstRate;
+  const sgst = price * qty * sgstRate;
   const rawTotal = price * qty + cgst + sgst;
   const total = Math.round(rawTotal);
   const roundOffDiff = total - rawTotal;

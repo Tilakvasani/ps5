@@ -14,30 +14,13 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 // ── CORS ─────────────────────────────────────────────
 app.use(cors({
-  origin: function (origin, callback) {
-    const allowedOrigins = [
-      "http://localhost:3000",
-      "https://ps5-phi.vercel.app",
-      "https://ps5-hhvf.vercel.app",
-      process.env.FRONTEND_URL,
-    ].filter(Boolean);
-
-    // Allow requests with no origin (mobile apps, curl, Render health checks)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: [
+    "http://localhost:3000",
+    "https://ps5-hhvf.vercel.app",
+    process.env.FRONTEND_URL,
+  ].filter(Boolean),
   credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 }));
-
-// Handle OPTIONS preflight for ALL routes
-app.options("*", cors());
 
 // ── Block Direct Browser Access to API ───────────────
 app.use((req, res, next) => {
@@ -203,6 +186,7 @@ app.listen(PORT, async () => {
       { key: "about_why3_title",  value: "Consumer Centric", group: "about" },
       { key: "about_why3_desc",   value: "Customer convenience and choice are our top priorities.", group: "about" },
       { key: "free_shipping_threshold", value: "500", group: "orders" },
+      { key: "gst_rate",                 value: "2.5",  group: "orders" },
       { key: "default_shipping_charge", value: "50",  group: "orders" },
       { key: "order_prefix",            value: "ZW",  group: "orders" },
     ];

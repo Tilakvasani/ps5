@@ -1,4 +1,5 @@
 "use client";
+import { useSettings, calcShipping } from "@/lib/useSettings";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -26,6 +27,7 @@ function loadRazorpay(): Promise<void> {
 
 export default function CheckoutPage() {
   const { cart, user, clearCart } = useStore();
+  const { freeShippingThreshold, defaultShippingCharge, cgstRate, sgstRate, gstin, stateCode } = useSettings();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [addresses, setAddresses] = useState<any[]>([]);
@@ -37,9 +39,9 @@ export default function CheckoutPage() {
   const [addingAddr, setAddingAddr] = useState(false);
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
-  const cgst = subtotal * 0.025;
-  const sgst = subtotal * 0.025;
-  const shipping = subtotal >= 500 ? 0 : 50;
+  const cgst = subtotal * cgstRate;
+  const sgst = subtotal * sgstRate;
+  const shipping = calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
   const rawTotal = subtotal + cgst + sgst + shipping;
   const total = Math.round(rawTotal);
   const roundOffDiff = total - rawTotal;

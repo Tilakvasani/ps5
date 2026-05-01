@@ -1,4 +1,5 @@
 "use client";
+import { useSettings, calcShipping } from "@/lib/useSettings";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Tag } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
@@ -10,14 +11,15 @@ import toast from "react-hot-toast";
 
 export default function CartPage() {
   const { cart, updateCartQty, removeFromCart, user } = useStore();
+  const { cgstRate, sgstRate, freeShippingThreshold, defaultShippingCharge } = useSettings();
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
 
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const cgst = subtotal * 0.025;
-  const sgst = subtotal * 0.025;
-  const shipping = subtotal > 500 ? 0 : 50;
+  const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
+  const cgst = subtotal * cgstRate;
+  const sgst = subtotal * sgstRate;
+  const shipping = calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
   const discount = couponApplied ? couponDiscount : 0;
   const rawTotal = subtotal + cgst + sgst + shipping - discount;
   const total = Math.round(rawTotal);

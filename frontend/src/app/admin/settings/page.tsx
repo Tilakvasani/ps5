@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import { adminApi } from "@/lib/api";
+import { invalidateSettingsCache } from "@/lib/useSettings";
 import toast from "react-hot-toast";
 
 const SETTING_GROUPS = [
@@ -108,6 +109,7 @@ const SETTING_GROUPS = [
   {
     label: "Order Settings",
     keys: [
+      { key: "gst_rate",                label: "GST Rate % (e.g. 5 for 5%, split equally as CGST+SGST)", type: "number" },
       { key: "free_shipping_threshold", label: "Free Shipping Above (₹)", type: "number" },
       { key: "default_shipping_charge", label: "Default Shipping Charge (₹)", type: "number" },
       { key: "order_prefix",           label: "Order Number Prefix", type: "text" },
@@ -150,7 +152,8 @@ export default function AdminSettingsPage() {
     setSaving(true);
     try {
       await adminApi.updateSettings(settings);
-      toast.success("Settings saved!");
+      invalidateSettingsCache(); // force all pages to reload fresh settings
+      toast.success("Settings saved! Changes are now live on the website.");
     } catch (err: any) { toast.error(err.message); }
     setSaving(false);
   };
