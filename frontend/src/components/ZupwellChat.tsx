@@ -52,7 +52,7 @@ interface ApiResponse {
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const API_URL =
-  process.env.NEXT_PUBLIC_CHAT_API_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_CHAT_API_URL || "https://whatsappchatbot-jfki.onrender.com";
 
 function getOrCreateSessionId(): string {
   if (typeof window === "undefined") return "ssr";
