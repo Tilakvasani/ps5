@@ -16,6 +16,7 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(cors({
   origin: [
     "http://localhost:3000",
+    "https://ps5-phi.vercel.app",
     "https://ps5-hhvf.vercel.app",
     process.env.FRONTEND_URL,
   ].filter(Boolean),
