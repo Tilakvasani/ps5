@@ -28,9 +28,9 @@ const C = {
 };
 
 const HOW_TO_USE = [
-  { icon: Droplets,    step: "1", title: "Drop It",         desc: "Drop the tablet into a glass of water (200ml)" },
-  { icon: Zap,         step: "2", title: "Watch the Magic", desc: "Enjoy the fizz" },
-  { icon: CheckCircle, step: "3", title: "Vibe On",         desc: "Sip and get back to work!" },
+  { icon: Droplets,    step: "1", title: "Drop It",         desc: "Drop the tablet into a glass of water (250ml)" },
+  { icon: Zap,         step: "2", title: "Watch the Magic", desc: "Watch the fizz! Let it dissolve completely" },
+  { icon: CheckCircle, step: "3", title: "Vibe On",         desc: "Sip and get back to work, powered up!" },
 ];
 
 const TRUST_BADGES = [
@@ -395,7 +395,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 </div>
                 <div className="p-4 rounded-2xl" style={{ background: C.altBg, border: `1.5px solid #C3E5D9` }}>
                   <p className="text-sm" style={{ color: C.blue }}>
-                    <span className="font-bold" style={{ color: C.mint }}>Pro tip:</span> Use cold water for best fizz. One tablet per 200ml glass. Take daily for best results.
+                    <span className="font-bold" style={{ color: C.mint }}>Pro tip:</span> Use cold water for best fizz. One tablet per 250ml glass. Take daily for best results.
                   </p>
                 </div>
               </motion.div>

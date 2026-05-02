@@ -43,28 +43,28 @@ export default function ProductCard({ product }: { product: Product }) {
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
       <Link href={`/products/${product.slug}`}>
         <div
-          className="group rounded-2xl overflow-hidden transition-all duration-300 bg-white border border-[#D9DEE8]"
+          className="group rounded-2xl overflow-hidden transition-all duration-300 bg-[#C8DCEA]"
           onMouseEnter={e => {
-            (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(244,124,65,0.4)";
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 24px rgba(244,124,65,0.12)";
+            (e.currentTarget as HTMLDivElement).style.borderColor = "#C3E5D9";
+            (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 24px transparent";
           }}
           onMouseLeave={e => {
-            (e.currentTarget as HTMLDivElement).style.borderColor = "#D9DEE8";
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
+            (e.currentTarget as HTMLDivElement).style.borderColor = "#C8DCEA";
+            
           }}
         >
           {/* Image */}
-          <div className="relative aspect-square overflow-hidden bg-[#F4F6FA]">
+          <div className="relative aspect-square overflow-hidden bg-[#F1FAFF]">
             {primaryImage ? (
               <img src={primaryImage} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-[#D9DEE8]">
+              <div className="w-full h-full flex items-center justify-center text-[#C8DCEA]">
                 <HeartPulse size={56} />
               </div>
             )}
             {discount > 0 && (
               <div className="absolute top-3 left-3 rounded-full px-2 py-1 text-[10px] font-bold text-white"
-                style={{ background: "#F47C41" }}>
+                style={{ background: "#45B08C" }}>
                 -{discount}%
               </div>
             )}
@@ -73,17 +73,17 @@ export default function ProductCard({ product }: { product: Product }) {
           {/* Info */}
           <div className="p-4">
             {product.brand && (
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 text-[#F47C41]">
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 text-[#45B08C]">
                 {product.brand}
               </p>
             )}
-            <h3 className="font-display font-semibold text-[#111827] text-sm leading-tight mb-1 line-clamp-2">{product.name}</h3>
-            <p className="text-xs mb-3 text-[#9CA3AF]">HSN: {product.hsnCode} · {product.unit}</p>
+            <h3 className="font-semibold text-[#1D3557] text-sm leading-tight mb-1 line-clamp-2">{product.name}</h3>
+            <p className="text-xs mb-3 text-[#7A9BB5]">HSN: {product.hsnCode} · {product.unit}</p>
 
             {product.avgRating && (
               <div className="flex items-center gap-1 mb-3">
                 <Star size={12} className="fill-yellow-400 text-yellow-400" />
-                <span className="text-xs text-[#6B7280]">
+                <span className="text-xs text-[#4A6A82]">
                   {product.avgRating.toFixed(1)} ({product._count?.reviews})
                 </span>
               </div>
@@ -91,17 +91,17 @@ export default function ProductCard({ product }: { product: Product }) {
 
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-lg font-bold text-[#111827]">₹{Number(product.sellingPrice).toFixed(2)}</span>
+                <span className="text-lg font-bold text-[#1D3557]">₹{Number(product.sellingPrice).toFixed(2)}</span>
                 {discount > 0 && (
-                  <span className="ml-1 text-xs line-through text-[#9CA3AF]">
+                  <span className="ml-1 text-xs line-through text-[#7A9BB5]">
                     ₹{Number(product.basePrice).toFixed(2)}
                   </span>
                 )}
-                <p className="text-[10px] text-[#9CA3AF]">+ GST</p>
+                <p className="text-[10px] text-[#7A9BB5]">+ GST</p>
               </div>
               <button
                 onClick={handleAddToCart}
-                className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-white transition-all hover:scale-105 active:scale-95 bg-[#F47C41] hover:bg-[#d9673a]"
+                className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-white transition-all hover:scale-105 active:scale-95 bg-[#45B08C] hover:bg-[#389475]"
               >
                 <ShoppingCart size={12} /> Add
               </button>

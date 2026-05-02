@@ -26,7 +26,7 @@ const FacebookIcon = () => (
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F4F6FA] flex items-center justify-center"><div className="h-8 w-8 rounded-full border-4 border-[#F47C41]/30 border-t-[#F47C41] animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F1FAFF] flex items-center justify-center"><div className="h-8 w-8 rounded-full border-4 border-[#45B08C]/30 border-t-[#45B08C] animate-spin" /></div>}>
       <LoginForm />
     </Suspense>
   );
@@ -85,69 +85,68 @@ function LoginForm() {
   };
 
   return (
-    <main className="relative min-h-screen bg-[#F4F6FA] flex items-center justify-center px-6">
-      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm text-[#6B7280] hover:text-[#0B2C6F] transition-colors font-medium">
+    <main className="relative min-h-screen bg-[#F1FAFF] flex items-center justify-center px-6">
+      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm text-[#4A6A82] hover:text-[#1D3557] transition-colors font-medium">
         <ArrowLeft size={16} /> Back to Home
       </Link>
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/4 h-[500px] w-[500px] rounded-full bg-[#F47C41]/10 blur-[120px]" />
-        <div className="absolute -bottom-40 right-1/4 h-[400px] w-[400px] rounded-full bg-[#0B2C6F]/8 blur-[100px]" />
+        <div className="absolute -top-40 left-1/4 h-[500px] w-[500px] rounded-full bg-[#45B08C]/10 " />
+        <div className="absolute -bottom-40 right-1/4 h-[400px] w-[400px] rounded-full bg-[#1D3557]/8 " />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="relative w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center mb-4">
-            <span className="text-4xl font-display font-black inline-flex items-start" style={{
-              background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-            }}>
+            <span className="text-4xl font-black inline-flex items-start" style={{
+              background: "#45B08C",
+              }}>
               Zupwell
-              <sup style={{ fontSize: "0.4em", fontWeight: 700, lineHeight: 1, marginTop: "4px", background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>™</sup>
+              <sup style={{ fontSize: "0.4em", fontWeight: 700, lineHeight: 1, marginTop: "4px", background: "#45B08C", }}>™</sup>
             </span>
           </Link>
-          <h1 className="text-3xl font-display font-black text-[#111827]">Welcome back</h1>
-          <p className="text-[#6B7280] mt-1">Sign in to your account</p>
+          <h1 className="text-3xl font-black text-[#1D3557]">Welcome back</h1>
+          <p className="text-[#4A6A82] mt-1">Sign in to your account</p>
         </div>
 
         <div className="card p-8">
           {/* Social Login Buttons */}
           <div className="space-y-3 mb-6">
             <button onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[#D9DEE8] bg-white hover:bg-gray-50 transition-colors text-sm font-semibold text-[#374151]">
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[#C8DCEA] bg-white hover:bg-gray-50 transition-colors text-sm font-semibold text-[#4A6A82]">
               <GoogleIcon /> Continue with Google
             </button>
             <button onClick={handleFacebookLogin}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[#D9DEE8] bg-white hover:bg-gray-50 transition-colors text-sm font-semibold text-[#374151]">
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[#C8DCEA] bg-white hover:bg-gray-50 transition-colors text-sm font-semibold text-[#4A6A82]">
               <FacebookIcon /> Continue with Facebook
             </button>
           </div>
 
           <div className="my-5 flex items-center gap-3">
-            <div className="h-px flex-1 bg-[#D9DEE8]" />
-            <span className="text-xs text-[#9CA3AF] uppercase tracking-wide">or with email</span>
-            <div className="h-px flex-1 bg-[#D9DEE8]" />
+            <div className="h-px flex-1 bg-[#C8DCEA]" />
+            <span className="text-xs text-[#7A9BB5] uppercase tracking-wide">or with email</span>
+            <div className="h-px flex-1 bg-[#C8DCEA]" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-[#374151] mb-1.5">Email</label>
+              <label className="block text-sm font-semibold text-[#4A6A82] mb-1.5">Email</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
                 className="input-field" placeholder="you@company.com" autoComplete="email" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[#374151] mb-1.5">Password</label>
+              <label className="block text-sm font-semibold text-[#4A6A82] mb-1.5">Password</label>
               <div className="relative">
                 <input type={showPass ? "text" : "password"} value={password}
                   onChange={e => setPassword(e.target.value)} required
                   className="input-field pr-10" placeholder="••••••••" autoComplete="current-password" />
                 <button type="button" onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#0B2C6F]">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4A6A82] hover:text-[#1D3557]">
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
               <div className="text-right mt-1">
-                <Link href="/forgot-password" className="text-xs text-[#F47C41] hover:text-[#d9673a]">Forgot password?</Link>
+                <Link href="/forgot-password" className="text-xs text-[#45B08C] hover:text-[#389475]">Forgot password?</Link>
               </div>
             </div>
 
@@ -165,14 +164,14 @@ function LoginForm() {
           </form>
 
           <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-[#D9DEE8]" />
-            <span className="text-xs text-[#9CA3AF] uppercase tracking-wide">or</span>
-            <div className="h-px flex-1 bg-[#D9DEE8]" />
+            <div className="h-px flex-1 bg-[#C8DCEA]" />
+            <span className="text-xs text-[#7A9BB5] uppercase tracking-wide">or</span>
+            <div className="h-px flex-1 bg-[#C8DCEA]" />
           </div>
 
-          <p className="text-center text-sm text-[#6B7280]">
+          <p className="text-center text-sm text-[#4A6A82]">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold text-[#F47C41] hover:text-[#d9673a]">Create one free</Link>
+            <Link href="/register" className="font-semibold text-[#45B08C] hover:text-[#389475]">Create one free</Link>
           </p>
         </div>
       </motion.div>

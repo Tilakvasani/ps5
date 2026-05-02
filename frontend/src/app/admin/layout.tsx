@@ -46,23 +46,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="flex h-screen bg-[#F4F6FA] overflow-hidden">
+    <div className="flex h-screen bg-[#F1FAFF] overflow-hidden">
       {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-white/60 lg:hidden" onClick={() => setSidebarOpen(false)} />
+            className="fixed inset-0 z-40 bg-white lg:hidden" onClick={() => setSidebarOpen(false)} />
         )}
       </AnimatePresence>
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0 border-r border-[#D9DEE8] bg-white backdrop-blur-xl flex flex-col transition-transform duration-300
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0 border-r border-[#C8DCEA] bg-white  flex flex-col transition-transform duration-300
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto`}>
         {/* Logo */}
-        <div className="flex items-center gap-2 px-5 py-5 border-b border-[#D9DEE8]">
-          <span className="text-xl font-display font-black" style={{ background: "linear-gradient(90deg, #F47C41 0%, #0B2C6F 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Zupwell</span>
-          <span className="ml-auto text-xs text-[#6B7280] border border-[#D9DEE8] rounded px-1.5 py-0.5">Admin</span>
-          <button className="lg:hidden text-[#6B7280] hover:text-[#0B2C6F] ml-1" onClick={() => setSidebarOpen(false)}><X size={18} /></button>
+        <div className="flex items-center gap-2 px-5 py-5 border-b border-[#C8DCEA]">
+          <span className="text-xl font-black" style={{ background: "#45B08C", }}>Zupwell</span>
+          <span className="ml-auto text-xs text-[#4A6A82] border border-[#C8DCEA] rounded px-1.5 py-0.5">Admin</span>
+          <button className="lg:hidden text-[#4A6A82] hover:text-[#1D3557] ml-1" onClick={() => setSidebarOpen(false)}><X size={18} /></button>
         </div>
 
         {/* Nav */}
@@ -72,8 +72,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             return (
               <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all group ${
-                  active ? "bg-[#F47C41]/20 text-[#F47C41]" : "text-[#6B7280] hover:text-[#0B2C6F] hover:bg-[#F4F6FA]"}`}>
-                <item.icon size={16} className={active ? "text-[#F47C41]" : "text-[#6B7280] group-hover:text-[#0B2C6F]"} />
+                  active ? "bg-[#45B08C]/20 text-[#45B08C]" : "text-[#4A6A82] hover:text-[#1D3557] hover:bg-[#F1FAFF]"}`}>
+                <item.icon size={16} className={active ? "text-[#45B08C]" : "text-[#4A6A82] group-hover:text-[#1D3557]"} />
                 {item.label}
                 {active && <ChevronRight size={12} className="ml-auto" />}
               </Link>
@@ -82,14 +82,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* Admin user */}
-        <div className="border-t border-[#D9DEE8] p-4">
+        <div className="border-t border-[#C8DCEA] p-4">
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#F47C41] to-[#FFD166] flex items-center justify-center text-sm font-black text-black">
+            <div className="h-9 w-9 rounded-xl bg-[#F1FAFF] flex items-center justify-center text-sm font-black text-black">
               {adminName[0]?.toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-[#111827] truncate">{adminName}</p>
-              <p className="text-xs text-[#6B7280]">Administrator</p>
+              <p className="text-sm font-bold text-[#1D3557] truncate">{adminName}</p>
+              <p className="text-xs text-[#4A6A82]">Administrator</p>
             </div>
           </div>
           <button onClick={handleLogout} className="w-full flex items-center gap-2 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition-all">
@@ -101,18 +101,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
-        <header className="flex items-center gap-4 border-b border-[#D9DEE8] bg-white/40 backdrop-blur-sm px-6 py-3 flex-shrink-0">
-          <button className="lg:hidden text-[#374151] hover:text-[#0B2C6F]" onClick={() => setSidebarOpen(true)}>
+        <header className="flex items-center gap-4 border-b border-[#C8DCEA] bg-white  px-6 py-3 flex-shrink-0">
+          <button className="lg:hidden text-[#4A6A82] hover:text-[#1D3557]" onClick={() => setSidebarOpen(true)}>
             <Menu size={22} />
           </button>
           <div className="flex-1" />
-          <Link href="/" target="_blank" className="text-xs text-[#6B7280] hover:text-[#0B2C6F] transition-colors border border-[#D9DEE8] rounded-lg px-3 py-1.5">
+          <Link href="/" target="_blank" className="text-xs text-[#4A6A82] hover:text-[#1D3557] transition-colors border border-[#C8DCEA] rounded-lg px-3 py-1.5">
             View Store ↗
           </Link>
           <Link href="/admin/notifications">
-            <div className="relative p-2 text-[#6B7280] hover:text-[#0B2C6F] cursor-pointer">
+            <div className="relative p-2 text-[#4A6A82] hover:text-[#1D3557] cursor-pointer">
               <Bell size={18} />
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[#F47C41]" />
+              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[#45B08C]" />
             </div>
           </Link>
         </header>

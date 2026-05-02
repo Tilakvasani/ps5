@@ -33,18 +33,18 @@ const StatCard = ({ title, value, sub, icon: Icon, change, color, href }: any) =
       </div>
       <ChangeBadge pct={change} />
     </div>
-    <p className="text-2xl font-display font-black text-[#111827]">{value}</p>
-    <p className="text-sm text-[#6B7280] mt-0.5">{title}</p>
-    {sub && <p className="text-xs text-[#9CA3AF] mt-1">{sub}</p>}
-    {href && <Link href={href} className="text-xs text-[#F47C41] hover:underline mt-2 block">View →</Link>}
+    <p className="text-2xl font-black text-[#1D3557]">{value}</p>
+    <p className="text-sm text-[#4A6A82] mt-0.5">{title}</p>
+    {sub && <p className="text-xs text-[#7A9BB5] mt-1">{sub}</p>}
+    {href && <Link href={href} className="text-xs text-[#45B08C] hover:underline mt-2 block">View →</Link>}
   </motion.div>
 );
 
 const ChartTip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-[#D9DEE8] bg-white p-3 text-sm shadow-sm">
-      <p className="text-[#374151] mb-2 font-semibold">{label}</p>
+    <div className="rounded-xl border border-[#C8DCEA] bg-white p-3 text-sm shadow-sm">
+      <p className="text-[#4A6A82] mb-2 font-semibold">{label}</p>
       {payload.map((p: any) => (
         <p key={p.name} style={{ color: p.color }} className="font-bold">
           {p.name === "profit" ? "Profit" : "Revenue"}: ₹{fmt(p.value)}
@@ -91,8 +91,8 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-display font-black text-[#111827]">Dashboard</h1>
-          <p className="text-[#6B7280] text-sm mt-1">
+          <h1 className="text-3xl font-black text-[#1D3557]">Dashboard</h1>
+          <p className="text-[#4A6A82] text-sm mt-1">
             {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </p>
         </div>
@@ -101,7 +101,7 @@ export default function AdminDashboard() {
             <button className="btn-outline text-sm px-4 py-2 flex items-center gap-2">
               <Clock size={14} /> Pending
               {stats?.statusBreakdown?.pending > 0 && (
-                <span className="bg-[#F47C41] text-white text-xs rounded-full px-1.5 py-0.5 font-bold leading-none">
+                <span className="bg-[#45B08C] text-white text-xs rounded-full px-1.5 py-0.5 font-bold leading-none">
                   {stats.statusBreakdown.pending}
                 </span>
               )}
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Revenue"  icon={IndianRupee} color="bg-[#F47C41]"
+        <StatCard title="Total Revenue"  icon={IndianRupee} color="bg-[#45B08C]"
           value={stats ? `₹${fmt(stats.totalRevenue)}` : "—"}
           sub={stats ? `Today ₹${fmt(stats.todayRevenue)}` : undefined}
           change={stats?.revenueChange} />
@@ -137,11 +137,11 @@ export default function AdminDashboard() {
           value={stats ? `₹${fmt(stats.totalProfit)}` : "—"}
           sub={stats ? `Margin ${stats.profitMargin}%` : undefined}
           change={stats?.profitChange} />
-        <StatCard title="Total Orders" icon={ShoppingBag} color="bg-[#2EC4B6]"
+        <StatCard title="Total Orders" icon={ShoppingBag} color="bg-[#45B08C]"
           value={stats?.totalOrders ?? "—"}
           sub={stats ? `Avg ₹${fmt(stats.avgOrderValue)}` : undefined}
           change={stats?.ordersChange} href="/admin/orders" />
-        <StatCard title="Total Users" icon={Users} color="bg-blue-500"
+        <StatCard title="Total Users" icon={Users} color="bg-[#1D3557]"
           value={stats?.totalUsers ?? "—"}
           change={stats?.usersChange} href="/admin/users" />
       </div>
@@ -150,28 +150,28 @@ export default function AdminDashboard() {
       <div className="card">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <TrendingUp size={16} className="text-[#F47C41]" />
-            <h2 className="font-display font-bold text-[#111827]">Revenue & Profit</h2>
+            <TrendingUp size={16} className="text-[#45B08C]" />
+            <h2 className="font-bold text-[#1D3557]">Revenue & Profit</h2>
           </div>
-          <div className="flex items-center gap-1 bg-[#F4F6FA] rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-[#F1FAFF] rounded-lg p-1">
             {[7, 30, 90].map(d => (
               <button key={d} onClick={() => setChartDays(d)}
-                className={`text-xs px-3 py-1.5 rounded-md font-semibold transition-all ${chartDays === d ? "bg-white text-[#F47C41] shadow-sm" : "text-[#6B7280] hover:text-[#111827]"}`}>
+                className={`text-xs px-3 py-1.5 rounded-md font-semibold transition-all ${chartDays === d ? "bg-white text-[#45B08C] shadow-sm" : "text-[#4A6A82] hover:text-[#1D3557]"}`}>
                 {d}d
               </button>
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-4 mb-4 text-xs text-[#6B7280]">
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-[#F47C41] rounded" />Revenue</span>
+        <div className="flex items-center gap-4 mb-4 text-xs text-[#4A6A82]">
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-[#45B08C] rounded" />Revenue</span>
           <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-emerald-500 rounded" />Profit</span>
         </div>
         <ResponsiveContainer width="100%" height={240}>
           <AreaChart data={revenue}>
             <defs>
               <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#F47C41" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#F47C41" stopOpacity={0} />
+                <stop offset="5%"  stopColor="#45B08C" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#45B08C" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="profGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%"  stopColor="#10B981" stopOpacity={0.2} />
@@ -179,10 +179,10 @@ export default function AdminDashboard() {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
-            <XAxis dataKey="date" tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
+            <XAxis dataKey="date" tick={{ fill: "#7A9BB5", fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "#7A9BB5", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
             <Tooltip content={<ChartTip />} />
-            <Area type="monotone" dataKey="revenue" name="revenue" stroke="#F47C41" fill="url(#revGrad)" strokeWidth={2} dot={false} />
+            <Area type="monotone" dataKey="revenue" name="revenue" stroke="#45B08C" fill="url(#revGrad)" strokeWidth={2} dot={false} />
             <Area type="monotone" dataKey="profit"  name="profit"  stroke="#10B981" fill="url(#profGrad)" strokeWidth={2} dot={false} />
           </AreaChart>
         </ResponsiveContainer>
@@ -191,31 +191,31 @@ export default function AdminDashboard() {
       {/* Order Pipeline + Payment Split */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card">
-          <h2 className="font-display font-bold text-[#111827] mb-4">Order Pipeline</h2>
+          <h2 className="font-bold text-[#1D3557] mb-4">Order Pipeline</h2>
           {statusData.length > 0 ? (
             <div className="space-y-2">
               {statusData.map(([name, value]: any) => {
                 const pct = statusTotal > 0 ? Math.round((value / statusTotal) * 100) : 0;
                 return (
                   <Link key={name} href={`/admin/orders?status=${name}`}>
-                    <div className="flex items-center gap-3 hover:bg-[#F4F6FA] rounded-lg p-2 -mx-2 transition-all cursor-pointer">
+                    <div className="flex items-center gap-3 hover:bg-[#F1FAFF] rounded-lg p-2 -mx-2 transition-all cursor-pointer">
                       <span className={`badge ${STATUS_BADGE[name] || "badge-info"} w-24 text-center shrink-0`}>{name}</span>
-                      <div className="flex-1 h-2 bg-[#F4F6FA] rounded-full overflow-hidden">
+                      <div className="flex-1 h-2 bg-[#F1FAFF] rounded-full overflow-hidden">
                         <div className="h-full rounded-full transition-all duration-500"
-                          style={{ width: `${pct}%`, backgroundColor: STATUS_COLORS[name] || "#6B7280" }} />
+                          style={{ width: `${pct}%`, backgroundColor: STATUS_COLORS[name] || "#4A6A82" }} />
                       </div>
-                      <span className="text-sm font-bold text-[#111827] w-6 text-right">{value}</span>
-                      <span className="text-xs text-[#9CA3AF] w-8 text-right">{pct}%</span>
+                      <span className="text-sm font-bold text-[#1D3557] w-6 text-right">{value}</span>
+                      <span className="text-xs text-[#7A9BB5] w-8 text-right">{pct}%</span>
                     </div>
                   </Link>
                 );
               })}
             </div>
-          ) : <p className="text-[#6B7280] text-sm py-4">No orders yet</p>}
+          ) : <p className="text-[#4A6A82] text-sm py-4">No orders yet</p>}
         </div>
 
         <div className="card">
-          <h2 className="font-display font-bold text-[#111827] mb-4">Payment Methods</h2>
+          <h2 className="font-bold text-[#1D3557] mb-4">Payment Methods</h2>
           {stats?.paymentSplit?.length > 0 ? (
             <div className="space-y-4">
               {stats.paymentSplit.map((p: any) => (
@@ -225,15 +225,15 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-semibold text-[#111827]">{p.method === "razorpay" ? "Razorpay" : "Cash on Delivery"}</span>
-                      <span className="text-sm font-bold text-[#F47C41]">₹{fmt(p.revenue)}</span>
+                      <span className="text-sm font-semibold text-[#1D3557]">{p.method === "razorpay" ? "Razorpay" : "Cash on Delivery"}</span>
+                      <span className="text-sm font-bold text-[#45B08C]">₹{fmt(p.revenue)}</span>
                     </div>
-                    <p className="text-xs text-[#6B7280]">{p.count} order{p.count !== 1 ? "s" : ""}</p>
+                    <p className="text-xs text-[#4A6A82]">{p.count} order{p.count !== 1 ? "s" : ""}</p>
                   </div>
                 </div>
               ))}
             </div>
-          ) : <p className="text-[#6B7280] text-sm py-4">No payment data yet</p>}
+          ) : <p className="text-[#4A6A82] text-sm py-4">No payment data yet</p>}
         </div>
       </div>
 
@@ -241,54 +241,54 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-bold text-[#111827]">Top Products</h2>
-            <Link href="/admin/products" className="text-xs text-[#F47C41] hover:underline">View all →</Link>
+            <h2 className="font-bold text-[#1D3557]">Top Products</h2>
+            <Link href="/admin/products" className="text-xs text-[#45B08C] hover:underline">View all →</Link>
           </div>
           <div className="space-y-4">
             {topProducts.slice(0, 6).map((p: any, i: number) => (
               <div key={p.id} className="flex items-center gap-3">
                 <span className="text-xs font-bold text-[#D1D5DB] w-5 shrink-0">#{i + 1}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#111827] truncate">{p.name}</p>
+                  <p className="text-sm font-semibold text-[#1D3557] truncate">{p.name}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-1.5 bg-[#F4F6FA] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#F47C41] rounded-full"
+                    <div className="flex-1 h-1.5 bg-[#F1FAFF] rounded-full overflow-hidden">
+                      <div className="h-full bg-[#45B08C] rounded-full"
                         style={{ width: `${Math.round((p.totalRevenue / maxRevenue) * 100)}%` }} />
                     </div>
-                    <span className="text-xs text-[#9CA3AF] shrink-0">{p.totalSold} sold</span>
+                    <span className="text-xs text-[#7A9BB5] shrink-0">{p.totalSold} sold</span>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-bold text-[#F47C41]">₹{fmt(p.totalRevenue)}</p>
+                  <p className="text-sm font-bold text-[#45B08C]">₹{fmt(p.totalRevenue)}</p>
                   <p className="text-xs text-emerald-500 font-semibold">+₹{fmt(p.totalProfit)} · {p.marginPct}%</p>
                 </div>
               </div>
             ))}
-            {topProducts.length === 0 && <p className="text-[#6B7280] text-sm">No data yet</p>}
+            {topProducts.length === 0 && <p className="text-[#4A6A82] text-sm">No data yet</p>}
           </div>
         </div>
 
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-bold text-[#111827]">Top Customers</h2>
-            <Link href="/admin/users" className="text-xs text-[#F47C41] hover:underline">View all →</Link>
+            <h2 className="font-bold text-[#1D3557]">Top Customers</h2>
+            <Link href="/admin/users" className="text-xs text-[#45B08C] hover:underline">View all →</Link>
           </div>
           <div className="space-y-3">
             {stats?.topCustomers?.length > 0 ? stats.topCustomers.map((c: any) => (
               <div key={c.id} className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-[#F47C41]/10 flex items-center justify-center text-sm font-bold text-[#F47C41] shrink-0">
+                <div className="h-9 w-9 rounded-full bg-[#45B08C]/10 flex items-center justify-center text-sm font-bold text-[#45B08C] shrink-0">
                   {c.name?.charAt(0)?.toUpperCase() || "?"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#111827] truncate">{c.name || "—"}</p>
-                  <p className="text-xs text-[#6B7280] truncate">{c.email}</p>
+                  <p className="text-sm font-semibold text-[#1D3557] truncate">{c.name || "—"}</p>
+                  <p className="text-xs text-[#4A6A82] truncate">{c.email}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-bold text-[#111827]">₹{fmt(c.totalSpent)}</p>
-                  <p className="text-xs text-[#9CA3AF]">{c.orderCount} order{c.orderCount !== 1 ? "s" : ""}</p>
+                  <p className="text-sm font-bold text-[#1D3557]">₹{fmt(c.totalSpent)}</p>
+                  <p className="text-xs text-[#7A9BB5]">{c.orderCount} order{c.orderCount !== 1 ? "s" : ""}</p>
                 </div>
               </div>
-            )) : <p className="text-[#6B7280] text-sm py-4">No customer data yet</p>}
+            )) : <p className="text-[#4A6A82] text-sm py-4">No customer data yet</p>}
           </div>
         </div>
       </div>
@@ -296,25 +296,25 @@ export default function AdminDashboard() {
       {/* Recent Orders */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display font-bold text-[#111827]">Recent Orders</h2>
-          <Link href="/admin/orders" className="text-sm text-[#F47C41] hover:text-[#f79b6e]">View all →</Link>
+          <h2 className="font-bold text-[#1D3557]">Recent Orders</h2>
+          <Link href="/admin/orders" className="text-sm text-[#45B08C] hover:text-[#45B08C]">View all →</Link>
         </div>
         {stats?.recentOrders?.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-[#6B7280] border-b border-[#D9DEE8]">
+                <tr className="text-left text-[#4A6A82] border-b border-[#C8DCEA]">
                   {["Order #", "Customer", "Amount", "Payment", "Status", "Date"].map(h => (
                     <th key={h} className="pb-3 font-semibold pr-4 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F4F6FA]">
+              <tbody className="divide-y divide-[#F1FAFF]">
                 {stats.recentOrders.map((o: any) => (
-                  <tr key={o.id} className="hover:bg-[#F4F6FA] transition-colors">
-                    <td className="py-3 pr-4 font-mono text-[#111827] font-semibold text-xs">{o.orderNumber}</td>
-                    <td className="py-3 pr-4 text-[#374151]">{o.user?.name || "—"}</td>
-                    <td className="py-3 pr-4 font-bold text-[#111827]">₹{fmt(Number(o.totalAmount))}</td>
+                  <tr key={o.id} className="hover:bg-[#F1FAFF] transition-colors">
+                    <td className="py-3 pr-4 font-mono text-[#1D3557] font-semibold text-xs">{o.orderNumber}</td>
+                    <td className="py-3 pr-4 text-[#4A6A82]">{o.user?.name || "—"}</td>
+                    <td className="py-3 pr-4 font-bold text-[#1D3557]">₹{fmt(Number(o.totalAmount))}</td>
                     <td className="py-3 pr-4">
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${o.paymentMethod === "razorpay" ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"}`}>
                         {o.paymentMethod === "razorpay" ? "Online" : "COD"}
@@ -323,7 +323,7 @@ export default function AdminDashboard() {
                     <td className="py-3 pr-4">
                       <span className={`badge ${STATUS_BADGE[o.status] || "badge-info"}`}>{o.status}</span>
                     </td>
-                    <td className="py-3 text-[#6B7280] text-xs whitespace-nowrap">
+                    <td className="py-3 text-[#4A6A82] text-xs whitespace-nowrap">
                       {new Date(o.createdAt).toLocaleDateString("en-IN")}
                     </td>
                   </tr>
@@ -331,7 +331,7 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-        ) : <p className="text-[#6B7280] text-sm py-4">No orders yet</p>}
+        ) : <p className="text-[#4A6A82] text-sm py-4">No orders yet</p>}
       </div>
 
     </div>

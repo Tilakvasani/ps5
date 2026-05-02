@@ -29,8 +29,8 @@ export default function AdminNotificationsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-display font-black text-[#111827]">Notifications</h1>
-          {unread > 0 && <p className="text-[#6B7280] text-sm mt-1">{unread} unread</p>}
+          <h1 className="text-3xl font-black text-[#1D3557]">Notifications</h1>
+          {unread > 0 && <p className="text-[#4A6A82] text-sm mt-1">{unread} unread</p>}
         </div>
         {unread > 0 && (
           <button onClick={markAll} className="btn-outline flex items-center gap-2 text-sm py-2"><CheckCheck size={14} /> Mark all read</button>
@@ -38,22 +38,22 @@ export default function AdminNotificationsPage() {
       </div>
 
       <div className="space-y-2">
-        {loading ? Array.from({ length: 6 }).map((_, i) => <div key={i} className="card h-16 animate-pulse bg-[#F4F6FA]" />) :
+        {loading ? Array.from({ length: 6 }).map((_, i) => <div key={i} className="card h-16 animate-pulse bg-[#F1FAFF]" />) :
           notifications.length === 0 ? (
-            <div className="card text-center py-16 text-[#6B7280]">
+            <div className="card text-center py-16 text-[#4A6A82]">
               <Bell size={40} className="mx-auto mb-3 opacity-20" />
               <p>No notifications</p>
             </div>
           ) : notifications.map((n: any) => (
             <div key={n.id} onClick={() => !n.isRead && markRead(n.id)}
-              className={`card flex items-start gap-4 cursor-pointer transition-all ${!n.isRead ? "border-[#F47C41]/20 bg-[#F47C41]/5" : "opacity-60"}`}>
+              className={`card flex items-start gap-4 cursor-pointer transition-all ${!n.isRead ? "border-[#45B08C]/20 bg-[#45B08C]/5" : "opacity-60"}`}>
               <div className="text-2xl flex-shrink-0">{ICON[n.type] || "🔔"}</div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-[#111827] text-sm">{n.title}</p>
-                <p className="text-sm text-[#6B7280] mt-0.5">{n.message}</p>
-                <p className="text-xs text-[#6B7280] mt-1">{new Date(n.createdAt).toLocaleString("en-IN")}</p>
+                <p className="font-semibold text-[#1D3557] text-sm">{n.title}</p>
+                <p className="text-sm text-[#4A6A82] mt-0.5">{n.message}</p>
+                <p className="text-xs text-[#4A6A82] mt-1">{new Date(n.createdAt).toLocaleString("en-IN")}</p>
               </div>
-              {!n.isRead && <div className="h-2 w-2 rounded-full bg-[#F47C41] flex-shrink-0 mt-1.5" />}
+              {!n.isRead && <div className="h-2 w-2 rounded-full bg-[#45B08C] flex-shrink-0 mt-1.5" />}
             </div>
           ))
         }

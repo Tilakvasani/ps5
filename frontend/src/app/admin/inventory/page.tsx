@@ -48,8 +48,8 @@ export default function AdminInventoryPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-display font-black text-[#111827]">Inventory</h1>
-          <p className="text-[#6B7280] text-sm mt-1">{inventory.length} SKUs tracked</p>
+          <h1 className="text-3xl font-black text-[#1D3557]">Inventory</h1>
+          <p className="text-[#4A6A82] text-sm mt-1">{inventory.length} SKUs tracked</p>
         </div>
       </div>
 
@@ -62,7 +62,7 @@ export default function AdminInventoryPage() {
 
       <div className="flex gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4A6A82]" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or SKU..." className="input-field pl-9 text-sm" />
         </div>
         <button onClick={fetchInventory} className="btn-outline p-2.5"><RefreshCw size={16} /></button>
@@ -72,7 +72,7 @@ export default function AdminInventoryPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#D9DEE8] text-[#6B7280] text-left">
+              <tr className="border-b border-[#C8DCEA] text-[#4A6A82] text-left">
                 {["Product", "SKU / Variant", "In Stock", "Reserved", "Available", "Low Stock At", "Action"].map(h => (
                   <th key={h} className="px-4 py-3 font-semibold whitespace-nowrap">{h}</th>
                 ))}
@@ -80,30 +80,30 @@ export default function AdminInventoryPage() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? Array.from({ length: 10 }).map((_, i) => (
-                <tr key={i}><td colSpan={7} className="px-4 py-3"><div className="h-4 rounded bg-[#F4F6FA] animate-pulse" /></td></tr>
+                <tr key={i}><td colSpan={7} className="px-4 py-3"><div className="h-4 rounded bg-[#F1FAFF] animate-pulse" /></td></tr>
               )) : filtered.map(item => {
                 const available = item.qtyInStock - item.reservedQty;
                 const isLow = item.qtyInStock <= item.lowStockThreshold;
                 return (
-                  <tr key={item.id} className={`hover:bg-[#F4F6FA] transition-colors ${isLow ? "bg-yellow-500/5" : ""}`}>
+                  <tr key={item.id} className={`hover:bg-[#F1FAFF] transition-colors ${isLow ? "bg-yellow-500/5" : ""}`}>
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-[#111827] line-clamp-1 max-w-[180px]">{item.product?.name}</p>
+                      <p className="font-semibold text-[#1D3557] line-clamp-1 max-w-[180px]">{item.product?.name}</p>
                     </td>
-                    <td className="px-4 py-3 font-mono text-[#6B7280] text-xs">
+                    <td className="px-4 py-3 font-mono text-[#4A6A82] text-xs">
                       {item.variant ? item.variant.sku : item.product?.sku}
-                      {item.variant && <p className="text-[#6B7280]">{item.variant.variantName}</p>}
+                      {item.variant && <p className="text-[#4A6A82]">{item.variant.variantName}</p>}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`font-bold text-lg ${isLow ? "text-yellow-400" : "text-[#111827]"}`}>{item.qtyInStock}</span>
+                      <span className={`font-bold text-lg ${isLow ? "text-yellow-400" : "text-[#1D3557]"}`}>{item.qtyInStock}</span>
                     </td>
-                    <td className="px-4 py-3 text-[#6B7280]">{item.reservedQty}</td>
+                    <td className="px-4 py-3 text-[#4A6A82]">{item.reservedQty}</td>
                     <td className="px-4 py-3">
                       <span className={`badge ${available > 0 ? "badge-success" : "badge-danger"}`}>{available}</span>
                     </td>
-                    <td className="px-4 py-3 text-[#6B7280]">{item.lowStockThreshold}</td>
+                    <td className="px-4 py-3 text-[#4A6A82]">{item.lowStockThreshold}</td>
                     <td className="px-4 py-3">
                       <button onClick={() => setMovementModal(item)}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-[#F47C41] hover:text-[#f79b6e] border border-[#F47C41]/20 hover:border-[#F47C41]/40 px-3 py-1.5 rounded-lg transition-all">
+                        className="flex items-center gap-1.5 text-xs font-semibold text-[#45B08C] hover:text-[#45B08C] border border-[#45B08C]/20 hover:border-[#45B08C]/40 px-3 py-1.5 rounded-lg transition-all">
                         <Plus size={12} /> Adjust
                       </button>
                     </td>
@@ -117,10 +117,10 @@ export default function AdminInventoryPage() {
 
       {/* Movement Modal */}
       {movementModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-sm px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white  px-4">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md card p-6">
-            <h2 className="font-display font-bold text-[#111827] mb-1">Adjust Stock</h2>
-            <p className="text-sm text-[#6B7280] mb-5">{movementModal.product?.name}{movementModal.variant ? ` — ${movementModal.variant.variantName}` : ""}</p>
+            <h2 className="font-bold text-[#1D3557] mb-1">Adjust Stock</h2>
+            <p className="text-sm text-[#4A6A82] mb-5">{movementModal.product?.name}{movementModal.variant ? ` — ${movementModal.variant.variantName}` : ""}</p>
             <div className="space-y-4">
               <div>
                 <label className="label-text">Movement Type</label>

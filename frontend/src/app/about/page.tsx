@@ -50,24 +50,24 @@ export default function AboutPage() {
   }));
 
   return (
-    <main className="min-h-screen bg-[#F4F6FA] overflow-x-hidden">
+    <main className="min-h-screen bg-[#F1FAFF] overflow-x-hidden">
       <Navbar />
 
       {/* ── Hero ── */}
       <section className="relative pt-32 pb-20 px-6 bg-white overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-[#F47C41]/6 blur-[100px]" />
+          <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-[#45B08C]/6 " />
         </div>
         <div className="relative mx-auto max-w-4xl text-center">
           <motion.span {...fadeUp(0)}
-            className="inline-block text-xs font-semibold uppercase tracking-widest text-[#F47C41] mb-4">
+            className="inline-block text-xs font-semibold uppercase tracking-widest text-[#45B08C] mb-4">
             About Zupwell
           </motion.span>
           <motion.h1 {...fadeUp(0.1)}
-            className="text-5xl md:text-6xl font-display font-black text-[#111827] leading-tight mb-6">
+            className="text-5xl md:text-6xl font-black text-[#1D3557] leading-tight mb-6">
             "{s(settings, "about_punchline")}"
           </motion.h1>
-          <motion.p {...fadeUp(0.2)} className="text-lg text-[#6B7280] max-w-2xl mx-auto leading-relaxed">
+          <motion.p {...fadeUp(0.2)} className="text-lg text-[#4A6A82] max-w-2xl mx-auto leading-relaxed">
             {s(settings, "about_description")}
           </motion.p>
         </div>
@@ -77,11 +77,11 @@ export default function AboutPage() {
       <section className="py-20 px-6">
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <motion.div {...fadeUp(0)}>
-            <span className="text-xs font-semibold uppercase tracking-widest text-[#F47C41] mb-3 block">Our Story</span>
-            <h2 className="text-3xl md:text-4xl font-display font-black text-[#111827] mb-6 leading-tight">
+            <span className="text-xs font-semibold uppercase tracking-widest text-[#45B08C] mb-3 block">Our Story</span>
+            <h2 className="text-3xl md:text-4xl font-black text-[#1D3557] mb-6 leading-tight">
               Born to solve a <span className="gradient-text">real problem</span>
             </h2>
-            <p className="text-[#374151] leading-relaxed text-lg">
+            <p className="text-[#4A6A82] leading-relaxed text-lg">
               {s(settings, "about_brand_story")}
             </p>
           </motion.div>
@@ -94,8 +94,8 @@ export default function AboutPage() {
               { val: "3-5",  label: "Days Delivery" },
             ].map(({ val, label }) => (
               <div key={label} className="card text-center py-8">
-                <p className="text-3xl font-display font-black gradient-text">{val}</p>
-                <p className="text-sm text-[#6B7280] mt-1">{label}</p>
+                <p className="text-3xl font-black gradient-text">{val}</p>
+                <p className="text-sm text-[#4A6A82] mt-1">{label}</p>
               </div>
             ))}
           </motion.div>
@@ -105,19 +105,19 @@ export default function AboutPage() {
       {/* ── Mission & Vision ── */}
       <section className="py-20 px-6 bg-white">
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8">
-          <motion.div {...fadeUp(0)} className="card border-l-4 border-l-[#F47C41] rounded-l-none">
-            <div className="h-10 w-10 rounded-xl bg-[#F47C41]/10 flex items-center justify-center mb-4">
-              <Heart size={20} className="text-[#F47C41]" />
+          <motion.div {...fadeUp(0)} className="card border-l-4 border-l-[#45B08C] rounded-l-none">
+            <div className="h-10 w-10 rounded-xl bg-[#45B08C]/10 flex items-center justify-center mb-4">
+              <Heart size={20} className="text-[#45B08C]" />
             </div>
-            <h3 className="text-xl font-display font-black text-[#111827] mb-3">Our Mission</h3>
-            <p className="text-[#374151] leading-relaxed">{s(settings, "about_mission")}</p>
+            <h3 className="text-xl font-black text-[#1D3557] mb-3">Our Mission</h3>
+            <p className="text-[#4A6A82] leading-relaxed">{s(settings, "about_mission")}</p>
           </motion.div>
-          <motion.div {...fadeUp(0.1)} className="card border-l-4 border-l-[#2EC4B6] rounded-l-none">
-            <div className="h-10 w-10 rounded-xl bg-[#2EC4B6]/10 flex items-center justify-center mb-4">
-              <Eye size={20} className="text-[#2EC4B6]" />
+          <motion.div {...fadeUp(0.1)} className="card border-l-4 border-l-[#45B08C] rounded-l-none">
+            <div className="h-10 w-10 rounded-xl bg-[#45B08C]/10 flex items-center justify-center mb-4">
+              <Eye size={20} className="text-[#45B08C]" />
             </div>
-            <h3 className="text-xl font-display font-black text-[#111827] mb-3">Our Vision</h3>
-            <p className="text-[#374151] leading-relaxed">{s(settings, "about_vision")}</p>
+            <h3 className="text-xl font-black text-[#1D3557] mb-3">Our Vision</h3>
+            <p className="text-[#4A6A82] leading-relaxed">{s(settings, "about_vision")}</p>
           </motion.div>
         </div>
       </section>
@@ -126,19 +126,19 @@ export default function AboutPage() {
       <section className="py-20 px-6">
         <div className="mx-auto max-w-5xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-display font-black text-[#111827] mb-3">
+            <h2 className="text-3xl md:text-4xl font-black text-[#1D3557] mb-3">
               Why <span className="gradient-text">Zupwell?</span>
             </h2>
-            <p className="text-[#6B7280]">Three reasons our customers never look back</p>
+            <p className="text-[#4A6A82]">Three reasons our customers never look back</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {why.map((w, i) => (
-              <motion.div key={i} {...fadeUp(i * 0.1)} className="card text-center group hover:border-[#F47C41]/30 transition-all">
-                <div className="h-14 w-14 mx-auto rounded-2xl bg-[#F47C41]/10 flex items-center justify-center mb-4 group-hover:bg-[#F47C41]/20 transition-all">
-                  <w.icon size={24} className="text-[#F47C41]" />
+              <motion.div key={i} {...fadeUp(i * 0.1)} className="card text-center group hover:border-[#45B08C]/30 transition-all">
+                <div className="h-14 w-14 mx-auto rounded-2xl bg-[#45B08C]/10 flex items-center justify-center mb-4 group-hover:bg-[#45B08C]/20 transition-all">
+                  <w.icon size={24} className="text-[#45B08C]" />
                 </div>
-                <h3 className="font-display font-bold text-[#111827] mb-2 text-lg">{w.title}</h3>
-                <p className="text-sm text-[#6B7280] leading-relaxed">{w.desc}</p>
+                <h3 className="font-bold text-[#1D3557] mb-2 text-lg">{w.title}</h3>
+                <p className="text-sm text-[#4A6A82] leading-relaxed">{w.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -149,7 +149,7 @@ export default function AboutPage() {
       <section className="py-20 px-6 bg-white">
         <div className="mx-auto max-w-4xl">
           <motion.div {...fadeUp(0)} className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-display font-black text-[#111827]">
+            <h2 className="text-3xl md:text-4xl font-black text-[#1D3557]">
               Founder's <span className="gradient-text">Message</span>
             </h2>
           </motion.div>
@@ -158,19 +158,19 @@ export default function AboutPage() {
             <div className="shrink-0 text-center">
               {s(settings, "founder_photo") ? (
                 <img src={s(settings, "founder_photo")} alt={s(settings, "founder_name")}
-                  className="h-36 w-36 rounded-full object-cover border-4 border-[#F47C41]/20 mx-auto" />
+                  className="h-36 w-36 rounded-full object-cover border-4 border-[#45B08C]/20 mx-auto" />
               ) : (
-                <div className="h-36 w-36 rounded-full bg-[#F47C41]/10 flex items-center justify-center text-5xl font-display font-black text-[#F47C41] mx-auto">
+                <div className="h-36 w-36 rounded-full bg-[#45B08C]/10 flex items-center justify-center text-5xl font-black text-[#45B08C] mx-auto">
                   {s(settings, "founder_name").charAt(0)}
                 </div>
               )}
-              <p className="font-display font-bold text-[#111827] mt-3">{s(settings, "founder_name")}</p>
-              <p className="text-xs text-[#6B7280]">{s(settings, "founder_title")}</p>
+              <p className="font-bold text-[#1D3557] mt-3">{s(settings, "founder_name")}</p>
+              <p className="text-xs text-[#4A6A82]">{s(settings, "founder_title")}</p>
             </div>
             {/* Quote */}
             <div className="flex-1">
-              <div className="text-5xl text-[#F47C41]/20 font-display font-black leading-none mb-2">"</div>
-              <p className="text-[#374151] leading-relaxed text-lg italic">
+              <div className="text-5xl text-[#45B08C]/20 font-black leading-none mb-2">"</div>
+              <p className="text-[#4A6A82] leading-relaxed text-lg italic">
                 {s(settings, "founder_message")}
               </p>
             </div>
@@ -183,13 +183,13 @@ export default function AboutPage() {
         <section className="py-20 px-6">
           <div className="mx-auto max-w-4xl">
             <motion.div {...fadeUp(0)} className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-display font-black text-[#111827]">
+              <h2 className="text-3xl md:text-4xl font-black text-[#1D3557]">
                 The Future of <span className="gradient-text">Zupwell</span>
               </h2>
             </motion.div>
             <motion.div {...fadeUp(0.1)}
-              className="card border border-[#F47C41]/20 bg-gradient-to-br from-[#F47C41]/5 to-[#FFD166]/5">
-              <p className="text-[#374151] leading-relaxed text-lg mb-6">
+              className="card border border-[#45B08C]/20 bg-[#F1FAFF]">
+              <p className="text-[#4A6A82] leading-relaxed text-lg mb-6">
                 {s(settings, "about_future")}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -198,8 +198,8 @@ export default function AboutPage() {
                   "Energy and focus formulations",
                   "Specialized recovery blends",
                 ].map((item) => (
-                  <div key={item} className="flex items-start gap-2 text-sm text-[#374151]">
-                    <span className="text-[#F47C41] mt-0.5 shrink-0">→</span>
+                  <div key={item} className="flex items-start gap-2 text-sm text-[#4A6A82]">
+                    <span className="text-[#45B08C] mt-0.5 shrink-0">→</span>
                     {item}
                   </div>
                 ))}
@@ -213,7 +213,7 @@ export default function AboutPage() {
       <section className="py-16 px-6 bg-white">
         <div className="mx-auto max-w-2xl text-center">
           <motion.div {...fadeUp(0)}>
-            <h2 className="text-2xl font-display font-black text-[#111827] mb-4">
+            <h2 className="text-2xl font-black text-[#1D3557] mb-4">
               Ready to fuel your hustle?
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

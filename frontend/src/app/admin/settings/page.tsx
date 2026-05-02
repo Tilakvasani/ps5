@@ -160,22 +160,22 @@ export default function AdminSettingsPage() {
 
   if (loading) return (
     <div className="flex justify-center py-20">
-      <div className="h-8 w-8 rounded-full border-2 border-[#F47C41] border-t-transparent animate-spin" />
+      <div className="h-8 w-8 rounded-full border-2 border-[#45B08C] border-t-transparent animate-spin" />
     </div>
   );
 
   return (
     <div>
-      <h1 className="text-3xl font-display font-black text-[#111827] mb-2">Settings</h1>
-      <p className="text-[#6B7280] text-sm mb-6">All changes here reflect live on the website. No code changes needed.</p>
+      <h1 className="text-3xl font-black text-[#1D3557] mb-2">Settings</h1>
+      <p className="text-[#4A6A82] text-sm mb-6">All changes here reflect live on the website. No code changes needed.</p>
       <form onSubmit={handleSave}>
         <div className="space-y-6 max-w-3xl">
           {SETTING_GROUPS.map(group => (
             <div key={group.label} className="card">
-              <div className="mb-4 pb-3 border-b border-[#D9DEE8]">
-                <h2 className="font-display font-bold text-[#111827]">{group.label}</h2>
+              <div className="mb-4 pb-3 border-b border-[#C8DCEA]">
+                <h2 className="font-bold text-[#1D3557]">{group.label}</h2>
                 {(group as any).desc && (
-                  <p className="text-xs text-[#6B7280] mt-1">{(group as any).desc}</p>
+                  <p className="text-xs text-[#4A6A82] mt-1">{(group as any).desc}</p>
                 )}
               </div>
               <div className="space-y-3">
