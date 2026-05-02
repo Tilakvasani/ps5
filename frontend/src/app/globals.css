@@ -2,184 +2,153 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Squada+One&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap');
+
+/* ─────────────────────────────────────────
+   ZUPWELL MATTE DESIGN SYSTEM
+   Parag Bhai palette — flat, zero gradient
+   ───────────────────────────────────────── */
 
 @layer base {
   :root {
-    --zupwell-blue:       #0B2C6F;
-    --zupwell-blue-light: #1E5AA8;
-    --zupwell-orange:     #F47C41;
-    --zupwell-white:      #FFFFFF;
-    --bg-light:           #F4F6FA;
-    --border-grey:        #D9DEE8;
-    --text-dark:          #111827;
-    --text-grey:          #6B7280;
-    --neon-sky:           #4CC9F0;
-    --lemon-yellow:       #FFD166;
-    --mint-green:         #2EC4B6;
+    --blue:        #1D3557;
+    --mint:        #45B08C;
+    --ice:         #F1FAFF;
+    --blue-dim:    #162843;
+    --mint-dim:    #389475;
+    --border:      #C8DCEA;
+    --border-soft: #DFF0F8;
+    --text-dark:   #1D3557;
+    --text-mid:    #4A6A82;
+    --text-light:  #7A9BB5;
+    --surface:     #FFFFFF;
+    --surface-alt: #F1FAFF;
 
-    --orange:      #F47C41;
-    --orange-dark: #d9673a;
-    --blue:        #0B2C6F;
-    --blue-light:  #1E5AA8;
-    --charcoal:    #111827;
-    --silver:      #F4F6FA;
-    --silver-dark: #D9DEE8;
-    --white:       #FFFFFF;
+    /* legacy aliases */
+    --zupwell-blue:       #1D3557;
+    --zupwell-blue-light: #45B08C;
+    --zupwell-orange:     #45B08C;
+    --zupwell-white:      #FFFFFF;
+    --bg-light:           #F1FAFF;
+    --border-grey:        #C8DCEA;
+    --text-grey:          #4A6A82;
+    --charcoal:           #1D3557;
+    --silver:             #F1FAFF;
+    --silver-dark:        #C8DCEA;
+    --white:              #FFFFFF;
+    --orange:             #45B08C;
+    --orange-dark:        #389475;
   }
 
   body {
     @apply antialiased;
-    background-color: #F4F6FA;
-    color: #111827;
-    font-family: 'Rajdhani', sans-serif;
+    background-color: #F1FAFF;
+    color: #1D3557;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Squada One', sans-serif;
-    color: #111827;
+    font-family: 'DM Sans', sans-serif;
+    color: #1D3557;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
+
+  a { color: inherit; }
 }
 
 @layer components {
 
-  /* Glass card — light version */
-  .glass {
-    @apply rounded-2xl backdrop-blur-xl;
-    background: rgba(255,255,255,0.85);
-    border: 1px solid rgba(217,222,232,0.7);
-    box-shadow: 0 4px 24px rgba(11,44,111,0.08);
-  }
-  .glass-hover {
-    @apply glass transition-all duration-300;
-  }
-  .glass-hover:hover {
-    background: rgba(255,255,255,0.95);
-    border-color: rgba(244,124,65,0.4);
-    box-shadow: 0 8px 32px rgba(244,124,65,0.12);
-  }
-
-  /* Gradient text */
-  .gradient-text {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #F47C41, #0B2C6F);
-  }
-
-  /* Primary: Zupwell Orange */
-  .btn-primary {
-    @apply relative overflow-hidden rounded-xl px-6 py-3 font-semibold text-[#111827] transition-all duration-300;
-    background: #F47C41;
-    box-shadow: 0 4px 14px rgba(244,124,65,0.35);
-  }
-  .btn-primary:hover {
-    background: #d9673a;
-    box-shadow: 0 6px 20px rgba(244,124,65,0.5);
-    transform: translateY(-1px);
-  }
-  .btn-primary:active { transform: translateY(0); }
-
-  /* Secondary: Zupwell Blue */
-  .btn-secondary {
-    @apply relative overflow-hidden rounded-xl px-6 py-3 font-semibold text-[#111827] transition-all duration-300;
-    background: #0B2C6F;
-    box-shadow: 0 4px 14px rgba(11,44,111,0.25);
-  }
-  .btn-secondary:hover {
-    background: #1E5AA8;
-    box-shadow: 0 6px 20px rgba(30,90,168,0.4);
-    transform: translateY(-1px);
-  }
-
-  /* Outline */
-  .btn-outline {
-    @apply rounded-xl px-6 py-3 font-semibold transition-all duration-300;
-    border: 1.5px solid #D9DEE8;
-    color: #111827;
-    background: transparent;
-  }
-  .btn-outline:hover {
-    border-color: #F47C41;
-    color: #F47C41;
-    background: rgba(244,124,65,0.06);
-  }
-
-  /* Input fields */
-  .input-field {
-    @apply w-full rounded-xl px-4 py-3 transition-all duration-200 focus:outline-none;
-    background: #FFFFFF;
-    border: 1.5px solid #D9DEE8;
-    color: #111827;
-  }
-  .input-field::placeholder { color: #9CA3AF; }
-  .input-field:focus {
-    border-color: #F47C41;
-    box-shadow: 0 0 0 3px rgba(244,124,65,0.15);
-  }
-
-  /* Card */
   .card {
     @apply rounded-2xl p-6;
     background: #FFFFFF;
-    border: 1px solid #D9DEE8;
-    box-shadow: 0 2px 12px rgba(11,44,111,0.06);
+    border: 1.5px solid #C8DCEA;
   }
 
-  /* Light panels */
-  .section-silver {
-    background: #F4F6FA;
-    color: #111827;
+  .glass {
+    @apply rounded-2xl;
+    background: #FFFFFF;
+    border: 1.5px solid #C8DCEA;
   }
-  .section-silver h1,
-  .section-silver h2,
-  .section-silver h3 { color: #111827; }
+  .glass-hover {
+    @apply glass transition-colors duration-200;
+  }
+  .glass-hover:hover { border-color: #45B08C; }
 
-  /* Labels */
+  /* flat text — no gradient */
+  .gradient-text { color: #1D3557; }
+
+  .btn-primary {
+    @apply rounded-xl px-6 py-3 font-semibold transition-colors duration-200;
+    background: #45B08C;
+    color: #FFFFFF;
+    border: none;
+  }
+  .btn-primary:hover  { background: #389475; }
+  .btn-primary:active { background: #2e7a5f; }
+
+  .btn-secondary {
+    @apply rounded-xl px-6 py-3 font-semibold transition-colors duration-200;
+    background: #1D3557;
+    color: #FFFFFF;
+    border: none;
+  }
+  .btn-secondary:hover  { background: #162843; }
+  .btn-secondary:active { background: #111e30; }
+
+  .btn-outline {
+    @apply rounded-xl px-6 py-3 font-semibold transition-colors duration-200;
+    background: transparent;
+    border: 1.5px solid #C8DCEA;
+    color: #1D3557;
+  }
+  .btn-outline:hover { border-color: #45B08C; color: #45B08C; }
+
+  .input-field {
+    @apply w-full rounded-xl px-4 py-3 transition-colors duration-200 focus:outline-none;
+    background: #FFFFFF;
+    border: 1.5px solid #C8DCEA;
+    color: #1D3557;
+  }
+  .input-field::placeholder { color: #7A9BB5; }
+  .input-field:focus { border-color: #45B08C; }
+
   .label-text {
     @apply block text-sm font-semibold mb-1.5;
-    color: #6B7280;
+    color: #4A6A82;
   }
 
-  /* Badges */
-  .badge { @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold; }
-  .badge-orange  { @apply badge; background: rgba(244,124,65,0.12);  color: #d9673a;  border: 1px solid rgba(244,124,65,0.3); }
-  .badge-blue    { @apply badge; background: rgba(11,44,111,0.08);   color: #1E5AA8;  border: 1px solid rgba(11,44,111,0.2); }
-  .badge-silver  { @apply badge; background: #F4F6FA;                color: #6B7280;  border: 1px solid #D9DEE8; }
-  .badge-success { @apply badge; background: rgba(46,196,182,0.1);   color: #1a9e94;  border: 1px solid rgba(46,196,182,0.3); }
-  .badge-warning { @apply badge; background: rgba(255,209,102,0.15); color: #b07d00;  border: 1px solid rgba(255,209,102,0.4); }
-  .badge-danger  { @apply badge; background: rgba(239,68,68,0.08);   color: #dc2626;  border: 1px solid rgba(239,68,68,0.25); }
-  .badge-info    { @apply badge; background: rgba(76,201,240,0.1);   color: #0284c7;  border: 1px solid rgba(76,201,240,0.3); }
-  .badge-purple  { @apply badge; background: rgba(168,85,247,0.08);  color: #7c3aed;  border: 1px solid rgba(168,85,247,0.25); }
+  .badge         { @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold; }
+  .badge-orange  { @apply badge; background:#EBF7F3; color:#389475; border:1px solid #C3E5D9; }
+  .badge-blue    { @apply badge; background:#EAF0F7; color:#1D3557; border:1px solid #C0D2E4; }
+  .badge-silver  { @apply badge; background:#F1FAFF; color:#4A6A82; border:1px solid #C8DCEA; }
+  .badge-success { @apply badge; background:#EBF7F3; color:#389475; border:1px solid #C3E5D9; }
+  .badge-warning { @apply badge; background:#FFF8EC; color:#9A6700; border:1px solid #F0DBA8; }
+  .badge-danger  { @apply badge; background:#FEF2F2; color:#B91C1C; border:1px solid #FCA5A5; }
+  .badge-info    { @apply badge; background:#EAF0F7; color:#1D3557; border:1px solid #C0D2E4; }
+  .badge-purple  { @apply badge; background:#F5F3FF; color:#5B21B6; border:1px solid #C4B5FD; }
+
+  .section-silver { background:#F1FAFF; color:#1D3557; }
+  .section-silver h1,
+  .section-silver h2,
+  .section-silver h3 { color:#1D3557; }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #F4F6FA; }
-::-webkit-scrollbar-thumb { background: #D9DEE8; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #F47C41; }
+::-webkit-scrollbar       { width:6px; }
+::-webkit-scrollbar-track { background:#F1FAFF; }
+::-webkit-scrollbar-thumb { background:#C8DCEA; border-radius:10px; }
+::-webkit-scrollbar-thumb:hover { background:#45B08C; }
 
-/* Glow Pulse */
-@keyframes glow-pulse {
-  0%, 100% { opacity: 0.6; }
-  50%       { opacity: 1; }
-}
-.glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
+:focus-visible { outline:2px solid #45B08C; outline-offset:2px; }
 
-/* Fade In Up */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
 }
-.animate-fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+.animate-fade-in-up { animation:fadeInUp 0.5s ease forwards; }
 
-/* Shadow utilities (replacing glow on light bg) */
-.orange-glow { box-shadow: 0 4px 20px rgba(244,124,65,0.3); }
-.blue-glow   { box-shadow: 0 4px 20px rgba(11,44,111,0.2); }
-
-:focus-visible { outline: 2px solid #F47C41; outline-offset: 2px; }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
 }
