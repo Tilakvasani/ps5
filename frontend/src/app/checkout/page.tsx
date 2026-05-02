@@ -3,7 +3,7 @@ import { useSettings, calcShipping } from "@/lib/useSettings";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ChevronRight, MapPin, CreditCard, CheckCircle, Plus } from "lucide-react";
+import { ChevronRight, MapPin, CreditCard, CheckCircle, Plus, Shield } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useStore } from "@/lib/store";
@@ -13,7 +13,6 @@ import toast from "react-hot-toast";
 
 const STEPS = ["Address", "Payment", "Review"];
 
-// FIX: load Razorpay script on demand and wait for it to be ready
 function loadRazorpay(): Promise<void> {
   return new Promise((resolve, reject) => {
     if ((window as any).Razorpay) return resolve();
@@ -23,6 +22,15 @@ function loadRazorpay(): Promise<void> {
     s.onerror = () => reject(new Error("Failed to load Razorpay. Please refresh the page."));
     document.body.appendChild(s);
   });
+}
+
+async function retryAsync(fn: () => Promise<void>, times = 3, delay = 600): Promise<boolean> {
+  for (let i = 0; i < times; i++) {
+    try { await fn(); return true; } catch {
+      if (i < times - 1) await new Promise(r => setTimeout(r, delay * (i + 1)));
+    }
+  }
+  return false;
 }
 
 export default function CheckoutPage() {
@@ -35,20 +43,22 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod">("razorpay");
   const [couponCode, setCouponCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [newAddr, setNewAddr] = useState({ fullName: "", phone: "", addressLine1: "", city: "Ahmedabad", state: "Gujarat", pincode: "", gstin: "" });
   const [addingAddr, setAddingAddr] = useState(false);
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
-  const cgst = subtotal * cgstRate;
-  const sgst = subtotal * sgstRate;
+  const cgst     = subtotal * cgstRate;
+  const sgst     = subtotal * sgstRate;
   const shipping = calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
   const rawTotal = subtotal + cgst + sgst + shipping;
-  const total = Math.round(rawTotal);
+  const total    = Math.round(rawTotal);
   const roundOffDiff = total - rawTotal;
+  const cgstPct  = (cgstRate * 100).toFixed(1);
+  const sgstPct  = (sgstRate * 100).toFixed(1);
 
   useEffect(() => {
     if (!user) { router.push("/login"); return; }
-    // FIX: show error if address fetch fails instead of silently swallowing it
     accountApi.getAddresses()
       .then(setAddresses)
       .catch(() => toast.error("Could not load your addresses. Please refresh."));
@@ -76,6 +86,7 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     if (!selectedAddress) { toast.error("Please select a delivery address"); return; }
+    if (!agreedToTerms) { toast.error("Please agree to the Terms, Privacy and Refund Policy to continue."); return; }
     setLoading(true);
     try {
       const order = await ordersApi.create({
@@ -86,9 +97,7 @@ export default function CheckoutPage() {
       });
 
       if (paymentMethod === "razorpay") {
-        // FIX: load Razorpay script on demand — wait for it to be ready
         await loadRazorpay();
-
         const rzp = await paymentsApi.createRazorpayOrder(order.id);
         const options = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -104,17 +113,17 @@ export default function CheckoutPage() {
               toast.success("Payment successful! 🎉");
               router.push(`/order/${order.orderNumber}`);
             } catch {
-              // Verification failed — cancel the order so it doesn't pollute admin
-              try { await ordersApi.cancel(order.id); } catch {}
+              await retryAsync(() => ordersApi.cancel(order.id));
               toast.error("Payment verification failed. Please try again.");
               setLoading(false);
             }
           },
           modal: {
             ondismiss: async () => {
-              // User closed Razorpay without paying — cancel the pending order
-              try { await ordersApi.cancel(order.id); } catch {}
-              toast.error("Payment cancelled.");
+              const cancelled = await retryAsync(() => ordersApi.cancel(order.id));
+              toast.error(cancelled
+                ? "Payment cancelled. Your order has been removed."
+                : "Payment cancelled. Contact support if a pending order appears.");
               setLoading(false);
             },
           },
@@ -122,17 +131,15 @@ export default function CheckoutPage() {
           theme: { color: "#F47C41" },
         };
         new (window as any).Razorpay(options).open();
-        // Note: setLoading(false) is handled by ondismiss or handler above
       } else {
         clearCart();
         toast.success("Order placed! You'll pay on delivery.");
         router.push(`/order/${order.orderNumber}`);
+        setLoading(false);
       }
     } catch (err: any) {
-      toast.error(err.message || "Order failed");
+      toast.error(err.message || "Order failed. Please try again.");
       setLoading(false);
-    } finally {
-      if (paymentMethod === "cod") setLoading(false);
     }
   };
 
@@ -146,7 +153,7 @@ export default function CheckoutPage() {
         <div className="flex items-center gap-4 mb-10">
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center gap-2">
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i <= step ? "bg-[#F47C41] text-[#111827]" : "bg-[#FFFFFF] text-[#6B7280]"}`}>
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i <= step ? "bg-[#F47C41] text-white" : "bg-white text-[#6B7280]"}`}>
                 {i < step ? <CheckCircle size={16} /> : i + 1}
               </div>
               <span className={`text-sm font-semibold ${i <= step ? "text-[#111827]" : "text-[#6B7280]"}`}>{s}</span>
@@ -156,8 +163,8 @@ export default function CheckoutPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+
             {/* Step 0: Address */}
             {step === 0 && (
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
@@ -167,7 +174,7 @@ export default function CheckoutPage() {
                     <h2 className="font-display font-bold text-[#111827]">Delivery Address</h2>
                   </div>
                   {addresses.map((addr) => (
-                    <label key={addr.id} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${selectedAddress === addr.id ? "border-[#F47C41] bg-[#F47C41]/10" : "border-[#D9DEE8] hover:border-[#D9DEE8]"}`}>
+                    <label key={addr.id} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${selectedAddress === addr.id ? "border-[#F47C41] bg-[#F47C41]/10" : "border-[#D9DEE8]"}`}>
                       <input type="radio" name="address" checked={selectedAddress === addr.id} onChange={() => setSelectedAddress(addr.id)} className="mt-1 accent-[#F47C41]" />
                       <div className="text-sm">
                         <p className="font-bold text-[#111827]">{addr.fullName}</p>
@@ -182,19 +189,17 @@ export default function CheckoutPage() {
                   </button>
                   {addingAddr && (
                     <div className="mt-4 space-y-3 border-t border-[#D9DEE8] pt-4">
-                      {[["fullName", "Full Name"], ["phone", "Phone"], ["addressLine1", "Address Line 1"], ["city", "City"], ["state", "State"], ["pincode", "Pincode"], ["gstin", "GSTIN (optional)"]].map(([k, label]) => (
+                      {[["fullName","Full Name"],["phone","Phone"],["addressLine1","Address Line 1"],["city","City"],["state","State"],["pincode","Pincode"],["gstin","GSTIN (optional)"]].map(([k, label]) => (
                         <div key={k}>
                           <label className="text-xs text-[#6B7280] mb-1 block">{label}</label>
-                          <input type="text" value={(newAddr as any)[k]} onChange={(e) => setNewAddr(n => ({ ...n, [k]: e.target.value }))}
-                            className="input-field text-sm" placeholder={label} />
+                          <input type="text" value={(newAddr as any)[k]} onChange={(e) => setNewAddr(n => ({ ...n, [k]: e.target.value }))} className="input-field text-sm" placeholder={label} />
                         </div>
                       ))}
                       <button onClick={handleSaveAddress} className="btn-primary text-sm px-4 py-2">Save Address</button>
                     </div>
                   )}
                 </div>
-                <button onClick={() => { if (!selectedAddress) { toast.error("Select an address"); return; } setStep(1); }}
-                  className="btn-primary w-full py-3 flex items-center justify-center gap-2">
+                <button onClick={() => { if (!selectedAddress) { toast.error("Select an address"); return; } setStep(1); }} className="btn-primary w-full py-3 flex items-center justify-center gap-2">
                   Continue to Payment <ChevronRight size={16} />
                 </button>
               </motion.div>
@@ -208,8 +213,8 @@ export default function CheckoutPage() {
                     <CreditCard size={18} className="text-[#F47C41]" />
                     <h2 className="font-display font-bold text-[#111827]">Payment Method</h2>
                   </div>
-                  {[["razorpay", "Razorpay (UPI, Card, Netbanking)", "🔐"], ["cod", "Cash on Delivery", "💵"]].map(([val, label, icon]) => (
-                    <label key={val} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${paymentMethod === val ? "border-[#F47C41] bg-[#F47C41]/10" : "border-[#D9DEE8] hover:border-[#D9DEE8]"}`}>
+                  {[["razorpay","Razorpay (UPI, Card, Netbanking)","🔐"],["cod","Cash on Delivery","💵"]].map(([val, label, icon]) => (
+                    <label key={val} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${paymentMethod === val ? "border-[#F47C41] bg-[#F47C41]/10" : "border-[#D9DEE8]"}`}>
                       <input type="radio" name="payment" checked={paymentMethod === val as any} onChange={() => setPaymentMethod(val as any)} className="mt-1 accent-[#F47C41]" />
                       <div>
                         <span className="text-sm font-semibold text-[#111827]">{icon} {label}</span>
@@ -220,9 +225,7 @@ export default function CheckoutPage() {
                   ))}
                   <div className="mt-4">
                     <label className="text-sm font-semibold text-[#374151] mb-2 block">Coupon Code (optional)</label>
-                    <div className="flex gap-2">
-                      <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="input-field text-sm flex-1" placeholder="Enter coupon" />
-                    </div>
+                    <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="input-field text-sm" placeholder="Enter coupon code" />
                   </div>
                 </div>
                 <div className="flex gap-3">
@@ -243,30 +246,61 @@ export default function CheckoutPage() {
                     {cart.map((item) => (
                       <div key={`${item.productId}-${item.variantId}`} className="flex justify-between text-sm">
                         <span className="text-[#374151]">{item.name} × {item.qty}</span>
-                        <span className="text-[#111827] font-semibold">₹{(item.price * item.qty).toFixed(2)}</span>
+                        <span className="text-[#111827] font-semibold">₹{(Number(item.price) * Number(item.qty)).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
+
+                {/* Terms Agreement */}
+                <div className={`card mb-4 border transition-all ${agreedToTerms ? "border-emerald-400/40 bg-emerald-50/30" : "border-[#D9DEE8]"}`}>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" checked={agreedToTerms} onChange={e => setAgreedToTerms(e.target.checked)}
+                      className="mt-0.5 accent-[#F47C41] h-4 w-4 shrink-0" />
+                    <div className="text-sm text-[#374151] leading-relaxed">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Shield size={14} className="text-[#F47C41] shrink-0" />
+                        <span className="font-semibold text-[#111827]">I agree to the following policies</span>
+                      </div>
+                      I have read and agree to the{" "}
+                      <Link href="/terms-of-service" target="_blank" className="text-[#F47C41] hover:underline font-medium">Terms & Conditions</Link>,{" "}
+                      <Link href="/privacy-policy" target="_blank" className="text-[#F47C41] hover:underline font-medium">Privacy Policy</Link>, and{" "}
+                      <Link href="/refund-policy" target="_blank" className="text-[#F47C41] hover:underline font-medium">Refund & Cancellation Policy</Link> of Zupwell.
+                    </div>
+                  </label>
+                </div>
+
                 <div className="flex gap-3">
                   <button onClick={() => setStep(1)} className="btn-outline py-3 px-6">← Back</button>
-                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handlePlaceOrder} disabled={loading}
-                    className="btn-primary flex-1 py-3 disabled:opacity-50">
-                    {loading ? <span className="flex items-center justify-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-[#D9DEE8] border-t-transparent animate-spin" />Placing Order...</span> : `Place Order · ₹${total.toFixed(0)}`}
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                    onClick={handlePlaceOrder} disabled={loading || !agreedToTerms}
+                    className="btn-primary flex-1 py-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                    {loading
+                      ? <span className="flex items-center justify-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Placing Order...</span>
+                      : `Place Order · ₹${total.toFixed(0)}`}
                   </motion.button>
                 </div>
+                {!agreedToTerms && (
+                  <p className="text-xs text-center text-[#9CA3AF] mt-2">Please agree to the policies above to place your order.</p>
+                )}
               </motion.div>
             )}
           </div>
 
-          {/* Order Summary sidebar */}
+          {/* Order Summary */}
           <div className="card h-fit sticky top-24">
             <h2 className="font-display font-bold text-[#111827] mb-4">Summary</h2>
             <div className="space-y-2 text-sm mb-4">
-              <div className="flex justify-between text-[#374151]"><span>Subtotal ({cart.length} items)</span><span>₹{subtotal.toFixed(2)}</span></div>
-              <div className="flex justify-between text-[#374151]"><span>CGST @2.5%</span><span>₹{cgst.toFixed(2)}</span></div>
-              <div className="flex justify-between text-[#374151]"><span>SGST @2.5%</span><span>₹{sgst.toFixed(2)}</span></div>
-              <div className="flex justify-between text-[#374151]"><span>Shipping</span><span>{shipping === 0 ? <span className="text-emerald-400">FREE</span> : `₹${shipping}`}</span></div>
+              <div className="flex justify-between text-[#374151]"><span>Subtotal ({cart.length} item{cart.length !== 1 ? "s" : ""})</span><span>₹{subtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[#374151]"><span>CGST @{cgstPct}%</span><span>₹{cgst.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[#374151]"><span>SGST @{sgstPct}%</span><span>₹{sgst.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[#374151]">
+                <span>Shipping</span>
+                <span>{shipping === 0 ? <span className="text-emerald-500 font-semibold">FREE</span> : `₹${shipping}`}</span>
+              </div>
+              {shipping > 0 && (
+                <p className="text-xs text-[#9CA3AF]">Free shipping on orders above ₹{freeShippingThreshold}</p>
+              )}
               {roundOffDiff !== 0 && (
                 <div className="flex justify-between text-[#9CA3AF] text-xs italic"><span>Round Off</span><span>{roundOffDiff > 0 ? "+" : ""}₹{roundOffDiff.toFixed(2)}</span></div>
               )}

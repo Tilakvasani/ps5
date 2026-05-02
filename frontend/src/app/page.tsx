@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle } from "lucide-react";
+import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle, Quote } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { publicApi } from "@/lib/api";
@@ -48,9 +48,11 @@ const s = (settings: Record<string, string>, key: string) =>
 
 export default function HomePage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
+  const [reviews, setReviews] = useState<any[]>([]);
 
   useEffect(() => {
     publicApi.getSettings().then(setSettings).catch(() => {});
+    publicApi.getReviews().then(setReviews).catch(() => {});
   }, []);
 
   const features = [1, 2, 3, 4].map(n => ({
@@ -222,6 +224,51 @@ export default function HomePage() {
                 <p className="text-sm text-[#6B7280]">{s(settings, "founder_title")}</p>
               </div>
             </motion.div>
+          </div>
+        </section>
+      )}
+
+
+      {/* ── Customer Reviews ── */}
+      {reviews.length > 0 && (
+        <section className="py-24 px-6 bg-white">
+          <div className="mx-auto max-w-7xl">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#F47C41] mb-3">Real People, Real Results</p>
+              <h2 className="text-4xl md:text-5xl font-display font-black text-[#111827] mb-3">
+                What Our <span className="gradient-text">Customers Say</span>
+              </h2>
+              <p className="text-[#6B7280]">Join thousands of happy customers across India</p>
+            </motion.div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reviews.slice(0, 6).map((review, i) => (
+                <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08 }} viewport={{ once: true }}
+                  className="card flex flex-col gap-4 hover:border-[#F47C41]/20 transition-all">
+                  <div className="flex items-start justify-between">
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <Star key={j} size={14} className={j < review.rating ? "fill-yellow-400 text-yellow-400" : "text-[#D9DEE8]"} />
+                      ))}
+                    </div>
+                    <Quote size={20} className="text-[#F47C41]/20" />
+                  </div>
+                  {review.title && <p className="font-display font-bold text-[#111827]">{review.title}</p>}
+                  <p className="text-sm text-[#374151] leading-relaxed flex-1">"{review.body}"</p>
+                  <div className="flex items-center justify-between border-t border-[#D9DEE8] pt-3 mt-auto">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-[#F47C41]/10 flex items-center justify-center text-xs font-bold text-[#F47C41]">
+                        {review.user?.name?.charAt(0)?.toUpperCase() || "?"}
+                      </div>
+                      <span className="text-sm font-semibold text-[#111827]">{review.user?.name || "Customer"}</span>
+                    </div>
+                    {review.product?.name && (
+                      <span className="text-xs text-[#9CA3AF] truncate max-w-[120px]">{review.product.name}</span>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </section>
       )}

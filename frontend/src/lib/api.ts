@@ -211,4 +211,6 @@ export default api;
 export const publicApi = {
   getSettings: (): Promise<Record<string, string>> =>
     api.get("/api/settings").then((r) => r.data),
+  getReviews: (): Promise<any[]> =>
+    api.get("/api/reviews/public").then((r) => r.data),
 };

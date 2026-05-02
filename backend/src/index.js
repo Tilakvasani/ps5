@@ -72,6 +72,25 @@ app.get("/api/settings", async (req, res) => {
   }
 });
 
+// ── Public Reviews — approved only, for home page ────
+app.get("/api/reviews/public", async (req, res) => {
+  try {
+    const prisma = require("./utils/prisma");
+    const reviews = await prisma.review.findMany({
+      where: { isApproved: true },
+      orderBy: { createdAt: "desc" },
+      take: 12,
+      include: {
+        user:    { select: { name: true } },
+        product: { select: { name: true } },
+      },
+    });
+    res.json(reviews);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+});
+
 // ── Health Check ─────────────────────────────────────
 app.get("/health", (req, res) => res.json({ status: "ok", time: new Date().toISOString() }));
 
