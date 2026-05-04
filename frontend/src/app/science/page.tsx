@@ -46,7 +46,6 @@ const MANUFACTURING = [
 ];
 
 const CLEAN = [
-  { label: "No Harmful Chemicals", sub: "Free from contaminants, fillers, and synthetic binders." },
   { label: "Moisture-Lock Packaging", sub: "Precision-sealed tubes keep tablets fresh and potent for longer." },
   { label: "Transparent Labelling", sub: "What's on the label is exactly what's inside — nothing hidden." },
   { label: "No Artificial Colours", sub: "Our effervescent colour comes from nature, not a lab dye." },

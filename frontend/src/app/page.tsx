@@ -219,66 +219,37 @@ export default function HomePage() {
 
       {/* ── Founder's Message ── */}
      {s(settings, "founder_message") && (
-        <section className="py-24 px-6 bg-white">
-          <div className="mx-auto max-w-4xl">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <div className="rounded-3xl overflow-hidden shadow-xl border border-[#E8F4EF]" style={{ background: "#fff" }}>
-                <div className="flex flex-col md:flex-row">
-
-                  {/* ── Left: Photo panel ── */}
-                  <div className="relative md:w-56 shrink-0 flex flex-col" style={{ background: "#F1FAFF" }}>
-                    {/* Green left accent stripe */}
-                    <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-3xl" style={{ background: "linear-gradient(180deg, #45B08C 0%, #1D3557 100%)" }} />
-                    {/* Photo */}
-                    <div className="flex-1 overflow-hidden" style={{ minHeight: 240 }}>
-                      {s(settings, "founder_photo") ? (
-                        <img
-                          src={s(settings, "founder_photo")}
-                          alt={s(settings, "founder_name")}
-                          className="w-full h-full"
-                          style={{ objectFit: "cover", objectPosition: "top center", minHeight: 240 }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center" style={{ minHeight: 240, fontSize: 64, fontWeight: 900, color: "#1D3557" }}>
-                          {s(settings, "founder_name").charAt(0)}
-                        </div>
-                      )}
-                    </div>
-                    {/* Name plate */}
-                    <div className="px-5 py-4 border-t border-[#C8DCEA]" style={{ background: "#fff" }}>
-                      <p className="font-black text-sm text-[#1D3557] leading-tight">{s(settings, "founder_name")}</p>
-                      <p className="text-xs font-semibold mt-0.5" style={{ color: "#45B08C" }}>{s(settings, "founder_title")}</p>
-                    </div>
-                  </div>
-
-                  {/* ── Right: Quote panel ── */}
-                  <div className="flex-1 flex flex-col justify-center px-8 py-10 relative">
-                    {/* Big decorative quote marks */}
-                    <div className="absolute top-6 left-6 text-7xl font-black leading-none select-none" style={{ color: "#45B08C", opacity: 0.12 }}>"</div>
-                    <div className="absolute bottom-4 right-8 text-7xl font-black leading-none select-none rotate-180" style={{ color: "#45B08C", opacity: 0.12 }}>"</div>
-
-                    <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "#45B08C" }}>Founder's Message</p>
-
-                    <p className="text-[#1D3557] text-lg leading-relaxed font-medium italic relative z-10">
-                      "{s(settings, "founder_message")}"
-                    </p>
-
-                    {/* Bottom rule + cert badge */}
-                    <div className="mt-8 pt-5 border-t border-[#E8F4EF] flex items-center justify-between flex-wrap gap-3">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle size={15} className="text-emerald-500 shrink-0" />
-                        <span className="text-xs text-[#4A6A82] font-semibold">HACCP Certified Operations</span>
-                      </div>
-                      {/* Green bottom accent line */}
-                      <div className="h-1 w-12 rounded-full" style={{ background: "linear-gradient(90deg, #45B08C, #1D3557)" }} />
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+       <section className="py-20 px-6 bg-white">
+               <div className="mx-auto max-w-4xl">
+                 <motion.div {...fadeUp(0)} className="text-center mb-10">
+                   <h2 className="text-3xl md:text-4xl font-black text-[#1D3557]">
+                     Founder's <span className="gradient-text">Message</span>
+                   </h2>
+                 </motion.div>
+                 <motion.div {...fadeUp(0.1)} className="card flex flex-col md:flex-row gap-8 items-center">
+                   {/* Photo */}
+                   <div className="shrink-0 text-center">
+                     {s(settings, "founder_photo") ? (
+                       <img src={s(settings, "founder_photo")} alt={s(settings, "founder_name")}
+                         className="h-36 w-36 rounded-full object-cover border-4 border-[#45B08C]/20 mx-auto" />
+                     ) : (
+                       <div className="h-36 w-36 rounded-full bg-[#45B08C]/10 flex items-center justify-center text-5xl font-black text-[#45B08C] mx-auto">
+                         {s(settings, "founder_name").charAt(0)}
+                       </div>
+                     )}
+                     <p className="font-bold text-[#1D3557] mt-3">{s(settings, "founder_name")}</p>
+                     <p className="text-xs text-[#4A6A82]">{s(settings, "founder_title")}</p>
+                   </div>
+                   {/* Quote */}
+                   <div className="flex-1">
+                     <div className="text-5xl text-[#45B08C]/20 font-black leading-none mb-2">"</div>
+                     <p className="text-[#4A6A82] leading-relaxed text-lg italic">
+                       {s(settings, "founder_message")}
+                     </p>
+                   </div>
+                 </motion.div>
+               </div>
+             </section>
       )}
 
       {/* ── Customer Reviews ── */}
