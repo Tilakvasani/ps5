@@ -23,7 +23,7 @@ const CATEGORIES = [
 
 const WHY_CHOOSE = [
   { icon: Droplets, title: "Water Upgrade", desc: "Give your plain water a powerful, professional upgrade with every sip." },
-  { icon: Zap,      title: "Performance Fuel", desc: "Fast-absorbing formula engineered for your busy, non-stop lifestyle." },
+  { icon: Zap,      title: "Performance Fuel", desc: "" },
   { icon: Brain,    title: "Science-Backed", desc: "Formulated with clinically studied ingredients for real results." },
   { icon: Leaf,     title: "Clean Ingredients", desc: "No junk, no fillers. Just what your body actually needs." },
 ];
@@ -338,12 +338,9 @@ export default function HomePage() {
 
                     {/* Bottom rule + cert badge */}
                     <div className="mt-8 pt-5 border-t border-[#E8F4EF] flex items-center justify-between flex-wrap gap-3">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle size={15} className="text-emerald-500 shrink-0" />
-                        <span className="text-xs text-[#4A6A82] font-semibold">HACCP Certified Operations</span>
-                      </div>
+                      
                       {/* Green bottom accent line */}
-                      <div className="h-1 w-12 rounded-full" style={{ background: "linear-gradient(90deg, #45B08C, #1D3557)" }} />
+                      
                     </div>
                   </div>
 
