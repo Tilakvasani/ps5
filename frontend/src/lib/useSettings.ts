@@ -37,7 +37,7 @@ function writeLocalCache(data: Record<string, string>) {
 let _cache: Record<string, string> | null = readLocalCache();
 let _fetchPromise: Promise<Record<string, string>> | null = null;
 
-async function fetchSettings(): Promise<Record<string, string>> {
+export async function fetchSettings(): Promise<Record<string, string>> {
   // Return in-memory cache only if it came from API (not just localStorage)
   if (_fetchPromise) return _fetchPromise;
   _fetchPromise = publicApi.getSettings()
@@ -118,10 +118,18 @@ const DEFAULTS: Omit<SiteSettings, "raw" | "loading"> = {
 export function useSettings(): SiteSettings {
   // Seed from the module-level cache (already populated from localStorage)
   // so components never render with an empty raw on the very first paint.
-  const [raw, setRaw] = useState<Record<string, string>>(() => _cache ?? {});
-  const [loading, setLoading] = useState(() => Object.keys(_cache ?? {}).length === 0);
+  // Always start with {} so server and client render identically (no hydration mismatch)
+  const [raw, setRaw] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Immediately apply localStorage cache (client-only, after hydration)
+    const cached = _cache ?? {};
+    if (Object.keys(cached).length > 0) {
+      setRaw(cached);
+      setLoading(false);
+    }
+    // Then fetch fresh from API
     fetchSettings().then(data => {
       setRaw(data);
       setLoading(false);
