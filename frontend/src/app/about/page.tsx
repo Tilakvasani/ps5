@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Zap, Heart, Eye, Star, ArrowRight } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { publicApi } from "@/lib/api";
+import { fetchSettings } from "@/lib/useSettings";
 import Link from "next/link";
 import { fadeUp } from "@/lib/utils";
 
@@ -34,7 +34,13 @@ export default function AboutPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    publicApi.getSettings().then(setSettings).catch(() => {});
+    fetchSettings().then(setSettings).catch(() => {});
+    const onBust = (e: StorageEvent) => {
+      if (e.key === "zupwell-settings-bust")
+        fetchSettings().then(setSettings).catch(() => {});
+    };
+    window.addEventListener("storage", onBust);
+    return () => window.removeEventListener("storage", onBust);
   }, []);
 
   const why = [1, 2, 3].map(n => ({

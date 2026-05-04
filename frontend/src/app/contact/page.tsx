@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Mail, MessageCircle, Instagram, Facebook, Send, User, Building, MapPin, Briefcase, FileText } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { publicApi } from "@/lib/api";
+import { fetchSettings } from "@/lib/useSettings";
 import toast from "react-hot-toast";
 import { fadeUp } from "@/lib/utils";
 
@@ -31,7 +31,13 @@ export default function ContactPage() {
   const [sending, setSending]   = useState(false);
 
   useEffect(() => {
-    publicApi.getSettings().then(setSettings).catch(() => {});
+    fetchSettings().then(setSettings).catch(() => {});
+    const onBust = (e: StorageEvent) => {
+      if (e.key === "zupwell-settings-bust")
+        fetchSettings().then(setSettings).catch(() => {});
+    };
+    window.addEventListener("storage", onBust);
+    return () => window.removeEventListener("storage", onBust);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

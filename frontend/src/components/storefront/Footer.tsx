@@ -52,7 +52,7 @@ export default function Footer() {
               <sup style={{ fontSize: "0.5em", fontWeight: 700, color: "#45B08C" }}>™</sup>
             </div>
             <p className="text-sm leading-relaxed mb-4" style={{ color: "#4A6A82" }}>
-              Premium health supplements — science-backed, delicious, and made for the modern lifestyle.
+              Performance-Driven Nutrition — Science-backed, insanely delicious, and tailored for your 24/7 lifestyle.
             </p>
             <div className="text-xs space-y-1 mb-5" style={{ color: "#7A9BB5" }}>
               {gstin  && <p>GSTIN: {gstin}</p>}

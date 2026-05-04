@@ -23,7 +23,7 @@ const CATEGORIES = [
 
 const WHY_CHOOSE = [
   { icon: Droplets, title: "Water Upgrade", desc: "Give your plain water a powerful, professional upgrade with every sip." },
-  { icon: Zap,      title: "Instant Hustle Fuel", desc: "Fast-absorbing formula designed for your busy, non-stop lifestyle." },
+  { icon: Zap,      title: "Performance Fuel", desc: "Fast-absorbing formula engineered for your busy, non-stop lifestyle." },
   { icon: Brain,    title: "Science-Backed", desc: "Formulated with clinically studied ingredients for real results." },
   { icon: Leaf,     title: "Clean Ingredients", desc: "No junk, no fillers. Just what your body actually needs." },
 ];
@@ -47,6 +47,72 @@ const D = {
 
 const s = (settings: Record<string, string>, key: string) =>
   settings[key] || D[key as keyof typeof D] || "";
+
+
+const BLOG_POSTS = [
+  {
+    emoji: "💧",
+    tag: "Hydration",
+    date: "Apr 2026",
+    title: "Why Hydration is the #1 Performance Hack",
+    body: "Most people underestimate the power of hydration. Even a 2% drop in body water can reduce your physical performance by up to 20% and cloud your mental focus. Plain water alone doesn't cut it — your body also needs electrolytes like sodium, potassium, and magnesium to actually absorb and use that water at the cellular level. That's exactly why Zupwell's effervescent formula is built around rapid hydration science — giving your cells what they need in seconds, not hours.",
+  },
+  {
+    emoji: "⚡",
+    tag: "Science",
+    date: "Mar 2026",
+    title: "Electrolytes vs Sports Drinks — What's the Difference?",
+    body: "Sports drinks are loaded with sugar, artificial colours, and calories you don't need. Electrolyte supplements like Zupwell deliver the same hydration benefits — sodium, potassium, magnesium, vitamin C — with zero sugar and zero compromise. The effervescent technology ensures faster absorption compared to gulping a sugary drink. If you're working out, commuting in the heat, or simply staying productive all day, pure electrolytes beat sports drinks every single time.",
+  },
+  {
+    emoji: "🏃",
+    tag: "Performance",
+    date: "Mar 2026",
+    title: "Pre-Workout Nutrition: What Actually Works",
+    body: "Forget complicated pre-workout stacks. The most effective pre-workout routine is surprisingly simple: hydration + fast energy. Start with an electrolyte tablet in water 20–30 minutes before training. This primes your muscles with the minerals they need for contraction and recovery. Add a light carb source if you're doing heavy lifting. Skip the mega-dose caffeine powders — they spike and crash. Zupwell's clean formula gives you steady energy without the jitters or the inevitable afternoon crash.",
+  },
+];
+
+function BlogSection() {
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <section className="py-24 px-6 bg-white">
+      <div className="mx-auto max-w-7xl">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#45B08C] mb-3">Health Tips & Insights</p>
+          <h2 className="text-4xl md:text-5xl font-black text-[#1D3557] mb-3">
+            From Our <span className="gradient-text">Blog</span>
+          </h2>
+          <p className="text-[#4A6A82]">Science-backed articles to fuel your health journey</p>
+        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {BLOG_POSTS.map((post, i) => (
+            <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }} viewport={{ once: true }}
+              className="card flex flex-col hover:border-[#45B08C]/30 transition-all duration-300 cursor-pointer"
+              onClick={() => setOpen(open === i ? null : i)}>
+              <div className="text-4xl mb-4">{post.emoji}</div>
+              <span className="text-xs font-semibold text-[#45B08C] uppercase tracking-widest">{post.tag}</span>
+              <h3 className="font-bold text-[#1D3557] mt-2 mb-3 leading-snug">{post.title}</h3>
+              {open === i && (
+                <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
+                  className="text-sm text-[#4A6A82] leading-relaxed mb-4">
+                  {post.body}
+                </motion.p>
+              )}
+              <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#C8DCEA]">
+                <span className="text-xs text-[#7A9BB5]">{post.date}</span>
+                <span className="text-xs text-[#45B08C] font-semibold flex items-center gap-1">
+                  {open === i ? "Close" : "Read more"} <ChevronRight size={12} className={open === i ? "rotate-90" : ""} />
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function HomePage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
@@ -138,7 +204,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-black text-[#1D3557] mb-3">Why Choose <span className="gradient-text">Zupwell?</span></h2>
-            <p className="text-[#4A6A82]">Premium health supplements — your hustle deserves better than plain water</p>
+            <p className="text-[#4A6A82] font-semibold">Smart-Fuel for Modern Humans. <span style={{color:"#45B08C"}}>શુદ્ધ વિજ્ઞાન, અદ્ભુત સ્વાદ અને ઝીરો ડ્રામા.</span></p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {WHY_CHOOSE.map((item, i) => (
@@ -155,15 +221,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── What Our Product Offers ── */}
+      {/* ── Why is Our Product Special? ── */}
       <section className="py-20 px-6 bg-[#F1FAFF]">
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-black text-[#1D3557] mb-3">What Makes Us <span className="gradient-text">Special?</span></h2>
-            <p className="text-[#4A6A82]">Crafted for the ones who never slow down</p>
+            <h2 className="text-4xl md:text-5xl font-black text-[#1D3557] mb-3">Why is Our Product <span className="gradient-text">Special?</span></h2>
+            <p className="text-[#4A6A82]">Zero-Compromise Health Boosters. Crafted for Perfection.</p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((f, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
+            {[
+              { icon: Brain,    title: "Scientific Formula", desc: "A fusion of science and taste." },
+              { icon: Leaf,     title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
+              { icon: Zap,      title: "Instant Absorption", desc: "Rocket-like speed, instant action." },
+              { icon: Shield,   title: "Pocket Friendly",    desc: "It even fits in your jeans pocket." },
+              { icon: Award,    title: "Best Flavour",       desc: "Absolutely fresh, as if straight from the garden." },
+            ].map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}
                 className="card group hover:border-[#45B08C]/20 transition-all duration-300 text-center">
                 <div className="h-14 w-14 mx-auto rounded-2xl bg-[#45B08C]/10 flex items-center justify-center mb-4 group-hover:bg-[#45B08C]/20 transition-all">
@@ -177,17 +249,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Certificate logos ── */}
-      <section className="py-12 px-6 bg-white">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#7A9BB5] mb-6">Certified & Compliant</p>
-          <div className="flex items-center justify-center gap-6 flex-wrap">
-            {certEntries.map(({ key, label }) =>
+      {/* ── Certificate logos — infinite scroll marquee ── */}
+      <section className="py-10 bg-white overflow-hidden">
+        <p className="text-center text-xs font-semibold uppercase tracking-widest text-[#7A9BB5] mb-6">Certified & Compliant</p>
+        <div className="relative">
+          <div className="flex gap-12 animate-marquee whitespace-nowrap" style={{ animationDuration: "18s" }}>
+            {[...certEntries, ...certEntries, ...certEntries].map(({ key, label }, idx) =>
               s(settings, key) ? (
-                <img key={key} src={s(settings, key)} alt={label} className="h-12 object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
               ) : (
-                <div key={key} className="flex items-center gap-1.5 text-sm font-semibold text-[#4A6A82] border border-[#C8DCEA] rounded-lg px-4 py-2">
-                  <CheckCircle size={14} className="text-emerald-500" /> {label} Certified
+                <div key={idx} className="inline-flex items-center gap-2 shrink-0 border border-[#C8DCEA] rounded-xl px-5 py-2.5">
+                  <CheckCircle size={13} className="text-emerald-500" />
+                  <span className="text-sm font-bold text-[#1D3557]">{label}</span>
+                  <span className="text-xs text-[#45B08C] font-semibold">Certified</span>
                 </div>
               )
             )}
@@ -195,31 +269,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Categories ── */}
-      <section className="py-24 px-6 bg-[#F1FAFF]">
-        <div className="mx-auto max-w-7xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-black text-[#1D3557] mb-3">Shop by <span className="gradient-text">Category</span></h2>
-            <p className="text-[#4A6A82]">Find the perfect supplement for your health journey</p>
-          </motion.div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {CATEGORIES.map((cat, i) => (
-              <motion.div key={cat.slug} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>
-                <Link href={`/products?category=${cat.slug}`}>
-                  <motion.div whileHover={{ scale: 1.02 }} className="card cursor-pointer group transition-all duration-300 hover:bg-[#FFFFFF]">
-                    <div className="text-3xl mb-3">{cat.emoji}</div>
-                    <h3 className="font-bold text-[#1D3557] mb-1">{cat.name}</h3>
-                    <p className="text-sm text-[#4A6A82]">{cat.desc}</p>
-                    <div className="mt-4 flex items-center gap-1 text-[#45B08C] text-xs font-semibold">
-                      Shop now <ChevronRight size={12} />
-                    </div>
-                  </motion.div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       {/* ── Founder's Message ── */}
       {s(settings, "founder_message") && (
@@ -286,18 +336,17 @@ export default function HomePage() {
       )}
 
       {/* ── Customer Reviews ── */}
-      {reviews.length > 0 && (
-        <section className="py-24 px-6 bg-[#F1FAFF]">
-          <div className="mx-auto max-w-7xl">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-4">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#45B08C] mb-3">Real People, Real Results</p>
-              <h2 className="text-4xl md:text-5xl font-black text-[#1D3557] mb-3">
-                What Our <span className="gradient-text">Customers Say</span>
-              </h2>
-              {/* Gujarati testimonial intro */}
-              <p className="text-[#45B08C] font-semibold text-lg mb-2">અમારા ગ્રાહકો આ સારો અહેવાલ — ઝુપવેલ.</p>
-              <p className="text-[#4A6A82]">Join thousands of happy customers across India</p>
-            </motion.div>
+      <section className="py-24 px-6 bg-[#F1FAFF]">
+        <div className="mx-auto max-w-7xl">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#45B08C] mb-3">Real People, Real Results</p>
+            <h2 className="text-4xl md:text-5xl font-black text-[#1D3557] mb-3">
+              What Our <span className="gradient-text">Customers Say</span>
+            </h2>
+            <p className="text-[#45B08C] font-semibold text-lg mb-2">અમારા ગ્રાહકો આ સારો અહેવાલ — ઝુપવેલ.</p>
+            <p className="text-[#4A6A82]">Join thousands of happy customers across India</p>
+          </motion.div>
+          {reviews.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
               {reviews.slice(0, 6).map((review, i) => (
                 <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
@@ -327,40 +376,17 @@ export default function HomePage() {
                 </motion.div>
               ))}
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── Blog Section ── */}
-      <section className="py-24 px-6 bg-white">
-        <div className="mx-auto max-w-7xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#45B08C] mb-3">Health Tips & Insights</p>
-            <h2 className="text-4xl md:text-5xl font-black text-[#1D3557] mb-3">
-              From Our <span className="gradient-text">Blog</span>
-            </h2>
-            <p className="text-[#4A6A82]">Science-backed articles to fuel your health journey</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { emoji: "💧", title: "Why Hydration is the #1 Performance Hack", date: "Apr 2026", tag: "Hydration" },
-              { emoji: "⚡", title: "Electrolytes vs Sports Drinks — What's the Difference?", date: "Mar 2026", tag: "Science" },
-              { emoji: "🏃", title: "Pre-Workout Nutrition: What Actually Works", date: "Mar 2026", tag: "Performance" },
-            ].map((post, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}
-                className="card group cursor-pointer hover:border-[#45B08C]/30 transition-all duration-300">
-                <div className="text-4xl mb-4">{post.emoji}</div>
-                <span className="text-xs font-semibold text-[#45B08C] uppercase tracking-widest">{post.tag}</span>
-                <h3 className="font-bold text-[#1D3557] mt-2 mb-3 leading-snug">{post.title}</h3>
-                <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#C8DCEA]">
-                  <span className="text-xs text-[#7A9BB5]">{post.date}</span>
-                  <span className="text-xs text-[#45B08C] font-semibold flex items-center gap-1">Read more <ChevronRight size={12} /></span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          ) : (
+            <div className="text-center mt-12 py-16 text-[#7A9BB5]">
+              <Star size={40} className="mx-auto mb-4 opacity-20" />
+              <p className="text-sm font-medium">Customer reviews coming soon!</p>
+            </div>
+          )}
         </div>
       </section>
+
+      {/* ── Blog Section ── */}
+      <BlogSection />
 
       {/* ── CTA ── */}
       <section className="py-24 px-6 bg-[#F1FAFF]">
@@ -371,7 +397,7 @@ export default function HomePage() {
               Give Your Water a <span className="gradient-text">Professional Upgrade</span>
             </h2>
             <p className="text-[#4A6A82] mb-8 max-w-lg mx-auto">
-              Because plain water isn't enough for your hustle. Create a free account to access exclusive pricing and your complete order history.
+              Create a free account to access exclusive pricing, personalised recommendations, and your complete order history.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">

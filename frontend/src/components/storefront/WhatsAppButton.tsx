@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { publicApi } from "@/lib/api";
+import { fetchSettings } from "@/lib/useSettings";
 
 export default function WhatsAppButton() {
   const [whatsapp, setWhatsapp] = useState("");
@@ -10,9 +10,15 @@ export default function WhatsAppButton() {
 
   useEffect(() => {
     setMounted(true);
-    publicApi.getSettings()
+    fetchSettings()
       .then(s => setWhatsapp(s.contact_whatsapp || ""))
       .catch(() => {});
+    const onBust = (e: StorageEvent) => {
+      if (e.key === "zupwell-settings-bust")
+        fetchSettings().then(s => setWhatsapp(s.contact_whatsapp || "")).catch(() => {});
+    };
+    window.addEventListener("storage", onBust);
+    return () => window.removeEventListener("storage", onBust);
   }, []);
 
   // Don't render if no WhatsApp number or not mounted

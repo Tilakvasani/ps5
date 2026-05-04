@@ -5,7 +5,7 @@ import { ChevronDown, MessageCircle } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useEffect } from "react";
-import { publicApi } from "@/lib/api";
+import { fetchSettings } from "@/lib/useSettings";
 
 const FAQS = [
   {
@@ -102,9 +102,15 @@ export default function FAQsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
-    publicApi.getSettings()
+    fetchSettings()
       .then(s => setWhatsapp(s.contact_whatsapp || ""))
       .catch(() => {});
+    const onBust = (e: StorageEvent) => {
+      if (e.key === "zupwell-settings-bust")
+        fetchSettings().then(s => setWhatsapp(s.contact_whatsapp || "")).catch(() => {});
+    };
+    window.addEventListener("storage", onBust);
+    return () => window.removeEventListener("storage", onBust);
   }, []);
 
   const categories = ["All", ...FAQS.map(f => f.category)];

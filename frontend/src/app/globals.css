@@ -152,3 +152,12 @@
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
 }
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+.animate-marquee {
+  display: inline-flex;
+  animation: marquee linear infinite;
+}
