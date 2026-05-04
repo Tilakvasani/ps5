@@ -367,7 +367,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
             {activeTab==="desc" && (
               <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-sm leading-relaxed" style={{ color: C.mid }}>
-                <div dangerouslySetInnerHTML={{__html:product.description||product.shortDescription||"No description available."}}/>
+                <div dangerouslySetInnerHTML={{__html: sanitizeHtml(product.description || product.shortDescription || "No description available.")}}/>
               </motion.div>
             )}
 

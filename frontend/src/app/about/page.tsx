@@ -6,13 +6,7 @@ import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { publicApi } from "@/lib/api";
 import Link from "next/link";
-
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 28 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.6, delay },
-});
+import { fadeUp } from "@/lib/utils";
 
 const D: Record<string, string> = {
   about_punchline:   "We don't just sell supplements; we fuel your hustle.",

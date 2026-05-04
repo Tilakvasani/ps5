@@ -59,10 +59,7 @@ function AccountPageContent() {
     } catch (err: any) { toast.error(err.message); }
   };
 
-  const handleLogout = async () => {
-    try { await authApi.logout(); } catch {}
-    logout(); router.push("/");
-  };
+  const handleLogout = useLogout();
 
   const TABS = [
     { id: "profile", label: "Profile", icon: User },

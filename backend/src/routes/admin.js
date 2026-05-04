@@ -5,6 +5,7 @@ const prisma = require("../utils/prisma");
 const { signAccess } = require("../utils/jwt");
 const { authAdmin } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
+const { sanitizeBody, validatePagination, validateProductBody, validateOrderStatus, validateIdParam } = require("../middleware/validate");
 
 const VALID_ORDER_STATUSES = ["pending","confirmed","processing","shipped","delivered","cancelled"];
 
@@ -229,7 +230,7 @@ router.get("/dashboard/top-products", authAdmin, async (req, res) => {
 
 // ── Products ──────────────────────────────────────────
 // BUG FIX: Show ALL products (including inactive/deactivated) in admin so admin can see & restore them
-router.get("/products", authAdmin, async (req, res) => {
+router.get("/products", validatePagination, authAdmin, async (req, res) => {
   try {
     const { page = 1, perPage = 15, search, id } = req.query;
     if (id) {
@@ -250,7 +251,7 @@ router.get("/products", authAdmin, async (req, res) => {
   }
 });
 
-router.post("/products", authAdmin, upload.array("images", 10), async (req, res) => {
+router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), async (req, res) => {
   try {
     const { name, sku, hsnCode = "3919", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants } = req.body;
     const slug = slugify(name, { lower: true, strict: true });
@@ -287,7 +288,7 @@ router.post("/products", authAdmin, upload.array("images", 10), async (req, res)
 });
 
 // BUG FIX: Added try/catch so errors return proper response instead of crashing server
-router.put("/products/:id", authAdmin, upload.array("images", 10), async (req, res) => {
+router.put("/products/:id", sanitizeBody, authAdmin, upload.array("images", 10), async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, ...rest } = req.body;
@@ -418,7 +419,7 @@ router.get("/inventory/movements", authAdmin, async (req, res) => {
 });
 
 // ── Orders ────────────────────────────────────────────
-router.get("/orders", authAdmin, async (req, res) => {
+router.get("/orders", validatePagination, authAdmin, async (req, res) => {
   try {
     const { page = 1, perPage = 20, search, status } = req.query;
     const where = {
@@ -446,7 +447,7 @@ router.get("/orders/:id", authAdmin, async (req, res) => {
 });
 
 // BUG FIX: Added try/catch + status validation
-router.put("/orders/:id/status", authAdmin, async (req, res) => {
+router.put("/orders/:id/status", validateOrderStatus, authAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     if (!status || !VALID_ORDER_STATUSES.includes(status)) {

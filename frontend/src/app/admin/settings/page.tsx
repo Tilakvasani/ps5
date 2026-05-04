@@ -53,9 +53,10 @@ const SETTING_GROUPS = [
     label: "Home Page — Certificate Logos",
     desc: "Paste image URLs for FSSAI, ISO, GMP logos shown on home page",
     keys: [
-      { key: "cert_fssai_logo", label: "FSSAI Logo URL", type: "text" },
-      { key: "cert_iso_logo",   label: "ISO Logo URL",   type: "text" },
-      { key: "cert_gmp_logo",   label: "GMP Logo URL",   type: "text" },
+      { key: "cert_fssai_logo", label: "FSSAI Logo URL",  type: "text" },
+      { key: "cert_iso_logo",   label: "ISO Logo URL",    type: "text" },
+      { key: "cert_gmp_logo",   label: "GMP Logo URL",    type: "text" },
+      { key: "cert_haccp_logo", label: "HACCP Logo URL",  type: "text" },
     ],
   },
   {

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAdminLogout } from "@/lib/useAuth";
 import {
   LayoutDashboard, Package, Tag, Boxes, ShoppingBag, FileText,
   Users, Ticket, Star, Settings, Bell, LogOut, Menu, X, ChevronRight
@@ -40,10 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (pathname === "/admin/login") return <>{children}</>;
 
-  const handleLogout = () => {
-    localStorage.removeItem("zupwell-admin");
-    router.push("/admin/login");
-  };
+  const handleLogout = useAdminLogout();
 
   return (
     <div className="flex h-screen bg-[#F1FAFF] overflow-hidden">

@@ -6,13 +6,8 @@ import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { publicApi } from "@/lib/api";
 import toast from "react-hot-toast";
+import { fadeUp } from "@/lib/utils";
 
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.55, delay },
-});
 
 const D: Record<string, string> = {
   contact_whatsapp:      "",

@@ -4,14 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Menu, X, HeartPulse, User, LogOut } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { useRouter } from "next/navigation";
-import { authApi } from "@/lib/api";
+import { useLogout } from "@/lib/useAuth";
 
 export default function Navbar() {
-  const { user, cart, logout } = useStore();
+  const { user, cart } = useStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userDropOpen, setUserDropOpen] = useState(false);
-  const router = useRouter();
   const dropRef = useRef<HTMLDivElement>(null);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
@@ -24,11 +22,7 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleLogout = async () => {
-    try { await authApi.logout(); } catch {}
-    logout();
-    router.push("/");
-  };
+  const handleLogout = useLogout();
 
   const NAV_LINKS = [
     ["Home",             "/"],
@@ -66,10 +60,7 @@ export default function Navbar() {
             <Link
               key={label}
               href={href}
-              className="text-sm font-medium transition-colors duration-150"
-              style={{ color: "#4A6A82" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#1D3557")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#4A6A82")}
+              className="text-sm font-medium transition-colors duration-150 text-[#4A6A82] hover:text-[#1D3557]"
             >
               {label}
             </Link>
@@ -81,9 +72,7 @@ export default function Navbar() {
 
           {/* Cart */}
           <Link href="/cart" className="relative p-2 transition-colors duration-150"
-            style={{ color: "#4A6A82" }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#1D3557")}
-            onMouseLeave={e => (e.currentTarget.style.color = "#4A6A82")}
+            className="text-[#4A6A82] hover:text-[#1D3557]"
           >
             <ShoppingCart size={20} />
             <AnimatePresence>
@@ -126,24 +115,21 @@ export default function Navbar() {
                     <Link href="/account" onClick={() => setUserDropOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150"
                       style={{ color: "#1D3557" }}
-                      onMouseEnter={e => (e.currentTarget.style.background = "#F1FAFF")}
-                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#1D3557] hover:bg-[#F1FAFF]"
                     >
                       <User size={14} /> My Account
                     </Link>
                     <Link href="/account?tab=orders" onClick={() => setUserDropOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150"
                       style={{ color: "#1D3557" }}
-                      onMouseEnter={e => (e.currentTarget.style.background = "#F1FAFF")}
-                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#1D3557] hover:bg-[#F1FAFF]"
                     >
                       <HeartPulse size={14} /> My Orders
                     </Link>
                     <div style={{ height: "1.5px", background: "#C8DCEA" }} />
                     <button onClick={handleLogout}
                       className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-500 transition-colors duration-150"
-                      onMouseEnter={e => (e.currentTarget.style.background = "#FEF2F2")}
-                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+
                     >
                       <LogOut size={14} /> Sign Out
                     </button>

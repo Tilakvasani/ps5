@@ -11,8 +11,7 @@
  */
 "use client";
 import { useEffect, useState } from "react";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { publicApi } from "./api";
 
 // In-memory cache so we don't fetch on every component mount
 let _cache: Record<string, string> | null = null;
@@ -21,8 +20,8 @@ let _fetchPromise: Promise<Record<string, string>> | null = null;
 async function fetchSettings(): Promise<Record<string, string>> {
   if (_cache) return _cache;
   if (_fetchPromise) return _fetchPromise;
-  _fetchPromise = fetch(`${API_URL}/api/settings`)
-    .then(r => r.json())
+  // Uses the shared publicApi — single HTTP client, consistent error handling
+  _fetchPromise = publicApi.getSettings()
     .then(data => { _cache = data; return data; })
     .catch(() => ({}));
   return _fetchPromise;
