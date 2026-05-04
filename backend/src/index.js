@@ -72,6 +72,53 @@ app.get("/api/settings", async (req, res) => {
   }
 });
 
+
+// ── Submit Review (authenticated user) ───────────────
+app.post("/api/reviews", async (req, res) => {
+  try {
+    const prisma = require("./utils/prisma");
+    const jwt = require("jsonwebtoken");
+
+    // Verify user token from Authorization header
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!token) return res.status(401).json({ error: "Sign in to leave a review" });
+
+    let userId;
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      userId = decoded.id;
+    } catch {
+      return res.status(401).json({ error: "Invalid or expired session" });
+    }
+
+    const { productId, rating, title, body } = req.body;
+
+    if (!productId || !rating || !body?.trim()) {
+      return res.status(400).json({ error: "Product, rating and review body are required" });
+    }
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ error: "Rating must be between 1 and 5" });
+    }
+
+    // Check product exists
+    const product = await prisma.product.findUnique({ where: { id: Number(productId) } });
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    // Upsert — one review per user per product
+    const review = await prisma.review.upsert({
+      where: { productId_userId: { productId: Number(productId), userId } },
+      update: { rating: Number(rating), title: title || null, body: body.trim(), isApproved: false },
+      create: { productId: Number(productId), userId, rating: Number(rating), title: title || null, body: body.trim(), isApproved: false },
+    });
+
+    res.status(201).json({ success: true, reviewId: review.id, message: "Review submitted, pending approval" });
+  } catch (err) {
+    console.error("Review submit error:", err);
+    res.status(500).json({ error: err.message || "Failed to submit review" });
+  }
+});
+
 // ── Public Reviews — approved only, for home page ────
 app.get("/api/reviews/public", async (req, res) => {
   try {
@@ -88,6 +135,46 @@ app.get("/api/reviews/public", async (req, res) => {
     res.json(reviews);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+});
+
+// ── Submit Review (authenticated user) ───────────────
+app.post("/api/reviews", async (req, res) => {
+  try {
+    const prisma = require("./utils/prisma");
+    const jwt = require("jsonwebtoken");
+
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!token) return res.status(401).json({ error: "Sign in to leave a review" });
+
+    let userId;
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      userId = decoded.id;
+    } catch {
+      return res.status(401).json({ error: "Invalid or expired session" });
+    }
+
+    const { productId, rating, title, body } = req.body;
+    if (!productId || !rating || !body?.trim())
+      return res.status(400).json({ error: "Product, rating and review body are required" });
+    if (rating < 1 || rating > 5)
+      return res.status(400).json({ error: "Rating must be between 1 and 5" });
+
+    const product = await prisma.product.findUnique({ where: { id: Number(productId) } });
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    const review = await prisma.review.upsert({
+      where: { productId_userId: { productId: Number(productId), userId } },
+      update: { rating: Number(rating), title: title || null, body: body.trim(), isApproved: false },
+      create: { productId: Number(productId), userId, rating: Number(rating), title: title || null, body: body.trim(), isApproved: false },
+    });
+
+    res.status(201).json({ success: true, reviewId: review.id, message: "Review submitted, pending approval" });
+  } catch (err) {
+    console.error("Review submit error:", err);
+    res.status(500).json({ error: err.message || "Failed to submit review" });
   }
 });
 
