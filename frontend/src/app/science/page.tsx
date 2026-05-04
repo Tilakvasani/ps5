@@ -91,7 +91,7 @@ export default function SciencePage() {
           </motion.div>
 
           <motion.h1 {...fadeUp(0.08)} className="font-black text-5xl md:text-7xl text-[#1D3557] leading-none mb-6">
-            વિજ્ઞાન અને{" "}
+            The confluence of {" "}
             <span
               style={{
                 background: "linear-gradient(135deg, #45B08C, #2D9B78)",
@@ -100,9 +100,19 @@ export default function SciencePage() {
                 backgroundClip: "text",
               }}
             >
-              શુદ્ધતા
+              science{" "}
             </span>
-            નો સંગમ
+            and {" "}
+             <span
+              style={{
+                background: "linear-gradient(135deg, #45B08C, #2D9B78)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              purity
+            </span>
           </motion.h1>
 
           <motion.p {...fadeUp(0.14)} className="text-lg md:text-xl text-[#4A6A82] max-w-2xl mx-auto leading-relaxed">
