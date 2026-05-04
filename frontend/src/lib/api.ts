@@ -236,4 +236,6 @@ export const publicApi = {
     api.get("/api/settings").then((r) => r.data),
   getReviews: (): Promise<any[]> =>
     api.get("/api/reviews/public").then((r) => r.data),
+  submitReview: (data: { productId: number; rating: number; title?: string; body: string }) =>
+    api.post("/api/reviews", data).then((r) => r.data),
 };

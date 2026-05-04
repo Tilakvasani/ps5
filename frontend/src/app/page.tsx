@@ -74,7 +74,8 @@ const BLOG_POSTS = [
 ];
 
 function BlogSection() {
-  const [open, setOpen] = useState<number | null>(null);
+  const [modal, setModal] = useState<number | null>(null);
+  const post = modal !== null ? BLOG_POSTS[modal] : null;
   return (
     <section className="py-24 px-6 bg-white">
       <div className="mx-auto max-w-7xl">
@@ -85,31 +86,49 @@ function BlogSection() {
           </h2>
           <p className="text-[#4A6A82]">Science-backed articles to fuel your health journey</p>
         </motion.div>
+
+        {/* Cards — equal height, excerpt only */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {BLOG_POSTS.map((post, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }} viewport={{ once: true }}
               className="card flex flex-col hover:border-[#45B08C]/30 transition-all duration-300 cursor-pointer"
-              onClick={() => setOpen(open === i ? null : i)}>
+              onClick={() => setModal(i)}>
               <div className="text-4xl mb-4">{post.emoji}</div>
               <span className="text-xs font-semibold text-[#45B08C] uppercase tracking-widest">{post.tag}</span>
               <h3 className="font-bold text-[#1D3557] mt-2 mb-3 leading-snug">{post.title}</h3>
-              {open === i && (
-                <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-                  className="text-sm text-[#4A6A82] leading-relaxed mb-4">
-                  {post.body}
-                </motion.p>
-              )}
-              <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#C8DCEA]">
+              <p className="text-sm text-[#4A6A82] leading-relaxed line-clamp-3 flex-1">{post.body}</p>
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#C8DCEA]">
                 <span className="text-xs text-[#7A9BB5]">{post.date}</span>
                 <span className="text-xs text-[#45B08C] font-semibold flex items-center gap-1">
-                  {open === i ? "Close" : "Read more"} <ChevronRight size={12} className={open === i ? "rotate-90" : ""} />
+                  Read more <ChevronRight size={12} />
                 </span>
               </div>
             </motion.div>
           ))}
         </div>
       </div>
+
+      {/* Modal overlay */}
+      {post && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(29,53,87,0.5)", backdropFilter: "blur(4px)" }}
+          onClick={() => setModal(null)}>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 relative"
+            onClick={e => e.stopPropagation()}>
+            <button onClick={() => setModal(null)}
+              className="absolute top-4 right-4 h-8 w-8 rounded-full flex items-center justify-center text-[#4A6A82] hover:bg-[#F1FAFF] transition-colors text-lg font-bold">
+              ✕
+            </button>
+            <div className="text-4xl mb-3">{post.emoji}</div>
+            <span className="text-xs font-semibold text-[#45B08C] uppercase tracking-widest">{post.tag}</span>
+            <h3 className="text-xl font-black text-[#1D3557] mt-2 mb-4 leading-snug">{post.title}</h3>
+            <p className="text-sm text-[#4A6A82] leading-relaxed">{post.body}</p>
+            <p className="text-xs text-[#7A9BB5] mt-6">{post.date}</p>
+          </motion.div>
+        </div>
+      )}
     </section>
   );
 }

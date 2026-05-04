@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { productsApi } from "@/lib/api";
+import { productsApi, publicApi } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -61,8 +61,14 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const [qty, setQty] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [activeTab, setActiveTab] = useState<"desc"|"howto"|"nutrition"|"specs"|"reviews">("desc");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewHover, setReviewHover] = useState(0);
+  const [reviewTitle, setReviewTitle] = useState("");
+  const [reviewBody, setReviewBody] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
   const [stickyVisible, setStickyVisible] = useState(false);
-  const { addToCart } = useStore();
+  const { addToCart, token } = useStore();
   const { cgstRate, sgstRate } = useSettings();
 
   useEffect(() => {
@@ -451,27 +457,106 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             )}
 
             {activeTab==="reviews" && (
-              <motion.div initial={{opacity:0}} animate={{opacity:1}}>
-                <h3 className="font-bold text-2xl mb-6" style={{ color: C.blue }}>Customer Reviews</h3>
-                {product.reviews?.length ? (
-                  <div className="space-y-4">
-                    {product.reviews.map((r: any) => (
-                      <div key={r.id} className="p-5 rounded-2xl" style={{ background: C.bg, border: `1.5px solid ${C.border}` }}>
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="flex gap-0.5">{Array.from({length:r.rating}).map((_,i) => <Star key={i} size={13} className="fill-yellow-400 text-yellow-400"/>)}</div>
-                          <span className="font-semibold text-sm" style={{ color: C.blue }}>{r.user?.name}</span>
+              <motion.div initial={{opacity:0}} animate={{opacity:1}} className="space-y-8">
+
+                {/* ── Existing Reviews ── */}
+                <div>
+                  <h3 className="font-bold text-2xl mb-6" style={{ color: C.blue }}>Customer Reviews</h3>
+                  {product.reviews?.length ? (
+                    <div className="space-y-4">
+                      {product.reviews.map((r: any) => (
+                        <div key={r.id} className="p-5 rounded-2xl" style={{ background: C.bg, border: `1.5px solid ${C.border}` }}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: C.border} : {}}/>)}</div>
+                            <span className="font-semibold text-sm" style={{ color: C.blue }}>{r.user?.name}</span>
+                          </div>
+                          {r.title && <p className="font-medium mb-1" style={{ color: C.blue }}>{r.title}</p>}
+                          <p className="text-sm" style={{ color: C.mid }}>{r.body}</p>
                         </div>
-                        {r.title && <p className="font-medium mb-1" style={{ color: C.blue }}>{r.title}</p>}
-                        <p className="text-sm" style={{ color: C.mid }}>{r.body}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Star size={36} className="mx-auto mb-4" style={{ color: C.border }}/>
+                      <p style={{ color: C.mid }}>No reviews yet. Be the first to review!</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Write a Review ── */}
+                <div className="rounded-3xl p-6" style={{ background: C.bg, border: `1.5px solid ${C.border}` }}>
+                  <h3 className="font-bold text-xl mb-5" style={{ color: C.blue }}>Write a Review</h3>
+
+                  {!token ? (
+                    <div className="text-center py-6">
+                      <p className="text-sm mb-3" style={{ color: C.mid }}>Please sign in to leave a review</p>
+                      <a href="/login" className="inline-block px-6 py-2.5 rounded-xl text-white text-sm font-semibold" style={{ background: C.mint }}>Sign In</a>
+                    </div>
+                  ) : reviewSuccess ? (
+                    <div className="text-center py-6">
+                      <CheckCircle size={40} className="mx-auto mb-3" style={{ color: C.mint }} />
+                      <p className="font-bold" style={{ color: C.blue }}>Thank you for your review!</p>
+                      <p className="text-sm mt-1" style={{ color: C.mid }}>It will appear after approval.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Star picker */}
+                      <div>
+                        <label className="text-sm font-semibold block mb-2" style={{ color: C.blue }}>Your Rating</label>
+                        <div className="flex gap-1">
+                          {Array.from({length:5}).map((_,i) => (
+                            <button key={i} type="button"
+                              onMouseEnter={() => setReviewHover(i+1)}
+                              onMouseLeave={() => setReviewHover(0)}
+                              onClick={() => setReviewRating(i+1)}>
+                              <Star size={28}
+                                className={(reviewHover || reviewRating) > i ? "fill-yellow-400 text-yellow-400" : ""}
+                                style={(reviewHover || reviewRating) > i ? {} : {color: C.border}} />
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Star size={36} className="mx-auto mb-4" style={{ color: C.border }}/>
-                    <p style={{ color: C.mid }}>No reviews yet. Be the first to review!</p>
-                  </div>
-                )}
+
+                      {/* Title */}
+                      <div>
+                        <label className="text-sm font-semibold block mb-1" style={{ color: C.blue }}>Review Title <span className="font-normal opacity-60">(optional)</span></label>
+                        <input value={reviewTitle} onChange={e => setReviewTitle(e.target.value)}
+                          placeholder="e.g. Great product!"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm outline-none"
+                          style={{ border: `1.5px solid ${C.border}`, background: "#fff", color: C.blue }} />
+                      </div>
+
+                      {/* Body */}
+                      <div>
+                        <label className="text-sm font-semibold block mb-1" style={{ color: C.blue }}>Your Review</label>
+                        <textarea value={reviewBody} onChange={e => setReviewBody(e.target.value)}
+                          rows={4} placeholder="Share your experience with this product..."
+                          className="w-full px-4 py-2.5 rounded-xl text-sm outline-none resize-none"
+                          style={{ border: `1.5px solid ${C.border}`, background: "#fff", color: C.blue }} />
+                      </div>
+
+                      {/* Submit */}
+                      <button
+                        disabled={!reviewBody.trim() || reviewSubmitting}
+                        onClick={async () => {
+                          if (!reviewBody.trim()) return;
+                          setReviewSubmitting(true);
+                          try {
+                            await publicApi.submitReview({ productId: product.id, rating: reviewRating, title: reviewTitle || undefined, body: reviewBody });
+                            setReviewSuccess(true);
+                          } catch (err: any) {
+                            toast.error(err.response?.data?.error || "Failed to submit review");
+                          }
+                          setReviewSubmitting(false);
+                        }}
+                        className="w-full py-3 rounded-xl font-bold text-white text-sm transition-opacity disabled:opacity-50"
+                        style={{ background: C.mint }}>
+                        {reviewSubmitting ? "Submitting..." : "Submit Review"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
               </motion.div>
             )}
           </div>
