@@ -111,9 +111,13 @@ export default function AdminOrdersPage() {
                   <td className="px-4 py-3 text-[#4A6A82] text-xs whitespace-nowrap">{new Date(o.createdAt).toLocaleDateString("en-IN")}</td>
                   <td className="px-4 py-3">
                     {o.invoice ? (
-                      <a href={invoicesApi.getPdf(o.invoice.invoiceNumber)} target="_blank" rel="noopener noreferrer">
-                        <button className="flex items-center gap-1 text-xs text-[#45B08C] hover:text-[#45B08C]"><Download size={12} /> PDF</button>
-                      </a>
+                      <button
+                        onClick={async () => {
+                          try { await invoicesApi.downloadPdf(o.invoice.invoiceNumber); }
+                          catch (err: any) { toast.error(err.message || "Download failed"); }
+                        }}
+                        className="flex items-center gap-1 text-xs text-[#45B08C] hover:text-[#45B08C]"
+                      ><Download size={12} /> PDF</button>
                     ) : <span className="text-[#1D3557]/30 text-xs">—</span>}
                   </td>
                   <td className="px-4 py-3">

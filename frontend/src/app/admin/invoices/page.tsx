@@ -51,9 +51,13 @@ export default function AdminInvoicesPage() {
                   <td className="px-4 py-3"><span className={`badge ${STATUS_BADGE[inv.status] || "badge-info"}`}>{inv.status}</span></td>
                   <td className="px-4 py-3 text-[#4A6A82] text-xs">{new Date(inv.createdAt).toLocaleDateString("en-IN")}</td>
                   <td className="px-4 py-3">
-                    <a href={invoicesApi.getPdf(inv.invoiceNumber)} download={`${inv.invoiceNumber}.pdf`}>
-                      <button className="flex items-center gap-1 text-xs text-[#45B08C] hover:text-[#45B08C]"><Download size={12} /> PDF</button>
-                    </a>
+                    <button
+                      onClick={async () => {
+                        try { await invoicesApi.downloadPdf(inv.invoiceNumber); }
+                        catch (err: any) { toast.error(err.message || "Download failed"); }
+                      }}
+                      className="flex items-center gap-1 text-xs text-[#45B08C] hover:text-[#45B08C]"
+                    ><Download size={12} /> PDF</button>
                   </td>
                   <td className="px-4 py-3">
                     {inv.status !== "cancelled" && (

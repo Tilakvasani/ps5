@@ -93,20 +93,43 @@ export const paymentsApi = {
 
 // ── Invoices ──────────────────────────────────────
 export const invoicesApi = {
-  getPdf: (invoiceNumber: string) => {
-    const base = `${API_URL}/api/invoices/${invoiceNumber}/pdf`;
-    try {
-      // Try user token first, then admin token
-      const userRaw = localStorage.getItem("zupwell-store");
-      const userToken = userRaw ? JSON.parse(userRaw)?.state?.token : null;
-      if (userToken) return `${base}?token=${encodeURIComponent(userToken)}`;
+  /** Fetch PDF with Authorization header and trigger a browser download. */
+  downloadPdf: async (invoiceNumber: string): Promise<void> => {
+    const url = `${API_URL}/api/invoices/${invoiceNumber}/pdf`;
 
-      const adminRaw = localStorage.getItem("zupwell-admin");
-      const adminToken = adminRaw ? JSON.parse(adminRaw)?.token : null;
-      if (adminToken) return `${base}?token=${encodeURIComponent(adminToken)}`;
+    let token: string | null = null;
+    try {
+      const userRaw = localStorage.getItem("zupwell-store");
+      token = userRaw ? JSON.parse(userRaw)?.state?.token ?? null : null;
+      if (!token) {
+        const adminRaw = localStorage.getItem("zupwell-admin");
+        token = adminRaw ? JSON.parse(adminRaw)?.token ?? null : null;
+      }
     } catch {}
-    return base;
+
+    const headers: Record<string, string> = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(url, { headers });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error || `Failed to download invoice (${res.status})`);
+    }
+
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = `${invoiceNumber}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(objectUrl);
   },
+
+  /** Direct URL for contexts where auth header is handled elsewhere. */
+  getPdf: (invoiceNumber: string): string =>
+    `${API_URL}/api/invoices/${invoiceNumber}/pdf`,
 };
 
 // ── Account ───────────────────────────────────────
