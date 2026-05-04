@@ -35,7 +35,7 @@ async function retryAsync(fn: () => Promise<void>, times = 3, delay = 600): Prom
 
 export default function CheckoutPage() {
   const { cart, user, clearCart } = useStore();
-  const { freeShippingThreshold, defaultShippingCharge, cgstRate, sgstRate, gstin, stateCode } = useSettings();
+  const { freeShippingThreshold, defaultShippingCharge, cgstRate, sgstRate, gstin, stateCode, siteName, raw: settingsRaw } = useSettings();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [addresses, setAddresses] = useState<any[]>([]);
@@ -94,16 +94,21 @@ export default function CheckoutPage() {
         paymentMethod,
         couponCode: couponCode || undefined,
         items: cart.map(i => ({ productId: i.productId, variantId: i.variantId, qty: i.qty })),
+        // Live settings — backend uses these for GST, shipping & invoice
+        cgstRate,
+        sgstRate,
+        shippingCharge: shipping,
+        freeShippingThreshold,
       });
 
       if (paymentMethod === "razorpay") {
         await loadRazorpay();
         const rzp = await paymentsApi.createRazorpayOrder(order.id);
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          key: settingsRaw["razorpay_key_id"] || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
           amount: rzp.amount,
           currency: "INR",
-          name: process.env.NEXT_PUBLIC_SITE_NAME || "Zupwell",
+          name: siteName || process.env.NEXT_PUBLIC_SITE_NAME || "Zupwell",
           description: `Order ${order.orderNumber}`,
           order_id: rzp.razorpayOrderId,
           handler: async (response: any) => {

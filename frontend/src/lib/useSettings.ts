@@ -126,6 +126,19 @@ export function useSettings(): SiteSettings {
       setRaw(data);
       setLoading(false);
     });
+
+    // Listen for admin settings save in other tabs — re-fetch immediately
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "zupwell-settings-bust") {
+        invalidateSettingsCache();
+        fetchSettings().then(data => {
+          setRaw(data);
+          setLoading(false);
+        });
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   const n = (key: string, fallback: number) => {

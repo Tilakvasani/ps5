@@ -153,7 +153,10 @@ export default function AdminSettingsPage() {
     setSaving(true);
     try {
       await adminApi.updateSettings(settings);
-      invalidateSettingsCache(); // force all pages to reload fresh settings
+      // 1. Bust the in-memory + localStorage cache
+      invalidateSettingsCache();
+      // 2. Broadcast to every open storefront tab so they refresh settings immediately
+      try { window.localStorage.setItem("zupwell-settings-bust", Date.now().toString()); } catch {}
       toast.success("Settings saved! Changes are now live on the website.");
     } catch (err: any) { toast.error(err.message); }
     setSaving(false);
