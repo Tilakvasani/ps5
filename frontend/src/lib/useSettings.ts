@@ -2,35 +2,66 @@
  * useSettings — Central Settings Hook
  * =====================================
  * Single source of truth for all admin-controlled values.
- * Fetches from /api/settings once per session and caches in memory.
- * 
- * Usage:
- *   const { shipping, gstRate, gstin, siteName } = useSettings();
- * 
- * All values update LIVE when admin changes them — no code changes needed.
+ *
+ * Strategy (no flash of defaults):
+ *   1. On module load, read last-known settings from localStorage instantly
+ *   2. Fetch fresh settings from the API in the background
+ *   3. Save fresh values back to localStorage for next load
+ *   4. Only fall back to hardcoded DEFAULTS when a key is missing from BOTH
+ *      the localStorage cache AND the API response
+ *
+ * Result: after the very first visit, users always see real values immediately.
  */
 "use client";
 import { useEffect, useState } from "react";
 import { publicApi } from "./api";
 
-// In-memory cache so we don't fetch on every component mount
-let _cache: Record<string, string> | null = null;
+const LS_KEY = "zupwell-settings-cache";
+
+/** Read the last-saved settings from localStorage synchronously (SSR-safe). */
+function readLocalCache(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+/** Persist fresh settings to localStorage so next load is instant. */
+function writeLocalCache(data: Record<string, string>) {
+  if (typeof window === "undefined") return;
+  try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch {}
+}
+
+// Module-level in-memory cache (populated from localStorage on first import)
+let _cache: Record<string, string> | null = readLocalCache();
 let _fetchPromise: Promise<Record<string, string>> | null = null;
 
 async function fetchSettings(): Promise<Record<string, string>> {
-  if (_cache) return _cache;
+  // Return in-memory cache only if it came from API (not just localStorage)
   if (_fetchPromise) return _fetchPromise;
-  // Uses the shared publicApi — single HTTP client, consistent error handling
   _fetchPromise = publicApi.getSettings()
-    .then(data => { _cache = data; return data; })
-    .catch(() => ({}));
+    .then(data => {
+      _cache = data;
+      writeLocalCache(data);
+      return data;
+    })
+    .catch(() => _cache ?? {});
   return _fetchPromise;
 }
 
-// Call this to force a refresh after admin saves settings
+/** Call this after admin saves settings to force a fresh fetch everywhere. */
 export function invalidateSettingsCache() {
   _cache = null;
   _fetchPromise = null;
+  if (typeof window !== "undefined") {
+    try { localStorage.removeItem(LS_KEY); } catch {}
+  }
+}
+
+/** Read the current in-memory/localStorage cache synchronously — use as useState initializer. */
+export function getSettingsCache(): Record<string, string> {
+  return _cache ?? {};
 }
 
 interface SiteSettings {
@@ -85,8 +116,10 @@ const DEFAULTS: Omit<SiteSettings, "raw" | "loading"> = {
 };
 
 export function useSettings(): SiteSettings {
-  const [raw, setRaw] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
+  // Seed from the module-level cache (already populated from localStorage)
+  // so components never render with an empty raw on the very first paint.
+  const [raw, setRaw] = useState<Record<string, string>>(() => _cache ?? {});
+  const [loading, setLoading] = useState(() => Object.keys(_cache ?? {}).length === 0);
 
   useEffect(() => {
     fetchSettings().then(data => {

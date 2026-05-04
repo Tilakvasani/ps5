@@ -6,6 +6,7 @@ import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle,
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { publicApi } from "@/lib/api";
+import { getSettingsCache } from "@/lib/useSettings";
 import { fadeUp } from "@/lib/utils";
 
 
@@ -48,7 +49,7 @@ const s = (settings: Record<string, string>, key: string) =>
   settings[key] || D[key as keyof typeof D] || "";
 
 export default function HomePage() {
-  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [settings, setSettings] = useState<Record<string, string>>(() => getSettingsCache());
   const [reviews, setReviews] = useState<any[]>([]);
 
   useEffect(() => {
