@@ -62,7 +62,7 @@ const BLOG_POSTS = [
     tag: "Science",
     date: "Mar 2026",
     title: "Electrolytes vs Sports Drinks — What's the Difference?",
-    body: "Sports drinks are loaded with sugar, artificial colours, and calories you don't need. Electrolyte supplements like Zupwell deliver the same hydration benefits — sodium, potassium, magnesium, vitamin C — with zero sugar and zero compromise. The effervescent technology ensures faster absorption compared to gulping a sugary drink. If you're working out, commuting in the heat, or simply staying productive all day, pure electrolytes beat sports drinks every single time.",
+    body: "Sports drinks are loaded with sugar, artificial colours, and calories you don't need. Electrolyte supplements like Zupwell deliver the same hydration benefits — sodium, potassium, magnesium, vitamin C — with less sugar and zero compromise. The effervescent technology ensures faster absorption compared to gulping a sugary drink. If you're working out, commuting in the heat, or simply staying productive all day, pure electrolytes beat sports drinks every single time.",
   },
   {
     emoji: "🏃",
@@ -362,7 +362,6 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-black text-[#1D3557] mb-3">
               What Our <span className="gradient-text">Customers Say</span>
             </h2>
-            <p className="text-[#45B08C] font-semibold text-lg mb-2">અમારા ગ્રાહકો આ સારો અહેવાલ — ઝુપવેલ.</p>
             <p className="text-[#4A6A82]">Join thousands of happy customers across India</p>
           </motion.div>
           {reviews.length > 0 ? (
