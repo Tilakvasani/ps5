@@ -6,7 +6,8 @@ import { User, Package, MapPin, LogOut, Download, Plus, Trash2, Edit3 } from "lu
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useStore } from "@/lib/store";
-import { accountApi, ordersApi, invoicesApi, authApi } from "@/lib/api";
+import { accountApi, ordersApi, invoicesApi } from "@/lib/api";
+import { useLogout } from "@/lib/useAuth";
 import toast from "react-hot-toast";
 
 export const dynamic = "force-dynamic";

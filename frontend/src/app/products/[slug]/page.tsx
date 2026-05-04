@@ -14,6 +14,14 @@ import { useStore } from "@/lib/store";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
+/* ── Simple HTML sanitizer (strips script/iframe tags) ── */
+function sanitizeHtml(html: string): string {
+  return html.replace(/<script[\s\S]*?<\/script>/gi, "")
+             .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
+             .replace(/on\w+="[^"]*"/gi, "")
+             .replace(/on\w+='[^']*'/gi, "");
+}
+
 /* ── Matte palette ── */
 const C = {
   bg:      "#F1FAFF",

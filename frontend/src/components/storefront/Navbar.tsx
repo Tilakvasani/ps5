@@ -71,8 +71,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
 
           {/* Cart */}
-          <Link href="/cart" className="relative p-2 transition-colors duration-150"
-            className="text-[#4A6A82] hover:text-[#1D3557]"
+          <Link href="/cart" className="relative p-2 transition-colors duration-150 text-[#4A6A82] hover:text-[#1D3557]"
           >
             <ShoppingCart size={20} />
             <AnimatePresence>
@@ -113,15 +112,11 @@ export default function Navbar() {
                     style={{ background: "#FFFFFF", border: "1.5px solid #C8DCEA" }}
                   >
                     <Link href="/account" onClick={() => setUserDropOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150"
-                      style={{ color: "#1D3557" }}
                       className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#1D3557] hover:bg-[#F1FAFF]"
                     >
                       <User size={14} /> My Account
                     </Link>
                     <Link href="/account?tab=orders" onClick={() => setUserDropOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150"
-                      style={{ color: "#1D3557" }}
                       className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#1D3557] hover:bg-[#F1FAFF]"
                     >
                       <HeartPulse size={14} /> My Orders
