@@ -2,6 +2,7 @@ const router = require("express").Router();
 const prisma = require("../utils/prisma");
 const { authUser } = require("../middleware/auth");
 const { generateOrderNumber, generateInvoiceNumber } = require("../utils/orderNumber");
+const shiprocket = require("../utils/shiprocket");
 
 // POST /api/orders - create order
 router.post("/", authUser, async (req, res) => {
@@ -123,11 +124,34 @@ router.post("/", authUser, async (req, res) => {
   const full = await prisma.order.findUnique({
     where: { id: order.id },
     include: {
-      items:   { include: { product: { select: { name: true } } } },
+      items:   { include: { product: { select: { name: true, sku: true } } } },
       address: true,
       invoice: true,
     },
   });
+
+  // ── Push COD orders to Shiprocket automatically ──────────────────
+  if (order.paymentMethod === "cod") {
+    try {
+      const { shiprocketOrderId, shipmentId } = await shiprocket.createOrder(full, req.user);
+      const { awbCode, courierName, trackingUrl } = await shiprocket.generateAWB(shipmentId);
+
+      await prisma.order.update({
+        where: { id: order.id },
+        data:  { shiprocketOrderId, awbCode, courierName, trackingUrl },
+      });
+
+      full.shiprocketOrderId = shiprocketOrderId;
+      full.awbCode           = awbCode;
+      full.courierName       = courierName;
+      full.trackingUrl       = trackingUrl;
+
+      console.log(`✅ Shiprocket: COD order ${order.orderNumber} pushed — AWB: ${awbCode}`);
+    } catch (err) {
+      // Non-fatal: order is already saved; Shiprocket push can be retried from admin panel
+      console.error(`⚠️  Shiprocket push failed for order ${order.orderNumber}:`, err.message);
+    }
+  }
 
   res.status(201).json(full);
 });

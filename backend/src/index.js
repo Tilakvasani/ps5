@@ -29,7 +29,8 @@ app.use((req, res, next) => {
   const referer = req.headers.referer;
   const isApiRoute = req.path.startsWith("/api/");
   const isHealthCheck = req.path === "/health";
-  if (isApiRoute && !isHealthCheck && !origin && !referer) {
+  const isShiprocketWebhook = req.path === "/api/shiprocket/webhook";
+  if (isApiRoute && !isHealthCheck && !isShiprocketWebhook && !origin && !referer) {
     return res.status(403).json({ error: "Access denied" });
   }
   next();
@@ -58,6 +59,7 @@ app.use("/api/payments",   require("./routes/payments"));
 app.use("/api/invoices",   require("./routes/invoices"));
 app.use("/api/account",    require("./routes/account"));
 app.use("/api/admin",      require("./routes/admin"));
+app.use("/api/shiprocket", require("./routes/shiprocket"));
 
 // ── Public Settings ──────────────────────────────────
 app.get("/api/settings", async (req, res) => {

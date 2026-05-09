@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle, Download, Package, ArrowRight } from "lucide-react";
+import { CheckCircle, Download, Package, ArrowRight, Truck, ExternalLink } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { ordersApi, invoicesApi } from "@/lib/api";
@@ -80,6 +80,42 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
                   📞 {order.address.phone}
                   {order.address.gstin && <><br /><span className="text-[#45B08C]">GSTIN: {order.address.gstin}</span></>}
                 </p>
+              </div>
+            )}
+
+            {/* Shipment Tracking */}
+            {order.awbCode && (
+              <div className="card">
+                <h2 className="font-bold text-[#1D3557] mb-4 flex items-center gap-2">
+                  <Truck size={18} className="text-[#45B08C]" /> Shipment Tracking
+                </h2>
+                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                  {order.courierName && (
+                    <div>
+                      <p className="text-[#4A6A82] mb-0.5">Courier</p>
+                      <p className="text-[#1D3557] font-semibold">{order.courierName}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-[#4A6A82] mb-0.5">AWB / Tracking No.</p>
+                    <p className="text-[#1D3557] font-semibold font-mono">{order.awbCode}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#4A6A82] mb-0.5">Status</p>
+                    <p className="text-[#45B08C] font-semibold capitalize">{order.status.replace(/_/g, " ")}</p>
+                  </div>
+                </div>
+                {order.trackingUrl && (
+                  <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="btn-primary flex items-center gap-2 text-sm px-4 py-2 w-full justify-center"
+                    >
+                      <ExternalLink size={14} /> Track Shipment Live
+                    </motion.button>
+                  </a>
+                )}
               </div>
             )}
 
