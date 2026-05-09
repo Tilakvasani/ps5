@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { User, Package, MapPin, LogOut, Download, Plus, Trash2, Edit3 } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
@@ -142,7 +143,8 @@ function AccountPageContent() {
                 ) : (
                   <div className="space-y-3">
                     {orders.map(order => (
-                      <div key={order.id} className="card hover:border-[#C8DCEA] transition-all">
+                      <Link key={order.id} href={`/order/${order.orderNumber}`}>
+                      <div className="card hover:border-[#45B08C] hover:shadow-md transition-all cursor-pointer">
                         <div className="flex items-start justify-between gap-4 flex-wrap">
                           <div>
                             <div className="flex items-center gap-2 mb-1">
@@ -152,11 +154,13 @@ function AccountPageContent() {
                             <p className="text-xs text-[#4A6A82]">{new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
                             <p className="text-sm text-[#4A6A82] mt-1">{order.items?.length} item(s)</p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right flex flex-col items-end gap-1">
                             <p className="text-lg font-black gradient-text">₹{Number(order.totalAmount).toFixed(2)}</p>
                             {order.invoice && (
                               <button
-                                onClick={async () => {
+                                onClick={async (e) => {
+                                  e.preventDefault(); // stop Link navigation
+                                  e.stopPropagation();
                                   try {
                                     await invoicesApi.downloadPdf(order.invoice.invoiceNumber);
                                   } catch (err: any) {
@@ -168,9 +172,11 @@ function AccountPageContent() {
                                 <Download size={11} /> Invoice PDF
                               </button>
                             )}
+                            <span className="text-xs text-[#4A6A82] mt-1">View Details →</span>
                           </div>
                         </div>
                       </div>
+                      </Link>
                     ))}
                   </div>
                 )}
