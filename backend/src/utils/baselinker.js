@@ -1,11 +1,9 @@
 /**
  * baselinker.js — BaseLinker API utility for Zupwell
- * Docs: https://api.baselinker.com/connector.php
+ * API: https://api.baselinker.com/connector.php
  */
 
 const BASE_URL = "https://api.baselinker.com/connector.php";
-
-// Cache status ID so we don't fetch every time
 let _cachedStatusId = null;
 
 // ── Generic API call ──────────────────────────────────────────────────
@@ -28,12 +26,12 @@ async function callAPI(method, parameters = {}) {
 
   const data = await res.json();
   if (data.status === "ERROR") {
-    throw new Error(`BaseLinker API error [${data.error_code}]: ${data.error_message}`);
+    throw new Error("BaseLinker [" + data.error_code + "]: " + data.error_message);
   }
   return data;
 }
 
-// ── Get first available order status ID ──────────────────────────────
+// ── Auto fetch first order status ID ─────────────────────────────────
 async function getFirstStatusId() {
   if (_cachedStatusId !== null) return _cachedStatusId;
   try {
@@ -41,24 +39,24 @@ async function getFirstStatusId() {
     const statuses = data.statuses || [];
     if (statuses.length > 0) {
       _cachedStatusId = statuses[0].id;
-      console.log("BaseLinker: using status ID " + _cachedStatusId + " (" + statuses[0].name + ")");
+      console.log("BaseLinker status ID: " + _cachedStatusId + " (" + statuses[0].name + ")");
       return _cachedStatusId;
     }
   } catch (err) {
-    console.error("Could not fetch BaseLinker statuses:", err.message);
+    console.error("BaseLinker status fetch failed:", err.message);
   }
   return null;
 }
 
-// ── Add Order to BaseLinker ───────────────────────────────────────────
+// ── Add Order ─────────────────────────────────────────────────────────
 async function addOrder(order, user) {
   const addr = order.address;
   const statusId = await getFirstStatusId();
 
   const products = order.items.map((item) => ({
-    storage:      "db",
+    storage:      "personal",
     storage_id:   0,
-    product_id:   String(item.productId || ""),
+    product_id:   "",
     variant_id:   0,
     name:         item.product?.name || ("Product #" + item.productId),
     sku:          item.product?.sku  || ("SKU-" + item.productId),
@@ -67,18 +65,18 @@ async function addOrder(order, user) {
     warehouse_id: 0,
     attributes:   "",
     price_brutto: Number(item.unitPrice),
-    tax_rate:     18,
+    tax_rate:     0,
     quantity:     item.qty,
     weight:       0.5,
   }));
 
   const parameters = {
-    ...(statusId !== null && { order_status_id: statusId }),
-    date_add:           Math.floor(new Date(order.createdAt).getTime() / 1000),
-    currency:           "INR",
-    payment_method:     order.paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment",
-    payment_method_cod: order.paymentMethod === "cod" ? 1 : 0,
-    payment_done:       order.paymentMethod === "cod" ? 0 : Number(order.totalAmount),
+    order_status_id:       statusId,
+    date_add:              Math.floor(new Date(order.createdAt).getTime() / 1000),
+    currency:              "INR",
+    payment_method:        order.paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment",
+    payment_method_cod:    order.paymentMethod === "cod" ? 1 : 0,
+    paid:                  order.paymentMethod === "cod" ? 0 : Number(order.totalAmount),
     delivery_method:       "",
     delivery_price:        Number(order.shippingCharge) || 0,
     delivery_fullname:     addr.fullName,
@@ -91,22 +89,23 @@ async function addOrder(order, user) {
     delivery_email:        user.email || "",
     invoice_fullname:      addr.fullName,
     invoice_company:       "",
+    invoice_nip:           addr.gstin || "",
     invoice_address:       addr.addressLine1,
     invoice_city:          addr.city,
     invoice_postcode:      addr.pincode,
     invoice_country_code:  "IN",
     invoice_email:         user.email || "",
     invoice_phone:         addr.phone,
-    invoice_nip:           addr.gstin || "",
-    admin_comments: "Zupwell Order#: " + order.orderNumber,
-    user_comments:  "",
-    want_invoice:   addr.gstin ? 1 : 0,
-    extra_field_1:  order.orderNumber,
-    extra_field_2:  order.paymentMethod === "cod" ? "COD" : ("Razorpay: " + (order.razorpayPaymentId || "")),
+    want_invoice:          addr.gstin ? 1 : 0,
+    extra_field_1:         order.orderNumber,
+    extra_field_2:         order.paymentMethod === "cod" ? "COD" : ("Razorpay: " + (order.razorpayPaymentId || "")),
+    admin_comments:        "Zupwell Order: " + order.orderNumber,
+    user_comments:         "",
     products,
   };
 
   const data = await callAPI("addOrder", parameters);
+  console.log("✅ BaseLinker: order pushed — ID: " + data.order_id);
   return { baselinkerOrderId: String(data.order_id) };
 }
 
