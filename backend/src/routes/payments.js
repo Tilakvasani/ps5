@@ -4,7 +4,7 @@ const crypto = require("crypto");
 const prisma = require("../utils/prisma");
 const { authUser } = require("../middleware/auth");
 const { generateInvoiceNumber } = require("../utils/orderNumber");
-const shiprocket = require("../utils/shiprocket");
+const baselinker = require("../utils/baselinker");
 
 const razorpay = new Razorpay({
   key_id:     process.env.RAZORPAY_KEY_ID,
@@ -113,8 +113,7 @@ router.post("/verify", authUser, async (req, res) => {
 
   res.json({ message: "Payment verified and invoice generated" });
 
-  // ── Push to Shiprocket after successful Razorpay payment ─────────
-  // Done AFTER responding so payment confirmation is instant for the customer
+  // ── Push to BaseLinker (eHandler) after successful Razorpay payment ─
   try {
     const fullOrder = await prisma.order.findUnique({
       where: { id: order.id },
@@ -124,18 +123,16 @@ router.post("/verify", authUser, async (req, res) => {
       },
     });
 
-    const { shiprocketOrderId, shipmentId } = await shiprocket.createOrder(fullOrder, req.user);
-    const { awbCode, courierName, trackingUrl } = await shiprocket.generateAWB(shipmentId);
+    const { baselinkerOrderId } = await baselinker.addOrder(fullOrder, req.user);
 
     await prisma.order.update({
       where: { id: order.id },
-      data:  { shiprocketOrderId, awbCode, courierName, trackingUrl },
+      data:  { baselinkerOrderId },
     });
 
-    console.log(`✅ Shiprocket: Razorpay order ${order.orderNumber} pushed — AWB: ${awbCode}`);
+    console.log(`✅ BaseLinker: Razorpay order ${order.orderNumber} pushed — BL ID: ${baselinkerOrderId}`);
   } catch (err) {
-    // Non-fatal: payment is confirmed; admin can retry from the dashboard
-    console.error(`⚠️  Shiprocket push failed for order ${order.orderNumber}:`, err.message);
+    console.error(`⚠️  BaseLinker push failed for order ${order.orderNumber}:`, err.message);
   }
 });
 

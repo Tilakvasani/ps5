@@ -2,7 +2,7 @@ const router = require("express").Router();
 const prisma = require("../utils/prisma");
 const { authUser } = require("../middleware/auth");
 const { generateOrderNumber, generateInvoiceNumber } = require("../utils/orderNumber");
-const shiprocket = require("../utils/shiprocket");
+const baselinker = require("../utils/baselinker");
 
 // POST /api/orders - create order
 router.post("/", authUser, async (req, res) => {
@@ -130,26 +130,20 @@ router.post("/", authUser, async (req, res) => {
     },
   });
 
-  // ── Push COD orders to Shiprocket automatically ──────────────────
+  // ── Push COD orders to BaseLinker (eHandler) automatically ─────────
   if (order.paymentMethod === "cod") {
     try {
-      const { shiprocketOrderId, shipmentId } = await shiprocket.createOrder(full, req.user);
-      const { awbCode, courierName, trackingUrl } = await shiprocket.generateAWB(shipmentId);
+      const { baselinkerOrderId } = await baselinker.addOrder(full, req.user);
 
       await prisma.order.update({
         where: { id: order.id },
-        data:  { shiprocketOrderId, awbCode, courierName, trackingUrl },
+        data:  { baselinkerOrderId },
       });
 
-      full.shiprocketOrderId = shiprocketOrderId;
-      full.awbCode           = awbCode;
-      full.courierName       = courierName;
-      full.trackingUrl       = trackingUrl;
-
-      console.log(`✅ Shiprocket: COD order ${order.orderNumber} pushed — AWB: ${awbCode}`);
+      full.baselinkerOrderId = baselinkerOrderId;
+      console.log(`✅ BaseLinker: COD order ${order.orderNumber} pushed — BL ID: ${baselinkerOrderId}`);
     } catch (err) {
-      // Non-fatal: order is already saved; Shiprocket push can be retried from admin panel
-      console.error(`⚠️  Shiprocket push failed for order ${order.orderNumber}:`, err.message);
+      console.error(`⚠️  BaseLinker push failed for order ${order.orderNumber}:`, err.message);
     }
   }
 
