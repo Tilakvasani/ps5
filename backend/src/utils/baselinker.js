@@ -68,7 +68,6 @@ async function addOrder(order, user) {
   }));
 
   const parameters = {
-    order_status_id:    null,
     date_add:           Math.floor(new Date(order.createdAt).getTime() / 1000),
     currency:           "INR",
     payment_method:     order.paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment",
