@@ -2,12 +2,14 @@
  * baselinker.js — BaseLinker API utility for Zupwell
  * API: https://api.baselinker.com/connector.php
  *
- * FIX: Removed delivery_phone & invoice_phone — these parameters do NOT exist
- *      in BaseLinker's addOrder API and caused:
- *      ERROR_BAD_PARAMETER: The specified parameter does not exist (delivery_phone)
+ * Parameters verified against official addOrder docs:
+ * https://api.baselinker.com/index.php?method=addOrder
  *
- *      Phone number is now stored in admin_comments alongside the order number,
- *      and also in extra_field_2 so it's always visible in BaseLinker panel.
+ * INVALID fields removed (caused ERROR_BAD_PARAMETER crashes):
+ *   ✗ delivery_phone  → ✓ phone   (top-level field)
+ *   ✗ invoice_phone   → removed   (does not exist)
+ *   ✗ delivery_email  → ✓ email   (top-level field)
+ *   ✗ invoice_email   → removed   (does not exist)
  */
 
 const BASE_URL = "https://api.baselinker.com/connector.php";
@@ -57,10 +59,10 @@ async function getFirstStatusId() {
 
 // ── Add Order ─────────────────────────────────────────────────────────
 async function addOrder(order, user) {
-  const addr   = order.address;
+  const addr     = order.address;
+  const isCOD    = order.paymentMethod === "cod";
   const statusId = await getFirstStatusId();
 
-  // ── Products — only data from the order itself ────────────────────
   const products = order.items.map((item) => ({
     storage:      "personal",
     storage_id:   0,
@@ -78,15 +80,8 @@ async function addOrder(order, user) {
     weight:       0.5,
   }));
 
-  // ── Build delivery address string ─────────────────────────────────
-  const deliveryAddress =
-    addr.addressLine1 + (addr.addressLine2 ? ", " + addr.addressLine2 : "");
-
-  // ── Payment flags ─────────────────────────────────────────────────
-  const isCOD = order.paymentMethod === "cod";
-
   const parameters = {
-    // ── Status & dates ───────────────────────────────────────────────
+    // ── Status & date ────────────────────────────────────────────────
     order_status_id: statusId,
     date_add:        Math.floor(new Date(order.createdAt).getTime() / 1000),
 
@@ -96,46 +91,39 @@ async function addOrder(order, user) {
     payment_method_cod: isCOD ? 1 : 0,
     paid:               isCOD ? 0 : Number(order.totalAmount),
 
-    // ── Shipping ─────────────────────────────────────────────────────
-    delivery_method: "",
-    delivery_price:  Number(order.shippingCharge) || 0,
+    // ── Buyer contact — CORRECT top-level fields per official docs ───
+    email: user.email || "",
+    phone: addr.phone || "",
 
-    // ── Delivery address (NO delivery_phone — not a valid BL field) ──
+    // ── Shipping ─────────────────────────────────────────────────────
+    delivery_method:       "",
+    delivery_price:        Number(order.shippingCharge) || 0,
     delivery_fullname:     addr.fullName,
     delivery_company:      "",
-    delivery_address:      deliveryAddress,
+    delivery_address:      addr.addressLine1 + (addr.addressLine2 ? ", " + addr.addressLine2 : ""),
     delivery_city:         addr.city,
-    delivery_state:        addr.state || "",       // state added for eHandler
+    delivery_state:        addr.state || "",
     delivery_postcode:     addr.pincode,
     delivery_country_code: "IN",
-    delivery_email:        user.email || "",
 
-    // ── Invoice address (NO invoice_phone — not a valid BL field) ───
+    // ── Billing ──────────────────────────────────────────────────────
     invoice_fullname:      addr.fullName,
     invoice_company:       "",
-    invoice_nip:           addr.gstin || "",       // GST number → NIP field
+    invoice_nip:           addr.gstin || "",
     invoice_address:       addr.addressLine1,
     invoice_city:          addr.city,
     invoice_state:         addr.state || "",
     invoice_postcode:      addr.pincode,
     invoice_country_code:  "IN",
-    invoice_email:         user.email || "",
     want_invoice:          addr.gstin ? 1 : 0,
 
     // ── Extra fields (visible in BaseLinker panel) ───────────────────
-    // extra_field_1 → Order number from Zupwell
-    // extra_field_2 → Phone number (since delivery_phone doesn't exist)
     extra_field_1: order.orderNumber,
-    extra_field_2: addr.phone || "",
+    extra_field_2: isCOD ? "COD" : ("Razorpay: " + (order.razorpayPaymentId || "")),
 
     // ── Comments ─────────────────────────────────────────────────────
-    admin_comments:
-      "Zupwell Order: " +
-      order.orderNumber +
-      " | Phone: " +
-      (addr.phone || "N/A") +
-      (isCOD ? "" : " | Razorpay: " + (order.razorpayPaymentId || "")),
-    user_comments: "",
+    admin_comments: "Zupwell Order: " + order.orderNumber,
+    user_comments:  "",
 
     products,
   };
