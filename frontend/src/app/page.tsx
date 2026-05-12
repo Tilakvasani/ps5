@@ -23,7 +23,7 @@ const CATEGORIES = [
 
 const WHY_CHOOSE = [
   { icon: Droplets, title: "Water Upgrade", desc: "Give your plain water a powerful, professional upgrade with every sip." },
-  { icon: Zap,      title: "Performance Fuel", desc: "" },
+  { icon: Zap,      title: "Performance Fuel", desc: "Fast-absorbing formula designed for your busy, non-stop lifestyle." },
   { icon: Brain,    title: "Science-Backed", desc: "Formulated with clinically studied ingredients for real results." },
   { icon: Leaf,     title: "Clean Ingredients", desc: "No junk, no fillers. Just what your body actually needs." },
 ];
