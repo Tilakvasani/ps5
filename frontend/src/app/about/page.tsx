@@ -145,38 +145,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── Founder's Message ── */}
-      <section className="py-20 px-6 bg-white">
-        <div className="mx-auto max-w-4xl">
-          <motion.div {...fadeUp(0)} className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-black text-[#1D3557]">
-              Founder's <span className="gradient-text">Message</span>
-            </h2>
-          </motion.div>
-          <motion.div {...fadeUp(0.1)} className="card flex flex-col md:flex-row gap-8 items-center">
-            {/* Photo */}
-            <div className="shrink-0 text-center">
-              {s(settings, "founder_photo") ? (
-                <img src={s(settings, "founder_photo")} alt={s(settings, "founder_name")}
-                  className="h-36 w-36 rounded-full object-cover border-4 border-[#45B08C]/20 mx-auto" />
-              ) : (
-                <div className="h-36 w-36 rounded-full bg-[#45B08C]/10 flex items-center justify-center text-5xl font-black text-[#45B08C] mx-auto">
-                  {s(settings, "founder_name").charAt(0)}
-                </div>
-              )}
-              <p className="font-bold text-[#1D3557] mt-3">{s(settings, "founder_name")}</p>
-              <p className="text-xs text-[#4A6A82]">{s(settings, "founder_title")}</p>
-            </div>
-            {/* Quote */}
-            <div className="flex-1">
-              <div className="text-5xl text-[#45B08C]/20 font-black leading-none mb-2">"</div>
-              <p className="text-[#4A6A82] leading-relaxed text-lg italic">
-                {s(settings, "founder_message")}
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      
 
       {/* ── Future of Zupwell ── */}
       {s(settings, "about_future") && (

@@ -112,14 +112,7 @@ function ProductsContent() {
             </div>
 
             {/* Price Range */}
-            <div>
-              <label className="text-xs font-semibold text-[#4A6A82] uppercase tracking-wider mb-2 block">Price Range (₹)</label>
-              <div className="flex gap-2">
-                <input type="number" value={priceMin} onChange={(e) => setPriceMin(e.target.value)} placeholder="Min" className="input-field text-sm" />
-                <input type="number" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} placeholder="Max" className="input-field text-sm" />
-              </div>
-              <button onClick={fetchProducts} className="mt-2 w-full btn-primary text-sm py-2">Apply</button>
-            </div>
+            
           </div>
         </aside>
 

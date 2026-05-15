@@ -53,21 +53,21 @@ const BLOG_POSTS = [
   {
     emoji: "💧",
     tag: "Hydration",
-    date: "Apr 2026",
+    date: "",
     title: "Why Hydration is the #1 Performance Hack",
     body: "Most people underestimate the power of hydration. Even a 2% drop in body water can reduce your physical performance by up to 20% and cloud your mental focus. Plain water alone doesn't cut it — your body also needs electrolytes like sodium, potassium, and magnesium to actually absorb and use that water at the cellular level. That's exactly why Zupwell's effervescent formula is built around rapid hydration science — giving your cells what they need in seconds, not hours.",
   },
   {
     emoji: "⚡",
     tag: "Science",
-    date: "Mar 2026",
+    date: "",
     title: "Electrolytes vs Sports Drinks — What's the Difference?",
     body: "Sports drinks are loaded with sugar, artificial colours, and calories you don't need. Electrolyte supplements like Zupwell deliver the same hydration benefits — sodium, potassium, magnesium, vitamin C — with less sugar and zero compromise. The effervescent technology ensures faster absorption compared to gulping down a sugary drink. If you're working out, commuting in the heat, or simply staying productive all day, pure electrolytes beat sports drinks every single time.",
   },
   {
     emoji: "🏃",
     tag: "Performance",
-    date: "Mar 2026",
+    date: "",
     title: "Pre-Workout Nutrition: What Actually Works",
     body: "Forget complicated pre-workout stacks. The most effective pre-workout routine is surprisingly simple: hydration + fast energy. Start with an electrolyte tablet in water 20–30 minutes before training. This primes your muscles with the minerals they need for contraction and recovery. Add a light carb source if you're doing heavy lifting. Skip the mega-dose caffeine powders — they spike and crash. Zupwell's clean formula gives you steady energy without the jitters or the inevitable afternoon crash.",
   },
@@ -223,7 +223,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-black text-[#1D3557] mb-3">Why Choose <span className="gradient-text">Zupwell?</span></h2>
-            <p className="text-[#4A6A82] font-semibold">Smart-Fuel for Modern Humans. <span style={{color:"#45B08C"}}>શુદ્ધ વિજ્ઞાન, અદ્ભુત સ્વાદ અને ઝીરો ડ્રામા.</span></p>
+            <p className="text-[#4A6A82] font-semibold">Smart-Fuel for Modern Humans.</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {WHY_CHOOSE.map((item, i) => (
