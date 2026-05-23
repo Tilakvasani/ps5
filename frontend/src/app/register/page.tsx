@@ -79,11 +79,10 @@ export default function RegisterPage() {
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="relative w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center mb-4">
-            <span className="text-4xl font-black inline-flex items-start" style={{
+            <span className="text-4xl font-black" style={{
               background: "#45B08C",
               }}>
-              Zupwell
-              <sup style={{ fontSize: "0.4em", fontWeight: 700, lineHeight: 1, marginTop: "4px", background: "#45B08C", }}>™</sup>
+              Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, marginLeft: "2px", verticalAlign: "super" }}>™</sup>
             </span>
           </Link>
           <h1 className="text-3xl font-black text-[#1D3557]">Create account</h1>

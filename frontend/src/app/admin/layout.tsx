@@ -57,8 +57,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0 border-r border-[#C8DCEA] bg-white  flex flex-col transition-transform duration-300
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto`}>
         {/* Logo */}
-        <div className="flex items-center gap-2 px-5 py-5 border-b border-[#C8DCEA]">
-          <span className="text-xl font-black" style={{ background: "#45B08C", }}>Zupwell</span>
+        <div className="flex items-center gap-1 px-5 py-5 border-b border-[#C8DCEA]">
+          <span className="text-xl font-black" style={{ background: "#45B08C", }}>
+            Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#45B08C", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
+          </span>
           <span className="ml-auto text-xs text-[#4A6A82] border border-[#C8DCEA] rounded px-1.5 py-0.5">Admin</span>
           <button className="lg:hidden text-[#4A6A82] hover:text-[#1D3557] ml-1" onClick={() => setSidebarOpen(false)}><X size={18} /></button>
         </div>
