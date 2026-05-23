@@ -44,9 +44,8 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
 
         {/* Logo — flat, no gradient */}
-        <Link href="/" className="text-2xl font-bold tracking-tight" style={{ color: "#1D3557", letterSpacing: "-0.04em", position: "relative", paddingRight: "1.1em", display: "inline-block" }}>
-          Zupwell
-          <span style={{ position: "absolute", top: "0", right: "0", fontSize: "0.5em", fontWeight: 800, lineHeight: 1, color: "#45B08C" }}>TM</span>
+        <Link href="/" className="text-2xl font-bold tracking-tight" style={{ color: "#1D3557", letterSpacing: "-0.04em" }}>
+          Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#45B08C", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
         </Link>
 
         {/* Desktop Nav */}
