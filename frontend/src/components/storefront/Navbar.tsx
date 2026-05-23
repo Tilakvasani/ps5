@@ -133,9 +133,8 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
           ) : (
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center">
               <Link href="/login" className="btn-outline text-sm px-4 py-2">Sign In</Link>
-              <Link href="/register" className="btn-primary text-sm px-4 py-2">Get Started</Link>
             </div>
           )}
 
@@ -180,9 +179,8 @@ export default function Navbar() {
                   <button onClick={handleLogout} className="text-red-500 text-sm text-left py-2">Sign Out</button>
                 </>
               ) : (
-                <div className="flex flex-col gap-2 pt-2">
+                <div className="flex flex-col pt-2">
                   <Link href="/login" className="btn-outline text-sm text-center" onClick={() => setMenuOpen(false)}>Sign In</Link>
-                  <Link href="/register" className="btn-primary text-sm text-center" onClick={() => setMenuOpen(false)}>Get Started</Link>
                 </div>
               )}
             </div>
