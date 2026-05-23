@@ -47,8 +47,9 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="md:col-span-1">
-            <div className="text-xl font-bold mb-3" style={{ color: "#1D3557", letterSpacing: "-0.03em" }}>
-              {name}<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#45B08C", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
+            <div className="text-xl font-bold mb-3" style={{ color: "#1D3557", letterSpacing: "-0.03em", position: "relative", paddingRight: "1.1em", display: "inline-block" }}>
+              {name}
+              <span style={{ position: "absolute", top: "0", right: "0", fontSize: "0.5em", fontWeight: 800, lineHeight: 1, color: "#45B08C" }}>TM</span>
             </div>
             <p className="text-sm leading-relaxed mb-4" style={{ color: "#4A6A82" }}>
               Performance-Driven Nutrition — Science-backed, insanely delicious, and tailored for your 24/7 lifestyle.

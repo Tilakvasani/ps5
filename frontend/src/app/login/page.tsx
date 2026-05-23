@@ -88,8 +88,12 @@ function LoginForm() {
           <Link href="/" className="inline-flex items-center justify-center mb-4">
             <span className="text-4xl font-black" style={{
               background: "#45B08C",
+              position: "relative",
+              paddingRight: "1.1em",
+              display: "inline-block"
               }}>
-              Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, marginLeft: "2px", verticalAlign: "super" }}>™</sup>
+              Zupwell
+              <span style={{ position: "absolute", top: "0", right: "0", fontSize: "0.5em", fontWeight: 800, lineHeight: 1, background: "#45B08C" }}>TM</span>
             </span>
           </Link>
           <h1 className="text-3xl font-black text-[#1D3557]">Welcome back</h1>
