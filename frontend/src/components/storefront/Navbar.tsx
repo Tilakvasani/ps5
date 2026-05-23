@@ -45,7 +45,7 @@ export default function Navbar() {
 
         {/* Logo — flat, no gradient */}
         <Link href="/" className="text-2xl font-bold tracking-tight" style={{ color: "#1D3557", letterSpacing: "-0.04em" }}>
-          Zupwell<span style={{ fontSize: "0.45em", fontWeight: 700, color: "#45B08C", position: "relative", top: "-0.5em", marginLeft: "2px" }}>™</span>
+          Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#45B08C", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
         </Link>
 
         {/* Desktop Nav */}
