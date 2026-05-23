@@ -195,13 +195,13 @@ export default function HomePage() {
             <Link href="/products">
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                 className="btn-primary flex items-center gap-2 px-8 py-4 text-base">
-                Browse Products <ArrowRight size={16} />
+                Choose Your Power <ArrowRight size={16} />
               </motion.button>
             </Link>
             <Link href="/register">
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                 className="btn-outline flex items-center gap-2 px-8 py-4 text-base">
-                Create Account <ChevronRight size={16} />
+                Start Your Hustle <ChevronRight size={16} />
               </motion.button>
             </Link>
           </motion.div>
@@ -409,7 +409,7 @@ export default function HomePage() {
           <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
             className="rounded-3xl border border-[#45B08C]/20 bg-white p-12 text-center">
             <h2 className="text-3xl md:text-4xl font-black text-[#1D3557] mb-4">
-              Give Your Water a <span className="gradient-text">Professional Upgrade</span>
+              Join the <span className="gradient-text">Zupwell Gang</span>
             </h2>
             <p className="text-[#4A6A82] mb-8 max-w-lg mx-auto">
               Create a free account to access exclusive pricing, personalised recommendations, and your complete order history.
@@ -417,12 +417,12 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="btn-primary px-8 py-4">
-                  Get Started Free
+                  Try Zupwell
                 </motion.button>
               </Link>
               <Link href="/products">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="btn-outline px-8 py-4">
-                  View Products
+                  Upgrade Your Water
                 </motion.button>
               </Link>
             </div>

@@ -154,7 +154,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 </div>
                 <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} onClick={handleAddToCart}
                   className="btn-primary flex items-center gap-2 py-2 px-5 text-sm">
-                  <ShoppingCart size={14}/> Add to Cart · ₹{total}
+                  <ShoppingCart size={14}/> Claim Your Energy · ₹{total}
                 </motion.button>
               </div>
             </div>
@@ -320,7 +320,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               </div>
               <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} onClick={handleAddToCart}
                 className="btn-primary flex-1 flex items-center justify-center gap-2 py-3.5 text-base">
-                <ShoppingCart size={18}/> Add to Cart
+                <ShoppingCart size={18}/> Claim Your Energy
               </motion.button>
             </div>
 

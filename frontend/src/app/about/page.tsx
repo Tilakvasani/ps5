@@ -189,7 +189,7 @@ export default function AboutPage() {
               <Link href="/products">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                   className="btn-primary flex items-center gap-2 px-8 py-3">
-                  Shop Now <ArrowRight size={16} />
+                  Upgrade Now <ArrowRight size={16} />
                 </motion.button>
               </Link>
               <Link href="/contact">
