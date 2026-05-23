@@ -89,7 +89,7 @@ function LoginForm() {
             <span className="text-4xl font-black" style={{
               background: "#45B08C",
               }}>
-              Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, marginLeft: "2px", verticalAlign: "super" }}>™</sup>
+              Zupwell<span style={{ fontSize: "0.45em", fontWeight: 700, position: "relative", top: "-0.5em", marginLeft: "2px" }}>™</span>
             </span>
           </Link>
           <h1 className="text-3xl font-black text-[#1D3557]">Welcome back</h1>
