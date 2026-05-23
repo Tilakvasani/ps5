@@ -7,13 +7,13 @@ export default function NewProductPage() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/products" className="flex items-center gap-1 text-[#4A6A82] hover:text-[#1D3557] text-sm transition-colors">
+        <Link href="/admin/products" className="flex items-center gap-1 text-[#45353E] hover:text-[#002A30] text-sm transition-colors">
           <ChevronLeft size={16} /> Products
         </Link>
-        <span className="text-[#1D3557]/30">/</span>
-        <span className="text-[#1D3557] font-semibold">New Product</span>
+        <span className="text-[#002A30]/30">/</span>
+        <span className="text-[#002A30] font-semibold">New Product</span>
       </div>
-      <h1 className="text-3xl font-black text-[#1D3557] mb-6">Add New Product</h1>
+      <h1 className="text-3xl font-black text-[#002A30] mb-6">Add New Product</h1>
       <ProductForm />
     </div>
   );

@@ -36,28 +36,28 @@ export default function AdminCouponsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-black text-[#1D3557]">Coupons</h1>
+        <h1 className="text-3xl font-black text-[#002A30]">Coupons</h1>
         <button onClick={openNew} className="btn-primary flex items-center gap-2"><Plus size={16} /> New Coupon</button>
       </div>
       <div className="card p-0 overflow-hidden">
         <table className="w-full text-sm">
-          <thead><tr className="border-b border-[#C8DCEA] text-[#4A6A82] text-left">
+          <thead><tr className="border-b border-[#E8E2D9] text-[#45353E] text-left">
             {["Code", "Type", "Value", "Min Order", "Used", "Valid Until", "Status", "Actions"].map(h => <th key={h} className="px-4 py-3 font-semibold">{h}</th>)}
           </tr></thead>
           <tbody className="divide-y divide-white/5">
-            {loading ? Array.from({ length: 5 }).map((_, i) => <tr key={i}><td colSpan={8} className="px-4 py-3"><div className="h-4 rounded bg-[#F1FAFF] animate-pulse" /></td></tr>)
+            {loading ? Array.from({ length: 5 }).map((_, i) => <tr key={i}><td colSpan={8} className="px-4 py-3"><div className="h-4 rounded bg-[#FCFAF6] animate-pulse" /></td></tr>)
               : coupons.map(c => (
-              <tr key={c.id} className="hover:bg-[#F1FAFF] transition-colors">
-                <td className="px-4 py-3 font-mono font-bold text-[#45B08C]">{c.code}</td>
-                <td className="px-4 py-3 text-[#4A6A82] capitalize">{c.discountType}</td>
-                <td className="px-4 py-3 font-bold text-[#1D3557]">{c.discountType === "percent" ? `${c.discountValue}%` : `₹${c.discountValue}`}</td>
-                <td className="px-4 py-3 text-[#4A6A82]">₹{c.minOrderValue}</td>
-                <td className="px-4 py-3 text-[#4A6A82]">{c.usedCount || 0}{c.usageLimit ? `/${c.usageLimit}` : ""}</td>
-                <td className="px-4 py-3 text-[#4A6A82] text-xs">{c.validTo ? new Date(c.validTo).toLocaleDateString("en-IN") : "—"}</td>
+              <tr key={c.id} className="hover:bg-[#FCFAF6] transition-colors">
+                <td className="px-4 py-3 font-mono font-bold text-[#48C062]">{c.code}</td>
+                <td className="px-4 py-3 text-[#45353E] capitalize">{c.discountType}</td>
+                <td className="px-4 py-3 font-bold text-[#002A30]">{c.discountType === "percent" ? `${c.discountValue}%` : `₹${c.discountValue}`}</td>
+                <td className="px-4 py-3 text-[#45353E]">₹{c.minOrderValue}</td>
+                <td className="px-4 py-3 text-[#45353E]">{c.usedCount || 0}{c.usageLimit ? `/${c.usageLimit}` : ""}</td>
+                <td className="px-4 py-3 text-[#45353E] text-xs">{c.validTo ? new Date(c.validTo).toLocaleDateString("en-IN") : "—"}</td>
                 <td className="px-4 py-3"><span className={`badge ${c.isActive ? "badge-success" : "badge-danger"}`}>{c.isActive ? "Active" : "Inactive"}</span></td>
                 <td className="px-4 py-3 flex gap-1">
-                  <button onClick={() => openEdit(c)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#4A6A82] hover:text-[#45B08C] hover:bg-[#EBF7F3] transition-all"><Edit3 size={14} /></button>
-                  <button onClick={() => handleDelete(c.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#4A6A82] hover:text-red-400 hover:bg-red-400/10 transition-all"><Trash2 size={14} /></button>
+                  <button onClick={() => openEdit(c)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#48C062] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
+                  <button onClick={() => handleDelete(c.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-red-400 hover:bg-red-400/10 transition-all"><Trash2 size={14} /></button>
                 </td>
               </tr>
             ))}
@@ -68,7 +68,7 @@ export default function AdminCouponsPage() {
       {modal !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white  px-4">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-lg card p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="font-bold text-[#1D3557] mb-5">{modal?.id ? "Edit" : "New"} Coupon</h2>
+            <h2 className="font-bold text-[#002A30] mb-5">{modal?.id ? "Edit" : "New"} Coupon</h2>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="label-text">Code *</label><input value={form.code} onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))} className="input-field" placeholder="SAVE10" /></div>
@@ -92,8 +92,8 @@ export default function AdminCouponsPage() {
               </div>
               <div><label className="label-text">Description</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="input-field resize-none" rows={2} /></div>
               <label className="flex items-center gap-3 cursor-pointer">
-                <span className="text-sm text-[#4A6A82]">Active</span>
-                <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-[#45B08C]" : "bg-[#FFFFFF]"}`}>
+                <span className="text-sm text-[#45353E]">Active</span>
+                <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-[#48C062]" : "bg-[#FFFFFF]"}`}>
                   <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${form.isActive ? "translate-x-6" : "translate-x-1"}`} />
                 </button>
               </label>

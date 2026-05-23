@@ -35,25 +35,25 @@ export default function Footer() {
   ].filter(s => s.href);
 
   const linkStyle = {
-    color: "#4A6A82",
+    color: "#45353E",
     fontSize: "14px",
     transition: "color 0.15s",
   };
 
   return (
-    <footer style={{ background: "#FFFFFF", borderTop: "1.5px solid #C8DCEA" }}>
+    <footer style={{ background: "#FFFFFF", borderTop: "1.5px solid #E8E2D9" }}>
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
 
           {/* Brand */}
           <div className="md:col-span-1">
-            <div className="text-xl font-bold mb-3" style={{ color: "#1D3557", letterSpacing: "-0.03em" }}>
-              {name}<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#45B08C", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
+            <div className="text-xl font-bold mb-3" style={{ color: "#002A30", letterSpacing: "-0.03em" }}>
+              {name}<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#48C062", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
             </div>
-            <p className="text-sm leading-relaxed mb-4" style={{ color: "#4A6A82" }}>
+            <p className="text-sm leading-relaxed mb-4" style={{ color: "#45353E" }}>
               Performance-Driven Nutrition — Science-backed, insanely delicious, and tailored for your 24/7 lifestyle.
             </p>
-            <div className="text-xs space-y-1 mb-5" style={{ color: "#7A9BB5" }}>
+            <div className="text-xs space-y-1 mb-5" style={{ color: "#8C8276" }}>
               {gstin  && <p>GSTIN: {gstin}</p>}
               {fssai  && <p>FSSAI: {fssai}</p>}
               <p>State Code: {stateCode}</p>
@@ -63,9 +63,9 @@ export default function Footer() {
                 {socials.map(({ href, icon, label }) => (
                   <a key={label} href={href} target="_blank" rel="noopener noreferrer"
                     className="h-9 w-9 rounded-xl flex items-center justify-center transition-colors duration-150"
-                    style={{ background: "#F1FAFF", border: "1.5px solid #C8DCEA", color: "#4A6A82" }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#45B08C"; e.currentTarget.style.color = "#45B08C"; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = "#C8DCEA"; e.currentTarget.style.color = "#4A6A82"; }}
+                    style={{ background: "#FCFAF6", border: "1.5px solid #E8E2D9", color: "#45353E" }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#48C062"; e.currentTarget.style.color = "#48C062"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "#E8E2D9"; e.currentTarget.style.color = "#45353E"; }}
                   >
                     {icon}
                   </a>
@@ -76,13 +76,13 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#1D3557", letterSpacing: "0.12em" }}>Quick Links</h4>
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#002A30", letterSpacing: "0.12em" }}>Quick Links</h4>
             <ul className="space-y-2.5">
               {[["Home","/"],["Shop / Products","/products"],["Science / Quality","/science"],["About Us","/about"],["FAQs","/faqs"],["Contact Us","/contact"]].map(([l,h]) => (
                 <li key={l}>
                   <Link href={h} style={linkStyle}
-                    onMouseEnter={e => (e.currentTarget.style.color = "#45B08C")}
-                    onMouseLeave={e => (e.currentTarget.style.color = "#4A6A82")}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#48C062")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#45353E")}
                   >{l}</Link>
                 </li>
               ))}
@@ -91,13 +91,13 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#1D3557", letterSpacing: "0.12em" }}>Legal</h4>
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#002A30", letterSpacing: "0.12em" }}>Legal</h4>
             <ul className="space-y-2.5">
               {[["Privacy Policy","/privacy-policy"],["Terms & Conditions","/terms-of-service"],["Refund & Cancellation","/refund-policy"],["Shipping Policy","/shipping-policy"],["Legal Disclaimer","/legal-disclaimer"]].map(([l,h]) => (
                 <li key={l}>
                   <Link href={h} style={linkStyle}
-                    onMouseEnter={e => (e.currentTarget.style.color = "#45B08C")}
-                    onMouseLeave={e => (e.currentTarget.style.color = "#4A6A82")}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#48C062")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#45353E")}
                   >{l}</Link>
                 </li>
               ))}
@@ -106,24 +106,24 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#1D3557", letterSpacing: "0.12em" }}>Contact Us</h4>
-            <div className="space-y-3 text-sm" style={{ color: "#4A6A82" }}>
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#002A30", letterSpacing: "0.12em" }}>Contact Us</h4>
+            <div className="space-y-3 text-sm" style={{ color: "#45353E" }}>
               <div className="flex items-start gap-2.5">
-                <MapPin size={14} className="mt-0.5 shrink-0" style={{ color: "#45B08C" }} />
+                <MapPin size={14} className="mt-0.5 shrink-0" style={{ color: "#48C062" }} />
                 <span>{address}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone size={14} className="shrink-0" style={{ color: "#45B08C" }} />
+                <Phone size={14} className="shrink-0" style={{ color: "#48C062" }} />
                 <span>{phone}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Mail size={14} className="shrink-0" style={{ color: "#45B08C" }} />
+                <Mail size={14} className="shrink-0" style={{ color: "#48C062" }} />
                 <span>{email}</span>
               </div>
               {whatsapp && (
                 <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-2.5 font-semibold transition-colors duration-150"
-                  style={{ color: "#45B08C" }}
+                  style={{ color: "#48C062" }}
                 >
                   <MessageCircle size={14} /> WhatsApp Us
                 </a>
@@ -133,12 +133,12 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderTop: "1.5px solid #C8DCEA" }}>
-          <p className="text-sm" style={{ color: "#7A9BB5" }}>
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderTop: "1.5px solid #E8E2D9" }}>
+          <p className="text-sm" style={{ color: "#8C8276" }}>
             © {new Date().getFullYear()} {name}™. All rights reserved.
             {fssai && <span className="ml-2">· FSSAI: {fssai}</span>}
           </p>
-          <p className="text-xs" style={{ color: "#7A9BB5" }}>
+          <p className="text-xs" style={{ color: "#8C8276" }}>
             This product is a health supplement and not for medicinal use.
           </p>
         </div>

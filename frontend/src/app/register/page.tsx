@@ -66,27 +66,27 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="relative min-h-screen bg-[#F1FAFF] flex items-center justify-center px-6 py-12">
-      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm text-[#4A6A82] hover:text-[#1D3557] transition-colors font-medium">
+    <main className="relative min-h-screen bg-[#FCFAF6] flex items-center justify-center px-6 py-12">
+      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm text-[#45353E] hover:text-[#002A30] transition-colors font-medium">
         <ArrowLeft size={16} /> Back to Home
       </Link>
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 right-1/4 h-[500px] w-[500px] rounded-full bg-[#45B08C]/10 " />
-        <div className="absolute bottom-0 left-1/4 h-[400px] w-[400px] rounded-full bg-[#1D3557]/8 " />
+        <div className="absolute -top-40 right-1/4 h-[500px] w-[500px] rounded-full bg-[#48C062]/10 " />
+        <div className="absolute bottom-0 left-1/4 h-[400px] w-[400px] rounded-full bg-[#002A30]/8 " />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="relative w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center mb-4">
             <span className="text-4xl font-black" style={{
-              background: "#45B08C",
+              background: "#48C062",
               }}>
               Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, marginLeft: "2px", verticalAlign: "super" }}>™</sup>
             </span>
           </Link>
-          <h1 className="text-3xl font-black text-[#1D3557]">Create account</h1>
-          <p className="text-[#4A6A82] mt-1">Start your wellness journey today</p>
+          <h1 className="text-3xl font-black text-[#002A30]">Create account</h1>
+          <p className="text-[#45353E] mt-1">Start your wellness journey today</p>
         </div>
 
         <div className="card p-8">
@@ -94,35 +94,35 @@ export default function RegisterPage() {
           {/* ✅ Google Sign Up Button */}
           <button
             onClick={handleGoogleSignUp}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[#C8DCEA] bg-white hover:bg-gray-50 transition-colors text-sm font-semibold text-[#4A6A82] mb-6"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[#E8E2D9] bg-white hover:bg-gray-50 transition-colors text-sm font-semibold text-[#45353E] mb-6"
           >
             <GoogleIcon /> Continue with Google
           </button>
 
           <div className="mb-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-[#C8DCEA]" />
-            <span className="text-xs text-[#7A9BB5] uppercase tracking-wide">or with email</span>
-            <div className="h-px flex-1 bg-[#C8DCEA]" />
+            <div className="h-px flex-1 bg-[#E8E2D9]" />
+            <span className="text-xs text-[#8C8276] uppercase tracking-wide">or with email</span>
+            <div className="h-px flex-1 bg-[#E8E2D9]" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-[#4A6A82] mb-1.5">Full Name</label>
+              <label className="block text-sm font-semibold text-[#45353E] mb-1.5">Full Name</label>
               <input type="text" value={form.name} onChange={update("name")} required minLength={2}
                 className="input-field" placeholder="Your full name" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[#4A6A82] mb-1.5">Email</label>
+              <label className="block text-sm font-semibold text-[#45353E] mb-1.5">Email</label>
               <input type="email" value={form.email} onChange={update("email")} required
                 className="input-field" placeholder="you@company.com" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[#4A6A82] mb-1.5">Phone</label>
+              <label className="block text-sm font-semibold text-[#45353E] mb-1.5">Phone</label>
               <input type="tel" value={form.phone} onChange={update("phone")} required
                 className="input-field" placeholder="+91 9999999999" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[#4A6A82] mb-1.5">Password</label>
+              <label className="block text-sm font-semibold text-[#45353E] mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPass ? "text" : "password"}
@@ -134,7 +134,7 @@ export default function RegisterPage() {
                   placeholder="Min 8 characters"
                 />
                 <button type="button" onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4A6A82] hover:text-[#1D3557]">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#45353E] hover:text-[#002A30]">
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -154,15 +154,15 @@ export default function RegisterPage() {
 
               {/* Password rules */}
               {showRules && (
-                <div className="mt-3 p-3 bg-[#F1FAFF] rounded-xl space-y-1.5">
+                <div className="mt-3 p-3 bg-[#FCFAF6] rounded-xl space-y-1.5">
                   {rules.map((rule, i) => {
                     const passed = rule.test(form.password);
                     return (
                       <div key={i} className="flex items-center gap-2">
-                        <div className={`h-4 w-4 rounded-full flex items-center justify-center ${passed ? "bg-[#EBF7F3]0" : "bg-[#C8DCEA]"}`}>
-                          {passed ? <Check size={10} className="text-white" /> : <X size={10} className="text-[#7A9BB5]" />}
+                        <div className={`h-4 w-4 rounded-full flex items-center justify-center ${passed ? "bg-[#F0EFEA]0" : "bg-[#E8E2D9]"}`}>
+                          {passed ? <Check size={10} className="text-white" /> : <X size={10} className="text-[#8C8276]" />}
                         </div>
-                        <span className={`text-xs ${passed ? "text-[#389475]" : "text-[#4A6A82]"}`}>{rule.label}</span>
+                        <span className={`text-xs ${passed ? "text-[#359E4C]" : "text-[#45353E]"}`}>{rule.label}</span>
                       </div>
                     );
                   })}
@@ -185,21 +185,21 @@ export default function RegisterPage() {
             </motion.button>
           </form>
 
-          <p className="text-center text-xs text-[#7A9BB5] mt-4">
+          <p className="text-center text-xs text-[#8C8276] mt-4">
             By creating an account you agree to our{" "}
-            <Link href="/terms-of-service" className="text-[#45B08C] hover:text-[#389475]">Terms</Link> and{" "}
-            <Link href="/privacy-policy" className="text-[#45B08C] hover:text-[#389475]">Privacy Policy</Link>
+            <Link href="/terms-of-service" className="text-[#48C062] hover:text-[#359E4C]">Terms</Link> and{" "}
+            <Link href="/privacy-policy" className="text-[#48C062] hover:text-[#359E4C]">Privacy Policy</Link>
           </p>
 
           <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-[#C8DCEA]" />
-            <span className="text-xs text-[#7A9BB5] uppercase tracking-wide">or</span>
-            <div className="h-px flex-1 bg-[#C8DCEA]" />
+            <div className="h-px flex-1 bg-[#E8E2D9]" />
+            <span className="text-xs text-[#8C8276] uppercase tracking-wide">or</span>
+            <div className="h-px flex-1 bg-[#E8E2D9]" />
           </div>
 
-          <p className="text-center text-sm text-[#4A6A82]">
+          <p className="text-center text-sm text-[#45353E]">
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold text-[#45B08C] hover:text-[#389475]">Sign in</Link>
+            <Link href="/login" className="font-semibold text-[#48C062] hover:text-[#359E4C]">Sign in</Link>
           </p>
         </div>
       </motion.div>

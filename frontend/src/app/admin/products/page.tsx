@@ -50,8 +50,8 @@ export default function AdminProductsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black text-[#1D3557]">Products</h1>
-          <p className="text-[#4A6A82] text-sm mt-1">{total} total products</p>
+          <h1 className="text-3xl font-black text-[#002A30]">Products</h1>
+          <p className="text-[#45353E] text-sm mt-1">{total} total products</p>
         </div>
         <Link href="/admin/products/new">
           <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="btn-primary flex items-center gap-2">
@@ -63,7 +63,7 @@ export default function AdminProductsPage() {
       {/* Toolbar */}
       <div className="flex gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4A6A82]" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#45353E]" />
           <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search products..." className="input-field pl-9 text-sm" />
         </div>
@@ -75,7 +75,7 @@ export default function AdminProductsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#C8DCEA] text-[#4A6A82] text-left">
+              <tr className="border-b border-[#E8E2D9] text-[#45353E] text-left">
                 {["Image", "Name", "SKU", "Category", "Price", "Stock", "Status", "Actions"].map(h => (
                   <th key={h} className="px-4 py-3 font-semibold whitespace-nowrap">{h}</th>
                 ))}
@@ -84,50 +84,50 @@ export default function AdminProductsPage() {
             <tbody className="divide-y divide-white/5">
               {loading ? (
                 Array.from({ length: 8 }).map((_, i) => (
-                  <tr key={i}><td colSpan={8} className="px-4 py-3"><div className="h-4 rounded bg-[#F1FAFF] animate-pulse" /></td></tr>
+                  <tr key={i}><td colSpan={8} className="px-4 py-3"><div className="h-4 rounded bg-[#FCFAF6] animate-pulse" /></td></tr>
                 ))
               ) : products.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-12 text-center text-[#4A6A82]">No products found</td></tr>
+                <tr><td colSpan={8} className="px-4 py-12 text-center text-[#45353E]">No products found</td></tr>
               ) : products.map(p => (
-                <motion.tr key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-[#F1FAFF] transition-colors">
+                <motion.tr key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-[#FCFAF6] transition-colors">
                   <td className="px-4 py-3">
-                    <div className="h-10 w-10 rounded-lg bg-[#F1FAFF] overflow-hidden border border-[#C8DCEA]">
+                    <div className="h-10 w-10 rounded-lg bg-[#FCFAF6] overflow-hidden border border-[#E8E2D9]">
                       {p.images?.[0]?.imageUrl ? <img src={p.images[0].imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full" />}
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-[#1D3557] line-clamp-1 max-w-[200px]">{p.name}</p>
-                    {p.brand && <p className="text-xs text-[#4A6A82]">{p.brand}</p>}
+                    <p className="font-semibold text-[#002A30] line-clamp-1 max-w-[200px]">{p.name}</p>
+                    {p.brand && <p className="text-xs text-[#45353E]">{p.brand}</p>}
                   </td>
-                  <td className="px-4 py-3 font-mono text-[#4A6A82] text-xs">{p.sku}</td>
-                  <td className="px-4 py-3 text-[#4A6A82]">{p.category?.name || "—"}</td>
+                  <td className="px-4 py-3 font-mono text-[#45353E] text-xs">{p.sku}</td>
+                  <td className="px-4 py-3 text-[#45353E]">{p.category?.name || "—"}</td>
                   <td className="px-4 py-3">
-                    <p className="font-bold text-[#1D3557]">₹{Number(p.sellingPrice).toFixed(2)}</p>
-                    {Number(p.discountPercent) > 0 && <p className="text-xs text-[#45B08C]">-{p.discountPercent}% off</p>}
+                    <p className="font-bold text-[#002A30]">₹{Number(p.sellingPrice).toFixed(2)}</p>
+                    {Number(p.discountPercent) > 0 && <p className="text-xs text-[#48C062]">-{p.discountPercent}% off</p>}
                   </td>
                   <td className="px-4 py-3">
                     {p.inventory?.[0] ? (
                       <span className={`badge ${p.inventory[0].qtyInStock <= p.inventory[0].lowStockThreshold ? "badge-warning" : "badge-success"}`}>
                         {p.inventory[0].qtyInStock}
                       </span>
-                    ) : <span className="text-[#4A6A82]">—</span>}
+                    ) : <span className="text-[#45353E]">—</span>}
                   </td>
                   <td className="px-4 py-3">
                     <button onClick={() => toggleActive(p)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${p.isActive ? "bg-[#45B08C]" : "bg-[#FFFFFF]"}`}>
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${p.isActive ? "bg-[#48C062]" : "bg-[#FFFFFF]"}`}>
                       <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${p.isActive ? "translate-x-6" : "translate-x-1"}`} />
                     </button>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
                       <Link href={`/products/${p.slug}`} target="_blank">
-                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#4A6A82] hover:text-[#1D3557] hover:bg-[#FFFFFF] transition-all"><Eye size={14} /></button>
+                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#002A30] hover:bg-[#FFFFFF] transition-all"><Eye size={14} /></button>
                       </Link>
                       <Link href={`/admin/products/${p.id}`}>
-                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#4A6A82] hover:text-[#45B08C] hover:bg-[#EBF7F3] transition-all"><Edit3 size={14} /></button>
+                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#48C062] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
                       </Link>
                       <button onClick={() => handleDelete(p.id, p.name)}
-                        className="h-8 w-8 flex items-center justify-center rounded-lg text-[#4A6A82] hover:text-red-400 hover:bg-red-400/10 transition-all">
+                        className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-red-400 hover:bg-red-400/10 transition-all">
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -140,12 +140,12 @@ export default function AdminProductsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-[#C8DCEA]">
-            <p className="text-xs text-[#4A6A82]">Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}</p>
+          <div className="flex items-center justify-between px-4 py-3 border-t border-[#E8E2D9]">
+            <p className="text-xs text-[#45353E]">Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}</p>
             <div className="flex gap-1">
               {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => (
                 <button key={i} onClick={() => setPage(i + 1)}
-                  className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all ${page === i + 1 ? "bg-[#45B08C] text-[#1D3557]" : "text-[#4A6A82] hover:bg-[#FFFFFF]"}`}>
+                  className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all ${page === i + 1 ? "bg-[#48C062] text-[#002A30]" : "text-[#45353E] hover:bg-[#FFFFFF]"}`}>
                   {i + 1}
                 </button>
               ))}

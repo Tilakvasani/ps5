@@ -6,18 +6,18 @@ const config: Config = {
     extend: {
       colors: {
         orange: {
-          DEFAULT: "#F47C41",
-          400: "#f79b6e",
-          500: "#F47C41",
-          600: "#d9673a",
-          700: "#bf5a32",
+          DEFAULT: "#EB9220",
+          400: "#FFA726",
+          500: "#EB9220",
+          600: "#E65100",
+          700: "#D84315",
         },
         blue: {
-          DEFAULT: "#0B2C6F",
-          400: "#4CC9F0",
-          500: "#1E5AA8",
-          600: "#0B2C6F",
-          700: "#071d4a",
+          DEFAULT: "#002A30",
+          400: "#359E4C",
+          500: "#48C062",
+          600: "#002A30",
+          700: "#001C20",
         },
         charcoal: {
           DEFAULT: "#111827",
@@ -34,18 +34,18 @@ const config: Config = {
         "neon-sky":      "#4CC9F0",
         "lemon-yellow":  "#FFD166",
         "mint-green":    "#2EC4B6",
-        "zupwell-blue":  "#0B2C6F",
-        "zupwell-blue-light": "#1E5AA8",
-        "zupwell-orange": "#F47C41",
+        "zupwell-blue":  "#002A30",
+        "zupwell-blue-light": "#48C062",
+        "zupwell-orange": "#EB9220",
       },
       fontFamily: {
         sans:    ["Rajdhani", "sans-serif"],
         display: ["Squada One", "sans-serif"],
       },
       backgroundImage: {
-        "gradient-brand":  "linear-gradient(135deg, #F47C41, #1E5AA8)",
-        "gradient-orange": "linear-gradient(135deg, #F47C41, #d9673a)",
-        "gradient-blue":   "linear-gradient(135deg, #0B2C6F, #1E5AA8)",
+        "gradient-brand":  "linear-gradient(135deg, #EB9220, #002A30)",
+        "gradient-orange": "linear-gradient(135deg, #EB9220, #E65100)",
+        "gradient-blue":   "linear-gradient(135deg, #002A30, #48C062)",
         "gradient-teal":   "linear-gradient(135deg, #2EC4B6, #4CC9F0)",
       },
       boxShadow: {

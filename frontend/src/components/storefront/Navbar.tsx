@@ -38,14 +38,14 @@ export default function Navbar() {
       className="fixed top-0 z-50 w-full"
       style={{
         background: "#FFFFFF",
-        borderBottom: "1.5px solid #C8DCEA",
+        borderBottom: "1.5px solid #E8E2D9",
       }}
     >
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
 
         {/* Logo — flat, no gradient */}
-        <Link href="/" className="text-2xl font-bold tracking-tight" style={{ color: "#1D3557", letterSpacing: "-0.04em" }}>
-          Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#45B08C", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
+        <Link href="/" className="text-2xl font-bold tracking-tight" style={{ color: "#002A30", letterSpacing: "-0.04em" }}>
+          Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#48C062", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
         </Link>
 
         {/* Desktop Nav */}
@@ -54,7 +54,7 @@ export default function Navbar() {
             <Link
               key={label}
               href={href}
-              className="text-sm font-medium transition-colors duration-150 text-[#4A6A82] hover:text-[#1D3557]"
+              className="text-sm font-medium transition-colors duration-150 text-[#45353E] hover:text-[#002A30]"
             >
               {label}
             </Link>
@@ -65,7 +65,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
 
           {/* Cart */}
-          <Link href="/cart" className="relative p-2 transition-colors duration-150 text-[#4A6A82] hover:text-[#1D3557]"
+          <Link href="/cart" className="relative p-2 transition-colors duration-150 text-[#45353E] hover:text-[#002A30]"
           >
             <ShoppingCart size={20} />
             <AnimatePresence>
@@ -73,7 +73,7 @@ export default function Navbar() {
                 <motion.span
                   initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
                   className="absolute -top-1 -right-1 h-5 w-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
-                  style={{ background: "#45B08C" }}
+                  style={{ background: "#48C062" }}
                 >
                   {cartCount}
                 </motion.span>
@@ -87,15 +87,15 @@ export default function Navbar() {
               <button
                 onClick={() => setUserDropOpen(!userDropOpen)}
                 className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-150"
-                style={{ border: "1.5px solid #C8DCEA", color: "#1D3557", background: "#FFFFFF" }}
+                style={{ border: "1.5px solid #E8E2D9", color: "#002A30", background: "#FFFFFF" }}
               >
                 <div
                   className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                  style={{ background: "#1D3557" }}
+                  style={{ background: "#002A30" }}
                 >
                   {user.name[0].toUpperCase()}
                 </div>
-                <span className="hidden md:inline" style={{ color: "#1D3557" }}>{user.name.split(" ")[0]}</span>
+                <span className="hidden md:inline" style={{ color: "#002A30" }}>{user.name.split(" ")[0]}</span>
               </button>
               <AnimatePresence>
                 {userDropOpen && (
@@ -103,19 +103,19 @@ export default function Navbar() {
                     initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }}
                     transition={{ duration: 0.15 }}
                     className="absolute right-0 top-12 w-48 rounded-2xl overflow-hidden"
-                    style={{ background: "#FFFFFF", border: "1.5px solid #C8DCEA" }}
+                    style={{ background: "#FFFFFF", border: "1.5px solid #E8E2D9" }}
                   >
                     <Link href="/account" onClick={() => setUserDropOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#1D3557] hover:bg-[#F1FAFF]"
+                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#002A30] hover:bg-[#FCFAF6]"
                     >
                       <User size={14} /> My Account
                     </Link>
                     <Link href="/account?tab=orders" onClick={() => setUserDropOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#1D3557] hover:bg-[#F1FAFF]"
+                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#002A30] hover:bg-[#FCFAF6]"
                     >
                       <HeartPulse size={14} /> My Orders
                     </Link>
-                    <div style={{ height: "1.5px", background: "#C8DCEA" }} />
+                    <div style={{ height: "1.5px", background: "#E8E2D9" }} />
                     <button onClick={handleLogout}
                       className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-500 transition-colors duration-150"
 
@@ -134,7 +134,7 @@ export default function Navbar() {
 
           <button
             className="md:hidden transition-colors duration-150"
-            style={{ color: "#4A6A82" }}
+            style={{ color: "#45353E" }}
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -149,27 +149,27 @@ export default function Navbar() {
             initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="md:hidden overflow-hidden"
-            style={{ background: "#FFFFFF", borderTop: "1.5px solid #C8DCEA" }}
+            style={{ background: "#FFFFFF", borderTop: "1.5px solid #E8E2D9" }}
           >
             <div className="px-6 py-4 flex flex-col gap-1">
               {NAV_LINKS.map(([label, href]) => (
                 <Link key={label} href={href}
                   className="text-sm py-2.5 font-medium border-b transition-colors duration-150"
-                  style={{ color: "#4A6A82", borderColor: "#F1FAFF" }}
+                  style={{ color: "#45353E", borderColor: "#FCFAF6" }}
                   onClick={() => setMenuOpen(false)}
                 >
                   {label}
                 </Link>
               ))}
               <Link href="/cart" className="text-sm py-2.5 font-medium transition-colors duration-150"
-                style={{ color: "#4A6A82" }}
+                style={{ color: "#45353E" }}
                 onClick={() => setMenuOpen(false)}
               >
                 Cart ({cartCount})
               </Link>
               {user ? (
                 <>
-                  <Link href="/account" className="text-sm py-2 transition-colors" style={{ color: "#4A6A82" }} onClick={() => setMenuOpen(false)}>Account</Link>
+                  <Link href="/account" className="text-sm py-2 transition-colors" style={{ color: "#45353E" }} onClick={() => setMenuOpen(false)}>Account</Link>
                   <button onClick={handleLogout} className="text-red-500 text-sm text-left py-2">Sign Out</button>
                 </>
               ) : (

@@ -24,15 +24,15 @@ function sanitizeHtml(html: string): string {
 
 /* ── Matte palette ── */
 const C = {
-  bg:      "#F1FAFF",
+  bg:      "#FCFAF6",
   surface: "#FFFFFF",
-  blue:    "#1D3557",
-  mint:    "#45B08C",
-  mintDim: "#389475",
-  border:  "#C8DCEA",
-  mid:     "#4A6A82",
-  light:   "#7A9BB5",
-  altBg:   "#EBF7F3",
+  blue:    "#002A30",
+  mint:    "#48C062",
+  mintDim: "#359E4C",
+  border:  "#E8E2D9",
+  mid:     "#45353E",
+  light:   "#8C8276",
+  altBg:   "#F0EFEA",
 };
 
 const HOW_TO_USE = [

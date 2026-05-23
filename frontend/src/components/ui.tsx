@@ -40,7 +40,7 @@ const SPINNER_SIZES = { sm: "h-4 w-4", md: "h-8 w-8", lg: "h-12 w-12" };
 /** Reusable spinner — used on page-level loading states */
 export const LoadingSpinner = ({ size = "md", className = "" }: SpinnerProps) => (
   <div
-    className={`rounded-full border-4 border-[#45B08C]/30 border-t-[#45B08C] animate-spin ${SPINNER_SIZES[size]} ${className}`}
+    className={`rounded-full border-4 border-[#48C062]/30 border-t-[#48C062] animate-spin ${SPINNER_SIZES[size]} ${className}`}
     role="status"
     aria-label="Loading"
   />
@@ -48,7 +48,7 @@ export const LoadingSpinner = ({ size = "md", className = "" }: SpinnerProps) =>
 
 /** Full-page loading screen */
 export const PageLoader = () => (
-  <div className="min-h-screen bg-[#F1FAFF] flex items-center justify-center">
+  <div className="min-h-screen bg-[#FCFAF6] flex items-center justify-center">
     <LoadingSpinner size="lg" />
   </div>
 );
@@ -66,7 +66,7 @@ const BADGE_VARIANTS = {
   blue:   "bg-blue-100 text-blue-700",
   yellow: "bg-yellow-100 text-yellow-700",
   red:    "bg-red-100 text-red-600",
-  gray:   "bg-[#F1FAFF] text-[#4A6A82]",
+  gray:   "bg-[#FCFAF6] text-[#45353E]",
 };
 
 export const Badge = ({ children, variant = "gray", className = "" }: BadgeProps) => (
@@ -87,8 +87,8 @@ interface EmptyStateProps {
 export const EmptyState = ({ icon, title, description, action }: EmptyStateProps) => (
   <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
     {icon && <div className="text-4xl mb-2">{icon}</div>}
-    <p className="font-bold text-[#1D3557] text-lg">{title}</p>
-    {description && <p className="text-sm text-[#4A6A82] max-w-sm">{description}</p>}
+    <p className="font-bold text-[#002A30] text-lg">{title}</p>
+    {description && <p className="text-sm text-[#45353E] max-w-sm">{description}</p>}
     {action && <div className="mt-4">{action}</div>}
   </div>
 );

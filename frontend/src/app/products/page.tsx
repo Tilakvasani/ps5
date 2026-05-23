@@ -63,13 +63,13 @@ function ProductsContent() {
   return (
     <div className="pt-20">
       {/* Header */}
-      <div className="relative border-b border-[#C8DCEA] py-12 px-6">
+      <div className="relative border-b border-[#E8E2D9] py-12 px-6">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-20 left-1/4 h-[300px] w-[300px] rounded-full bg-[#45B08C]/10 " />
+          <div className="absolute -top-20 left-1/4 h-[300px] w-[300px] rounded-full bg-[#48C062]/10 " />
         </div>
         <div className="relative mx-auto max-w-7xl">
-          <h1 className="text-4xl font-black text-[#1D3557] mb-2">All <span className="gradient-text">Products</span></h1>
-          <p className="text-[#4A6A82]">{total} products available</p>
+          <h1 className="text-4xl font-black text-[#002A30] mb-2">All <span className="gradient-text">Products</span></h1>
+          <p className="text-[#45353E]">{total} products available</p>
         </div>
       </div>
 
@@ -78,15 +78,15 @@ function ProductsContent() {
         <aside className={`lg:w-64 flex-shrink-0 ${filterOpen ? "block" : "hidden lg:block"}`}>
           <div className="card sticky top-24 space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-[#1D3557]">Filters</h2>
-              <button onClick={clearFilters} className="text-xs text-[#45B08C] hover:text-[#45B08C]">Clear all</button>
+              <h2 className="font-bold text-[#002A30]">Filters</h2>
+              <button onClick={clearFilters} className="text-xs text-[#48C062] hover:text-[#48C062]">Clear all</button>
             </div>
 
             {/* Search */}
             <div>
-              <label className="text-xs font-semibold text-[#4A6A82] uppercase tracking-wider mb-2 block">Search</label>
+              <label className="text-xs font-semibold text-[#45353E] uppercase tracking-wider mb-2 block">Search</label>
               <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4A6A82]" />
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#45353E]" />
                 <input
                   type="text" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                   placeholder="Search products..." className="input-field pl-9 text-sm"
@@ -96,15 +96,15 @@ function ProductsContent() {
 
             {/* Category */}
             <div>
-              <label className="text-xs font-semibold text-[#4A6A82] uppercase tracking-wider mb-2 block">Category</label>
+              <label className="text-xs font-semibold text-[#45353E] uppercase tracking-wider mb-2 block">Category</label>
               <div className="space-y-1">
                 <button onClick={() => { setSelectedCat(""); setPage(1); }}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${!selectedCat ? "bg-[#45B08C]/20 text-[#45B08C]" : "text-[#4A6A82] hover:text-[#1D3557] hover:bg-[#F1FAFF]"}`}>
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${!selectedCat ? "bg-[#48C062]/20 text-[#48C062]" : "text-[#45353E] hover:text-[#002A30] hover:bg-[#FCFAF6]"}`}>
                   All Categories
                 </button>
                 {categories.map((cat) => (
                   <button key={cat.id} onClick={() => { setSelectedCat(cat.slug); setPage(1); }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${selectedCat === cat.slug ? "bg-[#45B08C]/20 text-[#45B08C]" : "text-[#4A6A82] hover:text-[#1D3557] hover:bg-[#F1FAFF]"}`}>
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${selectedCat === cat.slug ? "bg-[#48C062]/20 text-[#48C062]" : "text-[#45353E] hover:text-[#002A30] hover:bg-[#FCFAF6]"}`}>
                     {cat.name}
                   </button>
                 ))}
@@ -141,13 +141,13 @@ function ProductsContent() {
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {Array.from({ length: 9 }).map((_, i) => (
-                <div key={i} className="rounded-2xl border border-[#C8DCEA] bg-[#F1FAFF] aspect-[3/4] animate-pulse" />
+                <div key={i} className="rounded-2xl border border-[#E8E2D9] bg-[#FCFAF6] aspect-[3/4] animate-pulse" />
               ))}
             </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-24 text-[#4A6A82]">
+            <div className="text-center py-24 text-[#45353E]">
               <p className="text-2xl mb-2">No products found</p>
-              <button onClick={clearFilters} className="text-[#45B08C] hover:text-[#45B08C] text-sm">Clear filters</button>
+              <button onClick={clearFilters} className="text-[#48C062] hover:text-[#48C062] text-sm">Clear filters</button>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -161,7 +161,7 @@ function ProductsContent() {
               {Array.from({ length: totalPages }).map((_, i) => (
                 <motion.button key={i} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={() => setPage(i + 1)}
-                  className={`h-9 w-9 rounded-lg text-sm font-semibold transition-all ${page === i + 1 ? "bg-[#45B08C] text-white" : "border border-[#C8DCEA] text-[#4A6A82] hover:border-[#C8DCEA] hover:text-[#1D3557]"}`}>
+                  className={`h-9 w-9 rounded-lg text-sm font-semibold transition-all ${page === i + 1 ? "bg-[#48C062] text-white" : "border border-[#E8E2D9] text-[#45353E] hover:border-[#E8E2D9] hover:text-[#002A30]"}`}>
                   {i + 1}
                 </motion.button>
               ))}
@@ -175,11 +175,11 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
-    <main className="min-h-screen bg-[#F1FAFF]">
+    <main className="min-h-screen bg-[#FCFAF6]">
       <Navbar />
       <Suspense fallback={
         <div className="pt-20 flex justify-center py-24">
-          <div className="h-8 w-8 rounded-full border-2 border-[#45B08C] border-t-transparent animate-spin" />
+          <div className="h-8 w-8 rounded-full border-2 border-[#48C062] border-t-transparent animate-spin" />
         </div>
       }>
         <ProductsContent />

@@ -69,14 +69,14 @@ const FAQS = [
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className={`border border-[#C8DCEA] rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-[#45B08C]/40 shadow-sm" : "hover:border-[#45B08C]/20"}`}>
+    <div className={`border border-[#E8E2D9] rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-[#48C062]/40 shadow-sm" : "hover:border-[#48C062]/20"}`}>
       <button onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left">
-        <span className={`font-semibold text-sm md:text-base transition-colors ${open ? "text-[#45B08C]" : "text-[#1D3557]"}`}>
+        <span className={`font-semibold text-sm md:text-base transition-colors ${open ? "text-[#48C062]" : "text-[#002A30]"}`}>
           {q}
         </span>
         <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }} className="shrink-0">
-          <ChevronDown size={18} className={open ? "text-[#45B08C]" : "text-[#7A9BB5]"} />
+          <ChevronDown size={18} className={open ? "text-[#48C062]" : "text-[#8C8276]"} />
         </motion.div>
       </button>
       <AnimatePresence initial={false}>
@@ -87,7 +87,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
-            <div className="px-5 pb-5 text-sm text-[#4A6A82] leading-relaxed border-t border-[#F1FAFF] pt-3">
+            <div className="px-5 pb-5 text-sm text-[#45353E] leading-relaxed border-t border-[#FCFAF6] pt-3">
               {a}
             </div>
           </motion.div>
@@ -117,37 +117,37 @@ export default function FAQsPage() {
   const filtered = activeCategory === "All" ? FAQS : FAQS.filter(f => f.category === activeCategory);
 
   return (
-    <main className="min-h-screen bg-[#F1FAFF] overflow-x-hidden">
+    <main className="min-h-screen bg-[#FCFAF6] overflow-x-hidden">
       <Navbar />
 
       {/* ── Hero ── */}
       <section className="relative pt-32 pb-16 px-6 bg-white overflow-hidden">
-        <div className="pointer-events-none absolute -top-40 -right-40 h-[400px] w-[400px] rounded-full bg-[#45B08C]/6 " />
+        <div className="pointer-events-none absolute -top-40 -right-40 h-[400px] w-[400px] rounded-full bg-[#48C062]/6 " />
         <div className="relative mx-auto max-w-3xl text-center">
           <motion.span initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-block text-xs font-semibold uppercase tracking-widest text-[#45B08C] mb-4">
+            className="inline-block text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-4">
             FAQs
           </motion.span>
           <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="text-5xl md:text-6xl font-black text-[#1D3557] mb-4 leading-tight">
+            className="text-5xl md:text-6xl font-black text-[#002A30] mb-4 leading-tight">
             Got <span className="gradient-text">Questions?</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="text-lg text-[#4A6A82]">
+            className="text-lg text-[#45353E]">
             Everything you need to know about Zupwell and our products.
           </motion.p>
         </div>
       </section>
 
       {/* ── Category Filter ── */}
-      <section className="py-8 px-6 bg-white border-b border-[#C8DCEA]">
+      <section className="py-8 px-6 bg-white border-b border-[#E8E2D9]">
         <div className="mx-auto max-w-3xl flex items-center gap-2 flex-wrap justify-center">
           {categories.map(cat => (
             <button key={cat} onClick={() => setActiveCategory(cat)}
               className={`text-sm px-4 py-2 rounded-full font-semibold transition-all ${
                 activeCategory === cat
-                  ? "bg-[#45B08C] text-white"
-                  : "bg-[#F1FAFF] text-[#4A6A82] hover:bg-[#45B08C]/10 hover:text-[#45B08C]"
+                  ? "bg-[#48C062] text-white"
+                  : "bg-[#FCFAF6] text-[#45353E] hover:bg-[#48C062]/10 hover:text-[#48C062]"
               }`}>
               {cat}
             </button>
@@ -164,7 +164,7 @@ export default function FAQsPage() {
               viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-2xl">{section.emoji}</span>
-                <h2 className="text-xl font-black text-[#1D3557]">{section.category}</h2>
+                <h2 className="text-xl font-black text-[#002A30]">{section.category}</h2>
               </div>
               <div className="space-y-3">
                 {section.questions.map(({ q, a }) => (
@@ -180,13 +180,13 @@ export default function FAQsPage() {
       <section className="py-16 px-6 bg-white">
         <div className="mx-auto max-w-xl text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <div className="h-16 w-16 rounded-2xl bg-[#EBF7F3] flex items-center justify-center mx-auto mb-4">
-              <MessageCircle size={28} className="text-[#45B08C]" />
+            <div className="h-16 w-16 rounded-2xl bg-[#F0EFEA] flex items-center justify-center mx-auto mb-4">
+              <MessageCircle size={28} className="text-[#48C062]" />
             </div>
-            <h2 className="text-2xl font-black text-[#1D3557] mb-2">
+            <h2 className="text-2xl font-black text-[#002A30] mb-2">
               Still have a question?
             </h2>
-            <p className="text-[#4A6A82] mb-6">
+            <p className="text-[#45353E] mb-6">
               Can't find what you're looking for? We're just a message away!
             </p>
             {whatsapp ? (

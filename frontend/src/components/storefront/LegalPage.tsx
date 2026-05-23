@@ -14,20 +14,20 @@ export default function LegalPage({
   sections: Section[];
 }) {
   return (
-    <main className="min-h-screen bg-[#F1FAFF]">
+    <main className="min-h-screen bg-[#FCFAF6]">
       <Navbar />
 
       {/* Hero */}
-      <div className="bg-white pt-28 pb-12 px-6 border-b border-[#C8DCEA]">
+      <div className="bg-white pt-28 pb-12 px-6 border-b border-[#E8E2D9]">
         <div className="mx-auto max-w-3xl">
           {badge && (
-            <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#45B08C] mb-3">
+            <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-3">
               {badge}
             </span>
           )}
-          <h1 className="text-4xl md:text-5xl font-black text-[#1D3557] mb-3">{title}</h1>
-          {subtitle && <p className="text-[#4A6A82] mb-2">{subtitle}</p>}
-          {updated && <p className="text-xs text-[#7A9BB5]">Last updated: {updated}</p>}
+          <h1 className="text-4xl md:text-5xl font-black text-[#002A30] mb-3">{title}</h1>
+          {subtitle && <p className="text-[#45353E] mb-2">{subtitle}</p>}
+          {updated && <p className="text-xs text-[#8C8276]">Last updated: {updated}</p>}
         </div>
       </div>
 
@@ -36,17 +36,17 @@ export default function LegalPage({
         <div className="mx-auto max-w-3xl space-y-6">
           {sections.map((s, i) => (
             <div key={i} className="card">
-              <h2 className="font-bold text-[#1D3557] mb-3 text-lg">{s.title}</h2>
+              <h2 className="font-bold text-[#002A30] mb-3 text-lg">{s.title}</h2>
               {Array.isArray(s.body) ? (
                 <ul className="space-y-2">
                   {s.body.map((item, j) => (
-                    <li key={j} className="flex items-start gap-2 text-[#4A6A82] leading-relaxed text-sm">
-                      <span className="text-[#45B08C] mt-0.5 shrink-0">→</span> {item}
+                    <li key={j} className="flex items-start gap-2 text-[#45353E] leading-relaxed text-sm">
+                      <span className="text-[#48C062] mt-0.5 shrink-0">→</span> {item}
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-[#4A6A82] leading-relaxed text-sm">{s.body}</p>
+                <p className="text-[#45353E] leading-relaxed text-sm">{s.body}</p>
               )}
             </div>
           ))}
