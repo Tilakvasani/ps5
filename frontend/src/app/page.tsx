@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle, Quote, Droplets, Brain, Flame, Leaf } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
+import { CertLogo } from "@/components/storefront/CertLogos";
 import { publicApi } from "@/lib/api";
 import { getSettingsCache, fetchSettings } from "@/lib/useSettings";
 import { fadeUp } from "@/lib/utils";
@@ -160,8 +161,9 @@ export default function HomePage() {
 
   const certEntries = [
     { key: "cert_fssai_logo", label: "FSSAI" },
-    { key: "cert_iso_logo",   label: "ISO" },
     { key: "cert_gmp_logo",   label: "GMP" },
+    { key: "cert_fssc_logo",  label: "FSSC 22000" },
+    { key: "cert_iso_logo",   label: "ISO" },
     { key: "cert_haccp_logo", label: "HACCP" },
   ];
   const hasCerts = certEntries.some(({ key }) => s(settings, key));
@@ -269,19 +271,19 @@ export default function HomePage() {
       </section>
 
       {/* ── Certificate logos — infinite scroll marquee ── */}
-      <section className="py-10 bg-white overflow-hidden">
-        <p className="text-center text-xs font-semibold uppercase tracking-widest text-[#8C8276] mb-6">Certified & Compliant</p>
-        <div className="relative">
-          <div className="flex gap-12 animate-marquee whitespace-nowrap" style={{ animationDuration: "18s" }}>
+      <section className="py-6 bg-white overflow-hidden border-y border-[#E8E2D9] relative">
+        <p className="text-center text-[10px] font-bold uppercase tracking-widest text-[#8C8276] mb-5">Certified & Compliant</p>
+        <div className="relative w-full">
+          {/* Edge gradients for smooth infinite fade */}
+          <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+          <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+
+          <div className="flex gap-16 animate-marquee whitespace-nowrap items-center" style={{ animationDuration: "20s" }}>
             {[...certEntries, ...certEntries, ...certEntries].map(({ key, label }, idx) =>
               s(settings, key) ? (
-                <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
+                <img key={idx} src={s(settings, key)} alt={label} className="h-10 object-contain opacity-90 hover:opacity-100 transition-opacity inline-block shrink-0" />
               ) : (
-                <div key={idx} className="inline-flex items-center gap-2 shrink-0 border border-[#E8E2D9] rounded-xl px-5 py-2.5">
-                  <CheckCircle size={13} className="text-emerald-500" />
-                  <span className="text-sm font-bold text-[#002A30]">{label}</span>
-                  <span className="text-xs text-[#48C062] font-semibold">Certified</span>
-                </div>
+                <CertLogo key={idx} label={label} className="opacity-90 hover:opacity-100 transition-opacity inline-block shrink-0" />
               )
             )}
           </div>

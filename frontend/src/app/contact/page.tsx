@@ -15,6 +15,13 @@ const D: Record<string, string> = {
   contact_info_email:    "info@zupwell.com",
   contact_instagram:     "",
   contact_facebook:      "",
+  contact_hero_badge:    "Contact Us",
+  contact_hero_title:    "Got Questions?\nWe've Got Answers!",
+  contact_hero_subtext:  "Reach out to us anytime — we're always happy to help.",
+  contact_form_badge:    "Grow with Zupwell",
+  contact_form_title:    "Distributor Inquiry",
+  contact_form_subtext:  "Interested in partnering with us? Fill in your details and let's do business!",
+  contact_form_footer:   "We typically respond within 24 hours on business days.",
 };
 
 const s = (settings: Record<string, string>, key: string) =>
@@ -80,14 +87,16 @@ export default function ContactPage() {
         <div className="pointer-events-none absolute -top-40 -left-40 h-[400px] w-[400px] rounded-full bg-[#48C062]/6 " />
         <div className="relative mx-auto max-w-3xl text-center">
           <motion.span {...fadeUp(0)} className="inline-block text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-4">
-            Contact Us
+            {s(settings, "contact_hero_badge")}
           </motion.span>
-          <motion.h1 {...fadeUp(0.1)} className="text-5xl md:text-6xl font-black text-[#002A30] mb-4 leading-tight">
-            Got Questions?<br />
-            <span className="gradient-text">We've Got Answers!</span>
+          <motion.h1 {...fadeUp(0.1)} className="text-5xl md:text-6xl font-black text-[#002A30] mb-4 leading-tight whitespace-pre-line">
+            {s(settings, "contact_hero_title").split(/(We've Got Answers!|We\'ve Got Answers!)/i).map((part, i) => {
+              const isMatch = part.toLowerCase() === "we've got answers!" || part.toLowerCase() === "we\'ve got answers!";
+              return isMatch ? <span key={i} className="gradient-text">{part}</span> : part;
+            })}
           </motion.h1>
           <motion.p {...fadeUp(0.2)} className="text-lg text-[#45353E]">
-            Reach out to us anytime — we're always happy to help.
+            {s(settings, "contact_hero_subtext")}
           </motion.p>
         </div>
       </section>
@@ -169,13 +178,16 @@ export default function ContactPage() {
         <div className="mx-auto max-w-3xl">
           <motion.div {...fadeUp(0)} className="text-center mb-10">
             <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-3">
-              Grow with Zupwell
+              {s(settings, "contact_form_badge")}
             </span>
             <h2 className="text-3xl md:text-4xl font-black text-[#002A30] mb-3">
-              Distributor <span className="gradient-text">Inquiry</span>
+              {s(settings, "contact_form_title").split(/(Inquiry)/i).map((part, i) => {
+                const isMatch = part.toLowerCase() === "inquiry";
+                return isMatch ? <span key={i} className="gradient-text">{part}</span> : part;
+              })}
             </h2>
             <p className="text-[#45353E]">
-              Interested in partnering with us? Fill in your details and let's do business!
+              {s(settings, "contact_form_subtext")}
             </p>
           </motion.div>
 
@@ -251,7 +263,7 @@ export default function ContactPage() {
             </motion.button>
 
             <p className="text-xs text-center text-[#8C8276]">
-              We typically respond within 24 hours on business days.
+              {s(settings, "contact_form_footer")}
             </p>
           </motion.form>
         </div>

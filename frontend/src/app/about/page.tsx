@@ -25,6 +25,12 @@ const D: Record<string, string> = {
   founder_title:     "Founder & CEO, Zupwell",
   founder_message:   "At Zupwell, I started with a simple observation: traditional supplements often feel like a chore — hard to swallow, slow to absorb, and difficult to integrate into a busy life. I founded Zupwell to bridge the gap between clinical effectiveness and modern convenience. Through Zupwell, my endeavor is to ensure that everyone can fulfil their dreams without compromising their health.",
   founder_photo:     "",
+  about_story_badge:  "Our Story",
+  about_story_title:  "Born to solve a real problem",
+  about_why_title:    "Why Zupwell?",
+  about_why_subtitle: "Three reasons our customers never look back",
+  about_future_title: "The Future of Zupwell",
+  about_cta_title:    "Ready to fuel your hustle?",
 };
 
 const s = (settings: Record<string, string>, key: string) =>
@@ -77,9 +83,16 @@ export default function AboutPage() {
       <section className="py-20 px-6">
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <motion.div {...fadeUp(0)}>
-            <span className="text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-3 block">Our Story</span>
+            <span className="text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-3 block">
+              {s(settings, "about_story_badge")}
+            </span>
             <h2 className="text-3xl md:text-4xl font-black text-[#002A30] mb-6 leading-tight">
-              Born to solve a <span className="gradient-text">real problem</span>
+              {s(settings, "about_story_title").split(/(real problem)/i).map((part, i) => {
+                if (part.toLowerCase() === "real problem") {
+                  return <span key={i} className="gradient-text">{part}</span>;
+                }
+                return part;
+              })}
             </h2>
             <p className="text-[#45353E] leading-relaxed text-lg">
               {s(settings, "about_brand_story")}
@@ -127,9 +140,14 @@ export default function AboutPage() {
         <div className="mx-auto max-w-5xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-black text-[#002A30] mb-3">
-              Why <span className="gradient-text">Zupwell?</span>
+              {s(settings, "about_why_title").split(/(Zupwell\?)/i).map((part, i) => {
+                if (part.toLowerCase() === "zupwell?") {
+                  return <span key={i} className="gradient-text">{part}</span>;
+                }
+                return part;
+              })}
             </h2>
-            <p className="text-[#45353E]">Three reasons our customers never look back</p>
+            <p className="text-[#45353E]">{s(settings, "about_why_subtitle")}</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {why.map((w, i) => (
@@ -153,7 +171,12 @@ export default function AboutPage() {
           <div className="mx-auto max-w-4xl">
             <motion.div {...fadeUp(0)} className="text-center mb-8">
               <h2 className="text-3xl md:text-4xl font-black text-[#002A30]">
-                The Future of <span className="gradient-text">Zupwell</span>
+                {s(settings, "about_future_title").split(/(Zupwell)/i).map((part, i) => {
+                  if (part.toLowerCase() === "zupwell") {
+                    return <span key={i} className="gradient-text">{part}</span>;
+                  }
+                  return part;
+                })}
               </h2>
             </motion.div>
             <motion.div {...fadeUp(0.1)}
@@ -183,7 +206,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-2xl text-center">
           <motion.div {...fadeUp(0)}>
             <h2 className="text-2xl font-black text-[#002A30] mb-4">
-              Ready to fuel your hustle?
+              {s(settings, "about_cta_title")}
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/products">
