@@ -90,6 +90,8 @@ export default function ZupwellChat() {
 
   useEffect(() => {
     setIsMounted(true);
+    // Wake up the Python chatbot in the background on page load
+    fetch(`${API_URL}/health`).catch(() => {});
   }, []);
   // ─────────────────────────────────────────────────────────────────────────
 
