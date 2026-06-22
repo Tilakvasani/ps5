@@ -9,6 +9,9 @@ const { startCleanupJobs } = require("./utils/cleanupJobs");
 
 const app = express();
 
+// ── Trust Render's reverse proxy (fixes express-rate-limit X-Forwarded-For error)
+app.set("trust proxy", 1);
+
 // ── Security Headers ─────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
