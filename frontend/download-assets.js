@@ -16,7 +16,7 @@ const LOGOS = [
     url: "https://pslpet.com/wp-content/uploads/2019/12/fssc-logo.png",
   }
 ];
-
+  
 const publicDir = path.join(__dirname, "public");
 if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
