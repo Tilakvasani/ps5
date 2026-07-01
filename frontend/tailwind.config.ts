@@ -39,8 +39,8 @@ const config: Config = {
         "zupwell-orange": "#EB9220",
       },
       fontFamily: {
-        sans:    ["Rajdhani", "sans-serif"],
-        display: ["Squada One", "sans-serif"],
+        sans:    ["Plus Jakarta Sans", "sans-serif"],
+        display: ["Outfit", "sans-serif"],
       },
       backgroundImage: {
         "gradient-brand":  "linear-gradient(135deg, #EB9220, #002A30)",
@@ -53,6 +53,8 @@ const config: Config = {
         "blue-glow":   "0 0 28px rgba(11,44,111,0.4)",
         "sky-glow":    "0 0 28px rgba(76,201,240,0.4)",
         "mint-glow":   "0 0 28px rgba(46,196,182,0.4)",
+        "premium":     "0 12px 40px rgba(0, 42, 48, 0.04)",
+        "soft":        "0 8px 30px rgba(0, 0, 0, 0.02)",
       },
     },
   },

@@ -2,72 +2,71 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle, Quote, Droplets, Brain, Flame, Leaf } from "lucide-react";
+import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle, Quote, Droplets, Brain, Flame, Leaf, Smile } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { publicApi } from "@/lib/api";
 import { getSettingsCache, fetchSettings } from "@/lib/useSettings";
 import { fadeUp } from "@/lib/utils";
 
-
-const FEATURE_ICONS = [Zap, Shield, Truck, Award];
-
-const CATEGORIES = [
-  { name: "Electrolytes", emoji: "⚡", slug: "electrolytes", desc: "Hydration & recovery drinks" },
-  { name: "Protein",      emoji: "💪", slug: "protein",      desc: "Whey, plant & blends" },
-  { name: "Vitamins",     emoji: "🌿", slug: "vitamins",     desc: "Daily essentials & multis" },
-  { name: "Immunity",     emoji: "🛡️", slug: "immunity",     desc: "Zinc, Vitamin C & more" },
-  { name: "Effervescent", emoji: "🫧", slug: "effervescent", desc: "Fizzy tablets & sachets" },
-  { name: "Wellness",     emoji: "🧘", slug: "wellness",     desc: "Sleep, stress & gut health" },
+const GOALS = [
+  {
+    name: "Energy & Focus",
+    emoji: "⚡",
+    slug: "energy",
+    desc: "Boost daily productivity and focus",
+    color: "#E8F5E9", // Green tint
+    textColor: "#2E7D32",
+    bottleColor: "from-[#48C062] to-[#1B5E20]"
+  },
+  {
+    name: "Skin & Glow",
+    emoji: "🌸",
+    slug: "skin-health",
+    desc: "Promote healthy, radiant skin from within",
+    color: "#FCE4EC", // Rose tint
+    textColor: "#C2185B",
+    bottleColor: "from-[#F06292] to-[#880E4F]"
+  },
+  {
+    name: "Immunity Support",
+    emoji: "🛡️",
+    slug: "immunity",
+    desc: "Strengthen your body's natural defenses",
+    color: "#E8EAF6", // Indigo/Blue tint
+    textColor: "#1A237E",
+    bottleColor: "from-[#5C6BC0] to-[#0D47A1]"
+  },
+  {
+    name: "Stress & Mood",
+    emoji: "🧘",
+    slug: "wellness",
+    desc: "Adapt to stress and balance your mood",
+    color: "#FFF3E0", // Amber/Yellow tint
+    textColor: "#E65100",
+    bottleColor: "from-[#FFB74D] to-[#E65100]"
+  }
 ];
-
-const WHY_CHOOSE = [
-  { icon: Droplets, title: "Water Upgrade", desc: "Give your plain water a powerful, professional upgrade with every sip." },
-  { icon: Zap,      title: "Performance Fuel", desc: "Fast-absorbing formula designed for your busy, non-stop lifestyle." },
-  { icon: Brain,    title: "Science-Backed", desc: "Formulated with clinically studied ingredients for real results." },
-  { icon: Leaf,     title: "Clean Ingredients", desc: "No junk, no fillers. Just what your body actually needs." },
-];
-
-const D = {
-  hero_title:       "Give Your Water a\nProfessional Upgrade.",
-  hero_tagline:     "તમારા સ્વાસ્થ્ય સાથે ચાલો — ઝુપવેલ!",
-  hero_subtext:     "A new and powerful addition to your water. Because plain water isn't enough for your hustle.",
-  hero_stat1_value: "200+",  hero_stat1_label: "Products",
-  hero_stat2_value: "50K+",  hero_stat2_label: "Happy Customers",
-  hero_stat3_value: "100%",  hero_stat3_label: "Authentic",
-  feature1_title: "Science-Backed",   feature1_desc: "Formulated with clinically studied ingredients for maximum effectiveness.",
-  feature2_title: "Sugar-Free",       feature2_desc: "Great taste without the sugar load. Health that's actually delicious.",
-  feature3_title: "Instant Energy",   feature3_desc: "Fast-absorbing effervescent formula. Drop, fizz, drink, go.",
-  feature4_title: "Best Flavour",     feature4_desc: "We believe health shouldn't taste boring. Every sip is a vibe.",
-  founder_name:    "Parag Hirpara",
-  founder_title:   "Founder & CEO",
-  founder_message: "At Zupwell, I started with a simple observation: traditional supplements often feel like a chore — hard to swallow, slow to absorb, and difficult to integrate into a busy life. I founded Zupwell to bridge the gap between clinical effectiveness and modern convenience. Through Zupwell, my endeavor is to ensure that everyone can fulfil their dreams without compromising their health.",
-  founder_photo:   "",
-};
-
-const s = (settings: Record<string, string>, key: string) =>
-  settings[key] || D[key as keyof typeof D] || "";
-
 
 const BLOG_POSTS = [
   {
     emoji: "💧",
     tag: "Hydration",
-    date: "",
+    date: "July 1, 2026",
     title: "Why Hydration is the #1 Performance Hack",
     body: "Most people underestimate the power of hydration. Even a 2% drop in body water can reduce your physical performance by up to 20% and cloud your mental focus. Plain water alone doesn't cut it — your body also needs electrolytes like sodium, potassium, and magnesium to actually absorb and use that water at the cellular level. That's exactly why Zupwell's effervescent formula is built around rapid hydration science — giving your cells what they need in seconds, not hours.",
   },
   {
     emoji: "⚡",
     tag: "Science",
-    date: "",
+    date: "June 25, 2026",
     title: "Electrolytes vs Sports Drinks — What's the Difference?",
     body: "Sports drinks are loaded with sugar, artificial colours, and calories you don't need. Electrolyte supplements like Zupwell deliver the same hydration benefits — sodium, potassium, magnesium, vitamin C — with less sugar and zero compromise. The effervescent technology ensures faster absorption compared to gulping down a sugary drink. If you're working out, commuting in the heat, or simply staying productive all day, pure electrolytes beat sports drinks every single time.",
   },
   {
     emoji: "🏃",
     tag: "Performance",
-    date: "",
+    date: "June 18, 2026",
     title: "Pre-Workout Nutrition: What Actually Works",
     body: "Forget complicated pre-workout stacks. The most effective pre-workout routine is surprisingly simple: hydration + fast energy. Start with an electrolyte tablet in water 20–30 minutes before training. This primes your muscles with the minerals they need for contraction and recovery. Add a light carb source if you're doing heavy lifting. Skip the mega-dose caffeine powders — they spike and crash. Zupwell's clean formula gives you steady energy without the jitters or the inevitable afternoon crash.",
   },
@@ -77,30 +76,30 @@ function BlogSection() {
   const [modal, setModal] = useState<number | null>(null);
   const post = modal !== null ? BLOG_POSTS[modal] : null;
   return (
-    <section className="py-24 px-6 bg-white">
+    <section className="py-24 px-6 bg-white border-t border-[#E8E2D9]">
       <div className="mx-auto max-w-7xl">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-3">Health Tips & Insights</p>
+          <p className="font-sans text-xs font-bold uppercase tracking-[0.15em] text-[#48C062] mb-3">Health Tips & Insights</p>
           <h2 className="text-4xl md:text-5xl font-black text-[#002A30] mb-3">
-            From Our <span className="gradient-text">Blog</span>
+            Wellness <span className="text-[#48C062]">Guide</span>
           </h2>
-          <p className="text-[#45353E]">Science-backed articles to fuel your health journey</p>
+          <p className="text-[#45353E] text-sm">Science-backed articles to fuel your health journey</p>
         </motion.div>
 
-        {/* Cards — equal height, excerpt only */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {BLOG_POSTS.map((post, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }} viewport={{ once: true }}
-              className="card flex flex-col hover:border-[#48C062]/30 transition-all duration-300 cursor-pointer"
+              className="card flex flex-col hover:border-[#48C062]/30 transition-all duration-300 cursor-pointer bg-white"
               onClick={() => setModal(i)}>
               <div className="text-4xl mb-4">{post.emoji}</div>
-              <span className="text-xs font-semibold text-[#48C062] uppercase tracking-widest">{post.tag}</span>
-              <h3 className="font-bold text-[#002A30] mt-2 mb-3 leading-snug">{post.title}</h3>
+              <span className="font-sans text-[10px] font-bold text-[#48C062] uppercase tracking-[0.12em]">{post.tag}</span>
+              <h3 className="font-display font-bold text-lg text-[#002A30] mt-2 mb-3 leading-snug">{post.title}</h3>
               <p className="text-sm text-[#45353E] leading-relaxed line-clamp-3 flex-1">{post.body}</p>
-              <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#E8E2D9]">
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-[#E8E2D9]">
                 <span className="text-xs text-[#8C8276]">{post.date}</span>
-                <span className="text-xs text-[#48C062] font-semibold flex items-center gap-1">
+                <span className="font-sans text-xs text-[#48C062] font-bold flex items-center gap-1">
                   Read more <ChevronRight size={12} />
                 </span>
               </div>
@@ -112,18 +111,18 @@ function BlogSection() {
       {/* Modal overlay */}
       {post && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(29,53,87,0.5)", backdropFilter: "blur(4px)" }}
+          style={{ background: "rgba(0,42,48,0.5)", backdropFilter: "blur(4px)" }}
           onClick={() => setModal(null)}>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 relative"
             onClick={e => e.stopPropagation()}>
             <button onClick={() => setModal(null)}
-              className="absolute top-4 right-4 h-8 w-8 rounded-full flex items-center justify-center text-[#45353E] hover:bg-[#FCFAF6] transition-colors text-lg font-bold">
+              className="absolute top-4 right-4 h-8 w-8 rounded-full flex items-center justify-center text-[#45353E] hover:bg-[#FCFAF6] transition-colors text-sm font-bold">
               ✕
             </button>
             <div className="text-4xl mb-3">{post.emoji}</div>
-            <span className="text-xs font-semibold text-[#48C062] uppercase tracking-widest">{post.tag}</span>
-            <h3 className="text-xl font-black text-[#002A30] mt-2 mb-4 leading-snug">{post.title}</h3>
+            <span className="font-sans text-[10px] font-bold text-[#48C062] uppercase tracking-[0.12em]">{post.tag}</span>
+            <h3 className="font-display text-xl font-bold text-[#002A30] mt-2 mb-4 leading-snug">{post.title}</h3>
             <p className="text-sm text-[#45353E] leading-relaxed">{post.body}</p>
             <p className="text-xs text-[#8C8276] mt-6">{post.date}</p>
           </motion.div>
@@ -138,25 +137,11 @@ export default function HomePage() {
   const [reviews, setReviews] = useState<any[]>([]);
 
   useEffect(() => {
-    // Load cache immediately after mount (client-only, avoids hydration mismatch)
     const cached = getSettingsCache();
     if (Object.keys(cached).length > 0) setSettings(cached);
-    // Then fetch fresh in background
     fetchSettings().then(setSettings).catch(() => {});
     publicApi.getReviews().then(setReviews).catch(() => {});
   }, []);
-
-  const features = [1, 2, 3, 4].map(n => ({
-    icon: FEATURE_ICONS[n - 1],
-    title: s(settings, `feature${n}_title`),
-    desc:  s(settings, `feature${n}_desc`),
-  }));
-
-  const stats = [
-    [s(settings, "hero_stat1_value"), s(settings, "hero_stat1_label")],
-    [s(settings, "hero_stat2_value"), s(settings, "hero_stat2_label")],
-    [s(settings, "hero_stat3_value"), s(settings, "hero_stat3_label")],
-  ];
 
   const certEntries = [
     { key: "cert_fssai_logo", label: "FSSAI" },
@@ -164,123 +149,191 @@ export default function HomePage() {
     { key: "cert_gmp_logo",   label: "GMP" },
     { key: "cert_haccp_logo", label: "HACCP" },
   ];
-  const hasCerts = certEntries.some(({ key }) => s(settings, key));
 
   return (
     <main className="relative min-h-screen bg-[#FCFAF6] overflow-x-hidden">
       <Navbar />
 
-      {/* ── Hero ── */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20 px-6">
+      {/* Hero Section */}
+      <section className="relative min-h-[92vh] flex items-center pt-24 pb-16 px-6 md:px-12 bg-white">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-[#48C062]/10 " />
-          <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-yellow-400/10 " />
+          <div className="absolute top-20 right-10 h-[500px] w-[500px] rounded-full bg-[#48C062]/5 blur-3xl" />
+          <div className="absolute bottom-10 left-10 h-[400px] w-[400px] rounded-full bg-yellow-400/5 blur-3xl" />
         </div>
-        <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <motion.h1 {...fadeUp(0.05)} className="text-5xl md:text-7xl font-black leading-[1.08] mb-4 whitespace-pre-line">
-            <span className="gradient-text">{s(settings, "hero_title")}</span>
-          </motion.h1>
 
-          {s(settings, "hero_tagline") && (
-            <motion.p {...fadeUp(0.12)} className="text-lg text-[#48C062] font-semibold mb-4">
-              {s(settings, "hero_tagline")}
-            </motion.p>
-          )}
+        <div className="relative z-10 mx-auto max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Hero text */}
+          <div className="lg:col-span-6 space-y-6 text-left">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E8F5E9] text-[#2E7D32] border border-[#C8E6C9] font-sans text-xs font-bold uppercase tracking-[0.12em]">
+              <Smile size={14} /> Science-backed supplements
+            </div>
+            <h1 className="font-display text-5xl md:text-7xl font-black text-[#002A30] leading-[1.05] tracking-tight">
+              Glow. Feel.<br />
+              <span className="text-[#48C062]">Be you.</span>
+            </h1>
+            <p className="text-[#45353E] text-base md:text-lg max-w-lg leading-relaxed">
+              Clean, science-backed vitamins and electrolytes formulated to fuel your daily hustle and elevate your body's potential.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
+              <Link href="/products">
+                <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}
+                  className="btn-primary w-full sm:w-auto px-8 py-4 font-sans text-xs uppercase tracking-[0.15em] font-bold bg-[#48C062]">
+                  Shop Now
+                </motion.button>
+              </Link>
+              <Link href="/products?category=electrolytes">
+                <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}
+                  className="btn-outline w-full sm:w-auto px-8 py-4 font-sans text-xs uppercase tracking-[0.15em] font-bold border-[#E8E2D9]">
+                  Explore Bundles
+                </motion.button>
+              </Link>
+            </div>
 
-          <motion.p {...fadeUp(0.18)} className="mx-auto max-w-2xl text-lg text-[#45353E] leading-relaxed mb-10">
-            {s(settings, "hero_subtext")}
-          </motion.p>
+            {/* Badges */}
+            <div className="flex flex-wrap items-center gap-3 pt-6 border-t border-[#E8E2D9]">
+              {["Clean Ingredients", "Science Backed", "Vegan-Friendly"].map((badge, idx) => (
+                <div key={idx} className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCFAF6] border border-[#E8E2D9] text-[#45353E] text-xs font-semibold">
+                  <CheckCircle size={12} className="text-[#48C062]" />
+                  <span>{badge}</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
-          <motion.div {...fadeUp(0.3)} className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/products">
-              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                className="btn-primary flex items-center gap-2 px-8 py-4 text-base">
-                Choose Your Power <ArrowRight size={16} />
-              </motion.button>
-            </Link>
-            <Link href="/register">
-              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                className="btn-outline flex items-center gap-2 px-8 py-4 text-base">
-                Start Your Hustle <ChevronRight size={16} />
-              </motion.button>
-            </Link>
-          </motion.div>
+          {/* Hero dynamic graphics panel (represents supplements mockup) */}
+          <div className="lg:col-span-6 flex justify-center items-center relative">
+            <div className="absolute h-[380px] w-[380px] md:h-[480px] md:w-[480px] rounded-full bg-[#FCFAF6] border border-[#E8E2D9] -z-10" />
+            
+            {/* Visual Supplement Bottles Representations */}
+            <div className="relative flex justify-center items-end h-[350px] w-[320px] md:h-[420px] md:w-[380px] gap-4">
+              
+              {/* Bottle 1: Daily Multi */}
+              <motion.div
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.1 }}
+                whileHover={{ y: -8 }}
+                className="w-1/2 aspect-[1/2] rounded-3xl bg-gradient-to-b from-[#E8F5E9] to-[#C8E6C9] border border-[#A5D6A7] shadow-xl p-4 flex flex-col justify-between items-center text-center cursor-pointer select-none"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#48C062]/20 flex items-center justify-center font-bold text-sm text-[#2E7D32]">01</div>
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-16 rounded-xl bg-gradient-to-b from-[#48C062] to-[#1B5E20] shadow-md mb-2 flex items-center justify-center font-display font-black text-white text-xs tracking-wider">ZUP</div>
+                  <h4 className="font-display font-bold text-xs uppercase tracking-wider text-[#1B5E20]">Daily Multi</h4>
+                  <p className="text-[9px] text-[#2E7D32]/80 mt-0.5">Energy Boost</p>
+                </div>
+                <div className="px-2.5 py-1 rounded-full bg-[#2E7D32] text-white text-[9px] font-bold">VEGAN</div>
+              </motion.div>
 
-          {/* Stats */}
-          <motion.div {...fadeUp(0.4)} className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
-            {stats.map(([val, label]) => (
-              <div key={label} className="text-center">
-                <div className="text-2xl font-black gradient-text">{val}</div>
-                <div className="text-xs text-[#45353E] mt-1">{label}</div>
+              {/* Bottle 2: Glow Skin */}
+              <motion.div
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                whileHover={{ y: -8 }}
+                className="w-1/2 aspect-[1/2] rounded-3xl bg-gradient-to-b from-[#FCE4EC] to-[#F8BBD0] border border-[#F48FB1] shadow-xl p-4 flex flex-col justify-between items-center text-center cursor-pointer select-none translate-y-[-20px]"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#F06292]/20 flex items-center justify-center font-bold text-sm text-[#C2185B]">02</div>
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-16 rounded-xl bg-gradient-to-b from-[#F06292] to-[#880E4F] shadow-md mb-2 flex items-center justify-center font-display font-black text-white text-xs tracking-wider">ZUP</div>
+                  <h4 className="font-display font-bold text-xs uppercase tracking-wider text-[#880E4F]">Glow Skin</h4>
+                  <p className="text-[9px] text-[#C2185B]/80 mt-0.5">Hydration</p>
+                </div>
+                <div className="px-2.5 py-1 rounded-full bg-[#C2185B] text-white text-[9px] font-bold">ORGANIC</div>
+              </motion.div>
+            </div>
+
+            {/* Float element badge */}
+            <div className="absolute top-10 left-10 p-3 bg-white rounded-2xl shadow-lg border border-[#E8E2D9] flex items-center gap-2 animate-bounce">
+              <div className="h-8 w-8 rounded-full bg-yellow-400/20 flex items-center justify-center text-yellow-600">🌟</div>
+              <div>
+                <p className="text-[10px] font-bold text-[#002A30] uppercase tracking-wider">Top Rated</p>
+                <p className="text-[9px] text-[#8C8276]">4.8/5.0 Stars</p>
               </div>
-            ))}
-          </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── Why Choose Zupwell ── */}
-      <section className="py-20 px-6 bg-white">
+      {/* Goal Section */}
+      <section className="py-24 px-6 bg-[#FCFAF6] border-t border-[#E8E2D9]">
         <div className="mx-auto max-w-7xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-black text-[#002A30] mb-3">Why Choose <span className="gradient-text">Zupwell?</span></h2>
-            <p className="text-[#45353E] font-semibold">Smart-Fuel for Modern Humans.</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {WHY_CHOOSE.map((item, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}
-                className="card group hover:border-[#48C062]/20 transition-all duration-300 text-center">
-                <div className="h-14 w-14 mx-auto rounded-2xl bg-[#48C062]/10 flex items-center justify-center mb-4 group-hover:bg-[#48C062]/20 transition-all">
-                  <item.icon size={24} className="text-[#48C062]" />
-                </div>
-                <h3 className="font-bold text-[#002A30] mb-2">{item.title}</h3>
-                <p className="text-sm text-[#45353E] leading-relaxed">{item.desc}</p>
-              </motion.div>
+          <div className="text-center mb-12">
+            <h2 className="font-display text-4xl md:text-5xl font-black text-[#002A30] mb-3">Shop by your goal</h2>
+            <p className="text-[#45353E] text-sm">Select a health priority to explore formulated wellness blends.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {GOALS.map((goal) => (
+              <Link href={`/products?category=${goal.slug}`} key={goal.name}>
+                <motion.div
+                  whileHover={{ y: -6 }}
+                  className="rounded-3xl p-6 flex flex-col justify-between items-start h-[260px] cursor-pointer shadow-sm transition-shadow hover:shadow-md border border-black/5"
+                  style={{ backgroundColor: goal.color }}
+                >
+                  <div className="flex justify-between items-center w-full">
+                    <span className="text-3xl">{goal.emoji}</span>
+                    <span className="h-7 w-7 rounded-full bg-white flex items-center justify-center shadow-sm">
+                      <ArrowRight size={14} style={{ color: goal.textColor }} />
+                    </span>
+                  </div>
+                  
+                  {/* Decorative Bottle Representation in Card */}
+                  <div className="w-10 h-14 rounded-lg bg-gradient-to-b opacity-25 mt-2 self-end" style={{ backgroundImage: `linear-gradient(to bottom, var(--tw-gradient-stops))` }} className={`self-end w-10 h-14 rounded-lg bg-gradient-to-b ${goal.bottleColor} opacity-20`} />
+
+                  <div>
+                    <h3 className="font-display font-bold text-xl mb-1" style={{ color: goal.textColor }}>
+                      {goal.name}
+                    </h3>
+                    <p className="text-xs text-[#45353E] opacity-90 leading-snug">{goal.desc}</p>
+                  </div>
+                </motion.div>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Why is Our Product Special? ── */}
-      <section className="py-20 px-6 bg-[#FCFAF6]">
-        <div className="mx-auto max-w-7xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-black text-[#002A30] mb-3">Why is Our Product <span className="gradient-text">Special?</span></h2>
-            <p className="text-[#45353E]">Zero-Compromise Health Boosters. Crafted for Perfection.</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
-            {[
-              { icon: Brain,    title: "Scientific Formula", desc: "A fusion of science and taste." },
-              { icon: Leaf,     title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
-              { icon: Zap,      title: "Instant Absorption", desc: "Rocket-like speed, instant action." },
-              { icon: Shield,   title: "Pocket Friendly",    desc: "It even fits in your jeans pocket." },
-              { icon: Award,    title: "Best Flavour",       desc: "Absolutely fresh, as if straight from the garden." },
-            ].map((f, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}
-                className="card group hover:border-[#48C062]/20 transition-all duration-300 text-center">
-                <div className="h-14 w-14 mx-auto rounded-2xl bg-[#48C062]/10 flex items-center justify-center mb-4 group-hover:bg-[#48C062]/20 transition-all">
-                  <f.icon size={24} className="text-[#48C062]" />
+      {/* Social Proof Indicator Banner */}
+      <section className="py-8 bg-[#48C062] text-white px-6">
+        <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
+              <Truck size={20} />
+            </div>
+            <p className="font-sans text-sm font-bold uppercase tracking-[0.08em]">
+              Free shipping on all orders over ₹499!
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            {/* Customer avatars pile */}
+            <div className="flex -space-x-2">
+              {[1, 2, 3, 4].map((n) => (
+                <div key={n} className="h-8 w-8 rounded-full border-2 border-[#48C062] bg-[#FCFAF6] flex items-center justify-center text-[10px] font-bold text-[#002A30]">
+                  {["A", "P", "S", "M"][n - 1]}
                 </div>
-                <h3 className="font-bold text-[#002A30] mb-2">{f.title}</h3>
-                <p className="text-sm text-[#45353E] leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
+              ))}
+            </div>
+            <p className="text-xs font-bold uppercase tracking-[0.08em] opacity-90">
+              Loved by 18,000+ happy customers
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ── Certificate logos — infinite scroll marquee ── */}
-      <section className="py-10 bg-white overflow-hidden">
-        <p className="text-center text-xs font-semibold uppercase tracking-widest text-[#8C8276] mb-6">Certified & Compliant</p>
+      {/* Certificate logos - Infinite Marquee */}
+      <section className="py-12 bg-white border-b border-[#E8E2D9] overflow-hidden">
+        <p className="text-center font-sans text-xs font-bold uppercase tracking-[0.15em] text-[#8C8276] mb-8">Certified & Compliant</p>
         <div className="relative">
-          <div className="flex gap-12 animate-marquee whitespace-nowrap" style={{ animationDuration: "18s" }}>
+          <div className="flex gap-12 animate-marquee whitespace-nowrap" style={{ animationDuration: "20s" }}>
             {[...certEntries, ...certEntries, ...certEntries].map(({ key, label }, idx) =>
-              s(settings, key) ? (
-                <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
+              settings[key] ? (
+                <img key={idx} src={settings[key]} alt={label} className="h-12 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
               ) : (
-                <div key={idx} className="inline-flex items-center gap-2 shrink-0 border border-[#E8E2D9] rounded-xl px-5 py-2.5">
-                  <CheckCircle size={13} className="text-emerald-500" />
-                  <span className="text-sm font-bold text-[#002A30]">{label}</span>
-                  <span className="text-xs text-[#48C062] font-semibold">Certified</span>
+                <div key={idx} className="inline-flex items-center gap-2 shrink-0 border border-[#E8E2D9] bg-[#FCFAF6] rounded-2xl px-6 py-3 shadow-sm">
+                  <CheckCircle size={14} className="text-[#48C062]" />
+                  <span className="font-display text-sm font-black text-[#002A30] tracking-wider">{label}</span>
+                  <span className="font-sans text-[10px] text-[#48C062] font-bold uppercase tracking-wider">Certified</span>
                 </div>
               )
             )}
@@ -288,60 +341,39 @@ export default function HomePage() {
         </div>
       </section>
 
-
-
-      {/* ── Founder's Message ── */}
-      {s(settings, "founder_message") && (
+      {/* Founder's Message */}
+      {settings["founder_message"] && (
         <section className="py-24 px-6 bg-white">
           <div className="mx-auto max-w-4xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <div className="rounded-3xl overflow-hidden shadow-xl border border-[#F5EFE6]" style={{ background: "#fff" }}>
+              <div className="rounded-3xl overflow-hidden shadow-premium border border-[#E8E2D9] bg-white">
                 <div className="flex flex-col md:flex-row">
-
-                  {/* ── Left: Photo panel ── */}
-                  <div className="relative md:w-56 shrink-0 flex flex-col" style={{ background: "#FCFAF6" }}>
-                    {/* Green left accent stripe */}
-                    <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-3xl" style={{ background: "linear-gradient(180deg, #48C062 0%, #002A30 100%)" }} />
-                    {/* Photo */}
-                    <div className="flex-1 overflow-hidden" style={{ minHeight: 240 }}>
-                      {s(settings, "founder_photo") ? (
-                        <img
-                          src={s(settings, "founder_photo")}
-                          alt={s(settings, "founder_name")}
-                          className="w-full h-full"
-                          style={{ objectFit: "cover", objectPosition: "top center", minHeight: 240 }}
-                        />
+                  
+                  {/* Founder photo side */}
+                  <div className="relative md:w-64 shrink-0 flex flex-col bg-[#FCFAF6] border-r border-[#E8E2D9]">
+                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#48C062]" />
+                    <div className="flex-1 overflow-hidden" style={{ minHeight: 260 }}>
+                      {settings["founder_photo"] ? (
+                        <img src={settings["founder_photo"]} alt={settings["founder_name"]} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center" style={{ minHeight: 240, fontSize: 64, fontWeight: 900, color: "#002A30" }}>
-                          {s(settings, "founder_name").charAt(0)}
+                        <div className="w-full h-full flex items-center justify-center font-display font-black text-6xl text-[#002A30]">
+                          {settings["founder_name"]?.charAt(0)}
                         </div>
                       )}
                     </div>
-                    {/* Name plate */}
-                    <div className="px-5 py-4 border-t border-[#E8E2D9]" style={{ background: "#fff" }}>
-                      <p className="font-black text-sm text-[#002A30] leading-tight">{s(settings, "founder_name")}</p>
-                      <p className="text-xs font-semibold mt-0.5" style={{ color: "#48C062" }}>{s(settings, "founder_title")}</p>
+                    <div className="px-6 py-4 bg-white border-t border-[#E8E2D9]">
+                      <p className="font-display font-bold text-base text-[#002A30] leading-tight">{settings["founder_name"]}</p>
+                      <p className="font-sans text-xs font-bold text-[#48C062] uppercase tracking-wider mt-1">{settings["founder_title"]}</p>
                     </div>
                   </div>
 
-                  {/* ── Right: Quote panel ── */}
-                  <div className="flex-1 flex flex-col justify-center px-8 py-10 relative">
-                    {/* Big decorative quote marks */}
-                    <div className="absolute top-6 left-6 text-7xl font-black leading-none select-none" style={{ color: "#48C062", opacity: 0.12 }}>"</div>
-                    <div className="absolute bottom-4 right-8 text-7xl font-black leading-none select-none rotate-180" style={{ color: "#48C062", opacity: 0.12 }}>"</div>
-
-                    <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "#48C062" }}>Founder's Message</p>
-
+                  {/* Founder Message side */}
+                  <div className="flex-1 flex flex-col justify-center px-8 py-12 relative bg-white">
+                    <div className="absolute top-6 left-6 text-8xl font-serif font-black leading-none select-none text-[#48C062]/10">“</div>
+                    <p className="font-sans text-xs font-bold uppercase tracking-[0.15em] text-[#48C062] mb-4">Founder's Message</p>
                     <p className="text-[#002A30] text-lg leading-relaxed font-medium italic relative z-10">
-                      "{s(settings, "founder_message")}"
+                      "{settings["founder_message"]}"
                     </p>
-
-                    {/* Bottom rule + cert badge */}
-                    <div className="mt-8 pt-5 border-t border-[#F5EFE6] flex items-center justify-between flex-wrap gap-3">
-                      
-                      {/* Green bottom accent line */}
-                      
-                    </div>
                   </div>
 
                 </div>
@@ -351,78 +383,79 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── Customer Reviews ── */}
-      <section className="py-24 px-6 bg-[#FCFAF6]">
+      {/* Customer Reviews */}
+      <section className="py-24 px-6 bg-[#FCFAF6] border-t border-[#E8E2D9]">
         <div className="mx-auto max-w-7xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-4">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-3">Real People, Real Results</p>
-            <h2 className="text-4xl md:text-5xl font-black text-[#002A30] mb-3">
-              What Our <span className="gradient-text">Customers Say</span>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+            <p className="font-sans text-xs font-bold uppercase tracking-[0.15em] text-[#48C062] mb-3">Real People, Real Results</p>
+            <h2 className="font-display text-4xl md:text-5xl font-black text-[#002A30]">
+              What Our <span className="text-[#48C062]">Community Says</span>
             </h2>
-            <p className="text-[#45353E]">Join thousands of happy customers across India</p>
+            <p className="text-[#45353E] text-sm mt-2">Join thousands of happy customers on their wellness journey</p>
           </motion.div>
+          
           {reviews.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {reviews.slice(0, 6).map((review, i) => (
                 <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.08 }} viewport={{ once: true }}
-                  className="card flex flex-col gap-4 hover:border-[#48C062]/20 transition-all">
+                  className="card flex flex-col gap-5 hover:border-[#48C062]/20 transition-all bg-white">
                   <div className="flex items-start justify-between">
                     <div className="flex gap-0.5">
                       {Array.from({ length: 5 }).map((_, j) => (
-                        <Star key={j} size={14} className={j < review.rating ? "fill-yellow-400 text-yellow-400" : "text-[#E8E2D9]"} />
+                        <Star key={j} size={14} className={j < review.rating ? "fill-yellow-400 text-yellow-400 animate-pulse" : "text-[#E8E2D9]"} />
                       ))}
                     </div>
-                    <Quote size={20} className="text-[#48C062]/20" />
+                    <Quote size={20} className="text-[#48C062]/10" />
                   </div>
-                  {review.title && <p className="font-bold text-[#002A30]">{review.title}</p>}
-                  <p className="text-sm text-[#45353E] leading-relaxed flex-1">"{review.body}"</p>
-                  <div className="flex items-center justify-between border-t border-[#E8E2D9] pt-3 mt-auto">
-                    <div className="flex items-center gap-2">
+                  {review.title && <p className="font-display font-bold text-sm text-[#002A30] uppercase tracking-wider">{review.title}</p>}
+                  <p className="text-sm text-[#45353E] leading-relaxed flex-1 italic">"{review.body}"</p>
+                  <div className="flex items-center justify-between border-t border-[#E8E2D9] pt-4 mt-auto">
+                    <div className="flex items-center gap-2.5">
                       <div className="h-8 w-8 rounded-full bg-[#48C062]/10 flex items-center justify-center text-xs font-bold text-[#48C062]">
                         {review.user?.name?.charAt(0)?.toUpperCase() || "?"}
                       </div>
-                      <span className="text-sm font-semibold text-[#002A30]">{review.user?.name || "Customer"}</span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-[#002A30]">{review.user?.name || "Customer"}</span>
                     </div>
                     {review.product?.name && (
-                      <span className="text-xs text-[#8C8276] truncate max-w-[120px]">{review.product.name}</span>
+                      <span className="text-[10px] font-bold text-[#8C8276] truncate max-w-[120px]">{review.product.name}</span>
                     )}
                   </div>
                 </motion.div>
               ))}
             </div>
           ) : (
-            <div className="text-center mt-12 py-16 text-[#8C8276]">
+            <div className="text-center py-16 text-[#8C8276]">
               <Star size={40} className="mx-auto mb-4 opacity-20" />
-              <p className="text-sm font-medium">Customer reviews coming soon!</p>
+              <p className="text-sm font-semibold">Community reviews coming soon!</p>
             </div>
           )}
         </div>
       </section>
 
-      {/* ── Blog Section ── */}
+      {/* Blog Section */}
       <BlogSection />
 
-      {/* ── CTA ── */}
-      <section className="py-24 px-6 bg-[#FCFAF6]">
+      {/* Brand CTA */}
+      <section className="py-24 px-6 bg-[#FCFAF6] border-t border-[#E8E2D9]">
         <div className="mx-auto max-w-4xl">
-          <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
-            className="rounded-3xl border border-[#48C062]/20 bg-white p-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-black text-[#002A30] mb-4">
-              Join the <span className="gradient-text">Zupwell Gang</span>
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
+            className="rounded-3xl border border-[#48C062]/20 bg-white p-12 text-center shadow-sm">
+            <h2 className="font-display text-3xl md:text-5xl font-black text-[#002A30] mb-4">
+              Join the <span className="text-[#48C062]">ZUPWELL Club</span>
             </h2>
-            <p className="text-[#45353E] mb-8 max-w-lg mx-auto">
-              Create a free account to access exclusive pricing, personalised recommendations, and your complete order history.
+            <p className="text-[#45353E] mb-8 max-w-lg mx-auto text-sm leading-relaxed">
+              Create a free account to unlock exclusive perks, personalized supplement matchers, and special member pricing.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
-                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="btn-primary px-8 py-4">
+                <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} className="btn-primary w-full sm:w-auto px-8 py-4 font-sans text-xs uppercase tracking-[0.15em] font-bold">
                   Try Zupwell
                 </motion.button>
               </Link>
               <Link href="/products">
-                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="btn-outline px-8 py-4">
-                  Upgrade Your Water
+                <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} className="btn-outline w-full sm:w-auto px-8 py-4 font-sans text-xs uppercase tracking-[0.15em] font-bold border-[#E8E2D9]">
+                  Upgrade Your Routine
                 </motion.button>
               </Link>
             </div>

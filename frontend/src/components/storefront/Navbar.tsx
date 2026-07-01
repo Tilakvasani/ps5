@@ -43,18 +43,18 @@ export default function Navbar() {
     >
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
 
-        {/* Logo — flat, no gradient */}
-        <Link href="/" className="text-2xl font-bold tracking-tight" style={{ color: "#002A30", letterSpacing: "-0.04em" }}>
-          Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#48C062", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
+        {/* Logo — premium display font */}
+        <Link href="/" className="font-display text-xl md:text-2xl font-black tracking-[0.08em] uppercase select-none transition-opacity hover:opacity-90" style={{ color: "#002A30" }}>
+          ZUPWELL<sup style={{ fontSize: "0.5em", fontWeight: 800, color: "#48C062", marginLeft: "2px", verticalAlign: "super" }}>TM</sup>
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-7">
+        <div className="hidden md:flex items-center gap-8">
           {NAV_LINKS.map(([label, href]) => (
             <Link
               key={label}
               href={href}
-              className="text-sm font-medium transition-colors duration-150 text-[#45353E] hover:text-[#002A30]"
+              className="font-sans text-xs uppercase tracking-[0.12em] font-bold transition-colors duration-200 text-[#45353E] hover:text-[#48C062]"
             >
               {label}
             </Link>
