@@ -93,14 +93,14 @@ export default function SciencePage() {
       icon: Shield,
       title: s(settings, "science_cert2_title"),
       desc: s(settings, "science_cert2_desc"),
-      color: "#48C062",
+      color: "#EB9220",
       bg: "#F0EFEA",
     },
     {
       icon: Microscope,
       title: s(settings, "science_cert3_title"),
       desc: s(settings, "science_cert3_desc"),
-      color: "#48C062",
+      color: "#EB9220",
       bg: "#F0EFEA",
     },
   ];
@@ -127,7 +127,7 @@ export default function SciencePage() {
           <span
             key={i}
             style={{
-              background: "linear-gradient(135deg, #48C062, #2D9B78)",
+              background: "linear-gradient(135deg, #EB9220, #2D9B78)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -157,7 +157,7 @@ export default function SciencePage() {
         {/* floating accent rings */}
         <div
           className="absolute top-24 right-20 w-64 h-64 rounded-full opacity-10 pointer-events-none"
-          style={{ border: "2px solid #48C062", transform: "rotate(20deg)" }}
+          style={{ border: "2px solid #EB9220", transform: "rotate(20deg)" }}
         />
         <div
           className="absolute -bottom-10 -left-16 w-96 h-96 rounded-full opacity-5 pointer-events-none"
@@ -170,7 +170,7 @@ export default function SciencePage() {
               className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-6"
               style={{
                 background: "#F0EFEA",
-                color: "#48C062",
+                color: "#EB9220",
                 border: "1px solid #C3E5D9",
               }}
             >
@@ -191,7 +191,7 @@ export default function SciencePage() {
       {/* ── MANUFACTURING EXCELLENCE ── */}
       <section className="py-20 px-6 mx-auto max-w-7xl">
         <motion.div {...fadeUp(0)} className="mb-14">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#48C062] mb-3">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#EB9220] mb-3">
             {s(settings, "science_process_badge")}
           </p>
           <h2 className="font-black text-4xl md:text-5xl text-[#002A30] whitespace-pre-line leading-tight">
@@ -220,7 +220,7 @@ export default function SciencePage() {
                 className="h-14 w-14 rounded-2xl flex items-center justify-center mb-6"
                 style={{ background: "#F0EFEA" }}
               >
-                <item.icon size={26} className="text-[#48C062]" />
+                <item.icon size={26} className="text-[#EB9220]" />
               </div>
               <h3 className="font-black text-2xl text-[#002A30] mb-3">{item.title}</h3>
               <p className="text-[#45353E] leading-relaxed">{item.desc}</p>
@@ -233,7 +233,7 @@ export default function SciencePage() {
       <section
         className="py-24 px-6"
         style={{
-          background: "#48C062",
+          background: "#EB9220",
         }}
       >
         <div className="mx-auto max-w-7xl">
@@ -260,14 +260,14 @@ export default function SciencePage() {
                   border: "1px solid rgba(255,255,255,0.12)",
                   backdropFilter: "blur(12px)",
                 }}
-                whileHover={{ borderColor: "#48C062" }}
+                whileHover={{ borderColor: "#EB9220" }}
                 transition={{ duration: 0.3 }}
               >
                 <div
                   className="h-14 w-14 rounded-2xl flex items-center justify-center mb-6"
                   style={{ background: cert.bg, border: "1px solid #E8E2D9" }}
                 >
-                  <cert.icon size={24} style={{ color: cert.color === "#002A30" ? "#48C062" : cert.color }} />
+                  <cert.icon size={24} style={{ color: cert.color === "#002A30" ? "#EB9220" : cert.color }} />
                 </div>
                 <h3 className="font-black text-xl mb-3">{cert.title}</h3>
                 <p className="text-white/65 leading-relaxed text-sm">{cert.desc}</p>
@@ -281,7 +281,7 @@ export default function SciencePage() {
       <section className="py-24 px-6 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div {...fadeUp(0)}>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#48C062] mb-3">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#EB9220] mb-3">
               {s(settings, "science_clean_badge")}
             </p>
             <h2 className="font-black text-4xl md:text-5xl text-[#002A30] mb-6 whitespace-pre-line leading-tight">
@@ -298,7 +298,7 @@ export default function SciencePage() {
                   className="flex items-start gap-4 p-4 rounded-2xl"
                   style={{ background: "#FFFFFF", border: "1px solid #E8E2D9" }}
                 >
-                  <CheckCircle size={20} className="text-[#48C062] mt-0.5 shrink-0" />
+                  <CheckCircle size={20} className="text-[#EB9220] mt-0.5 shrink-0" />
                   <div>
                     <p className="font-bold text-[#002A30] text-lg">{item.label}</p>
                     <p className="text-[#45353E] text-sm mt-0.5">{item.sub}</p>
@@ -324,7 +324,7 @@ export default function SciencePage() {
                   transform: "translate(30%, -30%)",
                 }}
               />
-              <Package size={48} className="text-[#48C062] mb-6" />
+              <Package size={48} className="text-[#EB9220] mb-6" />
               <h3 className="font-black text-3xl text-[#002A30] mb-4 whitespace-pre-line leading-tight">
                 {s(settings, "science_tube_title")}
               </h3>
@@ -349,7 +349,7 @@ export default function SciencePage() {
         <motion.div
           {...fadeUp(0)}
           className="relative rounded-3xl p-12 text-center overflow-hidden"
-          style={{ background: "#48C062" }}
+          style={{ background: "#EB9220" }}
         >
           <div
             className="absolute inset-0 pointer-events-none"
@@ -367,7 +367,7 @@ export default function SciencePage() {
             href="/products"
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
-            className="inline-flex items-center gap-2 bg-white text-[#48C062] font-bold px-8 py-4 rounded-2xl text-lg"
+            className="inline-flex items-center gap-2 bg-white text-[#EB9220] font-bold px-8 py-4 rounded-2xl text-lg"
             style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.12)" }}
           >
             {s(settings, "science_cta_btn")}

@@ -56,7 +56,7 @@ export default function AdminCategoriesPage() {
                   <td className="px-4 py-3 text-[#45353E]">{cat._count?.products ?? 0}</td>
                   <td className="px-4 py-3"><span className={`badge ${cat.isActive ? "badge-success" : "badge-danger"}`}>{cat.isActive ? "Active" : "Inactive"}</span></td>
                   <td className="px-4 py-3 flex gap-1">
-                    <button onClick={() => openEdit(cat)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#48C062] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
+                    <button onClick={() => openEdit(cat)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#EB9220] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
                     <button onClick={() => handleDelete(cat.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-red-400 hover:bg-red-400/10 transition-all"><Trash2 size={14} /></button>
                   </td>
                 </tr>
@@ -67,7 +67,7 @@ export default function AdminCategoriesPage() {
                     <td className="px-4 py-3 text-[#45353E]">{child._count?.products ?? 0}</td>
                     <td className="px-4 py-3"><span className={`badge ${child.isActive ? "badge-success" : "badge-danger"}`}>{child.isActive ? "Active" : "Inactive"}</span></td>
                     <td className="px-4 py-3 flex gap-1">
-                      <button onClick={() => openEdit(child)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#48C062] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
+                      <button onClick={() => openEdit(child)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#EB9220] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
                       <button onClick={() => handleDelete(child.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-red-400 hover:bg-red-400/10 transition-all"><Trash2 size={14} /></button>
                     </td>
                   </tr>
@@ -94,7 +94,7 @@ export default function AdminCategoriesPage() {
               <label className="flex items-center gap-3 cursor-pointer">
                 <span className="text-sm text-[#45353E]">Active</span>
                 <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-[#48C062]" : "bg-[#FFFFFF]"}`}>
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-[#EB9220]" : "bg-[#FFFFFF]"}`}>
                   <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${form.isActive ? "translate-x-6" : "translate-x-1"}`} />
                 </button>
               </label>

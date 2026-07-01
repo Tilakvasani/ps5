@@ -72,7 +72,7 @@ export default function RegisterPage() {
       </Link>
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 right-1/4 h-[500px] w-[500px] rounded-full bg-[#48C062]/10 " />
+        <div className="absolute -top-40 right-1/4 h-[500px] w-[500px] rounded-full bg-[#EB9220]/10 " />
         <div className="absolute bottom-0 left-1/4 h-[400px] w-[400px] rounded-full bg-[#002A30]/8 " />
       </div>
 
@@ -80,7 +80,7 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center mb-4">
             <span className="text-4xl font-black" style={{
-              background: "#48C062",
+              background: "#EB9220",
               }}>
               Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, marginLeft: "2px", verticalAlign: "super" }}>™</sup>
             </span>
@@ -162,7 +162,7 @@ export default function RegisterPage() {
                         <div className={`h-4 w-4 rounded-full flex items-center justify-center ${passed ? "bg-[#F0EFEA]0" : "bg-[#E8E2D9]"}`}>
                           {passed ? <Check size={10} className="text-white" /> : <X size={10} className="text-[#8C8276]" />}
                         </div>
-                        <span className={`text-xs ${passed ? "text-[#359E4C]" : "text-[#45353E]"}`}>{rule.label}</span>
+                        <span className={`text-xs ${passed ? "text-[#D84315]" : "text-[#45353E]"}`}>{rule.label}</span>
                       </div>
                     );
                   })}
@@ -187,8 +187,8 @@ export default function RegisterPage() {
 
           <p className="text-center text-xs text-[#8C8276] mt-4">
             By creating an account you agree to our{" "}
-            <Link href="/terms-of-service" className="text-[#48C062] hover:text-[#359E4C]">Terms</Link> and{" "}
-            <Link href="/privacy-policy" className="text-[#48C062] hover:text-[#359E4C]">Privacy Policy</Link>
+            <Link href="/terms-of-service" className="text-[#EB9220] hover:text-[#D84315]">Terms</Link> and{" "}
+            <Link href="/privacy-policy" className="text-[#EB9220] hover:text-[#D84315]">Privacy Policy</Link>
           </p>
 
           <div className="my-6 flex items-center gap-3">
@@ -199,7 +199,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm text-[#45353E]">
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold text-[#48C062] hover:text-[#359E4C]">Sign in</Link>
+            <Link href="/login" className="font-semibold text-[#EB9220] hover:text-[#D84315]">Sign in</Link>
           </p>
         </div>
       </motion.div>

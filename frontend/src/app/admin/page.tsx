@@ -36,7 +36,7 @@ const StatCard = ({ title, value, sub, icon: Icon, change, color, href }: any) =
     <p className="text-2xl font-black text-[#002A30]">{value}</p>
     <p className="text-sm text-[#45353E] mt-0.5">{title}</p>
     {sub && <p className="text-xs text-[#8C8276] mt-1">{sub}</p>}
-    {href && <Link href={href} className="text-xs text-[#48C062] hover:underline mt-2 block">View →</Link>}
+    {href && <Link href={href} className="text-xs text-[#EB9220] hover:underline mt-2 block">View →</Link>}
   </motion.div>
 );
 
@@ -101,7 +101,7 @@ export default function AdminDashboard() {
             <button className="btn-outline text-sm px-4 py-2 flex items-center gap-2">
               <Clock size={14} /> Pending
               {stats?.statusBreakdown?.pending > 0 && (
-                <span className="bg-[#48C062] text-white text-xs rounded-full px-1.5 py-0.5 font-bold leading-none">
+                <span className="bg-[#EB9220] text-white text-xs rounded-full px-1.5 py-0.5 font-bold leading-none">
                   {stats.statusBreakdown.pending}
                 </span>
               )}
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Revenue"  icon={IndianRupee} color="bg-[#48C062]"
+        <StatCard title="Total Revenue"  icon={IndianRupee} color="bg-[#EB9220]"
           value={stats ? `₹${fmt(stats.totalRevenue)}` : "—"}
           sub={stats ? `Today ₹${fmt(stats.todayRevenue)}` : undefined}
           change={stats?.revenueChange} />
@@ -137,7 +137,7 @@ export default function AdminDashboard() {
           value={stats ? `₹${fmt(stats.totalProfit)}` : "—"}
           sub={stats ? `Margin ${stats.profitMargin}%` : undefined}
           change={stats?.profitChange} />
-        <StatCard title="Total Orders" icon={ShoppingBag} color="bg-[#48C062]"
+        <StatCard title="Total Orders" icon={ShoppingBag} color="bg-[#EB9220]"
           value={stats?.totalOrders ?? "—"}
           sub={stats ? `Avg ₹${fmt(stats.avgOrderValue)}` : undefined}
           change={stats?.ordersChange} href="/admin/orders" />
@@ -150,28 +150,28 @@ export default function AdminDashboard() {
       <div className="card">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <TrendingUp size={16} className="text-[#48C062]" />
+            <TrendingUp size={16} className="text-[#EB9220]" />
             <h2 className="font-bold text-[#002A30]">Revenue & Profit</h2>
           </div>
           <div className="flex items-center gap-1 bg-[#FCFAF6] rounded-lg p-1">
             {[7, 30, 90].map(d => (
               <button key={d} onClick={() => setChartDays(d)}
-                className={`text-xs px-3 py-1.5 rounded-md font-semibold transition-all ${chartDays === d ? "bg-white text-[#48C062] shadow-sm" : "text-[#45353E] hover:text-[#002A30]"}`}>
+                className={`text-xs px-3 py-1.5 rounded-md font-semibold transition-all ${chartDays === d ? "bg-white text-[#EB9220] shadow-sm" : "text-[#45353E] hover:text-[#002A30]"}`}>
                 {d}d
               </button>
             ))}
           </div>
         </div>
         <div className="flex items-center gap-4 mb-4 text-xs text-[#45353E]">
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-[#48C062] rounded" />Revenue</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-[#EB9220] rounded" />Revenue</span>
           <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-emerald-500 rounded" />Profit</span>
         </div>
         <ResponsiveContainer width="100%" height={240}>
           <AreaChart data={revenue}>
             <defs>
               <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#48C062" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#48C062" stopOpacity={0} />
+                <stop offset="5%"  stopColor="#EB9220" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#EB9220" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="profGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%"  stopColor="#10B981" stopOpacity={0.2} />
@@ -182,7 +182,7 @@ export default function AdminDashboard() {
             <XAxis dataKey="date" tick={{ fill: "#8C8276", fontSize: 11 }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fill: "#8C8276", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
             <Tooltip content={<ChartTip />} />
-            <Area type="monotone" dataKey="revenue" name="revenue" stroke="#48C062" fill="url(#revGrad)" strokeWidth={2} dot={false} />
+            <Area type="monotone" dataKey="revenue" name="revenue" stroke="#EB9220" fill="url(#revGrad)" strokeWidth={2} dot={false} />
             <Area type="monotone" dataKey="profit"  name="profit"  stroke="#10B981" fill="url(#profGrad)" strokeWidth={2} dot={false} />
           </AreaChart>
         </ResponsiveContainer>
@@ -226,7 +226,7 @@ export default function AdminDashboard() {
                   <div className="flex-1">
                     <div className="flex justify-between mb-1">
                       <span className="text-sm font-semibold text-[#002A30]">{p.method === "razorpay" ? "Razorpay" : "Cash on Delivery"}</span>
-                      <span className="text-sm font-bold text-[#48C062]">₹{fmt(p.revenue)}</span>
+                      <span className="text-sm font-bold text-[#EB9220]">₹{fmt(p.revenue)}</span>
                     </div>
                     <p className="text-xs text-[#45353E]">{p.count} order{p.count !== 1 ? "s" : ""}</p>
                   </div>
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-[#002A30]">Top Products</h2>
-            <Link href="/admin/products" className="text-xs text-[#48C062] hover:underline">View all →</Link>
+            <Link href="/admin/products" className="text-xs text-[#EB9220] hover:underline">View all →</Link>
           </div>
           <div className="space-y-4">
             {topProducts.slice(0, 6).map((p: any, i: number) => (
@@ -252,14 +252,14 @@ export default function AdminDashboard() {
                   <p className="text-sm font-semibold text-[#002A30] truncate">{p.name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex-1 h-1.5 bg-[#FCFAF6] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#48C062] rounded-full"
+                      <div className="h-full bg-[#EB9220] rounded-full"
                         style={{ width: `${Math.round((p.totalRevenue / maxRevenue) * 100)}%` }} />
                     </div>
                     <span className="text-xs text-[#8C8276] shrink-0">{p.totalSold} sold</span>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-bold text-[#48C062]">₹{fmt(p.totalRevenue)}</p>
+                  <p className="text-sm font-bold text-[#EB9220]">₹{fmt(p.totalRevenue)}</p>
                   <p className="text-xs text-emerald-500 font-semibold">+₹{fmt(p.totalProfit)} · {p.marginPct}%</p>
                 </div>
               </div>
@@ -271,12 +271,12 @@ export default function AdminDashboard() {
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-[#002A30]">Top Customers</h2>
-            <Link href="/admin/users" className="text-xs text-[#48C062] hover:underline">View all →</Link>
+            <Link href="/admin/users" className="text-xs text-[#EB9220] hover:underline">View all →</Link>
           </div>
           <div className="space-y-3">
             {stats?.topCustomers?.length > 0 ? stats.topCustomers.map((c: any) => (
               <div key={c.id} className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-[#48C062]/10 flex items-center justify-center text-sm font-bold text-[#48C062] shrink-0">
+                <div className="h-9 w-9 rounded-full bg-[#EB9220]/10 flex items-center justify-center text-sm font-bold text-[#EB9220] shrink-0">
                   {c.name?.charAt(0)?.toUpperCase() || "?"}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -297,7 +297,7 @@ export default function AdminDashboard() {
       <div className="card">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold text-[#002A30]">Recent Orders</h2>
-          <Link href="/admin/orders" className="text-sm text-[#48C062] hover:text-[#48C062]">View all →</Link>
+          <Link href="/admin/orders" className="text-sm text-[#EB9220] hover:text-[#EB9220]">View all →</Link>
         </div>
         {stats?.recentOrders?.length > 0 ? (
           <div className="overflow-x-auto">

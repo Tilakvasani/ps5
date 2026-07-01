@@ -18,7 +18,7 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
   if (loading) return (
     <main className="min-h-screen bg-[#FCFAF6] flex items-center justify-center">
       <Navbar />
-      <div className="h-8 w-8 rounded-full border-2 border-[#48C062] border-t-transparent animate-spin mt-20" />
+      <div className="h-8 w-8 rounded-full border-2 border-[#EB9220] border-t-transparent animate-spin mt-20" />
     </main>
   );
 
@@ -29,17 +29,17 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
         {/* Success Header */}
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center mb-10">
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 border border-[#C3E5D9] mb-4">
-            <CheckCircle size={40} className="text-[#48C062]" />
+            <CheckCircle size={40} className="text-[#EB9220]" />
           </div>
           <h1 className="text-4xl font-black text-[#002A30] mb-2">Order Confirmed! 🎉</h1>
-          <p className="text-[#45353E]">Order <span className="text-[#48C062] font-mono font-bold">{params.orderNumber}</span> has been placed successfully.</p>
+          <p className="text-[#45353E]">Order <span className="text-[#EB9220] font-mono font-bold">{params.orderNumber}</span> has been placed successfully.</p>
         </motion.div>
 
         {order && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-4">
             {/* Order Details */}
             <div className="card">
-              <h2 className="font-bold text-[#002A30] mb-4 flex items-center gap-2"><Package size={18} className="text-[#48C062]" /> Order Details</h2>
+              <h2 className="font-bold text-[#002A30] mb-4 flex items-center gap-2"><Package size={18} className="text-[#EB9220]" /> Order Details</h2>
               <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                 {[["Order Number", order.orderNumber], ["Status", order.status], ["Payment", order.paymentMethod], ["Date", new Date(order.createdAt).toLocaleDateString("en-IN")]].map(([k, v]) => (
                   <div key={k}>
@@ -78,7 +78,7 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
                   {order.address.fullName}<br />
                   {order.address.addressLine1}, {order.address.city}, {order.address.state} - {order.address.pincode}<br />
                   📞 {order.address.phone}
-                  {order.address.gstin && <><br /><span className="text-[#48C062]">GSTIN: {order.address.gstin}</span></>}
+                  {order.address.gstin && <><br /><span className="text-[#EB9220]">GSTIN: {order.address.gstin}</span></>}
                 </p>
               </div>
             )}

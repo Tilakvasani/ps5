@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#FCFAF6] flex items-center justify-center"><div className="h-8 w-8 rounded-full border-4 border-[#48C062]/30 border-t-[#48C062] animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#FCFAF6] flex items-center justify-center"><div className="h-8 w-8 rounded-full border-4 border-[#EB9220]/30 border-t-[#EB9220] animate-spin" /></div>}>
       <LoginForm />
     </Suspense>
   );
@@ -79,7 +79,7 @@ function LoginForm() {
       </Link>
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/4 h-[500px] w-[500px] rounded-full bg-[#48C062]/10 " />
+        <div className="absolute -top-40 left-1/4 h-[500px] w-[500px] rounded-full bg-[#EB9220]/10 " />
         <div className="absolute -bottom-40 right-1/4 h-[400px] w-[400px] rounded-full bg-[#002A30]/8 " />
       </div>
 
@@ -87,7 +87,7 @@ function LoginForm() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center mb-4">
             <span className="text-4xl font-black" style={{
-              background: "#48C062",
+              background: "#EB9220",
               }}>
               Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, marginLeft: "2px", verticalAlign: "super" }}>™</sup>
             </span>
@@ -133,7 +133,7 @@ function LoginForm() {
                 </button>
               </div>
               <div className="text-right mt-1">
-                <Link href="/forgot-password" className="text-xs text-[#48C062] hover:text-[#359E4C]">Forgot password?</Link>
+                <Link href="/forgot-password" className="text-xs text-[#EB9220] hover:text-[#D84315]">Forgot password?</Link>
               </div>
             </div>
 
@@ -158,7 +158,7 @@ function LoginForm() {
 
           <p className="text-center text-sm text-[#45353E]">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold text-[#48C062] hover:text-[#359E4C]">Create one free</Link>
+            <Link href="/register" className="font-semibold text-[#EB9220] hover:text-[#D84315]">Create one free</Link>
           </p>
         </div>
       </motion.div>

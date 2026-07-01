@@ -11,7 +11,7 @@ import { ordersApi, accountApi, paymentsApi } from "@/lib/api";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
-const STEPS = ["Address Selection", "Payment Method", "Order Review"];
+const STEPS = ["Address", "Payment", "Review"];
 
 function loadRazorpay(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -67,20 +67,14 @@ export default function CheckoutPage() {
   if (cart.length === 0) return (
     <main className="min-h-screen bg-[#FCFAF6]">
       <Navbar />
-      <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
-        <p className="font-display text-2xl font-bold text-[#002A30] mb-4">Your cart is empty</p>
-        <Link href="/products">
-          <button className="btn-primary px-6 py-3 font-sans text-xs uppercase tracking-wider font-bold">Shop Now</button>
-        </Link>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
+        <p className="text-2xl font-bold text-[#002A30] mb-4">Your cart is empty</p>
+        <Link href="/products"><button className="btn-primary px-6 py-3">Shop Now</button></Link>
       </div>
     </main>
   );
 
   const handleSaveAddress = async () => {
-    if (!newAddr.fullName || !newAddr.phone || !newAddr.addressLine1 || !newAddr.pincode) {
-      toast.error("Please fill in all address fields");
-      return;
-    }
     try {
       const addr = await accountApi.addAddress(newAddr);
       setAddresses([...addresses, addr]);
@@ -100,6 +94,7 @@ export default function CheckoutPage() {
         paymentMethod,
         couponCode: couponCode || undefined,
         items: cart.map(i => ({ productId: i.productId, variantId: i.variantId, qty: i.qty })),
+        // Live settings — backend uses these for GST, shipping & invoice
         cgstRate,
         sgstRate,
         shippingCharge: shipping,
@@ -138,7 +133,7 @@ export default function CheckoutPage() {
             },
           },
           prefill: { name: user?.name, email: user?.email },
-          theme: { color: "#48C062" },
+          theme: { color: "#EB9220" },
         };
         new (window as any).Razorpay(options).open();
       } else {
@@ -157,203 +152,169 @@ export default function CheckoutPage() {
     <main className="min-h-screen bg-[#FCFAF6]">
       <Navbar />
       <div className="pt-24 pb-16 px-6 mx-auto max-w-6xl">
-        <h1 className="font-display text-4xl font-black text-[#002A30] mb-8">Checkout</h1>
+        <h1 className="text-4xl font-black text-[#002A30] mb-8">Checkout</h1>
 
-        {/* Stepper bubbles */}
-        <div className="flex items-center gap-4 mb-10 overflow-x-auto pb-2">
+        {/* Steps */}
+        <div className="flex items-center gap-4 mb-10">
           {STEPS.map((s, i) => (
-            <div key={s} className="flex items-center gap-2 flex-shrink-0">
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${i <= step ? "bg-[#48C062] text-white shadow-sm" : "bg-white border border-[#E8E2D9] text-[#45353E]"}`}>
-                {i < step ? <CheckCircle size={14} /> : i + 1}
+            <div key={s} className="flex items-center gap-2">
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i <= step ? "bg-[#EB9220] text-white" : "bg-white text-[#45353E]"}`}>
+                {i < step ? <CheckCircle size={16} /> : i + 1}
               </div>
-              <span className={`font-sans text-xs uppercase tracking-wider font-bold ${i <= step ? "text-[#002A30]" : "text-[#8C8276]"}`}>{s}</span>
-              {i < STEPS.length - 1 && <ChevronRight size={12} className="text-[#8C8276] mx-1" />}
+              <span className={`text-sm font-semibold ${i <= step ? "text-[#002A30]" : "text-[#45353E]"}`}>{s}</span>
+              {i < STEPS.length - 1 && <ChevronRight size={14} className="text-[#002A30]/30 mx-2" />}
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main content forms columns */}
-          <div className="lg:col-span-8 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
 
-            {/* Step 0: Address Selection */}
+            {/* Step 0: Address */}
             {step === 0 && (
-              <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                <div className="card bg-white border border-[#E8E2D9] shadow-soft">
-                  <div className="flex items-center gap-2 mb-6 border-b border-[#E8E2D9]/40 pb-3">
-                    <MapPin size={16} className="text-[#48C062]" />
-                    <h2 className="font-display font-bold text-base text-[#002A30] uppercase tracking-wider">Select Delivery Address</h2>
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                <div className="card mb-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <MapPin size={18} className="text-[#EB9220]" />
+                    <h2 className="font-bold text-[#002A30]">Delivery Address</h2>
                   </div>
-                  
-                  {addresses.length === 0 && !addingAddr && (
-                    <p className="text-xs text-[#8C8276] font-semibold uppercase tracking-wider mb-4">No addresses saved. Please add a new delivery address.</p>
-                  )}
-
-                  <div className="space-y-3">
-                    {addresses.map((addr) => (
-                      <label key={addr.id} className={`flex gap-3.5 p-4 rounded-2xl border cursor-pointer transition-all ${selectedAddress === addr.id ? "border-[#48C062] bg-[#48C062]/5 shadow-sm" : "border-[#E8E2D9] bg-[#FCFAF6] hover:border-[#48C062]/20"}`}>
-                        <input type="radio" name="address" checked={selectedAddress === addr.id} onChange={() => setSelectedAddress(addr.id)} className="mt-1 accent-[#48C062]" />
-                        <div className="text-xs font-semibold text-[#45353E] uppercase tracking-wider space-y-1">
-                          <p className="font-bold text-[#002A30] text-sm capitalize">{addr.fullName}</p>
-                          <p className="leading-relaxed">{addr.addressLine1}, {addr.city}, {addr.state} - {addr.pincode}</p>
-                          <p className="text-[#8C8276]">Phone: {addr.phone}</p>
-                          {addr.gstin && <p className="text-[#48C062] font-bold">GSTIN: {addr.gstin}</p>}
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-
-                  <button onClick={() => setAddingAddr(!addingAddr)} className="flex items-center gap-1.5 text-xs font-bold text-[#48C062] uppercase tracking-wider mt-4">
-                    <Plus size={14} strokeWidth={2.5} /> Add New Address
+                  {addresses.map((addr) => (
+                    <label key={addr.id} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${selectedAddress === addr.id ? "border-[#EB9220] bg-[#EB9220]/10" : "border-[#E8E2D9]"}`}>
+                      <input type="radio" name="address" checked={selectedAddress === addr.id} onChange={() => setSelectedAddress(addr.id)} className="mt-1 accent-[#EB9220]" />
+                      <div className="text-sm">
+                        <p className="font-bold text-[#002A30]">{addr.fullName}</p>
+                        <p className="text-[#45353E]">{addr.addressLine1}, {addr.city}, {addr.state} - {addr.pincode}</p>
+                        <p className="text-[#45353E]">{addr.phone}</p>
+                        {addr.gstin && <p className="text-xs text-[#EB9220] mt-1">GSTIN: {addr.gstin}</p>}
+                      </div>
+                    </label>
+                  ))}
+                  <button onClick={() => setAddingAddr(!addingAddr)} className="flex items-center gap-2 text-sm text-[#EB9220] hover:text-[#EB9220] mt-2">
+                    <Plus size={14} /> Add new address
                   </button>
-
                   {addingAddr && (
-                    <div className="mt-6 space-y-4 border-t border-[#E8E2D9]/40 pt-6">
-                      {[
-                        ["fullName","Full Name"],
-                        ["phone","Phone Number"],
-                        ["addressLine1","Address Details"],
-                        ["city","City"],
-                        ["state","State"],
-                        ["pincode","Pincode"],
-                        ["gstin","GSTIN (optional)"]
-                      ].map(([k, label]) => (
+                    <div className="mt-4 space-y-3 border-t border-[#E8E2D9] pt-4">
+                      {[["fullName","Full Name"],["phone","Phone"],["addressLine1","Address Line 1"],["city","City"],["state","State"],["pincode","Pincode"],["gstin","GSTIN (optional)"]].map(([k, label]) => (
                         <div key={k}>
-                          <label className="text-[10px] font-bold text-[#8C8276] uppercase tracking-wider mb-1 block">{label}</label>
-                          <input type="text" value={(newAddr as any)[k]} onChange={(e) => setNewAddr(n => ({ ...n, [k]: e.target.value }))} className="input-field text-xs font-semibold rounded-xl" placeholder={label} />
+                          <label className="text-xs text-[#45353E] mb-1 block">{label}</label>
+                          <input type="text" value={(newAddr as any)[k]} onChange={(e) => setNewAddr(n => ({ ...n, [k]: e.target.value }))} className="input-field text-sm" placeholder={label} />
                         </div>
                       ))}
-                      <div className="flex gap-2">
-                        <button onClick={handleSaveAddress} className="btn-primary text-xs font-bold uppercase tracking-wider py-2.5 px-6">Save Address</button>
-                        <button onClick={() => setAddingAddr(false)} className="btn-outline text-xs font-bold uppercase tracking-wider py-2.5 px-6">Cancel</button>
-                      </div>
+                      <button onClick={handleSaveAddress} className="btn-primary text-sm px-4 py-2">Save Address</button>
                     </div>
                   )}
                 </div>
-                
-                <button onClick={() => { if (!selectedAddress) { toast.error("Select an address"); return; } setStep(1); }} className="btn-primary w-full py-4 flex items-center justify-center gap-2 font-sans text-xs uppercase tracking-[0.15em] font-bold">
-                  Continue to Payment <ChevronRight size={14} />
+                <button onClick={() => { if (!selectedAddress) { toast.error("Select an address"); return; } setStep(1); }} className="btn-primary w-full py-3 flex items-center justify-center gap-2">
+                  Continue to Payment <ChevronRight size={16} />
                 </button>
               </motion.div>
             )}
 
-            {/* Step 1: Payment Method */}
+            {/* Step 1: Payment */}
             {step === 1 && (
-              <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                <div className="card bg-white border border-[#E8E2D9] shadow-soft">
-                  <div className="flex items-center gap-2 mb-6 border-b border-[#E8E2D9]/40 pb-3">
-                    <CreditCard size={16} className="text-[#48C062]" />
-                    <h2 className="font-display font-bold text-base text-[#002A30] uppercase tracking-wider">Choose Payment Method</h2>
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                <div className="card mb-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <CreditCard size={18} className="text-[#EB9220]" />
+                    <h2 className="font-bold text-[#002A30]">Payment Method</h2>
                   </div>
-                  
-                  <div className="space-y-3">
-                    {[
-                      ["razorpay","Razorpay (UPI, Cards, Netbanking)","🔐"],
-                      ["cod","Cash on Delivery","💵"]
-                    ].map(([val, label, icon]) => (
-                      <label key={val} className={`flex gap-3.5 p-4 rounded-2xl border cursor-pointer transition-all ${paymentMethod === val ? "border-[#48C062] bg-[#48C062]/5 shadow-sm" : "border-[#E8E2D9] bg-[#FCFAF6] hover:border-[#48C062]/20"}`}>
-                        <input type="radio" name="payment" checked={paymentMethod === val as any} onChange={() => setPaymentMethod(val as any)} className="mt-1 accent-[#48C062]" />
-                        <div className="text-xs font-semibold text-[#45353E] uppercase tracking-wider space-y-0.5">
-                          <span className="text-sm font-bold text-[#002A30]">{icon} {label}</span>
-                          {val === "razorpay" && <p className="text-[10px] text-[#8C8276] font-bold mt-1">Instant, 100% secure payments via Razorpay gateway</p>}
-                          {val === "cod" && <p className="text-[10px] text-[#8C8276] font-bold mt-1">Pay with cash or digital scan when package is delivered</p>}
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 pt-6 border-t border-[#E8E2D9]/40">
-                    <label className="text-[10px] font-bold text-[#8C8276] uppercase tracking-wider mb-1.5 block">Apply Coupon Discount (optional)</label>
-                    <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="input-field text-xs font-semibold rounded-xl max-w-sm" placeholder="Enter coupon code" />
+                  {[["razorpay","Razorpay (UPI, Card, Netbanking)","🔐"],["cod","Cash on Delivery","💵"]].map(([val, label, icon]) => (
+                    <label key={val} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${paymentMethod === val ? "border-[#EB9220] bg-[#EB9220]/10" : "border-[#E8E2D9]"}`}>
+                      <input type="radio" name="payment" checked={paymentMethod === val as any} onChange={() => setPaymentMethod(val as any)} className="mt-1 accent-[#EB9220]" />
+                      <div>
+                        <span className="text-sm font-semibold text-[#002A30]">{icon} {label}</span>
+                        {val === "razorpay" && <p className="text-xs text-[#45353E] mt-0.5">Secure payments powered by Razorpay</p>}
+                        {val === "cod" && <p className="text-xs text-[#45353E] mt-0.5">Pay when your order arrives</p>}
+                      </div>
+                    </label>
+                  ))}
+                  <div className="mt-4">
+                    <label className="text-sm font-semibold text-[#45353E] mb-2 block">Coupon Code (optional)</label>
+                    <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="input-field text-sm" placeholder="Enter coupon code" />
                   </div>
                 </div>
-                
-                <div className="flex gap-4">
-                  <button onClick={() => setStep(0)} className="btn-outline py-3.5 px-6 text-xs uppercase tracking-wider font-bold">← Back</button>
-                  <button onClick={() => setStep(2)} className="btn-primary flex-1 py-3.5 flex items-center justify-center gap-2 font-sans text-xs uppercase tracking-[0.15em] font-bold">
-                    Review Order <ChevronRight size={14} />
+                <div className="flex gap-3">
+                  <button onClick={() => setStep(0)} className="btn-outline py-3 px-6">← Back</button>
+                  <button onClick={() => setStep(2)} className="btn-primary flex-1 py-3 flex items-center justify-center gap-2">
+                    Review Order <ChevronRight size={16} />
                   </button>
                 </div>
               </motion.div>
             )}
 
-            {/* Step 2: Order Review */}
+            {/* Step 2: Review */}
             {step === 2 && (
-              <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                <div className="card bg-white border border-[#E8E2D9] shadow-soft">
-                  <h2 className="font-display font-bold text-base text-[#002A30] uppercase tracking-wider border-b border-[#E8E2D9]/40 pb-3 mb-4">Review Order Items</h2>
-                  <div className="divide-y divide-[#E8E2D9]/40">
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                <div className="card mb-4">
+                  <h2 className="font-bold text-[#002A30] mb-4">Order Items</h2>
+                  <div className="space-y-3">
                     {cart.map((item) => (
-                      <div key={`${item.productId}-${item.variantId}`} className="flex justify-between py-3 text-xs font-semibold text-[#45353E] uppercase tracking-wider">
-                        <span className="truncate max-w-[240px]">{item.name} <span className="text-[#8C8276]">× {item.qty}</span></span>
-                        <span className="text-[#002A30] font-bold">₹{(Number(item.price) * Number(item.qty)).toFixed(0)}</span>
+                      <div key={`${item.productId}-${item.variantId}`} className="flex justify-between text-sm">
+                        <span className="text-[#45353E]">{item.name} × {item.qty}</span>
+                        <span className="text-[#002A30] font-semibold">₹{(Number(item.price) * Number(item.qty)).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Policies agreement card */}
-                <div className={`card bg-white border p-6 rounded-3xl transition-all shadow-soft ${agreedToTerms ? "border-[#48C062]/30 bg-[#48C062]/5" : "border-[#E8E2D9]"}`}>
-                  <label className="flex items-start gap-3.5 cursor-pointer">
+                {/* Terms Agreement */}
+                <div className={`card mb-4 border transition-all ${agreedToTerms ? "border-emerald-400/40 bg-emerald-50/30" : "border-[#E8E2D9]"}`}>
+                  <label className="flex items-start gap-3 cursor-pointer">
                     <input type="checkbox" checked={agreedToTerms} onChange={e => setAgreedToTerms(e.target.checked)}
-                      className="mt-0.5 accent-[#48C062] h-4.5 w-4.5 shrink-0 rounded-lg" />
-                    <div className="text-xs font-semibold text-[#45353E] leading-relaxed uppercase tracking-wider">
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <Shield size={14} className="text-[#48C062] shrink-0" />
-                        <span className="font-bold text-[#002A30]">Agree to Store Policies</span>
+                      className="mt-0.5 accent-[#EB9220] h-4 w-4 shrink-0" />
+                    <div className="text-sm text-[#45353E] leading-relaxed">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Shield size={14} className="text-[#EB9220] shrink-0" />
+                        <span className="font-semibold text-[#002A30]">I agree to the following policies</span>
                       </div>
-                      I have read and agree to ZUPWELL's{" "}
-                      <Link href="/terms-of-service" target="_blank" className="text-[#48C062] hover:underline font-bold">Terms & Conditions</Link>,{" "}
-                      <Link href="/privacy-policy" target="_blank" className="text-[#48C062] hover:underline font-bold">Privacy Policy</Link>, and{" "}
-                      <Link href="/refund-policy" target="_blank" className="text-[#48C062] hover:underline font-bold">Refund & Cancellation Policy</Link>.
+                      I have read and agree to the{" "}
+                      <Link href="/terms-of-service" target="_blank" className="text-[#EB9220] hover:underline font-medium">Terms & Conditions</Link>,{" "}
+                      <Link href="/privacy-policy" target="_blank" className="text-[#EB9220] hover:underline font-medium">Privacy Policy</Link>, and{" "}
+                      <Link href="/refund-policy" target="_blank" className="text-[#EB9220] hover:underline font-medium">Refund & Cancellation Policy</Link> of Zupwell.
                     </div>
                   </label>
                 </div>
 
-                <div className="flex gap-4">
-                  <button onClick={() => setStep(1)} className="btn-outline py-3.5 px-6 text-xs uppercase tracking-wider font-bold">← Back</button>
+                <div className="flex gap-3">
+                  <button onClick={() => setStep(1)} className="btn-outline py-3 px-6">← Back</button>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                     onClick={handlePlaceOrder} disabled={loading || !agreedToTerms}
-                    className="btn-primary flex-1 py-3.5 disabled:opacity-50 disabled:cursor-not-allowed font-sans text-xs uppercase tracking-[0.15em] font-bold">
+                    className="btn-primary flex-1 py-3 disabled:opacity-50 disabled:cursor-not-allowed">
                     {loading
                       ? <span className="flex items-center justify-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Placing Order...</span>
                       : `Place Order · ₹${total.toFixed(0)}`}
                   </motion.button>
                 </div>
                 {!agreedToTerms && (
-                  <p className="text-[10px] font-bold text-center text-[#8C8276] uppercase tracking-wider mt-2">Agree to store policies to enable checkout.</p>
+                  <p className="text-xs text-center text-[#8C8276] mt-2">Please agree to the policies above to place your order.</p>
                 )}
               </motion.div>
             )}
           </div>
 
-          {/* Right sticky sidebar order summary */}
-          <div className="lg:col-span-4">
-            <div className="card h-fit sticky top-28 bg-white border border-[#E8E2D9] shadow-soft p-6">
-              <h2 className="font-display font-bold text-lg text-[#002A30] mb-5 border-b border-[#E8E2D9]/40 pb-3 uppercase tracking-wider">Summary</h2>
-              
-              <div className="space-y-2.5 text-xs font-semibold text-[#8C8276] uppercase tracking-wider border-b border-[#E8E2D9]/40 pb-4 mb-4">
-                <div className="flex justify-between"><span>Subtotal ({cart.length} items)</span><span className="text-[#002A30] font-bold">₹{subtotal.toFixed(2)}</span></div>
-                <div className="flex justify-between"><span>CGST @{cgstPct}%</span><span className="text-[#002A30] font-bold">₹{cgst.toFixed(2)}</span></div>
-                <div className="flex justify-between"><span>SGST @{sgstPct}%</span><span className="text-[#002A30] font-bold">₹{sgst.toFixed(2)}</span></div>
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>{shipping === 0 ? <span className="text-[#48C062] font-bold">FREE</span> : <span className="text-[#002A30] font-bold">₹{shipping}</span>}</span>
-                </div>
-                {shipping > 0 && (
-                  <p className="text-[9px] font-bold lowercase tracking-wider text-[#8C8276]">Free delivery on orders above ₹{freeShippingThreshold}</p>
-                )}
-                {roundOffDiff !== 0 && (
-                  <div className="flex justify-between text-[11px] italic"><span>Round Off</span><span>{roundOffDiff > 0 ? "+" : ""}₹{roundOffDiff.toFixed(2)}</span></div>
-                )}
+          {/* Order Summary */}
+          <div className="card h-fit sticky top-24">
+            <h2 className="font-bold text-[#002A30] mb-4">Summary</h2>
+            <div className="space-y-2 text-sm mb-4">
+              <div className="flex justify-between text-[#45353E]"><span>Subtotal ({cart.length} item{cart.length !== 1 ? "s" : ""})</span><span>₹{subtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[#45353E]"><span>CGST @{cgstPct}%</span><span>₹{cgst.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[#45353E]"><span>SGST @{sgstPct}%</span><span>₹{sgst.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[#45353E]">
+                <span>Shipping</span>
+                <span>{shipping === 0 ? <span className="text-emerald-500 font-semibold">FREE</span> : `₹${shipping}`}</span>
               </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="font-display font-bold text-base text-[#002A30] uppercase tracking-wider">Total Amount</span>
-                <span className="text-xl font-black text-[#48C062]">₹{total.toFixed(0)}</span>
-              </div>
-              <p className="text-[9px] font-sans font-bold text-[#8C8276] uppercase tracking-wider mt-1 text-right">GST Inclusive</p>
+              {shipping > 0 && (
+                <p className="text-xs text-[#8C8276]">Free shipping on orders above ₹{freeShippingThreshold}</p>
+              )}
+              {roundOffDiff !== 0 && (
+                <div className="flex justify-between text-[#8C8276] text-xs italic"><span>Round Off</span><span>{roundOffDiff > 0 ? "+" : ""}₹{roundOffDiff.toFixed(2)}</span></div>
+              )}
             </div>
+            <div className="border-t border-[#E8E2D9] pt-4 flex justify-between items-center">
+              <span className="font-bold text-[#002A30]">Total</span>
+              <span className="text-2xl font-black gradient-text">₹{total.toFixed(0)}</span>
+            </div>
+            <p className="text-xs text-[#45353E] mt-1">Inclusive of all taxes</p>
           </div>
         </div>
       </div>

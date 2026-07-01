@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Menu, X, HeartPulse, User, LogOut } from "lucide-react";
+import { ShoppingCart, Menu, X, HeartPulse, User, LogOut, Search } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useLogout } from "@/lib/useAuth";
 
@@ -25,12 +25,12 @@ export default function Navbar() {
   const handleLogout = useLogout();
 
   const NAV_LINKS = [
-    ["Home",             "/"],
-    ["Shop",             "/products"],
-    ["Science",          "/science"],
-    ["About Us",         "/about"],
-    ["FAQs",             "/faqs"],
-    ["Contact",          "/contact"],
+    ["SHOP ALL",         "/products"],
+    ["ELECTROLYTES",     "/products"],
+    ["BUNDLES",          "/products"],
+    ["ABOUT ZUPWELL",    "/about"],
+    ["SCIENCE",          "/science"],
+    ["FAQS",             "/faqs"],
   ];
 
   return (
@@ -41,20 +41,28 @@ export default function Navbar() {
         borderBottom: "1.5px solid #E8E2D9",
       }}
     >
+      {/* Top Banner */}
+      <div className="w-full bg-[#002A30] text-white py-2 px-6 text-center text-xs font-semibold flex items-center justify-center gap-2">
+        <span className="bg-[#EB9220] text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md leading-none">NEW</span>
+        <span className="flex items-center gap-1 text-[11px] tracking-wide">
+          ⚡ Instant Hydration Effervescent Electrolyte Tablets | Free Express Shipping across India over ₹499
+        </span>
+      </div>
+
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
 
-        {/* Logo — premium display font */}
-        <Link href="/" className="font-display text-xl md:text-2xl font-black tracking-[0.08em] uppercase select-none transition-opacity hover:opacity-90" style={{ color: "#002A30" }}>
-          ZUPWELL<sup style={{ fontSize: "0.5em", fontWeight: 800, color: "#48C062", marginLeft: "2px", verticalAlign: "super" }}>TM</sup>
+        {/* Logo — lowercase with orange dot */}
+        <Link href="/" className="text-3xl font-black flex items-center tracking-tight font-sans" style={{ color: "#002A30", letterSpacing: "-0.06em" }}>
+          zupwell<span className="text-[#EB9220] font-black text-4xl leading-none -ml-0.5">.</span>
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-7">
           {NAV_LINKS.map(([label, href]) => (
             <Link
               key={label}
               href={href}
-              className="font-sans text-xs uppercase tracking-[0.12em] font-bold transition-colors duration-200 text-[#45353E] hover:text-[#48C062]"
+              className="text-xs font-bold uppercase tracking-wider transition-colors duration-150 text-[#45353E] hover:text-[#002A30]"
             >
               {label}
             </Link>
@@ -62,7 +70,12 @@ export default function Navbar() {
         </div>
 
         {/* Right */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+ 
+          {/* Search */}
+          <Link href="/products" className="p-2 transition-colors duration-150 text-[#45353E] hover:text-[#002A30]">
+            <Search size={20} />
+          </Link>
 
           {/* Cart */}
           <Link href="/cart" className="relative p-2 transition-colors duration-150 text-[#45353E] hover:text-[#002A30]"
@@ -73,7 +86,7 @@ export default function Navbar() {
                 <motion.span
                   initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
                   className="absolute -top-1 -right-1 h-5 w-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
-                  style={{ background: "#48C062" }}
+                  style={{ background: "#EB9220" }}
                 >
                   {cartCount}
                 </motion.span>
@@ -128,7 +141,7 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="hidden md:flex items-center">
-              <Link href="/login" className="btn-outline text-sm px-4 py-2">Sign In</Link>
+              <Link href="/login" className="btn-primary text-xs uppercase tracking-wider px-5 py-2 !rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all">Sign In</Link>
             </div>
           )}
 

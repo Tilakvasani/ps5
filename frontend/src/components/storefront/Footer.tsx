@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -44,46 +43,28 @@ export default function Footer() {
   return (
     <footer style={{ background: "#FFFFFF", borderTop: "1.5px solid #E8E2D9" }}>
       <div className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
 
-          {/* Left Block: Brand, Newsletter, Socials */}
-          <div className="md:col-span-5 space-y-6">
-            <div>
-              <div className="font-display text-2xl font-black tracking-[0.08em] uppercase mb-3" style={{ color: "#002A30" }}>
-                ZUPWELL<sup style={{ fontSize: "0.5em", fontWeight: 800, color: "#48C062", marginLeft: "2px", verticalAlign: "super" }}>TM</sup>
-              </div>
-              <p className="text-sm leading-relaxed" style={{ color: "#45353E" }}>
-                Wellness that fits your lifestyle. Clean ingredients, real results. Science-backed, insanely delicious, and tailored for your 24/7 hustle.
-              </p>
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <div className="text-xl font-bold mb-3" style={{ color: "#002A30", letterSpacing: "-0.03em" }}>
+              {name}<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#EB9220", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
             </div>
-
-            {/* Newsletter input with green button */}
-            <div className="space-y-2 max-w-md">
-              <h5 className="font-sans text-xs uppercase tracking-[0.12em] font-bold" style={{ color: "#002A30" }}>Subscribe to our newsletter</h5>
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="input-field text-sm flex-1 py-2 px-3 rounded-xl focus:border-[#48C062]"
-                  style={{ border: "1.5px solid #E8E2D9", background: "#FFFFFF" }}
-                />
-                <button
-                  className="btn-primary rounded-xl px-4 py-2 flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
-                  style={{ background: "#48C062" }}
-                  onClick={() => toast.success("Subscribed successfully!")}
-                >
-                  <span className="text-white font-bold">➔</span>
-                </button>
-              </div>
+            <p className="text-sm leading-relaxed mb-4" style={{ color: "#45353E" }}>
+              Performance-Driven Nutrition — Science-backed, insanely delicious, and tailored for your 24/7 lifestyle.
+            </p>
+            <div className="text-xs space-y-1 mb-5" style={{ color: "#8C8276" }}>
+              {gstin  && <p>GSTIN: {gstin}</p>}
+              {fssai  && <p>FSSAI: {fssai}</p>}
+              <p>State Code: {stateCode}</p>
             </div>
-
             {socials.length > 0 && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {socials.map(({ href, icon, label }) => (
                   <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-                    className="h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-150"
+                    className="h-9 w-9 rounded-xl flex items-center justify-center transition-colors duration-150"
                     style={{ background: "#FCFAF6", border: "1.5px solid #E8E2D9", color: "#45353E" }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#48C062"; e.currentTarget.style.color = "#48C062"; }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#EB9220"; e.currentTarget.style.color = "#EB9220"; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = "#E8E2D9"; e.currentTarget.style.color = "#45353E"; }}
                   >
                     {icon}
@@ -91,23 +72,16 @@ export default function Footer() {
                 ))}
               </div>
             )}
-
-            <div className="text-xs space-y-1" style={{ color: "#8C8276" }}>
-              {gstin  && <p>GSTIN: {gstin}</p>}
-              {fssai  && <p>FSSAI: {fssai}</p>}
-              <p>State Code: {stateCode}</p>
-            </div>
           </div>
 
-          {/* Column 2: Shop */}
-          <div className="md:col-span-2">
-            <h4 className="font-sans text-xs uppercase tracking-[0.12em] font-bold mb-5" style={{ color: "#002A30" }}>Shop</h4>
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#002A30", letterSpacing: "0.12em" }}>Quick Links</h4>
             <ul className="space-y-2.5">
-              {[["All Products","/products"],["Vitamins","/products?category=vitamins"],["Electrolytes","/products?category=electrolytes"],["Science Store","/science"],["Special Bundles","/products"]].map(([l,h]) => (
+              {[["Home","/"],["Shop / Products","/products"],["Science / Quality","/science"],["About Us","/about"],["FAQs","/faqs"],["Contact Us","/contact"]].map(([l,h]) => (
                 <li key={l}>
                   <Link href={h} style={linkStyle}
-                    className="font-sans text-xs uppercase tracking-[0.08em] font-bold"
-                    onMouseEnter={e => (e.currentTarget.style.color = "#48C062")}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#EB9220")}
                     onMouseLeave={e => (e.currentTarget.style.color = "#45353E")}
                   >{l}</Link>
                 </li>
@@ -115,15 +89,14 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 3: Company */}
-          <div className="md:col-span-2">
-            <h4 className="font-sans text-xs uppercase tracking-[0.12em] font-bold mb-5" style={{ color: "#002A30" }}>Company</h4>
+          {/* Legal */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#002A30", letterSpacing: "0.12em" }}>Legal</h4>
             <ul className="space-y-2.5">
-              {[["About Us","/about"],["FAQs","/faqs"],["Contact Us","/contact"],["Privacy Policy","/privacy-policy"],["Terms & Conditions","/terms-of-service"],["Refund Policy","/refund-policy"]].map(([l,h]) => (
+              {[["Privacy Policy","/privacy-policy"],["Terms & Conditions","/terms-of-service"],["Refund & Cancellation","/refund-policy"],["Shipping Policy","/shipping-policy"],["Legal Disclaimer","/legal-disclaimer"]].map(([l,h]) => (
                 <li key={l}>
                   <Link href={h} style={linkStyle}
-                    className="font-sans text-xs uppercase tracking-[0.08em] font-bold"
-                    onMouseEnter={e => (e.currentTarget.style.color = "#48C062")}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#EB9220")}
                     onMouseLeave={e => (e.currentTarget.style.color = "#45353E")}
                   >{l}</Link>
                 </li>
@@ -131,26 +104,26 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Help & Contact */}
-          <div className="md:col-span-3">
-            <h4 className="font-sans text-xs uppercase tracking-[0.12em] font-bold mb-5" style={{ color: "#002A30" }}>Help & Support</h4>
+          {/* Contact */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#002A30", letterSpacing: "0.12em" }}>Contact Us</h4>
             <div className="space-y-3 text-sm" style={{ color: "#45353E" }}>
               <div className="flex items-start gap-2.5">
-                <MapPin size={14} className="mt-0.5 shrink-0" style={{ color: "#48C062" }} />
-                <span className="text-xs uppercase tracking-[0.08em] font-bold">{address}</span>
+                <MapPin size={14} className="mt-0.5 shrink-0" style={{ color: "#EB9220" }} />
+                <span>{address}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone size={14} className="shrink-0" style={{ color: "#48C062" }} />
-                <span className="text-xs uppercase tracking-[0.08em] font-bold">{phone}</span>
+                <Phone size={14} className="shrink-0" style={{ color: "#EB9220" }} />
+                <span>{phone}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Mail size={14} className="shrink-0" style={{ color: "#48C062" }} />
-                <span className="text-xs font-bold break-all">{email}</span>
+                <Mail size={14} className="shrink-0" style={{ color: "#EB9220" }} />
+                <span>{email}</span>
               </div>
               {whatsapp && (
                 <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2.5 font-bold text-xs uppercase tracking-[0.08em] transition-colors duration-150"
-                  style={{ color: "#48C062" }}
+                  className="flex items-center gap-2.5 font-semibold transition-colors duration-150"
+                  style={{ color: "#EB9220" }}
                 >
                   <MessageCircle size={14} /> WhatsApp Us
                 </a>
@@ -161,11 +134,11 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderTop: "1.5px solid #E8E2D9" }}>
-          <p className="text-xs font-bold uppercase tracking-[0.08em]" style={{ color: "#8C8276" }}>
-            © {new Date().getFullYear()} ZUPWELL™. All Rights Reserved.
+          <p className="text-sm" style={{ color: "#8C8276" }}>
+            © {new Date().getFullYear()} {name}™. All rights reserved.
             {fssai && <span className="ml-2">· FSSAI: {fssai}</span>}
           </p>
-          <p className="text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: "#8C8276" }}>
+          <p className="text-xs" style={{ color: "#8C8276" }}>
             This product is a health supplement and not for medicinal use.
           </p>
         </div>

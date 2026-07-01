@@ -58,8 +58,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto`}>
         {/* Logo */}
         <div className="flex items-center gap-1 px-5 py-5 border-b border-[#E8E2D9]">
-          <span className="text-xl font-black" style={{ background: "#48C062", }}>
-            Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#48C062", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
+          <span className="text-xl font-black" style={{ background: "#EB9220", }}>
+            Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#EB9220", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
           </span>
           <span className="ml-auto text-xs text-[#45353E] border border-[#E8E2D9] rounded px-1.5 py-0.5">Admin</span>
           <button className="lg:hidden text-[#45353E] hover:text-[#002A30] ml-1" onClick={() => setSidebarOpen(false)}><X size={18} /></button>
@@ -72,8 +72,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             return (
               <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all group ${
-                  active ? "bg-[#48C062]/20 text-[#48C062]" : "text-[#45353E] hover:text-[#002A30] hover:bg-[#FCFAF6]"}`}>
-                <item.icon size={16} className={active ? "text-[#48C062]" : "text-[#45353E] group-hover:text-[#002A30]"} />
+                  active ? "bg-[#EB9220]/20 text-[#EB9220]" : "text-[#45353E] hover:text-[#002A30] hover:bg-[#FCFAF6]"}`}>
+                <item.icon size={16} className={active ? "text-[#EB9220]" : "text-[#45353E] group-hover:text-[#002A30]"} />
                 {item.label}
                 {active && <ChevronRight size={12} className="ml-auto" />}
               </Link>
@@ -112,7 +112,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/notifications">
             <div className="relative p-2 text-[#45353E] hover:text-[#002A30] cursor-pointer">
               <Bell size={18} />
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[#48C062]" />
+              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[#EB9220]" />
             </div>
           </Link>
         </header>

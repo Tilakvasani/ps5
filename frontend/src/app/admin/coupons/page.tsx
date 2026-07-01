@@ -48,7 +48,7 @@ export default function AdminCouponsPage() {
             {loading ? Array.from({ length: 5 }).map((_, i) => <tr key={i}><td colSpan={8} className="px-4 py-3"><div className="h-4 rounded bg-[#FCFAF6] animate-pulse" /></td></tr>)
               : coupons.map(c => (
               <tr key={c.id} className="hover:bg-[#FCFAF6] transition-colors">
-                <td className="px-4 py-3 font-mono font-bold text-[#48C062]">{c.code}</td>
+                <td className="px-4 py-3 font-mono font-bold text-[#EB9220]">{c.code}</td>
                 <td className="px-4 py-3 text-[#45353E] capitalize">{c.discountType}</td>
                 <td className="px-4 py-3 font-bold text-[#002A30]">{c.discountType === "percent" ? `${c.discountValue}%` : `₹${c.discountValue}`}</td>
                 <td className="px-4 py-3 text-[#45353E]">₹{c.minOrderValue}</td>
@@ -56,7 +56,7 @@ export default function AdminCouponsPage() {
                 <td className="px-4 py-3 text-[#45353E] text-xs">{c.validTo ? new Date(c.validTo).toLocaleDateString("en-IN") : "—"}</td>
                 <td className="px-4 py-3"><span className={`badge ${c.isActive ? "badge-success" : "badge-danger"}`}>{c.isActive ? "Active" : "Inactive"}</span></td>
                 <td className="px-4 py-3 flex gap-1">
-                  <button onClick={() => openEdit(c)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#48C062] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
+                  <button onClick={() => openEdit(c)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#EB9220] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
                   <button onClick={() => handleDelete(c.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-red-400 hover:bg-red-400/10 transition-all"><Trash2 size={14} /></button>
                 </td>
               </tr>
@@ -93,7 +93,7 @@ export default function AdminCouponsPage() {
               <div><label className="label-text">Description</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="input-field resize-none" rows={2} /></div>
               <label className="flex items-center gap-3 cursor-pointer">
                 <span className="text-sm text-[#45353E]">Active</span>
-                <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-[#48C062]" : "bg-[#FFFFFF]"}`}>
+                <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-[#EB9220]" : "bg-[#FFFFFF]"}`}>
                   <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${form.isActive ? "translate-x-6" : "translate-x-1"}`} />
                 </button>
               </label>

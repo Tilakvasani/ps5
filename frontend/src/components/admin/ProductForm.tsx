@@ -144,7 +144,7 @@ export default function ProductForm({ productId }: Props) {
               <label key={k} className="flex items-center justify-between cursor-pointer">
                 <span className="text-sm text-[#45353E]">{label}</span>
                 <button type="button" onClick={() => setForm(f => ({ ...f, [k]: !(f as any)[k] }))}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${(form as any)[k] ? "bg-[#48C062]" : "bg-[#FFFFFF]"}`}>
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${(form as any)[k] ? "bg-[#EB9220]" : "bg-[#FFFFFF]"}`}>
                   <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${(form as any)[k] ? "translate-x-6" : "translate-x-1"}`} />
                 </button>
               </label>
@@ -172,11 +172,11 @@ export default function ProductForm({ productId }: Props) {
             {existingImages.map(img => (
               <div key={img.id} className="relative h-20 w-20 rounded-xl overflow-hidden border border-[#E8E2D9]">
                 <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
-                {img.isPrimary && <span className="absolute bottom-0 left-0 right-0 bg-[#48C062]/80 text-[9px] text-[#002A30] text-center py-0.5">Primary</span>}
+                {img.isPrimary && <span className="absolute bottom-0 left-0 right-0 bg-[#EB9220]/80 text-[9px] text-[#002A30] text-center py-0.5">Primary</span>}
               </div>
             ))}
             {images.map((img, i) => (
-              <div key={i} className="relative h-20 w-20 rounded-xl overflow-hidden border border-[#48C062]/30">
+              <div key={i} className="relative h-20 w-20 rounded-xl overflow-hidden border border-[#EB9220]/30">
                 <img src={URL.createObjectURL(img)} alt="" className="w-full h-full object-cover" />
                 <button type="button" onClick={() => setImages(imgs => imgs.filter((_, j) => j !== i))}
                   className="absolute top-1 right-1 h-5 w-5 rounded-full bg-white flex items-center justify-center text-[#002A30] hover:bg-red-500/80">
@@ -184,7 +184,7 @@ export default function ProductForm({ productId }: Props) {
                 </button>
               </div>
             ))}
-            <label className="h-20 w-20 rounded-xl border-2 border-dashed border-[#E8E2D9] flex flex-col items-center justify-center cursor-pointer hover:border-[#48C062]/50 transition-colors">
+            <label className="h-20 w-20 rounded-xl border-2 border-dashed border-[#E8E2D9] flex flex-col items-center justify-center cursor-pointer hover:border-[#EB9220]/50 transition-colors">
               <Upload size={18} className="text-[#45353E] mb-1" />
               <span className="text-[10px] text-[#45353E]">Upload</span>
               <input type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" />
@@ -197,7 +197,7 @@ export default function ProductForm({ productId }: Props) {
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-[#002A30]">Variants (optional)</h2>
             <button type="button" onClick={() => setVariants(v => [...v, { variantName: "", sku: "", price: "" }])}
-              className="flex items-center gap-1.5 text-sm text-[#48C062] hover:text-[#48C062]">
+              className="flex items-center gap-1.5 text-sm text-[#EB9220] hover:text-[#EB9220]">
               <Plus size={14} /> Add Variant
             </button>
           </div>

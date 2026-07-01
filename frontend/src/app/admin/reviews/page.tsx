@@ -29,7 +29,7 @@ export default function AdminReviewsPage() {
       </div>
       <div className="flex gap-1 mb-4">
         {["pending", "approved", "all"].map(t => (
-          <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all ${tab === t ? "bg-[#48C062] text-[#002A30]" : "border border-[#E8E2D9] text-[#45353E] hover:text-[#002A30]"}`}>{t}</button>
+          <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all ${tab === t ? "bg-[#EB9220] text-[#002A30]" : "border border-[#E8E2D9] text-[#45353E] hover:text-[#002A30]"}`}>{t}</button>
         ))}
       </div>
       <div className="space-y-3">
@@ -50,7 +50,7 @@ export default function AdminReviewsPage() {
               </div>
               <div className="flex gap-1 flex-shrink-0">
                 {!r.isApproved && (
-                  <button onClick={() => approve(r.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#48C062]/60 hover:text-[#48C062] hover:bg-emerald-400/10 transition-all"><CheckCircle size={14} /></button>
+                  <button onClick={() => approve(r.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#EB9220]/60 hover:text-[#EB9220] hover:bg-emerald-400/10 transition-all"><CheckCircle size={14} /></button>
                 )}
                 <button onClick={() => del(r.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-red-400/40 hover:text-red-400 hover:bg-red-400/10 transition-all"><Trash2 size={14} /></button>
               </div>

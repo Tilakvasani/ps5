@@ -41,7 +41,7 @@ function CallbackHandler() {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="h-10 w-10 rounded-full border-4 border-[#48C062]/30 border-t-[#48C062] animate-spin" />
+      <div className="h-10 w-10 rounded-full border-4 border-[#EB9220]/30 border-t-[#EB9220] animate-spin" />
       <p className="text-[#45353E] font-medium text-sm">Signing you in with Google...</p>
     </div>
   );
@@ -52,7 +52,7 @@ export default function AuthCallbackPage() {
     <main className="min-h-screen flex items-center justify-center bg-[#FCFAF6]">
       <Suspense fallback={
         <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 rounded-full border-4 border-[#48C062]/30 border-t-[#48C062] animate-spin" />
+          <div className="h-10 w-10 rounded-full border-4 border-[#EB9220]/30 border-t-[#EB9220] animate-spin" />
           <p className="text-[#45353E] font-medium text-sm">Loading...</p>
         </div>
       }>

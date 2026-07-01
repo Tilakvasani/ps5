@@ -103,7 +103,7 @@ export default function AdminProductsPage() {
                   <td className="px-4 py-3 text-[#45353E]">{p.category?.name || "—"}</td>
                   <td className="px-4 py-3">
                     <p className="font-bold text-[#002A30]">₹{Number(p.sellingPrice).toFixed(2)}</p>
-                    {Number(p.discountPercent) > 0 && <p className="text-xs text-[#48C062]">-{p.discountPercent}% off</p>}
+                    {Number(p.discountPercent) > 0 && <p className="text-xs text-[#EB9220]">-{p.discountPercent}% off</p>}
                   </td>
                   <td className="px-4 py-3">
                     {p.inventory?.[0] ? (
@@ -114,7 +114,7 @@ export default function AdminProductsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <button onClick={() => toggleActive(p)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${p.isActive ? "bg-[#48C062]" : "bg-[#FFFFFF]"}`}>
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${p.isActive ? "bg-[#EB9220]" : "bg-[#FFFFFF]"}`}>
                       <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${p.isActive ? "translate-x-6" : "translate-x-1"}`} />
                     </button>
                   </td>
@@ -124,7 +124,7 @@ export default function AdminProductsPage() {
                         <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#002A30] hover:bg-[#FFFFFF] transition-all"><Eye size={14} /></button>
                       </Link>
                       <Link href={`/admin/products/${p.id}`}>
-                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#48C062] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
+                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#EB9220] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
                       </Link>
                       <button onClick={() => handleDelete(p.id, p.name)}
                         className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-red-400 hover:bg-red-400/10 transition-all">
@@ -145,7 +145,7 @@ export default function AdminProductsPage() {
             <div className="flex gap-1">
               {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => (
                 <button key={i} onClick={() => setPage(i + 1)}
-                  className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all ${page === i + 1 ? "bg-[#48C062] text-[#002A30]" : "text-[#45353E] hover:bg-[#FFFFFF]"}`}>
+                  className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all ${page === i + 1 ? "bg-[#EB9220] text-[#002A30]" : "text-[#45353E] hover:bg-[#FFFFFF]"}`}>
                   {i + 1}
                 </button>
               ))}

@@ -103,7 +103,7 @@ export default function AdminInventoryPage() {
                     <td className="px-4 py-3 text-[#45353E]">{item.lowStockThreshold}</td>
                     <td className="px-4 py-3">
                       <button onClick={() => setMovementModal(item)}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-[#48C062] hover:text-[#48C062] border border-[#48C062]/20 hover:border-[#48C062]/40 px-3 py-1.5 rounded-lg transition-all">
+                        className="flex items-center gap-1.5 text-xs font-semibold text-[#EB9220] hover:text-[#EB9220] border border-[#EB9220]/20 hover:border-[#EB9220]/40 px-3 py-1.5 rounded-lg transition-all">
                         <Plus size={12} /> Adjust
                       </button>
                     </td>

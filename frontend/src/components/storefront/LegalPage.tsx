@@ -21,7 +21,7 @@ export default function LegalPage({
       <div className="bg-white pt-28 pb-12 px-6 border-b border-[#E8E2D9]">
         <div className="mx-auto max-w-3xl">
           {badge && (
-            <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-3">
+            <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#EB9220] mb-3">
               {badge}
             </span>
           )}
@@ -41,7 +41,7 @@ export default function LegalPage({
                 <ul className="space-y-2">
                   {s.body.map((item, j) => (
                     <li key={j} className="flex items-start gap-2 text-[#45353E] leading-relaxed text-sm">
-                      <span className="text-[#48C062] mt-0.5 shrink-0">→</span> {item}
+                      <span className="text-[#EB9220] mt-0.5 shrink-0">→</span> {item}
                     </li>
                   ))}
                 </ul>

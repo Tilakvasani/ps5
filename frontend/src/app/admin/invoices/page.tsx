@@ -56,7 +56,7 @@ export default function AdminInvoicesPage() {
                         try { await invoicesApi.downloadPdf(inv.invoiceNumber); }
                         catch (err: any) { toast.error(err.message || "Download failed"); }
                       }}
-                      className="flex items-center gap-1 text-xs text-[#48C062] hover:text-[#48C062]"
+                      className="flex items-center gap-1 text-xs text-[#EB9220] hover:text-[#EB9220]"
                     ><Download size={12} /> PDF</button>
                   </td>
                   <td className="px-4 py-3">

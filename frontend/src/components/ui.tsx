@@ -40,7 +40,7 @@ const SPINNER_SIZES = { sm: "h-4 w-4", md: "h-8 w-8", lg: "h-12 w-12" };
 /** Reusable spinner — used on page-level loading states */
 export const LoadingSpinner = ({ size = "md", className = "" }: SpinnerProps) => (
   <div
-    className={`rounded-full border-4 border-[#48C062]/30 border-t-[#48C062] animate-spin ${SPINNER_SIZES[size]} ${className}`}
+    className={`rounded-full border-4 border-[#EB9220]/30 border-t-[#EB9220] animate-spin ${SPINNER_SIZES[size]} ${className}`}
     role="status"
     aria-label="Loading"
   />

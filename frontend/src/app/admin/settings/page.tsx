@@ -276,7 +276,7 @@ export default function AdminSettingsPage() {
 
   if (loading) return (
     <div className="flex justify-center py-20">
-      <div className="h-8 w-8 rounded-full border-2 border-[#48C062] border-t-transparent animate-spin" />
+      <div className="h-8 w-8 rounded-full border-2 border-[#EB9220] border-t-transparent animate-spin" />
     </div>
   );
 

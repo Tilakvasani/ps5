@@ -46,14 +46,14 @@ export default function AdminNotificationsPage() {
             </div>
           ) : notifications.map((n: any) => (
             <div key={n.id} onClick={() => !n.isRead && markRead(n.id)}
-              className={`card flex items-start gap-4 cursor-pointer transition-all ${!n.isRead ? "border-[#48C062]/20 bg-[#48C062]/5" : "opacity-60"}`}>
+              className={`card flex items-start gap-4 cursor-pointer transition-all ${!n.isRead ? "border-[#EB9220]/20 bg-[#EB9220]/5" : "opacity-60"}`}>
               <div className="text-2xl flex-shrink-0">{ICON[n.type] || "🔔"}</div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-[#002A30] text-sm">{n.title}</p>
                 <p className="text-sm text-[#45353E] mt-0.5">{n.message}</p>
                 <p className="text-xs text-[#45353E] mt-1">{new Date(n.createdAt).toLocaleString("en-IN")}</p>
               </div>
-              {!n.isRead && <div className="h-2 w-2 rounded-full bg-[#48C062] flex-shrink-0 mt-1.5" />}
+              {!n.isRead && <div className="h-2 w-2 rounded-full bg-[#EB9220] flex-shrink-0 mt-1.5" />}
             </div>
           ))
         }

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Outfit:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap');
 
 /* ─────────────────────────────────────────
    ZUPWELL MATTE DESIGN SYSTEM
@@ -12,10 +12,10 @@
 @layer base {
   :root {
     --blue:        #002A30;
-    --mint:        #48C062;
+    --mint:        #EB9220;
     --ice:         #FCFAF6;
     --blue-dim:    #001C20;
-    --mint-dim:    #359E4C;
+    --mint-dim:    #D84315;
     --border:      #E8E2D9;
     --border-soft: #F5EFE6;
     --text-dark:   #002A30;
@@ -26,7 +26,7 @@
 
     /* legacy aliases */
     --zupwell-blue:       #002A30;
-    --zupwell-blue-light: #48C062;
+    --zupwell-blue-light: #EB9220;
     --zupwell-orange:     #EB9220;
     --zupwell-white:      #FFFFFF;
     --bg-light:           #FCFAF6;
@@ -44,13 +44,13 @@
     @apply antialiased;
     background-color: #FCFAF6;
     color: #002A30;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     font-size: 15px;
     line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     color: #002A30;
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -71,7 +71,7 @@
   .card:hover {
     transform: translateY(-3px);
     box-shadow: 0 20px 40px rgba(0, 42, 48, 0.06);
-    border-color: rgba(72, 192, 98, 0.15);
+    border-color: rgba(235, 146, 32, 0.15);
   }
 
   .glass {
@@ -87,12 +87,12 @@
   .glass-hover:hover {
     transform: translateY(-3px);
     box-shadow: 0 20px 40px rgba(0, 42, 48, 0.06);
-    border-color: #48C062;
+    border-color: #EB9220;
   }
 
   /* vibrant gradient matching Plix brand aesthetic */
   .gradient-text {
-    background: linear-gradient(135deg, #002A30 30%, #48C062 100%);
+    background: linear-gradient(135deg, #002A30 30%, #EB9220 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -100,16 +100,16 @@
   }
 
   .btn-primary {
-    @apply rounded-xl px-6 py-3 font-semibold transition-all duration-200;
-    background: #48C062;
+    @apply rounded-full px-6 py-3 font-semibold transition-all duration-200;
+    background: #EB9220;
     color: #FFFFFF;
     border: none;
   }
-  .btn-primary:hover  { background: #359E4C; transform: translateY(-1.5px); box-shadow: 0 4px 14px rgba(72, 192, 98, 0.25); }
-  .btn-primary:active { background: #287739; transform: translateY(0); }
+  .btn-primary:hover  { background: #D84315; transform: translateY(-1.5px); box-shadow: 0 4px 14px rgba(235, 146, 32, 0.25); }
+  .btn-primary:active { background: #B23200; transform: translateY(0); }
 
   .btn-secondary {
-    @apply rounded-xl px-6 py-3 font-semibold transition-all duration-200;
+    @apply rounded-full px-6 py-3 font-semibold transition-all duration-200;
     background: #002A30;
     color: #FFFFFF;
     border: none;
@@ -118,12 +118,12 @@
   .btn-secondary:active { background: #001518; transform: translateY(0); }
 
   .btn-outline {
-    @apply rounded-xl px-6 py-3 font-semibold transition-all duration-200;
+    @apply rounded-full px-6 py-3 font-semibold transition-all duration-200;
     background: transparent;
-    border: 1.5px solid #E8E2D9;
+    border: 2px solid #002A30;
     color: #002A30;
   }
-  .btn-outline:hover { border-color: #48C062; color: #48C062; background: rgba(72, 192, 98, 0.04); }
+  .btn-outline:hover { border-color: #EB9220; color: #EB9220; background: rgba(235, 146, 32, 0.04); }
 
   .input-field {
     @apply w-full rounded-xl px-4 py-3 transition-all duration-200 focus:outline-none;
@@ -133,8 +133,8 @@
   }
   .input-field::placeholder { color: #8C8276; }
   .input-field:focus {
-    border-color: #48C062;
-    box-shadow: 0 0 0 3px rgba(72, 192, 98, 0.12);
+    border-color: #EB9220;
+    box-shadow: 0 0 0 3px rgba(235, 146, 32, 0.12);
   }
 
   .label-text {
@@ -161,9 +161,9 @@
 ::-webkit-scrollbar       { width:6px; }
 ::-webkit-scrollbar-track { background:#FCFAF6; }
 ::-webkit-scrollbar-thumb { background:#E8E2D9; border-radius:10px; }
-::-webkit-scrollbar-thumb:hover { background:#48C062; }
+::-webkit-scrollbar-thumb:hover { background:#EB9220; }
 
-:focus-visible { outline:2px solid #48C062; outline-offset:2px; }
+:focus-visible { outline:2px solid #EB9220; outline-offset:2px; }
 
 @keyframes fadeInUp {
   from { opacity:0; transform:translateY(16px); }

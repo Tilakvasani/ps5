@@ -62,7 +62,7 @@ export default function AdminOrdersPage() {
         <div className="flex gap-1 flex-wrap">
           {STATUSES.map(s => (
             <button key={s} onClick={() => { setStatus(s); setPage(1); }}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-all ${status === s ? "bg-[#48C062] text-[#002A30]" : "border border-[#E8E2D9] text-[#45353E] hover:text-[#002A30] hover:border-[#E8E2D9]"}`}>
+              className={`px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-all ${status === s ? "bg-[#EB9220] text-[#002A30]" : "border border-[#E8E2D9] text-[#45353E] hover:text-[#002A30] hover:border-[#E8E2D9]"}`}>
               {s}
             </button>
           ))}
@@ -98,11 +98,11 @@ export default function AdminOrdersPage() {
                   <td className="px-4 py-3">
                     <select value={o.status} onChange={e => updateStatus(o.id, e.target.value)}
                       className={`rounded-lg border px-2 py-1 text-xs font-semibold cursor-pointer bg-transparent capitalize
-                        ${STATUS_BADGE[o.status] === "badge-success" ? "border-[#C3E5D9] text-[#48C062]" :
+                        ${STATUS_BADGE[o.status] === "badge-success" ? "border-[#C3E5D9] text-[#EB9220]" :
                           STATUS_BADGE[o.status] === "badge-warning" ? "border-yellow-500/30 text-yellow-400" :
                           STATUS_BADGE[o.status] === "badge-danger" ? "border-red-500/30 text-red-400" :
                           STATUS_BADGE[o.status] === "badge-purple" ? "border-purple-500/30 text-purple-400" :
-                          "border-[#002A30]/30 text-[#48C062]"}`}>
+                          "border-[#002A30]/30 text-[#EB9220]"}`}>
                       {["pending","confirmed","processing","shipped","delivered","cancelled"].map(s => (
                         <option key={s} value={s} className="bg-[#FCFAF6] text-[#002A30] capitalize">{s}</option>
                       ))}
@@ -116,7 +116,7 @@ export default function AdminOrdersPage() {
                           try { await invoicesApi.downloadPdf(o.invoice.invoiceNumber); }
                           catch (err: any) { toast.error(err.message || "Download failed"); }
                         }}
-                        className="flex items-center gap-1 text-xs text-[#48C062] hover:text-[#48C062]"
+                        className="flex items-center gap-1 text-xs text-[#EB9220] hover:text-[#EB9220]"
                       ><Download size={12} /> PDF</button>
                     ) : <span className="text-[#002A30]/30 text-xs">—</span>}
                   </td>
