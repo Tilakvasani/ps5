@@ -13,11 +13,11 @@ const config: Config = {
           700: "#D84315",
         },
         blue: {
-          DEFAULT: "#002A30",
+          DEFAULT: "#0B1B3D",
           400: "#359E4C",
           500: "#48C062",
-          600: "#002A30",
-          700: "#001C20",
+          600: "#0B1B3D",
+          700: "#06122b",
         },
         charcoal: {
           DEFAULT: "#111827",
@@ -34,8 +34,8 @@ const config: Config = {
         "neon-sky":      "#4CC9F0",
         "lemon-yellow":  "#FFD166",
         "mint-green":    "#2EC4B6",
-        "zupwell-blue":  "#002A30",
-        "zupwell-blue-light": "#EB9220",
+        "zupwell-blue":  "#0B1B3D",
+        "zupwell-blue-light": "#0B3C9B",
         "zupwell-orange": "#EB9220",
       },
       fontFamily: {
@@ -43,9 +43,9 @@ const config: Config = {
         display: ["Squada One", "sans-serif"],
       },
       backgroundImage: {
-        "gradient-brand":  "linear-gradient(135deg, #EB9220, #002A30)",
+        "gradient-brand":  "linear-gradient(135deg, #EB9220, #0B3C9B)",
         "gradient-orange": "linear-gradient(135deg, #EB9220, #E65100)",
-        "gradient-blue":   "linear-gradient(135deg, #002A30, #EB9220)",
+        "gradient-blue":   "linear-gradient(135deg, #0B3C9B, #EB9220)",
         "gradient-teal":   "linear-gradient(135deg, #2EC4B6, #4CC9F0)",
       },
       boxShadow: {

@@ -26,7 +26,7 @@ function sanitizeHtml(html: string): string {
 const C = {
   bg:      "#FCFAF6",
   surface: "#FFFFFF",
-  blue:    "#002A30",
+  blue:    "#0B1B3D",
   mint:    "#EB9220",
   mintDim: "#D84315",
   border:  "#E8E2D9",

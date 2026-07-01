@@ -68,7 +68,7 @@ function ProductsContent() {
           <div className="absolute -top-20 left-1/4 h-[300px] w-[300px] rounded-full bg-[#EB9220]/10 " />
         </div>
         <div className="relative mx-auto max-w-7xl">
-          <h1 className="text-4xl font-black text-[#002A30] mb-2">All <span className="gradient-text">Products</span></h1>
+          <h1 className="text-4xl font-black text-[#0B1B3D] mb-2">All <span className="gradient-text">Products</span></h1>
           <p className="text-[#45353E]">{total} products available</p>
         </div>
       </div>
@@ -78,7 +78,7 @@ function ProductsContent() {
         <aside className={`lg:w-64 flex-shrink-0 ${filterOpen ? "block" : "hidden lg:block"}`}>
           <div className="card sticky top-24 space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-[#002A30]">Filters</h2>
+              <h2 className="font-bold text-[#0B1B3D]">Filters</h2>
               <button onClick={clearFilters} className="text-xs text-[#EB9220] hover:text-[#EB9220]">Clear all</button>
             </div>
 
@@ -99,12 +99,12 @@ function ProductsContent() {
               <label className="text-xs font-semibold text-[#45353E] uppercase tracking-wider mb-2 block">Category</label>
               <div className="space-y-1">
                 <button onClick={() => { setSelectedCat(""); setPage(1); }}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${!selectedCat ? "bg-[#EB9220]/20 text-[#EB9220]" : "text-[#45353E] hover:text-[#002A30] hover:bg-[#FCFAF6]"}`}>
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${!selectedCat ? "bg-[#EB9220]/20 text-[#EB9220]" : "text-[#45353E] hover:text-[#0B1B3D] hover:bg-[#FCFAF6]"}`}>
                   All Categories
                 </button>
                 {categories.map((cat) => (
                   <button key={cat.id} onClick={() => { setSelectedCat(cat.slug); setPage(1); }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${selectedCat === cat.slug ? "bg-[#EB9220]/20 text-[#EB9220]" : "text-[#45353E] hover:text-[#002A30] hover:bg-[#FCFAF6]"}`}>
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${selectedCat === cat.slug ? "bg-[#EB9220]/20 text-[#EB9220]" : "text-[#45353E] hover:text-[#0B1B3D] hover:bg-[#FCFAF6]"}`}>
                     {cat.name}
                   </button>
                 ))}
@@ -161,7 +161,7 @@ function ProductsContent() {
               {Array.from({ length: totalPages }).map((_, i) => (
                 <motion.button key={i} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={() => setPage(i + 1)}
-                  className={`h-9 w-9 rounded-lg text-sm font-semibold transition-all ${page === i + 1 ? "bg-[#EB9220] text-white" : "border border-[#E8E2D9] text-[#45353E] hover:border-[#E8E2D9] hover:text-[#002A30]"}`}>
+                  className={`h-9 w-9 rounded-lg text-sm font-semibold transition-all ${page === i + 1 ? "bg-[#EB9220] text-white" : "border border-[#E8E2D9] text-[#45353E] hover:border-[#E8E2D9] hover:text-[#0B1B3D]"}`}>
                   {i + 1}
                 </motion.button>
               ))}

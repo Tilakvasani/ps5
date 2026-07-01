@@ -72,7 +72,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
     <div className={`border border-[#E8E2D9] rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-[#EB9220]/40 shadow-sm" : "hover:border-[#EB9220]/20"}`}>
       <button onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left">
-        <span className={`font-semibold text-sm md:text-base transition-colors ${open ? "text-[#EB9220]" : "text-[#002A30]"}`}>
+        <span className={`font-semibold text-sm md:text-base transition-colors ${open ? "text-[#EB9220]" : "text-[#0B1B3D]"}`}>
           {q}
         </span>
         <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }} className="shrink-0">
@@ -129,7 +129,7 @@ export default function FAQsPage() {
             FAQs
           </motion.span>
           <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="text-5xl md:text-6xl font-black text-[#002A30] mb-4 leading-tight">
+            className="text-5xl md:text-6xl font-black text-[#0B1B3D] mb-4 leading-tight">
             Got <span className="gradient-text">Questions?</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
@@ -164,7 +164,7 @@ export default function FAQsPage() {
               viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-2xl">{section.emoji}</span>
-                <h2 className="text-xl font-black text-[#002A30]">{section.category}</h2>
+                <h2 className="text-xl font-black text-[#0B1B3D]">{section.category}</h2>
               </div>
               <div className="space-y-3">
                 {section.questions.map(({ q, a }) => (
@@ -183,7 +183,7 @@ export default function FAQsPage() {
             <div className="h-16 w-16 rounded-2xl bg-[#F0EFEA] flex items-center justify-center mx-auto mb-4">
               <MessageCircle size={28} className="text-[#EB9220]" />
             </div>
-            <h2 className="text-2xl font-black text-[#002A30] mb-2">
+            <h2 className="text-2xl font-black text-[#0B1B3D] mb-2">
               Still have a question?
             </h2>
             <p className="text-[#45353E] mb-6">

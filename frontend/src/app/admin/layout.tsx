@@ -62,7 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#EB9220", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
           </span>
           <span className="ml-auto text-xs text-[#45353E] border border-[#E8E2D9] rounded px-1.5 py-0.5">Admin</span>
-          <button className="lg:hidden text-[#45353E] hover:text-[#002A30] ml-1" onClick={() => setSidebarOpen(false)}><X size={18} /></button>
+          <button className="lg:hidden text-[#45353E] hover:text-[#0B1B3D] ml-1" onClick={() => setSidebarOpen(false)}><X size={18} /></button>
         </div>
 
         {/* Nav */}
@@ -72,8 +72,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             return (
               <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all group ${
-                  active ? "bg-[#EB9220]/20 text-[#EB9220]" : "text-[#45353E] hover:text-[#002A30] hover:bg-[#FCFAF6]"}`}>
-                <item.icon size={16} className={active ? "text-[#EB9220]" : "text-[#45353E] group-hover:text-[#002A30]"} />
+                  active ? "bg-[#EB9220]/20 text-[#EB9220]" : "text-[#45353E] hover:text-[#0B1B3D] hover:bg-[#FCFAF6]"}`}>
+                <item.icon size={16} className={active ? "text-[#EB9220]" : "text-[#45353E] group-hover:text-[#0B1B3D]"} />
                 {item.label}
                 {active && <ChevronRight size={12} className="ml-auto" />}
               </Link>
@@ -88,7 +88,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {adminName[0]?.toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-[#002A30] truncate">{adminName}</p>
+              <p className="text-sm font-bold text-[#0B1B3D] truncate">{adminName}</p>
               <p className="text-xs text-[#45353E]">Administrator</p>
             </div>
           </div>
@@ -102,15 +102,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
         <header className="flex items-center gap-4 border-b border-[#E8E2D9] bg-white  px-6 py-3 flex-shrink-0">
-          <button className="lg:hidden text-[#45353E] hover:text-[#002A30]" onClick={() => setSidebarOpen(true)}>
+          <button className="lg:hidden text-[#45353E] hover:text-[#0B1B3D]" onClick={() => setSidebarOpen(true)}>
             <Menu size={22} />
           </button>
           <div className="flex-1" />
-          <Link href="/" target="_blank" className="text-xs text-[#45353E] hover:text-[#002A30] transition-colors border border-[#E8E2D9] rounded-lg px-3 py-1.5">
+          <Link href="/" target="_blank" className="text-xs text-[#45353E] hover:text-[#0B1B3D] transition-colors border border-[#E8E2D9] rounded-lg px-3 py-1.5">
             View Store ↗
           </Link>
           <Link href="/admin/notifications">
-            <div className="relative p-2 text-[#45353E] hover:text-[#002A30] cursor-pointer">
+            <div className="relative p-2 text-[#45353E] hover:text-[#0B1B3D] cursor-pointer">
               <Bell size={18} />
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[#EB9220]" />
             </div>

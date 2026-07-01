@@ -64,7 +64,7 @@ export default function AboutPage() {
             About Zupwell
           </motion.span>
           <motion.h1 {...fadeUp(0.1)}
-            className="text-5xl md:text-6xl font-black text-[#002A30] leading-tight mb-6">
+            className="text-5xl md:text-6xl font-black text-[#0B1B3D] leading-tight mb-6">
             "{s(settings, "about_punchline")}"
           </motion.h1>
           <motion.p {...fadeUp(0.2)} className="text-lg text-[#45353E] max-w-2xl mx-auto leading-relaxed">
@@ -78,7 +78,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <motion.div {...fadeUp(0)}>
             <span className="text-xs font-semibold uppercase tracking-widest text-[#EB9220] mb-3 block">Our Story</span>
-            <h2 className="text-3xl md:text-4xl font-black text-[#002A30] mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-black text-[#0B1B3D] mb-6 leading-tight">
               Born to solve a <span className="gradient-text">real problem</span>
             </h2>
             <p className="text-[#45353E] leading-relaxed text-lg">
@@ -109,14 +109,14 @@ export default function AboutPage() {
             <div className="h-10 w-10 rounded-xl bg-[#EB9220]/10 flex items-center justify-center mb-4">
               <Heart size={20} className="text-[#EB9220]" />
             </div>
-            <h3 className="text-xl font-black text-[#002A30] mb-3">Our Mission</h3>
+            <h3 className="text-xl font-black text-[#0B1B3D] mb-3">Our Mission</h3>
             <p className="text-[#45353E] leading-relaxed">{s(settings, "about_mission")}</p>
           </motion.div>
           <motion.div {...fadeUp(0.1)} className="card border-l-4 border-l-[#EB9220] rounded-l-none">
             <div className="h-10 w-10 rounded-xl bg-[#EB9220]/10 flex items-center justify-center mb-4">
               <Eye size={20} className="text-[#EB9220]" />
             </div>
-            <h3 className="text-xl font-black text-[#002A30] mb-3">Our Vision</h3>
+            <h3 className="text-xl font-black text-[#0B1B3D] mb-3">Our Vision</h3>
             <p className="text-[#45353E] leading-relaxed">{s(settings, "about_vision")}</p>
           </motion.div>
         </div>
@@ -126,7 +126,7 @@ export default function AboutPage() {
       <section className="py-20 px-6">
         <div className="mx-auto max-w-5xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black text-[#002A30] mb-3">
+            <h2 className="text-3xl md:text-4xl font-black text-[#0B1B3D] mb-3">
               Why <span className="gradient-text">Zupwell?</span>
             </h2>
             <p className="text-[#45353E]">Three reasons our customers never look back</p>
@@ -137,7 +137,7 @@ export default function AboutPage() {
                 <div className="h-14 w-14 mx-auto rounded-2xl bg-[#EB9220]/10 flex items-center justify-center mb-4 group-hover:bg-[#EB9220]/20 transition-all">
                   <w.icon size={24} className="text-[#EB9220]" />
                 </div>
-                <h3 className="font-bold text-[#002A30] mb-2 text-lg">{w.title}</h3>
+                <h3 className="font-bold text-[#0B1B3D] mb-2 text-lg">{w.title}</h3>
                 <p className="text-sm text-[#45353E] leading-relaxed">{w.desc}</p>
               </motion.div>
             ))}
@@ -152,7 +152,7 @@ export default function AboutPage() {
         <section className="py-20 px-6">
           <div className="mx-auto max-w-4xl">
             <motion.div {...fadeUp(0)} className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-black text-[#002A30]">
+              <h2 className="text-3xl md:text-4xl font-black text-[#0B1B3D]">
                 The Future of <span className="gradient-text">Zupwell</span>
               </h2>
             </motion.div>
@@ -182,7 +182,7 @@ export default function AboutPage() {
       <section className="py-16 px-6 bg-white">
         <div className="mx-auto max-w-2xl text-center">
           <motion.div {...fadeUp(0)}>
-            <h2 className="text-2xl font-black text-[#002A30] mb-4">
+            <h2 className="text-2xl font-black text-[#0B1B3D] mb-4">
               Ready to fuel your hustle?
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

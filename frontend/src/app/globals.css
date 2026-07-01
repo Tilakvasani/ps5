@@ -11,28 +11,28 @@
 
 @layer base {
   :root {
-    --blue:        #002A30;
+    --blue:        #0B3C9B;
     --mint:        #EB9220;
     --ice:         #FCFAF6;
-    --blue-dim:    #001C20;
+    --blue-dim:    #061d47;
     --mint-dim:    #D84315;
     --border:      #E8E2D9;
     --border-soft: #F5EFE6;
-    --text-dark:   #002A30;
+    --text-dark:   #0B1B3D;
     --text-mid:    #45353E;
     --text-light:  #8C8276;
     --surface:     #FFFFFF;
     --surface-alt: #FCFAF6;
 
     /* legacy aliases */
-    --zupwell-blue:       #002A30;
-    --zupwell-blue-light: #EB9220;
+    --zupwell-blue:       #0B1B3D;
+    --zupwell-blue-light: #0B3C9B;
     --zupwell-orange:     #EB9220;
     --zupwell-white:      #FFFFFF;
     --bg-light:           #FCFAF6;
     --border-grey:        #E8E2D9;
     --text-grey:          #45353E;
-    --charcoal:           #002A30;
+    --charcoal:           #0B1B3D;
     --silver:             #FCFAF6;
     --silver-dark:        #E8E2D9;
     --white:              #FFFFFF;
@@ -43,7 +43,7 @@
   body {
     @apply antialiased;
     background-color: #FCFAF6;
-    color: #002A30;
+    color: #0B1B3D;
     font-family: 'DM Sans', sans-serif;
     font-size: 15px;
     line-height: 1.6;
@@ -51,7 +51,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'DM Sans', sans-serif;
-    color: #002A30;
+    color: #0B1B3D;
     font-weight: 700;
     letter-spacing: -0.02em;
   }
@@ -64,21 +64,21 @@
   .card {
     @apply rounded-3xl p-6;
     background: #FFFFFF;
-    border: 1px solid rgba(0, 42, 48, 0.05);
-    box-shadow: 0 10px 30px rgba(0, 42, 48, 0.03);
+    border: 1px solid rgba(11, 27, 61, 0.05);
+    box-shadow: 0 10px 30px rgba(11, 27, 61, 0.03);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 20px 40px rgba(0, 42, 48, 0.06);
+    box-shadow: 0 20px 40px rgba(11, 27, 61, 0.06);
     border-color: rgba(235, 146, 32, 0.15);
   }
 
   .glass {
     @apply rounded-3xl;
     background: #FFFFFF;
-    border: 1px solid rgba(0, 42, 48, 0.05);
-    box-shadow: 0 10px 30px rgba(0, 42, 48, 0.03);
+    border: 1px solid rgba(11, 27, 61, 0.05);
+    box-shadow: 0 10px 30px rgba(11, 27, 61, 0.03);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .glass-hover {
@@ -86,13 +86,13 @@
   }
   .glass-hover:hover {
     transform: translateY(-3px);
-    box-shadow: 0 20px 40px rgba(0, 42, 48, 0.06);
+    box-shadow: 0 20px 40px rgba(11, 27, 61, 0.06);
     border-color: #EB9220;
   }
 
   /* vibrant gradient matching Plix brand aesthetic */
   .gradient-text {
-    background: linear-gradient(135deg, #002A30 30%, #EB9220 100%);
+    background: linear-gradient(135deg, #0B1B3D 30%, #EB9220 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -110,18 +110,18 @@
 
   .btn-secondary {
     @apply rounded-full px-6 py-3 font-semibold transition-all duration-200;
-    background: #002A30;
+    background: #0B1B3D;
     color: #FFFFFF;
     border: none;
   }
-  .btn-secondary:hover  { background: #001C20; transform: translateY(-1.5px); box-shadow: 0 4px 14px rgba(0, 42, 48, 0.2); }
+  .btn-secondary:hover  { background: #001C20; transform: translateY(-1.5px); box-shadow: 0 4px 14px rgba(11, 27, 61, 0.2); }
   .btn-secondary:active { background: #001518; transform: translateY(0); }
 
   .btn-outline {
     @apply rounded-full px-6 py-3 font-semibold transition-all duration-200;
     background: transparent;
-    border: 2px solid #002A30;
-    color: #002A30;
+    border: 2px solid #0B1B3D;
+    color: #0B1B3D;
   }
   .btn-outline:hover { border-color: #EB9220; color: #EB9220; background: rgba(235, 146, 32, 0.04); }
 
@@ -129,7 +129,7 @@
     @apply w-full rounded-xl px-4 py-3 transition-all duration-200 focus:outline-none;
     background: #FFFFFF;
     border: 1.5px solid #E8E2D9;
-    color: #002A30;
+    color: #0B1B3D;
   }
   .input-field::placeholder { color: #8C8276; }
   .input-field:focus {
@@ -143,19 +143,19 @@
   }
 
   .badge         { @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold; }
-  .badge-orange  { @apply badge; background:#F0EFEA; color:#359E4C; border:1px solid #C3E5D9; }
-  .badge-blue    { @apply badge; background:#EAF0F7; color:#002A30; border:1px solid #C0D2E4; }
+  .badge-orange  { @apply badge; background:#FFF8EC; color:#D84315; border:1px solid #F0DBA8; }
+  .badge-blue    { @apply badge; background:#EAF0F7; color:#0B1B3D; border:1px solid #C0D2E4; }
   .badge-silver  { @apply badge; background:#FCFAF6; color:#45353E; border:1px solid #E8E2D9; }
-  .badge-success { @apply badge; background:#F0EFEA; color:#359E4C; border:1px solid #C3E5D9; }
+  .badge-success { @apply badge; background:#FFF8EC; color:#D84315; border:1px solid #F0DBA8; }
   .badge-warning { @apply badge; background:#FFF8EC; color:#9A6700; border:1px solid #F0DBA8; }
   .badge-danger  { @apply badge; background:#FEF2F2; color:#B91C1C; border:1px solid #FCA5A5; }
-  .badge-info    { @apply badge; background:#EAF0F7; color:#002A30; border:1px solid #C0D2E4; }
+  .badge-info    { @apply badge; background:#EAF0F7; color:#0B1B3D; border:1px solid #C0D2E4; }
   .badge-purple  { @apply badge; background:#F5F3FF; color:#5B21B6; border:1px solid #C4B5FD; }
 
-  .section-silver { background:#FCFAF6; color:#002A30; }
+  .section-silver { background:#FCFAF6; color:#0B1B3D; }
   .section-silver h1,
   .section-silver h2,
-  .section-silver h3 { color:#002A30; }
+  .section-silver h3 { color:#0B1B3D; }
 }
 
 ::-webkit-scrollbar       { width:6px; }

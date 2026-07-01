@@ -36,7 +36,7 @@ export default function AdminCouponsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-black text-[#002A30]">Coupons</h1>
+        <h1 className="text-3xl font-black text-[#0B1B3D]">Coupons</h1>
         <button onClick={openNew} className="btn-primary flex items-center gap-2"><Plus size={16} /> New Coupon</button>
       </div>
       <div className="card p-0 overflow-hidden">
@@ -50,7 +50,7 @@ export default function AdminCouponsPage() {
               <tr key={c.id} className="hover:bg-[#FCFAF6] transition-colors">
                 <td className="px-4 py-3 font-mono font-bold text-[#EB9220]">{c.code}</td>
                 <td className="px-4 py-3 text-[#45353E] capitalize">{c.discountType}</td>
-                <td className="px-4 py-3 font-bold text-[#002A30]">{c.discountType === "percent" ? `${c.discountValue}%` : `₹${c.discountValue}`}</td>
+                <td className="px-4 py-3 font-bold text-[#0B1B3D]">{c.discountType === "percent" ? `${c.discountValue}%` : `₹${c.discountValue}`}</td>
                 <td className="px-4 py-3 text-[#45353E]">₹{c.minOrderValue}</td>
                 <td className="px-4 py-3 text-[#45353E]">{c.usedCount || 0}{c.usageLimit ? `/${c.usageLimit}` : ""}</td>
                 <td className="px-4 py-3 text-[#45353E] text-xs">{c.validTo ? new Date(c.validTo).toLocaleDateString("en-IN") : "—"}</td>
@@ -68,7 +68,7 @@ export default function AdminCouponsPage() {
       {modal !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white  px-4">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-lg card p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="font-bold text-[#002A30] mb-5">{modal?.id ? "Edit" : "New"} Coupon</h2>
+            <h2 className="font-bold text-[#0B1B3D] mb-5">{modal?.id ? "Edit" : "New"} Coupon</h2>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="label-text">Code *</label><input value={form.code} onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))} className="input-field" placeholder="SAVE10" /></div>

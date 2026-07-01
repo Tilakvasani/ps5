@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           toastOptions={{
             style: {
               background: "#FFFFFF",
-              color: "#002A30",
+              color: "#0B1B3D",
               border: "1px solid #E8E2D9",
               
               borderRadius: "12px",

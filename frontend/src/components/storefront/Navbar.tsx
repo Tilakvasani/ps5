@@ -42,7 +42,7 @@ export default function Navbar() {
       }}
     >
       {/* Top Banner */}
-      <div className="w-full bg-[#002A30] text-white py-2 px-6 text-center text-xs font-semibold flex items-center justify-center gap-2">
+      <div className="w-full bg-[#0B1B3D] text-white py-2 px-6 text-center text-xs font-semibold flex items-center justify-center gap-2">
         <span className="bg-[#EB9220] text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md leading-none">NEW</span>
         <span className="flex items-center gap-1 text-[11px] tracking-wide">
           ⚡ Instant Hydration Effervescent Electrolyte Tablets | Free Express Shipping across India over ₹499
@@ -52,7 +52,7 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
 
         {/* Logo — lowercase with orange dot */}
-        <Link href="/" className="text-3xl font-black flex items-center tracking-tight font-sans" style={{ color: "#002A30", letterSpacing: "-0.06em" }}>
+        <Link href="/" className="text-3xl font-black flex items-center tracking-tight font-sans" style={{ color: "#0B1B3D", letterSpacing: "-0.06em" }}>
           zupwell<span className="text-[#EB9220] font-black text-4xl leading-none -ml-0.5">.</span>
         </Link>
 
@@ -62,7 +62,7 @@ export default function Navbar() {
             <Link
               key={label}
               href={href}
-              className="text-xs font-bold uppercase tracking-wider transition-colors duration-150 text-[#45353E] hover:text-[#002A30]"
+              className="text-xs font-bold uppercase tracking-wider transition-colors duration-150 text-[#45353E] hover:text-[#0B1B3D]"
             >
               {label}
             </Link>
@@ -73,12 +73,12 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
  
           {/* Search */}
-          <Link href="/products" className="p-2 transition-colors duration-150 text-[#45353E] hover:text-[#002A30]">
+          <Link href="/products" className="p-2 transition-colors duration-150 text-[#45353E] hover:text-[#0B1B3D]">
             <Search size={20} />
           </Link>
 
           {/* Cart */}
-          <Link href="/cart" className="relative p-2 transition-colors duration-150 text-[#45353E] hover:text-[#002A30]"
+          <Link href="/cart" className="relative p-2 transition-colors duration-150 text-[#45353E] hover:text-[#0B1B3D]"
           >
             <ShoppingCart size={20} />
             <AnimatePresence>
@@ -100,15 +100,15 @@ export default function Navbar() {
               <button
                 onClick={() => setUserDropOpen(!userDropOpen)}
                 className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-150"
-                style={{ border: "1.5px solid #E8E2D9", color: "#002A30", background: "#FFFFFF" }}
+                style={{ border: "1.5px solid #E8E2D9", color: "#0B1B3D", background: "#FFFFFF" }}
               >
                 <div
                   className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                  style={{ background: "#002A30" }}
+                  style={{ background: "#0B1B3D" }}
                 >
                   {user.name[0].toUpperCase()}
                 </div>
-                <span className="hidden md:inline" style={{ color: "#002A30" }}>{user.name.split(" ")[0]}</span>
+                <span className="hidden md:inline" style={{ color: "#0B1B3D" }}>{user.name.split(" ")[0]}</span>
               </button>
               <AnimatePresence>
                 {userDropOpen && (
@@ -119,12 +119,12 @@ export default function Navbar() {
                     style={{ background: "#FFFFFF", border: "1.5px solid #E8E2D9" }}
                   >
                     <Link href="/account" onClick={() => setUserDropOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#002A30] hover:bg-[#FCFAF6]"
+                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#0B1B3D] hover:bg-[#FCFAF6]"
                     >
                       <User size={14} /> My Account
                     </Link>
                     <Link href="/account?tab=orders" onClick={() => setUserDropOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#002A30] hover:bg-[#FCFAF6]"
+                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#0B1B3D] hover:bg-[#FCFAF6]"
                     >
                       <HeartPulse size={14} /> My Orders
                     </Link>

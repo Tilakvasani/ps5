@@ -82,7 +82,7 @@ export default function ContactPage() {
           <motion.span {...fadeUp(0)} className="inline-block text-xs font-semibold uppercase tracking-widest text-[#EB9220] mb-4">
             Contact Us
           </motion.span>
-          <motion.h1 {...fadeUp(0.1)} className="text-5xl md:text-6xl font-black text-[#002A30] mb-4 leading-tight">
+          <motion.h1 {...fadeUp(0.1)} className="text-5xl md:text-6xl font-black text-[#0B1B3D] mb-4 leading-tight">
             Got Questions?<br />
             <span className="gradient-text">We've Got Answers!</span>
           </motion.h1>
@@ -105,7 +105,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-[#45353E] mb-1">WhatsApp</p>
-                <p className="font-bold text-[#002A30] text-sm">+{s(settings, "contact_whatsapp")}</p>
+                <p className="font-bold text-[#0B1B3D] text-sm">+{s(settings, "contact_whatsapp")}</p>
                 <p className="text-xs text-[#EB9220] mt-1 font-semibold">Chat now →</p>
               </div>
             </motion.a>
@@ -119,7 +119,7 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-[#45353E] mb-1">Support Email</p>
-              <p className="font-bold text-[#002A30] text-sm break-all">{s(settings, "contact_support_email")}</p>
+              <p className="font-bold text-[#0B1B3D] text-sm break-all">{s(settings, "contact_support_email")}</p>
             </div>
           </motion.a>
 
@@ -131,7 +131,7 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-[#45353E] mb-1">Info Email</p>
-              <p className="font-bold text-[#002A30] text-sm break-all">{s(settings, "contact_info_email")}</p>
+              <p className="font-bold text-[#0B1B3D] text-sm break-all">{s(settings, "contact_info_email")}</p>
             </div>
           </motion.a>
 
@@ -171,7 +171,7 @@ export default function ContactPage() {
             <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#EB9220] mb-3">
               Grow with Zupwell
             </span>
-            <h2 className="text-3xl md:text-4xl font-black text-[#002A30] mb-3">
+            <h2 className="text-3xl md:text-4xl font-black text-[#0B1B3D] mb-3">
               Distributor <span className="gradient-text">Inquiry</span>
             </h2>
             <p className="text-[#45353E]">

@@ -87,7 +87,7 @@ interface EmptyStateProps {
 export const EmptyState = ({ icon, title, description, action }: EmptyStateProps) => (
   <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
     {icon && <div className="text-4xl mb-2">{icon}</div>}
-    <p className="font-bold text-[#002A30] text-lg">{title}</p>
+    <p className="font-bold text-[#0B1B3D] text-lg">{title}</p>
     {description && <p className="text-sm text-[#45353E] max-w-sm">{description}</p>}
     {action && <div className="mt-4">{action}</div>}
   </div>

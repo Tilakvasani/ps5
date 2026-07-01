@@ -77,7 +77,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 {product.brand}
               </p>
             )}
-            <h3 className="font-semibold text-[#002A30] text-sm leading-tight mb-1 line-clamp-2">{product.name}</h3>
+            <h3 className="font-semibold text-[#0B1B3D] text-sm leading-tight mb-1 line-clamp-2">{product.name}</h3>
             <p className="text-xs mb-3 text-[#8C8276]">HSN: {product.hsnCode} · {product.unit}</p>
 
             {product.avgRating && (
@@ -91,7 +91,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-lg font-bold text-[#002A30]">₹{Number(product.sellingPrice).toFixed(2)}</span>
+                <span className="text-lg font-bold text-[#0B1B3D]">₹{Number(product.sellingPrice).toFixed(2)}</span>
                 {discount > 0 && (
                   <span className="ml-1 text-xs line-through text-[#8C8276]">
                     ₹{Number(product.basePrice).toFixed(2)}
