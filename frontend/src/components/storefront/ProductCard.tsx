@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ShoppingCart, Star, HeartPulse } from "lucide-react";
+import { ShoppingCart, Star, HeartPulse, Plus } from "lucide-react";
 import { useStore } from "@/lib/store";
 import toast from "react-hot-toast";
 
@@ -14,6 +14,7 @@ interface Product {
   discountPercent: number;
   unit: string;
   hsnCode: string;
+  sku: string;
   brand?: string;
   images: { imageUrl: string; isPrimary: boolean }[];
   _count?: { reviews: number };

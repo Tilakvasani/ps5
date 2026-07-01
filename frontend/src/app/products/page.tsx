@@ -12,7 +12,7 @@ import { useSearchParams } from "next/navigation";
 interface Product {
   id: number; name: string; slug: string;
   sellingPrice: number; basePrice: number; discountPercent: number;
-  unit: string; hsnCode: string; brand?: string;
+  unit: string; hsnCode: string; sku: string; brand?: string;
   images: { imageUrl: string; isPrimary: boolean }[];
   avgRating?: number; _count?: { reviews: number };
 }
