@@ -57,6 +57,7 @@ const SETTING_GROUPS = [
       { key: "cert_iso_logo",   label: "ISO Logo URL",    type: "text" },
       { key: "cert_gmp_logo",   label: "GMP Logo URL",    type: "text" },
       { key: "cert_haccp_logo", label: "HACCP Logo URL",  type: "text" },
+      { key: "cert_fssc_logo",  label: "FSSC 22000 Logo URL", type: "text" },
     ],
   },
   {
@@ -85,6 +86,58 @@ const SETTING_GROUPS = [
       { key: "about_why2_desc",    label: "Why Zupwell — Point 2 Description", type: "textarea" },
       { key: "about_why3_title",   label: "Why Zupwell — Point 3 Title", type: "text" },
       { key: "about_why3_desc",    label: "Why Zupwell — Point 3 Description", type: "textarea" },
+      { key: "about_story_badge",  label: "Story Section Badge", type: "text" },
+      { key: "about_story_title",  label: "Story Section Title", type: "text" },
+      { key: "about_why_title",    label: "Why Section Title", type: "text" },
+      { key: "about_why_subtitle", label: "Why Section Subtitle", type: "text" },
+      { key: "about_future_title", label: "Future Section Title", type: "text" },
+      { key: "about_cta_title",    label: "CTA Section Title", type: "text" },
+    ],
+  },
+  {
+    label: "Science Page",
+    desc: "Content for the Science & Quality page sections",
+    keys: [
+      { key: "science_hero_badge", label: "Hero Badge", type: "text" },
+      { key: "science_hero_title", label: "Hero Title", type: "text" },
+      { key: "science_hero_subtext", label: "Hero Subtext", type: "textarea" },
+      { key: "science_process_badge", label: "Process Section Badge", type: "text" },
+      { key: "science_process_title", label: "Process Section Title", type: "textarea" },
+      { key: "science_process1_title", label: "Process Point 1 Title", type: "text" },
+      { key: "science_process1_desc", label: "Process Point 1 Description", type: "textarea" },
+      { key: "science_process2_title", label: "Process Point 2 Title", type: "text" },
+      { key: "science_process2_desc", label: "Process Point 2 Description", type: "textarea" },
+      { key: "science_cert_badge", label: "Certifications Section Badge", type: "text" },
+      { key: "science_cert_title", label: "Certifications Section Title", type: "text" },
+      { key: "science_cert_subtext", label: "Certifications Section Subtext", type: "textarea" },
+      { key: "science_cert1_title", label: "Certification 1 Title", type: "text" },
+      { key: "science_cert1_desc", label: "Certification 1 Description", type: "textarea" },
+      { key: "science_cert2_title", label: "Certification 2 Title", type: "text" },
+      { key: "science_cert2_desc", label: "Certification 2 Description", type: "textarea" },
+      { key: "science_cert3_title", label: "Certification 3 Title", type: "text" },
+      { key: "science_cert3_desc", label: "Certification 3 Description", type: "textarea" },
+      { key: "science_clean_badge", label: "Clean Label Badge", type: "text" },
+      { key: "science_clean_title", label: "Clean Label Title", type: "textarea" },
+      { key: "science_clean_desc", label: "Clean Label Description", type: "textarea" },
+      { key: "science_clean1_label", label: "Clean Label Point 1 Label", type: "text" },
+      { key: "science_clean1_sub", label: "Clean Label Point 1 Subtext", type: "textarea" },
+      { key: "science_clean2_label", label: "Clean Label Point 2 Label", type: "text" },
+      { key: "science_clean2_sub", label: "Clean Label Point 2 Subtext", type: "textarea" },
+      { key: "science_clean3_label", label: "Clean Label Point 3 Label", type: "text" },
+      { key: "science_clean3_sub", label: "Clean Label Point 3 Subtext", type: "textarea" },
+      { key: "science_tube_title", label: "Tube Design Section Title", type: "textarea" },
+      { key: "science_tube_desc", label: "Tube Design Section Description", type: "textarea" },
+      { key: "science_tube_f1_title", label: "Tube Design Feature 1 Title", type: "text" },
+      { key: "science_tube_f1_desc", label: "Tube Design Feature 1 Desc", type: "text" },
+      { key: "science_tube_f2_title", label: "Tube Design Feature 2 Title", type: "text" },
+      { key: "science_tube_f2_desc", label: "Tube Design Feature 2 Desc", type: "text" },
+      { key: "science_tube_f3_title", label: "Tube Design Feature 3 Title", type: "text" },
+      { key: "science_tube_f3_desc", label: "Tube Design Feature 3 Desc", type: "text" },
+      { key: "science_tube_f4_title", label: "Tube Design Feature 4 Title", type: "text" },
+      { key: "science_tube_f4_desc", label: "Tube Design Feature 4 Desc", type: "text" },
+      { key: "science_cta_title", label: "CTA Section Title", type: "text" },
+      { key: "science_cta_subtext", label: "CTA Section Subtext", type: "textarea" },
+      { key: "science_cta_btn", label: "CTA Section Button Text", type: "text" },
     ],
   },
   {
@@ -96,6 +149,65 @@ const SETTING_GROUPS = [
       { key: "contact_info_email",    label: "Info Email", type: "email" },
       { key: "contact_instagram",     label: "Instagram URL", type: "text" },
       { key: "contact_facebook",      label: "Facebook URL", type: "text" },
+      { key: "contact_hero_badge",    label: "Hero Badge", type: "text" },
+      { key: "contact_hero_title",    label: "Hero Title", type: "text" },
+      { key: "contact_hero_subtext",  label: "Hero Subtext", type: "textarea" },
+      { key: "contact_form_badge",    label: "Distributor Form Badge", type: "text" },
+      { key: "contact_form_title",    label: "Distributor Form Title", type: "text" },
+      { key: "contact_form_subtext",  label: "Distributor Form Subtext", type: "textarea" },
+      { key: "contact_form_footer",   label: "Distributor Form Footnote", type: "text" },
+    ],
+  },
+  {
+    label: "FAQs Page",
+    desc: "Frequently Asked Questions configuration",
+    keys: [
+      { key: "faqs_hero_badge", label: "Hero Badge", type: "text" },
+      { key: "faqs_hero_title", label: "Hero Title", type: "text" },
+      { key: "faqs_hero_subtext", label: "Hero Subtext", type: "textarea" },
+      { key: "faqs_footer_title", label: "Footer Title (still have questions?)", type: "text" },
+      { key: "faqs_footer_subtext", label: "Footer Subtext", type: "textarea" },
+      { key: "faqs_list_json", label: "FAQs List (JSON Format)", type: "json" },
+    ],
+  },
+  {
+    label: "Legal Policy Pages",
+    desc: "Content and sections for all 5 legal policies (Privacy, Terms, Refund, Shipping, Disclaimer)",
+    keys: [
+      // Privacy Policy
+      { key: "policy_privacy_badge", label: "Privacy Policy — Badge", type: "text" },
+      { key: "policy_privacy_title", label: "Privacy Policy — Title", type: "text" },
+      { key: "policy_privacy_subtitle", label: "Privacy Policy — Subtitle", type: "textarea" },
+      { key: "policy_privacy_updated", label: "Privacy Policy — Last Updated", type: "text" },
+      { key: "policy_privacy_sections_json", label: "Privacy Policy — Sections (JSON List of {title, body})", type: "json" },
+
+      // Terms of Service
+      { key: "policy_terms_badge", label: "Terms of Service — Badge", type: "text" },
+      { key: "policy_terms_title", label: "Terms of Service — Title", type: "text" },
+      { key: "policy_terms_subtitle", label: "Terms of Service — Subtitle", type: "textarea" },
+      { key: "policy_terms_updated", label: "Terms of Service — Last Updated", type: "text" },
+      { key: "policy_terms_sections_json", label: "Terms of Service — Sections (JSON List of {title, body})", type: "json" },
+
+      // Refund Policy
+      { key: "policy_refund_badge", label: "Refund Policy — Badge", type: "text" },
+      { key: "policy_refund_title", label: "Refund Policy — Title", type: "text" },
+      { key: "policy_refund_subtitle", label: "Refund Policy — Subtitle", type: "textarea" },
+      { key: "policy_refund_updated", label: "Refund Policy — Last Updated", type: "text" },
+      { key: "policy_refund_sections_json", label: "Refund Policy — Sections (JSON List of {title, body})", type: "json" },
+
+      // Shipping Policy
+      { key: "policy_shipping_badge", label: "Shipping Policy — Badge", type: "text" },
+      { key: "policy_shipping_title", label: "Shipping Policy — Title", type: "text" },
+      { key: "policy_shipping_subtitle", label: "Shipping Policy — Subtitle", type: "textarea" },
+      { key: "policy_shipping_updated", label: "Shipping Policy — Last Updated", type: "text" },
+      { key: "policy_shipping_sections_json", label: "Shipping Policy — Sections (JSON List of {title, body})", type: "json" },
+
+      // Legal Disclaimer
+      { key: "policy_disclaimer_badge", label: "Legal Disclaimer — Badge", type: "text" },
+      { key: "policy_disclaimer_title", label: "Legal Disclaimer — Title", type: "text" },
+      { key: "policy_disclaimer_subtitle", label: "Legal Disclaimer — Subtitle", type: "textarea" },
+      { key: "policy_disclaimer_updated", label: "Legal Disclaimer — Last Updated", type: "text" },
+      { key: "policy_disclaimer_sections_json", label: "Legal Disclaimer — Sections (JSON List of {title, body})", type: "json" },
     ],
   },
   {
@@ -186,11 +298,13 @@ export default function AdminSettingsPage() {
                 {group.keys.map(({ key, label, type }) => (
                   <div key={key}>
                     <label className="label-text">{label}</label>
-                    {type === "textarea" ? (
+                    {type === "textarea" || type === "json" ? (
                       <textarea
                         value={settings[key] || ""}
                         onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
-                        className="input-field resize-none text-sm" rows={3}
+                        className={`input-field text-sm ${type === "json" ? "font-mono h-40 resize-y" : "resize-none h-20"}`}
+                        rows={type === "json" ? 8 : 3}
+                        placeholder={type === "json" ? '[{"title": "...", "body": "..."}]' : ""}
                       />
                     ) : (
                       <input

@@ -2,20 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ZupwellChat from "@/components/ZupwellChat";
 import WhatsAppButton from "@/components/storefront/WhatsAppButton";
+import ServerWakeup from "@/components/ServerWakeup";
 import { Toaster } from "react-hot-toast";
 import dynamic from "next/dynamic";
 
 const AuthSync = dynamic(() => import("@/components/AuthSync"), { ssr: false });
 
-// Keep Render backends alive — ping every 14 min to prevent sleep
-if (typeof window !== "undefined") {
-  const CHAT_URL = process.env.NEXT_PUBLIC_CHAT_API_URL || "https://whatsappchatbot-jfki.onrender.com";
-  const API_URL  = process.env.NEXT_PUBLIC_API_URL     || "https://ps5-ufm2.onrender.com";
-  setInterval(() => {
-    fetch(CHAT_URL + "/").catch(() => {});
-    fetch(API_URL  + "/health").catch(() => {});
-  }, 14 * 60 * 1000);
-}
+
 
 export const metadata: Metadata = {
   title: {
@@ -55,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <AuthSync />
+        <ServerWakeup />
         <ZupwellChat />
         <WhatsAppButton />
         {children}
