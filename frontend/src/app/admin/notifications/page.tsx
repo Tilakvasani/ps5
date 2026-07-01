@@ -29,7 +29,7 @@ export default function AdminNotificationsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black text-[#0B1B3D]">Notifications</h1>
+          <h1 className="text-3xl font-black text-[#001c54]">Notifications</h1>
           {unread > 0 && <p className="text-[#45353E] text-sm mt-1">{unread} unread</p>}
         </div>
         {unread > 0 && (
@@ -49,7 +49,7 @@ export default function AdminNotificationsPage() {
               className={`card flex items-start gap-4 cursor-pointer transition-all ${!n.isRead ? "border-[#EB9220]/20 bg-[#EB9220]/5" : "opacity-60"}`}>
               <div className="text-2xl flex-shrink-0">{ICON[n.type] || "🔔"}</div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-[#0B1B3D] text-sm">{n.title}</p>
+                <p className="font-semibold text-[#001c54] text-sm">{n.title}</p>
                 <p className="text-sm text-[#45353E] mt-0.5">{n.message}</p>
                 <p className="text-xs text-[#45353E] mt-1">{new Date(n.createdAt).toLocaleString("en-IN")}</p>
               </div>

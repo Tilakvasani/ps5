@@ -25,7 +25,7 @@ export default function LegalPage({
               {badge}
             </span>
           )}
-          <h1 className="text-4xl md:text-5xl font-black text-[#0B1B3D] mb-3">{title}</h1>
+          <h1 className="text-4xl md:text-5xl font-black text-[#001c54] mb-3">{title}</h1>
           {subtitle && <p className="text-[#45353E] mb-2">{subtitle}</p>}
           {updated && <p className="text-xs text-[#8C8276]">Last updated: {updated}</p>}
         </div>
@@ -36,7 +36,7 @@ export default function LegalPage({
         <div className="mx-auto max-w-3xl space-y-6">
           {sections.map((s, i) => (
             <div key={i} className="card">
-              <h2 className="font-bold text-[#0B1B3D] mb-3 text-lg">{s.title}</h2>
+              <h2 className="font-bold text-[#001c54] mb-3 text-lg">{s.title}</h2>
               {Array.isArray(s.body) ? (
                 <ul className="space-y-2">
                   {s.body.map((item, j) => (

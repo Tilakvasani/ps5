@@ -44,9 +44,9 @@ export default function CartPage() {
       <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
           <div className="h-24 w-24 rounded-3xl bg-[#FCFAF6] border border-[#E8E2D9] flex items-center justify-center mb-6 mx-auto">
-            <ShoppingCart size={36} className="text-[#0B1B3D]/30" />
+            <ShoppingCart size={36} className="text-[#001c54]/30" />
           </div>
-          <h2 className="text-3xl font-black text-[#0B1B3D] mb-3">Your cart is empty</h2>
+          <h2 className="text-3xl font-black text-[#001c54] mb-3">Your cart is empty</h2>
           <p className="text-[#45353E] mb-8">Add some products to get started</p>
           <Link href="/products"><motion.button whileHover={{ scale: 1.04 }} className="btn-primary px-8 py-3">Browse Products</motion.button></Link>
         </motion.div>
@@ -59,7 +59,7 @@ export default function CartPage() {
     <main className="min-h-screen bg-[#FCFAF6]">
       <Navbar />
       <div className="pt-24 pb-16 px-6 mx-auto max-w-7xl">
-        <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-black text-[#0B1B3D] mb-8">
+        <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-black text-[#001c54] mb-8">
           Your <span className="gradient-text">Cart</span>
           <span className="ml-3 text-lg text-[#45353E]">({cart.length} items)</span>
         </motion.h1>
@@ -75,12 +75,12 @@ export default function CartPage() {
                   {/* Image */}
                   <div className="h-20 w-20 flex-shrink-0 rounded-xl bg-[#FCFAF6] border border-[#E8E2D9] overflow-hidden">
                     {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" /> :
-                      <div className="w-full h-full flex items-center justify-center text-[#0B1B3D]/20"><ShoppingCart size={24} /></div>}
+                      <div className="w-full h-full flex items-center justify-center text-[#001c54]/20"><ShoppingCart size={24} /></div>}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-[#0B1B3D] text-sm mb-0.5 line-clamp-1">{item.name}</h3>
+                    <h3 className="font-semibold text-[#001c54] text-sm mb-0.5 line-clamp-1">{item.name}</h3>
                     <p className="text-xs text-[#45353E] mb-3">{item.unit} · {item.sku}</p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 rounded-lg border border-[#E8E2D9] bg-[#FCFAF6] p-0.5">
@@ -91,7 +91,7 @@ export default function CartPage() {
                           className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#FFFFFF] transition-colors"><Plus size={12} /></button>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-[#0B1B3D]">₹{(item.price * item.qty).toFixed(2)}</div>
+                        <div className="font-bold text-[#001c54]">₹{(item.price * item.qty).toFixed(2)}</div>
                         <div className="text-xs text-[#45353E]">₹{item.price.toFixed(2)} each</div>
                       </div>
                     </div>
@@ -113,7 +113,7 @@ export default function CartPage() {
             <div className="card">
               <div className="flex items-center gap-2 mb-3">
                 <Tag size={16} className="text-[#EB9220]" />
-                <span className="font-semibold text-[#0B1B3D] text-sm">Coupon Code</span>
+                <span className="font-semibold text-[#001c54] text-sm">Coupon Code</span>
               </div>
               <div className="flex gap-2">
                 <input value={coupon} onChange={(e) => setCoupon(e.target.value)} placeholder="Enter coupon" className="input-field text-sm flex-1" />
@@ -124,7 +124,7 @@ export default function CartPage() {
 
             {/* Summary */}
             <div className="card">
-              <h2 className="font-bold text-[#0B1B3D] mb-4">Order Summary</h2>
+              <h2 className="font-bold text-[#001c54] mb-4">Order Summary</h2>
               <div className="space-y-2 text-sm mb-4">
                 <div className="flex justify-between text-[#45353E]"><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>
                 <div className="flex justify-between text-[#45353E]"><span>CGST @2.5%</span><span>₹{cgst.toFixed(2)}</span></div>
@@ -139,7 +139,7 @@ export default function CartPage() {
                 )}
               </div>
               <div className="border-t border-[#E8E2D9] pt-4 flex justify-between items-center">
-                <span className="font-bold text-[#0B1B3D]">Total</span>
+                <span className="font-bold text-[#001c54]">Total</span>
                 <span className="text-2xl font-black gradient-text">₹{total.toFixed(0)}</span>
               </div>
               <p className="text-xs text-[#45353E] mt-1 text-right">Inclusive of GST</p>

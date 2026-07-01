@@ -25,11 +25,11 @@ export default function AdminReviewsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-black text-[#0B1B3D]">Reviews</h1>
+        <h1 className="text-3xl font-black text-[#001c54]">Reviews</h1>
       </div>
       <div className="flex gap-1 mb-4">
         {["pending", "approved", "all"].map(t => (
-          <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all ${tab === t ? "bg-[#EB9220] text-[#0B1B3D]" : "border border-[#E8E2D9] text-[#45353E] hover:text-[#0B1B3D]"}`}>{t}</button>
+          <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all ${tab === t ? "bg-[#EB9220] text-[#001c54]" : "border border-[#E8E2D9] text-[#45353E] hover:text-[#001c54]"}`}>{t}</button>
         ))}
       </div>
       <div className="space-y-3">
@@ -40,11 +40,11 @@ export default function AdminReviewsPage() {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-1">
                   <div className="flex gap-0.5">{Array.from({ length: r.rating }).map((_, i) => <Star key={i} size={12} className="fill-yellow-400 text-yellow-400" />)}</div>
-                  <span className="font-bold text-[#0B1B3D] text-sm">{r.user?.name}</span>
+                  <span className="font-bold text-[#001c54] text-sm">{r.user?.name}</span>
                   <span className="text-xs text-[#45353E]">{new Date(r.createdAt).toLocaleDateString("en-IN")}</span>
                   {r.isApproved ? <span className="badge badge-success text-[10px]">Approved</span> : <span className="badge badge-warning text-[10px]">Pending</span>}
                 </div>
-                <p className="text-sm text-[#0B1B3D] font-medium">{r.title}</p>
+                <p className="text-sm text-[#001c54] font-medium">{r.title}</p>
                 <p className="text-sm text-[#45353E] mt-0.5">{r.body}</p>
                 <p className="text-xs text-[#45353E] mt-1">Product: {r.product?.name}</p>
               </div>

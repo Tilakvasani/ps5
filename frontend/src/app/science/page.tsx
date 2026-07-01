@@ -86,7 +86,7 @@ export default function SciencePage() {
       icon: Award,
       title: s(settings, "science_cert1_title"),
       desc: s(settings, "science_cert1_desc"),
-      color: "#0B1B3D",
+      color: "#001c54",
       bg: "#EAF0F7",
     },
     {
@@ -161,7 +161,7 @@ export default function SciencePage() {
         />
         <div
           className="absolute -bottom-10 -left-16 w-96 h-96 rounded-full opacity-5 pointer-events-none"
-          style={{ border: "3px solid #0B1B3D" }}
+          style={{ border: "3px solid #001c54" }}
         />
 
         <div className="relative mx-auto max-w-4xl text-center">
@@ -178,7 +178,7 @@ export default function SciencePage() {
             </span>
           </motion.div>
 
-          <motion.h1 {...fadeUp(0.08)} className="font-black text-5xl md:text-7xl text-[#0B1B3D] leading-none mb-6">
+          <motion.h1 {...fadeUp(0.08)} className="font-black text-5xl md:text-7xl text-[#001c54] leading-none mb-6">
             {renderTitle(s(settings, "science_hero_title"))}
           </motion.h1>
 
@@ -194,7 +194,7 @@ export default function SciencePage() {
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#EB9220] mb-3">
             {s(settings, "science_process_badge")}
           </p>
-          <h2 className="font-black text-4xl md:text-5xl text-[#0B1B3D] whitespace-pre-line leading-tight">
+          <h2 className="font-black text-4xl md:text-5xl text-[#001c54] whitespace-pre-line leading-tight">
             {s(settings, "science_process_title")}
           </h2>
         </motion.div>
@@ -222,7 +222,7 @@ export default function SciencePage() {
               >
                 <item.icon size={26} className="text-[#EB9220]" />
               </div>
-              <h3 className="font-black text-2xl text-[#0B1B3D] mb-3">{item.title}</h3>
+              <h3 className="font-black text-2xl text-[#001c54] mb-3">{item.title}</h3>
               <p className="text-[#45353E] leading-relaxed">{item.desc}</p>
             </motion.div>
           ))}
@@ -267,7 +267,7 @@ export default function SciencePage() {
                   className="h-14 w-14 rounded-2xl flex items-center justify-center mb-6"
                   style={{ background: cert.bg, border: "1px solid #E8E2D9" }}
                 >
-                  <cert.icon size={24} style={{ color: cert.color === "#0B1B3D" ? "#EB9220" : cert.color }} />
+                  <cert.icon size={24} style={{ color: cert.color === "#001c54" ? "#EB9220" : cert.color }} />
                 </div>
                 <h3 className="font-black text-xl mb-3">{cert.title}</h3>
                 <p className="text-white/65 leading-relaxed text-sm">{cert.desc}</p>
@@ -284,7 +284,7 @@ export default function SciencePage() {
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#EB9220] mb-3">
               {s(settings, "science_clean_badge")}
             </p>
-            <h2 className="font-black text-4xl md:text-5xl text-[#0B1B3D] mb-6 whitespace-pre-line leading-tight">
+            <h2 className="font-black text-4xl md:text-5xl text-[#001c54] mb-6 whitespace-pre-line leading-tight">
               {s(settings, "science_clean_title")}
             </h2>
             <p className="text-[#45353E] text-lg leading-relaxed mb-8">
@@ -300,7 +300,7 @@ export default function SciencePage() {
                 >
                   <CheckCircle size={20} className="text-[#EB9220] mt-0.5 shrink-0" />
                   <div>
-                    <p className="font-bold text-[#0B1B3D] text-lg">{item.label}</p>
+                    <p className="font-bold text-[#001c54] text-lg">{item.label}</p>
                     <p className="text-[#45353E] text-sm mt-0.5">{item.sub}</p>
                   </div>
                 </motion.div>
@@ -325,7 +325,7 @@ export default function SciencePage() {
                 }}
               />
               <Package size={48} className="text-[#EB9220] mb-6" />
-              <h3 className="font-black text-3xl text-[#0B1B3D] mb-4 whitespace-pre-line leading-tight">
+              <h3 className="font-black text-3xl text-[#001c54] mb-4 whitespace-pre-line leading-tight">
                 {s(settings, "science_tube_title")}
               </h3>
               <p className="text-[#45353E] leading-relaxed mb-8">
@@ -334,7 +334,7 @@ export default function SciencePage() {
               <div className="grid grid-cols-2 gap-4">
                 {tubeFeatures.map(([a, b]) => (
                   <div key={a} className="rounded-2xl p-4" style={{ background: "#FCFAF6", border: "1px solid #E8E2D9" }}>
-                    <p className="font-bold text-[#0B1B3D] text-sm">{a}</p>
+                    <p className="font-bold text-[#001c54] text-sm">{a}</p>
                     <p className="text-[#45353E] text-xs mt-0.5">{b}</p>
                   </div>
                 ))}

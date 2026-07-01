@@ -75,7 +75,7 @@ function AccountPageContent() {
       <div className="pt-24 pb-16 px-6 mx-auto max-w-6xl">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-black text-[#0B1B3D]">My Account</h1>
+            <h1 className="text-3xl font-black text-[#001c54]">My Account</h1>
             <p className="text-[#45353E] text-sm mt-1">{user?.email}</p>
           </div>
           <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 border border-red-400/20 hover:border-red-400/40 px-4 py-2 rounded-xl transition-all">
@@ -92,13 +92,13 @@ function AccountPageContent() {
                   {user?.name?.[0]?.toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-bold text-[#0B1B3D] text-sm">{user?.name}</p>
+                  <p className="font-bold text-[#001c54] text-sm">{user?.name}</p>
                   <p className="text-xs text-[#45353E]">Customer</p>
                 </div>
               </div>
               {TABS.map((t) => (
                 <button key={t.id} onClick={() => setTab(t.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === t.id ? "bg-[#EB9220]/20 text-[#EB9220]" : "text-[#45353E] hover:text-[#0B1B3D] hover:bg-[#FCFAF6]"}`}>
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === t.id ? "bg-[#EB9220]/20 text-[#EB9220]" : "text-[#45353E] hover:text-[#001c54] hover:bg-[#FCFAF6]"}`}>
                   <t.icon size={15} /> {t.label}
                 </button>
               ))}
@@ -110,7 +110,7 @@ function AccountPageContent() {
             {/* Profile Tab */}
             {tab === "profile" && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="card">
-                <h2 className="font-bold text-[#0B1B3D] mb-6">Profile Information</h2>
+                <h2 className="font-bold text-[#001c54] mb-6">Profile Information</h2>
                 <div className="space-y-4 max-w-md">
                   <div>
                     <label className="text-sm font-semibold text-[#45353E] mb-1.5 block">Full Name</label>
@@ -134,7 +134,7 @@ function AccountPageContent() {
             {/* Orders Tab */}
             {tab === "orders" && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                <h2 className="font-bold text-[#0B1B3D] mb-4">Order History</h2>
+                <h2 className="font-bold text-[#001c54] mb-4">Order History</h2>
                 {orders.length === 0 ? (
                   <div className="card text-center py-12 text-[#45353E]">
                     <Package size={40} className="mx-auto mb-3 opacity-30" />
@@ -148,7 +148,7 @@ function AccountPageContent() {
                         <div className="flex items-start justify-between gap-4 flex-wrap">
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="font-mono text-sm font-bold text-[#0B1B3D]">{order.orderNumber}</span>
+                              <span className="font-mono text-sm font-bold text-[#001c54]">{order.orderNumber}</span>
                               <span className={`badge ${STATUS_BADGE[order.status] || "badge-info"}`}>{order.status}</span>
                             </div>
                             <p className="text-xs text-[#45353E]">{new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
@@ -187,7 +187,7 @@ function AccountPageContent() {
             {tab === "addresses" && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-bold text-[#0B1B3D]">Saved Addresses</h2>
+                  <h2 className="font-bold text-[#001c54]">Saved Addresses</h2>
                   <button onClick={() => setAddingAddr(!addingAddr)} className="btn-primary text-sm px-4 py-2 flex items-center gap-1.5">
                     <Plus size={14} /> Add Address
                   </button>
@@ -195,7 +195,7 @@ function AccountPageContent() {
 
                 {addingAddr && (
                   <div className="card mb-4 space-y-3">
-                    <h3 className="font-semibold text-[#0B1B3D] text-sm">New Address</h3>
+                    <h3 className="font-semibold text-[#001c54] text-sm">New Address</h3>
                     {[["fullName","Full Name"],["phone","Phone"],["addressLine1","Address Line 1"],["city","City"],["state","State"],["pincode","Pincode"],["gstin","GSTIN (optional)"]].map(([k, label]) => (
                       <div key={k}>
                         <label className="text-xs text-[#45353E] mb-1 block">{label}</label>
@@ -216,7 +216,7 @@ function AccountPageContent() {
                         <span className="badge badge-info capitalize">{addr.label}</span>
                         {addr.isDefault && <span className="badge badge-success">Default</span>}
                       </div>
-                      <p className="font-bold text-[#0B1B3D] text-sm">{addr.fullName}</p>
+                      <p className="font-bold text-[#001c54] text-sm">{addr.fullName}</p>
                       <p className="text-sm text-[#45353E] mt-1 leading-relaxed">{addr.addressLine1}<br />{addr.city}, {addr.state} - {addr.pincode}</p>
                       <p className="text-sm text-[#45353E] mt-1">{addr.phone}</p>
                       {addr.gstin && <p className="text-xs text-[#EB9220] mt-1">GSTIN: {addr.gstin}</p>}

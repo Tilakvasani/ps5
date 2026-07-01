@@ -68,7 +68,7 @@ export default function CheckoutPage() {
     <main className="min-h-screen bg-[#FCFAF6]">
       <Navbar />
       <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
-        <p className="text-2xl font-bold text-[#0B1B3D] mb-4">Your cart is empty</p>
+        <p className="text-2xl font-bold text-[#001c54] mb-4">Your cart is empty</p>
         <Link href="/products"><button className="btn-primary px-6 py-3">Shop Now</button></Link>
       </div>
     </main>
@@ -152,7 +152,7 @@ export default function CheckoutPage() {
     <main className="min-h-screen bg-[#FCFAF6]">
       <Navbar />
       <div className="pt-24 pb-16 px-6 mx-auto max-w-6xl">
-        <h1 className="text-4xl font-black text-[#0B1B3D] mb-8">Checkout</h1>
+        <h1 className="text-4xl font-black text-[#001c54] mb-8">Checkout</h1>
 
         {/* Steps */}
         <div className="flex items-center gap-4 mb-10">
@@ -161,8 +161,8 @@ export default function CheckoutPage() {
               <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i <= step ? "bg-[#EB9220] text-white" : "bg-white text-[#45353E]"}`}>
                 {i < step ? <CheckCircle size={16} /> : i + 1}
               </div>
-              <span className={`text-sm font-semibold ${i <= step ? "text-[#0B1B3D]" : "text-[#45353E]"}`}>{s}</span>
-              {i < STEPS.length - 1 && <ChevronRight size={14} className="text-[#0B1B3D]/30 mx-2" />}
+              <span className={`text-sm font-semibold ${i <= step ? "text-[#001c54]" : "text-[#45353E]"}`}>{s}</span>
+              {i < STEPS.length - 1 && <ChevronRight size={14} className="text-[#001c54]/30 mx-2" />}
             </div>
           ))}
         </div>
@@ -176,13 +176,13 @@ export default function CheckoutPage() {
                 <div className="card mb-4">
                   <div className="flex items-center gap-2 mb-4">
                     <MapPin size={18} className="text-[#EB9220]" />
-                    <h2 className="font-bold text-[#0B1B3D]">Delivery Address</h2>
+                    <h2 className="font-bold text-[#001c54]">Delivery Address</h2>
                   </div>
                   {addresses.map((addr) => (
                     <label key={addr.id} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${selectedAddress === addr.id ? "border-[#EB9220] bg-[#EB9220]/10" : "border-[#E8E2D9]"}`}>
                       <input type="radio" name="address" checked={selectedAddress === addr.id} onChange={() => setSelectedAddress(addr.id)} className="mt-1 accent-[#EB9220]" />
                       <div className="text-sm">
-                        <p className="font-bold text-[#0B1B3D]">{addr.fullName}</p>
+                        <p className="font-bold text-[#001c54]">{addr.fullName}</p>
                         <p className="text-[#45353E]">{addr.addressLine1}, {addr.city}, {addr.state} - {addr.pincode}</p>
                         <p className="text-[#45353E]">{addr.phone}</p>
                         {addr.gstin && <p className="text-xs text-[#EB9220] mt-1">GSTIN: {addr.gstin}</p>}
@@ -216,13 +216,13 @@ export default function CheckoutPage() {
                 <div className="card mb-4">
                   <div className="flex items-center gap-2 mb-4">
                     <CreditCard size={18} className="text-[#EB9220]" />
-                    <h2 className="font-bold text-[#0B1B3D]">Payment Method</h2>
+                    <h2 className="font-bold text-[#001c54]">Payment Method</h2>
                   </div>
                   {[["razorpay","Razorpay (UPI, Card, Netbanking)","🔐"],["cod","Cash on Delivery","💵"]].map(([val, label, icon]) => (
                     <label key={val} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${paymentMethod === val ? "border-[#EB9220] bg-[#EB9220]/10" : "border-[#E8E2D9]"}`}>
                       <input type="radio" name="payment" checked={paymentMethod === val as any} onChange={() => setPaymentMethod(val as any)} className="mt-1 accent-[#EB9220]" />
                       <div>
-                        <span className="text-sm font-semibold text-[#0B1B3D]">{icon} {label}</span>
+                        <span className="text-sm font-semibold text-[#001c54]">{icon} {label}</span>
                         {val === "razorpay" && <p className="text-xs text-[#45353E] mt-0.5">Secure payments powered by Razorpay</p>}
                         {val === "cod" && <p className="text-xs text-[#45353E] mt-0.5">Pay when your order arrives</p>}
                       </div>
@@ -246,12 +246,12 @@ export default function CheckoutPage() {
             {step === 2 && (
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
                 <div className="card mb-4">
-                  <h2 className="font-bold text-[#0B1B3D] mb-4">Order Items</h2>
+                  <h2 className="font-bold text-[#001c54] mb-4">Order Items</h2>
                   <div className="space-y-3">
                     {cart.map((item) => (
                       <div key={`${item.productId}-${item.variantId}`} className="flex justify-between text-sm">
                         <span className="text-[#45353E]">{item.name} × {item.qty}</span>
-                        <span className="text-[#0B1B3D] font-semibold">₹{(Number(item.price) * Number(item.qty)).toFixed(2)}</span>
+                        <span className="text-[#001c54] font-semibold">₹{(Number(item.price) * Number(item.qty)).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
@@ -265,7 +265,7 @@ export default function CheckoutPage() {
                     <div className="text-sm text-[#45353E] leading-relaxed">
                       <div className="flex items-center gap-1.5 mb-1">
                         <Shield size={14} className="text-[#EB9220] shrink-0" />
-                        <span className="font-semibold text-[#0B1B3D]">I agree to the following policies</span>
+                        <span className="font-semibold text-[#001c54]">I agree to the following policies</span>
                       </div>
                       I have read and agree to the{" "}
                       <Link href="/terms-of-service" target="_blank" className="text-[#EB9220] hover:underline font-medium">Terms & Conditions</Link>,{" "}
@@ -294,7 +294,7 @@ export default function CheckoutPage() {
 
           {/* Order Summary */}
           <div className="card h-fit sticky top-24">
-            <h2 className="font-bold text-[#0B1B3D] mb-4">Summary</h2>
+            <h2 className="font-bold text-[#001c54] mb-4">Summary</h2>
             <div className="space-y-2 text-sm mb-4">
               <div className="flex justify-between text-[#45353E]"><span>Subtotal ({cart.length} item{cart.length !== 1 ? "s" : ""})</span><span>₹{subtotal.toFixed(2)}</span></div>
               <div className="flex justify-between text-[#45353E]"><span>CGST @{cgstPct}%</span><span>₹{cgst.toFixed(2)}</span></div>
@@ -311,7 +311,7 @@ export default function CheckoutPage() {
               )}
             </div>
             <div className="border-t border-[#E8E2D9] pt-4 flex justify-between items-center">
-              <span className="font-bold text-[#0B1B3D]">Total</span>
+              <span className="font-bold text-[#001c54]">Total</span>
               <span className="text-2xl font-black gradient-text">₹{total.toFixed(0)}</span>
             </div>
             <p className="text-xs text-[#45353E] mt-1">Inclusive of all taxes</p>

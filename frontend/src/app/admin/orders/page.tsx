@@ -47,7 +47,7 @@ export default function AdminOrdersPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black text-[#0B1B3D]">Orders</h1>
+          <h1 className="text-3xl font-black text-[#001c54]">Orders</h1>
           <p className="text-[#45353E] text-sm mt-1">{total} total orders</p>
         </div>
       </div>
@@ -62,7 +62,7 @@ export default function AdminOrdersPage() {
         <div className="flex gap-1 flex-wrap">
           {STATUSES.map(s => (
             <button key={s} onClick={() => { setStatus(s); setPage(1); }}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-all ${status === s ? "bg-[#EB9220] text-[#0B1B3D]" : "border border-[#E8E2D9] text-[#45353E] hover:text-[#0B1B3D] hover:border-[#E8E2D9]"}`}>
+              className={`px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-all ${status === s ? "bg-[#EB9220] text-[#001c54]" : "border border-[#E8E2D9] text-[#45353E] hover:text-[#001c54] hover:border-[#E8E2D9]"}`}>
               {s}
             </button>
           ))}
@@ -87,13 +87,13 @@ export default function AdminOrdersPage() {
                 <tr><td colSpan={9} className="px-4 py-12 text-center text-[#45353E]">No orders found</td></tr>
               ) : orders.map(o => (
                 <tr key={o.id} className="hover:bg-[#FCFAF6] transition-colors">
-                  <td className="px-4 py-3 font-mono font-bold text-[#0B1B3D] text-xs">{o.orderNumber}</td>
+                  <td className="px-4 py-3 font-mono font-bold text-[#001c54] text-xs">{o.orderNumber}</td>
                   <td className="px-4 py-3">
-                    <p className="text-[#0B1B3D] font-semibold">{o.user?.name || "—"}</p>
+                    <p className="text-[#001c54] font-semibold">{o.user?.name || "—"}</p>
                     <p className="text-xs text-[#45353E]">{o.user?.email}</p>
                   </td>
                   <td className="px-4 py-3 text-[#45353E]">{o._count?.items || o.items?.length || 0} items</td>
-                  <td className="px-4 py-3 font-bold text-[#0B1B3D]">₹{Math.round(Number(o.totalAmount)).toLocaleString("en-IN")}</td>
+                  <td className="px-4 py-3 font-bold text-[#001c54]">₹{Math.round(Number(o.totalAmount)).toLocaleString("en-IN")}</td>
                   <td className="px-4 py-3 text-[#45353E] capitalize">{o.paymentMethod}</td>
                   <td className="px-4 py-3">
                     <select value={o.status} onChange={e => updateStatus(o.id, e.target.value)}
@@ -102,9 +102,9 @@ export default function AdminOrdersPage() {
                           STATUS_BADGE[o.status] === "badge-warning" ? "border-yellow-500/30 text-yellow-400" :
                           STATUS_BADGE[o.status] === "badge-danger" ? "border-red-500/30 text-red-400" :
                           STATUS_BADGE[o.status] === "badge-purple" ? "border-purple-500/30 text-purple-400" :
-                          "border-[#0B1B3D]/30 text-[#EB9220]"}`}>
+                          "border-[#001c54]/30 text-[#EB9220]"}`}>
                       {["pending","confirmed","processing","shipped","delivered","cancelled"].map(s => (
-                        <option key={s} value={s} className="bg-[#FCFAF6] text-[#0B1B3D] capitalize">{s}</option>
+                        <option key={s} value={s} className="bg-[#FCFAF6] text-[#001c54] capitalize">{s}</option>
                       ))}
                     </select>
                   </td>
@@ -118,11 +118,11 @@ export default function AdminOrdersPage() {
                         }}
                         className="flex items-center gap-1 text-xs text-[#EB9220] hover:text-[#EB9220]"
                       ><Download size={12} /> PDF</button>
-                    ) : <span className="text-[#0B1B3D]/30 text-xs">—</span>}
+                    ) : <span className="text-[#001c54]/30 text-xs">—</span>}
                   </td>
                   <td className="px-4 py-3">
                     <Link href={`/admin/orders/${o.id}`}>
-                      <button className="flex items-center gap-1 text-xs text-[#45353E] hover:text-[#0B1B3D] transition-colors">
+                      <button className="flex items-center gap-1 text-xs text-[#45353E] hover:text-[#001c54] transition-colors">
                         View <ChevronRight size={12} />
                       </button>
                     </Link>

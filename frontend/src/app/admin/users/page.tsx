@@ -19,7 +19,7 @@ export default function AdminUsersPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-3xl font-black text-[#0B1B3D]">Users</h1><p className="text-[#45353E] text-sm mt-1">{total} registered users</p></div>
+        <div><h1 className="text-3xl font-black text-[#001c54]">Users</h1><p className="text-[#45353E] text-sm mt-1">{total} registered users</p></div>
       </div>
       <div className="flex gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
@@ -41,12 +41,12 @@ export default function AdminUsersPage() {
                     <div className="h-8 w-8 rounded-full bg-[#FCFAF6] flex items-center justify-center text-xs font-black text-black flex-shrink-0">
                       {u.name?.[0]?.toUpperCase()}
                     </div>
-                    <div><p className="font-semibold text-[#0B1B3D]">{u.name}</p><p className="text-xs text-[#45353E]">{u.email}</p></div>
+                    <div><p className="font-semibold text-[#001c54]">{u.name}</p><p className="text-xs text-[#45353E]">{u.email}</p></div>
                   </div>
                 </td>
                 <td className="px-4 py-3 text-[#45353E]">{u.phone || "—"}</td>
                 <td className="px-4 py-3 text-[#45353E]">{u._count?.orders ?? 0}</td>
-                <td className="px-4 py-3 font-bold text-[#0B1B3D]">₹{Number(u.totalSpent || 0).toFixed(2)}</td>
+                <td className="px-4 py-3 font-bold text-[#001c54]">₹{Number(u.totalSpent || 0).toFixed(2)}</td>
                 <td className="px-4 py-3"><span className={`badge ${u.isVerified ? "badge-success" : "badge-warning"}`}>{u.isVerified ? "Yes" : "No"}</span></td>
                 <td className="px-4 py-3 text-[#45353E] text-xs">{new Date(u.createdAt).toLocaleDateString("en-IN")}</td>
               </tr>

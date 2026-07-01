@@ -37,7 +37,7 @@ export default function AdminCategoriesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-black text-[#0B1B3D]">Categories</h1>
+        <h1 className="text-3xl font-black text-[#001c54]">Categories</h1>
         <button onClick={openNew} className="btn-primary flex items-center gap-2"><Plus size={16} /> Add Category</button>
       </div>
 
@@ -51,7 +51,7 @@ export default function AdminCategoriesPage() {
               : roots.map(cat => (
               <>
                 <tr key={cat.id} className="hover:bg-[#FCFAF6] transition-colors font-semibold">
-                  <td className="px-4 py-3 text-[#0B1B3D]">{cat.name}</td>
+                  <td className="px-4 py-3 text-[#001c54]">{cat.name}</td>
                   <td className="px-4 py-3 text-[#45353E]">—</td>
                   <td className="px-4 py-3 text-[#45353E]">{cat._count?.products ?? 0}</td>
                   <td className="px-4 py-3"><span className={`badge ${cat.isActive ? "badge-success" : "badge-danger"}`}>{cat.isActive ? "Active" : "Inactive"}</span></td>
@@ -62,7 +62,7 @@ export default function AdminCategoriesPage() {
                 </tr>
                 {children(cat.id).map(child => (
                   <tr key={child.id} className="hover:bg-[#FCFAF6] transition-colors">
-                    <td className="px-4 py-3 pl-10 text-[#0B1B3D]">↳ {child.name}</td>
+                    <td className="px-4 py-3 pl-10 text-[#001c54]">↳ {child.name}</td>
                     <td className="px-4 py-3 text-[#45353E]">{cat.name}</td>
                     <td className="px-4 py-3 text-[#45353E]">{child._count?.products ?? 0}</td>
                     <td className="px-4 py-3"><span className={`badge ${child.isActive ? "badge-success" : "badge-danger"}`}>{child.isActive ? "Active" : "Inactive"}</span></td>
@@ -81,7 +81,7 @@ export default function AdminCategoriesPage() {
       {modal !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white  px-4">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md card p-6">
-            <h2 className="font-bold text-[#0B1B3D] mb-5">{modal?.id ? "Edit" : "New"} Category</h2>
+            <h2 className="font-bold text-[#001c54] mb-5">{modal?.id ? "Edit" : "New"} Category</h2>
             <div className="space-y-4">
               <div><label className="label-text">Name *</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="input-field" /></div>
               <div><label className="label-text">Description</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="input-field resize-none" rows={2} /></div>

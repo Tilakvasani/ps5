@@ -31,7 +31,7 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 border border-[#C3E5D9] mb-4">
             <CheckCircle size={40} className="text-[#EB9220]" />
           </div>
-          <h1 className="text-4xl font-black text-[#0B1B3D] mb-2">Order Confirmed! 🎉</h1>
+          <h1 className="text-4xl font-black text-[#001c54] mb-2">Order Confirmed! 🎉</h1>
           <p className="text-[#45353E]">Order <span className="text-[#EB9220] font-mono font-bold">{params.orderNumber}</span> has been placed successfully.</p>
         </motion.div>
 
@@ -39,12 +39,12 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-4">
             {/* Order Details */}
             <div className="card">
-              <h2 className="font-bold text-[#0B1B3D] mb-4 flex items-center gap-2"><Package size={18} className="text-[#EB9220]" /> Order Details</h2>
+              <h2 className="font-bold text-[#001c54] mb-4 flex items-center gap-2"><Package size={18} className="text-[#EB9220]" /> Order Details</h2>
               <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                 {[["Order Number", order.orderNumber], ["Status", order.status], ["Payment", order.paymentMethod], ["Date", new Date(order.createdAt).toLocaleDateString("en-IN")]].map(([k, v]) => (
                   <div key={k}>
                     <p className="text-[#45353E] mb-0.5">{k}</p>
-                    <p className="text-[#0B1B3D] font-semibold capitalize">{v}</p>
+                    <p className="text-[#001c54] font-semibold capitalize">{v}</p>
                   </div>
                 ))}
               </div>
@@ -54,7 +54,7 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
                 {order.items?.map((item: any) => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <span className="text-[#45353E]">{item.product?.name} × {item.qty}</span>
-                    <span className="text-[#0B1B3D] font-semibold">₹{Number(item.unitPrice * item.qty).toFixed(2)}</span>
+                    <span className="text-[#001c54] font-semibold">₹{Number(item.unitPrice * item.qty).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -64,7 +64,7 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
                 <div className="flex justify-between text-[#45353E]"><span>Subtotal</span><span>₹{Number(order.subtotal).toFixed(2)}</span></div>
                 <div className="flex justify-between text-[#45353E]"><span>CGST</span><span>₹{Number(order.cgstAmount).toFixed(2)}</span></div>
                 <div className="flex justify-between text-[#45353E]"><span>SGST</span><span>₹{Number(order.sgstAmount).toFixed(2)}</span></div>
-                <div className="flex justify-between font-bold text-[#0B1B3D] border-t border-[#E8E2D9] pt-2 mt-1">
+                <div className="flex justify-between font-bold text-[#001c54] border-t border-[#E8E2D9] pt-2 mt-1">
                   <span>Total Paid</span><span className="gradient-text text-lg">₹{Number(order.totalAmount).toFixed(2)}</span>
                 </div>
               </div>
@@ -73,7 +73,7 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
             {/* Delivery Address */}
             {order.address && (
               <div className="card">
-                <h2 className="font-bold text-[#0B1B3D] mb-3">Delivery Address</h2>
+                <h2 className="font-bold text-[#001c54] mb-3">Delivery Address</h2>
                 <p className="text-sm text-[#45353E] leading-relaxed">
                   {order.address.fullName}<br />
                   {order.address.addressLine1}, {order.address.city}, {order.address.state} - {order.address.pincode}<br />
@@ -87,7 +87,7 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
             {order.invoice && (
               <div className="card flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-[#0B1B3D]">GST Invoice Ready</p>
+                  <p className="font-bold text-[#001c54]">GST Invoice Ready</p>
                   <p className="text-sm text-[#45353E]">{order.invoice.invoiceNumber}</p>
                 </div>
                 <a href={invoicesApi.getPdf(order.invoice.invoiceNumber)} target="_blank" rel="noopener noreferrer">

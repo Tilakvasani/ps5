@@ -282,14 +282,14 @@ export default function AdminSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-black text-[#0B1B3D] mb-2">Settings</h1>
+      <h1 className="text-3xl font-black text-[#001c54] mb-2">Settings</h1>
       <p className="text-[#45353E] text-sm mb-6">All changes here reflect live on the website. No code changes needed.</p>
       <form onSubmit={handleSave}>
         <div className="space-y-6 max-w-3xl">
           {SETTING_GROUPS.map(group => (
             <div key={group.label} className="card">
               <div className="mb-4 pb-3 border-b border-[#E8E2D9]">
-                <h2 className="font-bold text-[#0B1B3D]">{group.label}</h2>
+                <h2 className="font-bold text-[#001c54]">{group.label}</h2>
                 {(group as any).desc && (
                   <p className="text-xs text-[#45353E] mt-1">{(group as any).desc}</p>
                 )}

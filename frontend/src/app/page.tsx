@@ -81,7 +81,7 @@ function BlogSection() {
       <div className="mx-auto max-w-7xl">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
           <p className="text-xs font-semibold uppercase tracking-widest text-[#EB9220] mb-3">Health Tips & Insights</p>
-          <h2 className="text-4xl md:text-5xl font-black text-[#0B1B3D] mb-3">
+          <h2 className="text-4xl md:text-5xl font-black text-[#001c54] mb-3">
             From Our <span className="gradient-text">Blog</span>
           </h2>
           <p className="text-[#45353E]">Science-backed articles to fuel your health journey</p>
@@ -96,7 +96,7 @@ function BlogSection() {
               onClick={() => setModal(i)}>
               <div className="text-4xl mb-4">{post.emoji}</div>
               <span className="text-xs font-semibold text-[#EB9220] uppercase tracking-widest">{post.tag}</span>
-              <h3 className="font-bold text-[#0B1B3D] mt-2 mb-3 leading-snug">{post.title}</h3>
+              <h3 className="font-bold text-[#001c54] mt-2 mb-3 leading-snug">{post.title}</h3>
               <p className="text-sm text-[#45353E] leading-relaxed line-clamp-3 flex-1">{post.body}</p>
               <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#E8E2D9]">
                 <span className="text-xs text-[#8C8276]">{post.date}</span>
@@ -123,7 +123,7 @@ function BlogSection() {
             </button>
             <div className="text-4xl mb-3">{post.emoji}</div>
             <span className="text-xs font-semibold text-[#EB9220] uppercase tracking-widest">{post.tag}</span>
-            <h3 className="text-xl font-black text-[#0B1B3D] mt-2 mb-4 leading-snug">{post.title}</h3>
+            <h3 className="text-xl font-black text-[#001c54] mt-2 mb-4 leading-snug">{post.title}</h3>
             <p className="text-sm text-[#45353E] leading-relaxed">{post.body}</p>
             <p className="text-xs text-[#8C8276] mt-6">{post.date}</p>
           </motion.div>
@@ -174,7 +174,7 @@ export default function HomePage() {
       <section className="relative min-h-screen flex items-center pt-32 pb-20 px-6">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-[#EB9220]/10 blur-3xl" />
-          <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-[#0B1B3D]/15 blur-3xl" />
+          <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-[#001c54]/15 blur-3xl" />
         </div>
         
         <div className="mx-auto max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center z-10 relative">
@@ -184,7 +184,7 @@ export default function HomePage() {
               ⚡ ELECTROLYTE EFFERVESCENT TABLET
             </motion.div>
             
-            <motion.h1 {...fadeUp(0.08)} className="text-5xl md:text-7xl lg:text-[76px] font-black leading-[0.98] tracking-tight mb-6 text-[#0B1B3D] font-sans">
+            <motion.h1 {...fadeUp(0.08)} className="text-5xl md:text-7xl lg:text-[76px] font-black leading-[0.98] tracking-tight mb-6 text-[#001c54] font-sans">
               Instant Hydration.<br />
               <span className="text-[#EB9220]">Unstoppable Stamina.</span>
             </motion.h1>
@@ -212,7 +212,7 @@ export default function HomePage() {
             <motion.div {...fadeUp(0.3)} className="mt-16 grid grid-cols-3 gap-8 w-full max-w-lg">
               {stats.map(([val, label]) => (
                 <div key={label} className="text-left">
-                  <div className="text-2xl font-black text-[#0B1B3D]">{val}</div>
+                  <div className="text-2xl font-black text-[#001c54]">{val}</div>
                   <div className="text-xs text-[#8C8276] font-bold uppercase tracking-wider mt-1">{label}</div>
                 </div>
               ))}
@@ -225,7 +225,7 @@ export default function HomePage() {
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative w-full max-w-md aspect-[3/4] flex items-center justify-center rounded-[2.5rem] overflow-hidden shadow-2xl bg-gradient-to-b from-[#0B3C9B] to-[#04122d] border border-[#E8E2D9]/10"
+              className="relative w-full max-w-md aspect-[3/4] flex items-center justify-center rounded-[2.5rem] overflow-hidden shadow-2xl bg-gradient-to-b from-[#0038a8] to-[#04122d] border border-[#E8E2D9]/10"
             >
               <img
                 src="/products/zupwell-electrolyte-orange.jpg"
@@ -252,7 +252,7 @@ export default function HomePage() {
       <section className="py-20 px-6 bg-white">
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-black text-[#0B1B3D] mb-3">Why Choose <span className="gradient-text">Zupwell?</span></h2>
+            <h2 className="text-4xl md:text-5xl font-black text-[#001c54] mb-3">Why Choose <span className="gradient-text">Zupwell?</span></h2>
             <p className="text-[#45353E] font-semibold">Smart-Fuel for Modern Humans.</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -262,7 +262,7 @@ export default function HomePage() {
                 <div className="h-14 w-14 mx-auto rounded-2xl bg-[#EB9220]/10 flex items-center justify-center mb-4 group-hover:bg-[#EB9220]/20 transition-all">
                   <item.icon size={24} className="text-[#EB9220]" />
                 </div>
-                <h3 className="font-bold text-[#0B1B3D] mb-2">{item.title}</h3>
+                <h3 className="font-bold text-[#001c54] mb-2">{item.title}</h3>
                 <p className="text-sm text-[#45353E] leading-relaxed">{item.desc}</p>
               </motion.div>
             ))}
@@ -274,7 +274,7 @@ export default function HomePage() {
       <section className="py-20 px-6 bg-[#FCFAF6]">
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-black text-[#0B1B3D] mb-3">Why is Our Product <span className="gradient-text">Special?</span></h2>
+            <h2 className="text-4xl md:text-5xl font-black text-[#001c54] mb-3">Why is Our Product <span className="gradient-text">Special?</span></h2>
             <p className="text-[#45353E]">Zero-Compromise Health Boosters. Crafted for Perfection.</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
@@ -290,7 +290,7 @@ export default function HomePage() {
                 <div className="h-14 w-14 mx-auto rounded-2xl bg-[#EB9220]/10 flex items-center justify-center mb-4 group-hover:bg-[#EB9220]/20 transition-all">
                   <f.icon size={24} className="text-[#EB9220]" />
                 </div>
-                <h3 className="font-bold text-[#0B1B3D] mb-2">{f.title}</h3>
+                <h3 className="font-bold text-[#001c54] mb-2">{f.title}</h3>
                 <p className="text-sm text-[#45353E] leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
@@ -309,7 +309,7 @@ export default function HomePage() {
               ) : (
                 <div key={idx} className="inline-flex items-center gap-2 shrink-0 border border-[#E8E2D9] rounded-xl px-5 py-2.5">
                   <CheckCircle size={13} className="text-emerald-500" />
-                  <span className="text-sm font-bold text-[#0B1B3D]">{label}</span>
+                  <span className="text-sm font-bold text-[#001c54]">{label}</span>
                   <span className="text-xs text-[#EB9220] font-semibold">Certified</span>
                 </div>
               )
@@ -331,7 +331,7 @@ export default function HomePage() {
                   {/* ── Left: Photo panel ── */}
                   <div className="relative md:w-56 shrink-0 flex flex-col" style={{ background: "#FCFAF6" }}>
                     {/* Green left accent stripe */}
-                    <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-3xl" style={{ background: "linear-gradient(180deg, #EB9220 0%, #0B1B3D 100%)" }} />
+                    <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-3xl" style={{ background: "linear-gradient(180deg, #EB9220 0%, #001c54 100%)" }} />
                     {/* Photo */}
                     <div className="flex-1 overflow-hidden" style={{ minHeight: 240 }}>
                       {s(settings, "founder_photo") ? (
@@ -342,14 +342,14 @@ export default function HomePage() {
                           style={{ objectFit: "cover", objectPosition: "top center", minHeight: 240 }}
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center" style={{ minHeight: 240, fontSize: 64, fontWeight: 900, color: "#0B1B3D" }}>
+                        <div className="w-full h-full flex items-center justify-center" style={{ minHeight: 240, fontSize: 64, fontWeight: 900, color: "#001c54" }}>
                           {s(settings, "founder_name").charAt(0)}
                         </div>
                       )}
                     </div>
                     {/* Name plate */}
                     <div className="px-5 py-4 border-t border-[#E8E2D9]" style={{ background: "#fff" }}>
-                      <p className="font-black text-sm text-[#0B1B3D] leading-tight">{s(settings, "founder_name")}</p>
+                      <p className="font-black text-sm text-[#001c54] leading-tight">{s(settings, "founder_name")}</p>
                       <p className="text-xs font-semibold mt-0.5" style={{ color: "#EB9220" }}>{s(settings, "founder_title")}</p>
                     </div>
                   </div>
@@ -362,7 +362,7 @@ export default function HomePage() {
 
                     <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "#EB9220" }}>Founder's Message</p>
 
-                    <p className="text-[#0B1B3D] text-lg leading-relaxed font-medium italic relative z-10">
+                    <p className="text-[#001c54] text-lg leading-relaxed font-medium italic relative z-10">
                       "{s(settings, "founder_message")}"
                     </p>
 
@@ -386,7 +386,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-4">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#EB9220] mb-3">Real People, Real Results</p>
-            <h2 className="text-4xl md:text-5xl font-black text-[#0B1B3D] mb-3">
+            <h2 className="text-4xl md:text-5xl font-black text-[#001c54] mb-3">
               What Our <span className="gradient-text">Customers Say</span>
             </h2>
             <p className="text-[#45353E]">Join thousands of happy customers across India</p>
@@ -405,14 +405,14 @@ export default function HomePage() {
                     </div>
                     <Quote size={20} className="text-[#EB9220]/20" />
                   </div>
-                  {review.title && <p className="font-bold text-[#0B1B3D]">{review.title}</p>}
+                  {review.title && <p className="font-bold text-[#001c54]">{review.title}</p>}
                   <p className="text-sm text-[#45353E] leading-relaxed flex-1">"{review.body}"</p>
                   <div className="flex items-center justify-between border-t border-[#E8E2D9] pt-3 mt-auto">
                     <div className="flex items-center gap-2">
                       <div className="h-8 w-8 rounded-full bg-[#EB9220]/10 flex items-center justify-center text-xs font-bold text-[#EB9220]">
                         {review.user?.name?.charAt(0)?.toUpperCase() || "?"}
                       </div>
-                      <span className="text-sm font-semibold text-[#0B1B3D]">{review.user?.name || "Customer"}</span>
+                      <span className="text-sm font-semibold text-[#001c54]">{review.user?.name || "Customer"}</span>
                     </div>
                     {review.product?.name && (
                       <span className="text-xs text-[#8C8276] truncate max-w-[120px]">{review.product.name}</span>
@@ -438,7 +438,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-4xl">
           <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
             className="rounded-3xl border border-[#EB9220]/20 bg-white p-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-black text-[#0B1B3D] mb-4">
+            <h2 className="text-3xl md:text-4xl font-black text-[#001c54] mb-4">
               Join the <span className="gradient-text">Zupwell Gang</span>
             </h2>
             <p className="text-[#45353E] mb-8 max-w-lg mx-auto">

@@ -48,7 +48,7 @@ export default function AdminInventoryPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black text-[#0B1B3D]">Inventory</h1>
+          <h1 className="text-3xl font-black text-[#001c54]">Inventory</h1>
           <p className="text-[#45353E] text-sm mt-1">{inventory.length} SKUs tracked</p>
         </div>
       </div>
@@ -87,14 +87,14 @@ export default function AdminInventoryPage() {
                 return (
                   <tr key={item.id} className={`hover:bg-[#FCFAF6] transition-colors ${isLow ? "bg-yellow-500/5" : ""}`}>
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-[#0B1B3D] line-clamp-1 max-w-[180px]">{item.product?.name}</p>
+                      <p className="font-semibold text-[#001c54] line-clamp-1 max-w-[180px]">{item.product?.name}</p>
                     </td>
                     <td className="px-4 py-3 font-mono text-[#45353E] text-xs">
                       {item.variant ? item.variant.sku : item.product?.sku}
                       {item.variant && <p className="text-[#45353E]">{item.variant.variantName}</p>}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`font-bold text-lg ${isLow ? "text-yellow-400" : "text-[#0B1B3D]"}`}>{item.qtyInStock}</span>
+                      <span className={`font-bold text-lg ${isLow ? "text-yellow-400" : "text-[#001c54]"}`}>{item.qtyInStock}</span>
                     </td>
                     <td className="px-4 py-3 text-[#45353E]">{item.reservedQty}</td>
                     <td className="px-4 py-3">
@@ -119,7 +119,7 @@ export default function AdminInventoryPage() {
       {movementModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white  px-4">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md card p-6">
-            <h2 className="font-bold text-[#0B1B3D] mb-1">Adjust Stock</h2>
+            <h2 className="font-bold text-[#001c54] mb-1">Adjust Stock</h2>
             <p className="text-sm text-[#45353E] mb-5">{movementModal.product?.name}{movementModal.variant ? ` — ${movementModal.variant.variantName}` : ""}</p>
             <div className="space-y-4">
               <div>

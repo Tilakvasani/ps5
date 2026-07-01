@@ -50,7 +50,7 @@ export default function AdminProductsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black text-[#0B1B3D]">Products</h1>
+          <h1 className="text-3xl font-black text-[#001c54]">Products</h1>
           <p className="text-[#45353E] text-sm mt-1">{total} total products</p>
         </div>
         <Link href="/admin/products/new">
@@ -96,13 +96,13 @@ export default function AdminProductsPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-[#0B1B3D] line-clamp-1 max-w-[200px]">{p.name}</p>
+                    <p className="font-semibold text-[#001c54] line-clamp-1 max-w-[200px]">{p.name}</p>
                     {p.brand && <p className="text-xs text-[#45353E]">{p.brand}</p>}
                   </td>
                   <td className="px-4 py-3 font-mono text-[#45353E] text-xs">{p.sku}</td>
                   <td className="px-4 py-3 text-[#45353E]">{p.category?.name || "—"}</td>
                   <td className="px-4 py-3">
-                    <p className="font-bold text-[#0B1B3D]">₹{Number(p.sellingPrice).toFixed(2)}</p>
+                    <p className="font-bold text-[#001c54]">₹{Number(p.sellingPrice).toFixed(2)}</p>
                     {Number(p.discountPercent) > 0 && <p className="text-xs text-[#EB9220]">-{p.discountPercent}% off</p>}
                   </td>
                   <td className="px-4 py-3">
@@ -121,7 +121,7 @@ export default function AdminProductsPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
                       <Link href={`/products/${p.slug}`} target="_blank">
-                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#0B1B3D] hover:bg-[#FFFFFF] transition-all"><Eye size={14} /></button>
+                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#001c54] hover:bg-[#FFFFFF] transition-all"><Eye size={14} /></button>
                       </Link>
                       <Link href={`/admin/products/${p.id}`}>
                         <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#EB9220] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
@@ -145,7 +145,7 @@ export default function AdminProductsPage() {
             <div className="flex gap-1">
               {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => (
                 <button key={i} onClick={() => setPage(i + 1)}
-                  className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all ${page === i + 1 ? "bg-[#EB9220] text-[#0B1B3D]" : "text-[#45353E] hover:bg-[#FFFFFF]"}`}>
+                  className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all ${page === i + 1 ? "bg-[#EB9220] text-[#001c54]" : "text-[#45353E] hover:bg-[#FFFFFF]"}`}>
                   {i + 1}
                 </button>
               ))}

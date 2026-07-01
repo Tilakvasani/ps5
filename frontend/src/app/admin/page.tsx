@@ -33,7 +33,7 @@ const StatCard = ({ title, value, sub, icon: Icon, change, color, href }: any) =
       </div>
       <ChangeBadge pct={change} />
     </div>
-    <p className="text-2xl font-black text-[#0B1B3D]">{value}</p>
+    <p className="text-2xl font-black text-[#001c54]">{value}</p>
     <p className="text-sm text-[#45353E] mt-0.5">{title}</p>
     {sub && <p className="text-xs text-[#8C8276] mt-1">{sub}</p>}
     {href && <Link href={href} className="text-xs text-[#EB9220] hover:underline mt-2 block">View →</Link>}
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#0B1B3D]">Dashboard</h1>
+          <h1 className="text-3xl font-black text-[#001c54]">Dashboard</h1>
           <p className="text-[#45353E] text-sm mt-1">
             {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </p>
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
           value={stats?.totalOrders ?? "—"}
           sub={stats ? `Avg ₹${fmt(stats.avgOrderValue)}` : undefined}
           change={stats?.ordersChange} href="/admin/orders" />
-        <StatCard title="Total Users" icon={Users} color="bg-[#0B1B3D]"
+        <StatCard title="Total Users" icon={Users} color="bg-[#001c54]"
           value={stats?.totalUsers ?? "—"}
           change={stats?.usersChange} href="/admin/users" />
       </div>
@@ -151,12 +151,12 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <TrendingUp size={16} className="text-[#EB9220]" />
-            <h2 className="font-bold text-[#0B1B3D]">Revenue & Profit</h2>
+            <h2 className="font-bold text-[#001c54]">Revenue & Profit</h2>
           </div>
           <div className="flex items-center gap-1 bg-[#FCFAF6] rounded-lg p-1">
             {[7, 30, 90].map(d => (
               <button key={d} onClick={() => setChartDays(d)}
-                className={`text-xs px-3 py-1.5 rounded-md font-semibold transition-all ${chartDays === d ? "bg-white text-[#EB9220] shadow-sm" : "text-[#45353E] hover:text-[#0B1B3D]"}`}>
+                className={`text-xs px-3 py-1.5 rounded-md font-semibold transition-all ${chartDays === d ? "bg-white text-[#EB9220] shadow-sm" : "text-[#45353E] hover:text-[#001c54]"}`}>
                 {d}d
               </button>
             ))}
@@ -191,7 +191,7 @@ export default function AdminDashboard() {
       {/* Order Pipeline + Payment Split */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card">
-          <h2 className="font-bold text-[#0B1B3D] mb-4">Order Pipeline</h2>
+          <h2 className="font-bold text-[#001c54] mb-4">Order Pipeline</h2>
           {statusData.length > 0 ? (
             <div className="space-y-2">
               {statusData.map(([name, value]: any) => {
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
                         <div className="h-full rounded-full transition-all duration-500"
                           style={{ width: `${pct}%`, backgroundColor: STATUS_COLORS[name] || "#45353E" }} />
                       </div>
-                      <span className="text-sm font-bold text-[#0B1B3D] w-6 text-right">{value}</span>
+                      <span className="text-sm font-bold text-[#001c54] w-6 text-right">{value}</span>
                       <span className="text-xs text-[#8C8276] w-8 text-right">{pct}%</span>
                     </div>
                   </Link>
@@ -215,7 +215,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="card">
-          <h2 className="font-bold text-[#0B1B3D] mb-4">Payment Methods</h2>
+          <h2 className="font-bold text-[#001c54] mb-4">Payment Methods</h2>
           {stats?.paymentSplit?.length > 0 ? (
             <div className="space-y-4">
               {stats.paymentSplit.map((p: any) => (
@@ -225,7 +225,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-semibold text-[#0B1B3D]">{p.method === "razorpay" ? "Razorpay" : "Cash on Delivery"}</span>
+                      <span className="text-sm font-semibold text-[#001c54]">{p.method === "razorpay" ? "Razorpay" : "Cash on Delivery"}</span>
                       <span className="text-sm font-bold text-[#EB9220]">₹{fmt(p.revenue)}</span>
                     </div>
                     <p className="text-xs text-[#45353E]">{p.count} order{p.count !== 1 ? "s" : ""}</p>
@@ -241,7 +241,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-[#0B1B3D]">Top Products</h2>
+            <h2 className="font-bold text-[#001c54]">Top Products</h2>
             <Link href="/admin/products" className="text-xs text-[#EB9220] hover:underline">View all →</Link>
           </div>
           <div className="space-y-4">
@@ -249,7 +249,7 @@ export default function AdminDashboard() {
               <div key={p.id} className="flex items-center gap-3">
                 <span className="text-xs font-bold text-[#D1D5DB] w-5 shrink-0">#{i + 1}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#0B1B3D] truncate">{p.name}</p>
+                  <p className="text-sm font-semibold text-[#001c54] truncate">{p.name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex-1 h-1.5 bg-[#FCFAF6] rounded-full overflow-hidden">
                       <div className="h-full bg-[#EB9220] rounded-full"
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
 
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-[#0B1B3D]">Top Customers</h2>
+            <h2 className="font-bold text-[#001c54]">Top Customers</h2>
             <Link href="/admin/users" className="text-xs text-[#EB9220] hover:underline">View all →</Link>
           </div>
           <div className="space-y-3">
@@ -280,11 +280,11 @@ export default function AdminDashboard() {
                   {c.name?.charAt(0)?.toUpperCase() || "?"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#0B1B3D] truncate">{c.name || "—"}</p>
+                  <p className="text-sm font-semibold text-[#001c54] truncate">{c.name || "—"}</p>
                   <p className="text-xs text-[#45353E] truncate">{c.email}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-bold text-[#0B1B3D]">₹{fmt(c.totalSpent)}</p>
+                  <p className="text-sm font-bold text-[#001c54]">₹{fmt(c.totalSpent)}</p>
                   <p className="text-xs text-[#8C8276]">{c.orderCount} order{c.orderCount !== 1 ? "s" : ""}</p>
                 </div>
               </div>
@@ -296,7 +296,7 @@ export default function AdminDashboard() {
       {/* Recent Orders */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-[#0B1B3D]">Recent Orders</h2>
+          <h2 className="font-bold text-[#001c54]">Recent Orders</h2>
           <Link href="/admin/orders" className="text-sm text-[#EB9220] hover:text-[#EB9220]">View all →</Link>
         </div>
         {stats?.recentOrders?.length > 0 ? (
@@ -312,9 +312,9 @@ export default function AdminDashboard() {
               <tbody className="divide-y divide-[#FCFAF6]">
                 {stats.recentOrders.map((o: any) => (
                   <tr key={o.id} className="hover:bg-[#FCFAF6] transition-colors">
-                    <td className="py-3 pr-4 font-mono text-[#0B1B3D] font-semibold text-xs">{o.orderNumber}</td>
+                    <td className="py-3 pr-4 font-mono text-[#001c54] font-semibold text-xs">{o.orderNumber}</td>
                     <td className="py-3 pr-4 text-[#45353E]">{o.user?.name || "—"}</td>
-                    <td className="py-3 pr-4 font-bold text-[#0B1B3D]">₹{fmt(Number(o.totalAmount))}</td>
+                    <td className="py-3 pr-4 font-bold text-[#001c54]">₹{fmt(Number(o.totalAmount))}</td>
                     <td className="py-3 pr-4">
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${o.paymentMethod === "razorpay" ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"}`}>
                         {o.paymentMethod === "razorpay" ? "Online" : "COD"}

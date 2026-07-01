@@ -79,7 +79,7 @@ export function CertLogo({ label, className }: CertLogoProps) {
   // Fallback
   return (
     <div className="inline-flex items-center gap-1 shrink-0 border border-[#E8E2D9] rounded-lg px-2.5 py-0.5 bg-[#FCFAF6] h-7">
-      <span className="text-[11px] font-bold text-[#0B1B3D]">{label}</span>
+      <span className="text-[11px] font-bold text-[#001c54]">{label}</span>
       <span className="text-[9px] text-[#EB9220] font-semibold">Certified</span>
     </div>
   );

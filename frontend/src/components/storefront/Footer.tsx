@@ -47,7 +47,7 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="md:col-span-1">
-            <div className="text-xl font-bold mb-3" style={{ color: "#0B1B3D", letterSpacing: "-0.03em" }}>
+            <div className="text-xl font-bold mb-3" style={{ color: "#001c54", letterSpacing: "-0.03em" }}>
               {name}<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#EB9220", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
             </div>
             <p className="text-sm leading-relaxed mb-4" style={{ color: "#45353E" }}>
@@ -76,7 +76,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#0B1B3D", letterSpacing: "0.12em" }}>Quick Links</h4>
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#001c54", letterSpacing: "0.12em" }}>Quick Links</h4>
             <ul className="space-y-2.5">
               {[["Home","/"],["Shop / Products","/products"],["Science / Quality","/science"],["About Us","/about"],["FAQs","/faqs"],["Contact Us","/contact"]].map(([l,h]) => (
                 <li key={l}>
@@ -91,7 +91,7 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#0B1B3D", letterSpacing: "0.12em" }}>Legal</h4>
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#001c54", letterSpacing: "0.12em" }}>Legal</h4>
             <ul className="space-y-2.5">
               {[["Privacy Policy","/privacy-policy"],["Terms & Conditions","/terms-of-service"],["Refund & Cancellation","/refund-policy"],["Shipping Policy","/shipping-policy"],["Legal Disclaimer","/legal-disclaimer"]].map(([l,h]) => (
                 <li key={l}>
@@ -106,7 +106,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#0B1B3D", letterSpacing: "0.12em" }}>Contact Us</h4>
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "#001c54", letterSpacing: "0.12em" }}>Contact Us</h4>
             <div className="space-y-3 text-sm" style={{ color: "#45353E" }}>
               <div className="flex items-start gap-2.5">
                 <MapPin size={14} className="mt-0.5 shrink-0" style={{ color: "#EB9220" }} />

@@ -67,13 +67,13 @@ export default function RegisterPage() {
 
   return (
     <main className="relative min-h-screen bg-[#FCFAF6] flex items-center justify-center px-6 py-12">
-      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm text-[#45353E] hover:text-[#0B1B3D] transition-colors font-medium">
+      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm text-[#45353E] hover:text-[#001c54] transition-colors font-medium">
         <ArrowLeft size={16} /> Back to Home
       </Link>
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 right-1/4 h-[500px] w-[500px] rounded-full bg-[#EB9220]/10 " />
-        <div className="absolute bottom-0 left-1/4 h-[400px] w-[400px] rounded-full bg-[#0B1B3D]/8 " />
+        <div className="absolute bottom-0 left-1/4 h-[400px] w-[400px] rounded-full bg-[#001c54]/8 " />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="relative w-full max-w-md">
@@ -85,7 +85,7 @@ export default function RegisterPage() {
               Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, marginLeft: "2px", verticalAlign: "super" }}>™</sup>
             </span>
           </Link>
-          <h1 className="text-3xl font-black text-[#0B1B3D]">Create account</h1>
+          <h1 className="text-3xl font-black text-[#001c54]">Create account</h1>
           <p className="text-[#45353E] mt-1">Start your wellness journey today</p>
         </div>
 
@@ -134,7 +134,7 @@ export default function RegisterPage() {
                   placeholder="Min 8 characters"
                 />
                 <button type="button" onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#45353E] hover:text-[#0B1B3D]">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#45353E] hover:text-[#001c54]">
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>

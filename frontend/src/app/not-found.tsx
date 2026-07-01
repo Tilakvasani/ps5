@@ -12,7 +12,7 @@ export default function NotFound() {
         >
           404
         </h1>
-        <h2 className="text-2xl font-black text-[#0B1B3D] mt-2">
+        <h2 className="text-2xl font-black text-[#001c54] mt-2">
           Page not found
         </h2>
         <p className="text-[#45353E] mt-2 max-w-sm mx-auto">
