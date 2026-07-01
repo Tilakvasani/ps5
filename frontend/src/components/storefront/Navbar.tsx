@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Menu, X, HeartPulse, User, LogOut, Search } from "lucide-react";
+import { ShoppingCart, Menu, X, HeartPulse, User, LogOut } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useLogout } from "@/lib/useAuth";
 
@@ -25,12 +25,12 @@ export default function Navbar() {
   const handleLogout = useLogout();
 
   const NAV_LINKS = [
-    ["SHOP ALL",         "/products"],
-    ["ELECTROLYTES",     "/products"],
-    ["BUNDLES",          "/products"],
-    ["ABOUT ZUPWELL",    "/about"],
-    ["SCIENCE",          "/science"],
-    ["FAQS",             "/faqs"],
+    ["Home",             "/"],
+    ["Shop",             "/products"],
+    ["Science",          "/science"],
+    ["About Us",         "/about"],
+    ["FAQs",             "/faqs"],
+    ["Contact",          "/contact"],
   ];
 
   return (
@@ -41,19 +41,11 @@ export default function Navbar() {
         borderBottom: "1.5px solid #E8E2D9",
       }}
     >
-      {/* Top Banner */}
-      <div className="w-full bg-[#001c54] text-white py-2 px-6 text-center text-xs font-semibold flex items-center justify-center gap-2">
-        <span className="bg-[#EB9220] text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md leading-none">NEW</span>
-        <span className="flex items-center gap-1 text-[11px] tracking-wide">
-          ⚡ Instant Hydration Effervescent Electrolyte Tablets | Free Express Shipping across India over ₹499
-        </span>
-      </div>
-
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
 
-        {/* Logo — lowercase with orange dot */}
-        <Link href="/" className="text-3xl font-black flex items-center tracking-tight font-sans" style={{ color: "#001c54", letterSpacing: "-0.06em" }}>
-          zupwell<span className="text-[#EB9220] font-black text-4xl leading-none -ml-0.5">.</span>
+        {/* Logo — flat, no gradient */}
+        <Link href="/" className="text-2xl font-bold tracking-tight" style={{ color: "#002A30", letterSpacing: "-0.04em" }}>
+          Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#48C062", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
         </Link>
 
         {/* Desktop Nav */}
@@ -62,7 +54,7 @@ export default function Navbar() {
             <Link
               key={label}
               href={href}
-              className="text-xs font-bold uppercase tracking-wider transition-colors duration-150 text-[#45353E] hover:text-[#001c54]"
+              className="text-sm font-medium transition-colors duration-150 text-[#45353E] hover:text-[#002A30]"
             >
               {label}
             </Link>
@@ -70,15 +62,10 @@ export default function Navbar() {
         </div>
 
         {/* Right */}
-        <div className="flex items-center gap-4">
- 
-          {/* Search */}
-          <Link href="/products" className="p-2 transition-colors duration-150 text-[#45353E] hover:text-[#001c54]">
-            <Search size={20} />
-          </Link>
+        <div className="flex items-center gap-3">
 
           {/* Cart */}
-          <Link href="/cart" className="relative p-2 transition-colors duration-150 text-[#45353E] hover:text-[#001c54]"
+          <Link href="/cart" className="relative p-2 transition-colors duration-150 text-[#45353E] hover:text-[#002A30]"
           >
             <ShoppingCart size={20} />
             <AnimatePresence>
@@ -86,7 +73,7 @@ export default function Navbar() {
                 <motion.span
                   initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
                   className="absolute -top-1 -right-1 h-5 w-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
-                  style={{ background: "#EB9220" }}
+                  style={{ background: "#48C062" }}
                 >
                   {cartCount}
                 </motion.span>
@@ -100,15 +87,15 @@ export default function Navbar() {
               <button
                 onClick={() => setUserDropOpen(!userDropOpen)}
                 className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-150"
-                style={{ border: "1.5px solid #E8E2D9", color: "#001c54", background: "#FFFFFF" }}
+                style={{ border: "1.5px solid #E8E2D9", color: "#002A30", background: "#FFFFFF" }}
               >
                 <div
                   className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                  style={{ background: "#001c54" }}
+                  style={{ background: "#002A30" }}
                 >
                   {user.name[0].toUpperCase()}
                 </div>
-                <span className="hidden md:inline" style={{ color: "#001c54" }}>{user.name.split(" ")[0]}</span>
+                <span className="hidden md:inline" style={{ color: "#002A30" }}>{user.name.split(" ")[0]}</span>
               </button>
               <AnimatePresence>
                 {userDropOpen && (
@@ -119,12 +106,12 @@ export default function Navbar() {
                     style={{ background: "#FFFFFF", border: "1.5px solid #E8E2D9" }}
                   >
                     <Link href="/account" onClick={() => setUserDropOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#001c54] hover:bg-[#FCFAF6]"
+                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#002A30] hover:bg-[#FCFAF6]"
                     >
                       <User size={14} /> My Account
                     </Link>
                     <Link href="/account?tab=orders" onClick={() => setUserDropOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#001c54] hover:bg-[#FCFAF6]"
+                      className="flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 text-[#002A30] hover:bg-[#FCFAF6]"
                     >
                       <HeartPulse size={14} /> My Orders
                     </Link>
@@ -141,7 +128,7 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="hidden md:flex items-center">
-              <Link href="/login" className="btn-primary text-xs uppercase tracking-wider px-5 py-2 !rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all">Sign In</Link>
+              <Link href="/login" className="btn-outline text-sm px-4 py-2">Sign In</Link>
             </div>
           )}
 
