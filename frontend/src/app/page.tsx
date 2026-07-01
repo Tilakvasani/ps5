@@ -281,7 +281,7 @@ export default function HomePage() {
                   </div>
                   
                   {/* Decorative Bottle Representation in Card */}
-                  <div className="w-10 h-14 rounded-lg bg-gradient-to-b opacity-25 mt-2 self-end" style={{ backgroundImage: `linear-gradient(to bottom, var(--tw-gradient-stops))` }} className={`self-end w-10 h-14 rounded-lg bg-gradient-to-b ${goal.bottleColor} opacity-20`} />
+                  <div className={`self-end w-10 h-14 rounded-lg bg-gradient-to-b ${goal.bottleColor} opacity-20`} />
 
                   <div>
                     <h3 className="font-display font-bold text-xl mb-1" style={{ color: goal.textColor }}>
