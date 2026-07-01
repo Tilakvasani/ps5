@@ -1,9 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, MessageCircle, HelpCircle } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
+import { useEffect } from "react";
 import { fetchSettings } from "@/lib/useSettings";
 
 const FAQS = [
@@ -65,17 +66,6 @@ const FAQS = [
   },
 ];
 
-const D: Record<string, string> = {
-  faqs_hero_badge: "FAQs",
-  faqs_hero_title: "Got Questions?",
-  faqs_hero_subtext: "Everything you need to know about Zupwell and our products.",
-  faqs_footer_title: "Still have a question?",
-  faqs_footer_subtext: "Can't find what you're looking for? We're just a message away!",
-};
-
-const s = (settings: Record<string, string>, key: string) =>
-  settings[key] || D[key] || "";
-
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
@@ -112,7 +102,9 @@ export default function FAQsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
-    fetchSettings().then(setSettings).catch(() => {});
+    fetchSettings()
+      .then(setSettings)
+      .catch(() => {});
     const onBust = (e: StorageEvent) => {
       if (e.key === "zupwell-settings-bust")
         fetchSettings().then(setSettings).catch(() => {});
@@ -123,7 +115,7 @@ export default function FAQsPage() {
 
   const whatsapp = settings.contact_whatsapp || "";
 
-  // Parse FAQs list from settings
+  // Parse FAQs list from settings if custom
   let faqs = FAQS;
   if (settings.faqs_list_json) {
     try {
@@ -143,7 +135,6 @@ export default function FAQsPage() {
     <main className="min-h-screen bg-[#FCFAF6] overflow-x-hidden">
       <Navbar />
 
-<<<<<<< HEAD
       {/* Hero Banner */}
       <section className="relative pt-32 pb-16 px-6 bg-white border-b border-[#E8E2D9] overflow-hidden">
         <div className="pointer-events-none absolute -top-40 -right-40 h-[400px] w-[400px] rounded-full bg-[#48C062]/5 blur-3xl" />
@@ -157,29 +148,6 @@ export default function FAQsPage() {
           <p className="font-sans text-xs font-bold text-[#8C8276] uppercase tracking-wider">
             Find answers to common questions about our products & shipping.
           </p>
-=======
-      {/* ── Hero ── */}
-      <section className="relative pt-32 pb-16 px-6 bg-white overflow-hidden">
-        <div className="pointer-events-none absolute -top-40 -right-40 h-[400px] w-[400px] rounded-full bg-[#48C062]/6 " />
-        <div className="relative mx-auto max-w-3xl text-center">
-          <motion.span initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-block text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-4">
-            {s(settings, "faqs_hero_badge")}
-          </motion.span>
-          <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="text-5xl md:text-6xl font-black text-[#002A30] mb-4 leading-tight">
-            {s(settings, "faqs_hero_title").split(/(Questions\?)/i).map((part, i) => {
-              if (part.toLowerCase() === "questions?") {
-                return <span key={i} className="gradient-text">{part}</span>;
-              }
-              return part;
-            })}
-          </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="text-lg text-[#45353E]">
-            {s(settings, "faqs_hero_subtext")}
-          </motion.p>
->>>>>>> 3fafafe9dfa2fc6041d3fbf2f0f5c8dcafb59565
         </div>
       </section>
 
@@ -207,11 +175,11 @@ export default function FAQsPage() {
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="space-y-4">
               <div className="flex items-center gap-3">
-                <span className="text-xl h-8 w-8 rounded-xl bg-white border border-[#E8E2D9] flex items-center justify-center shadow-soft">{section.emoji}</span>
+                <span className="text-xl h-8 w-8 rounded-xl bg-white border border-[#E8E2D9] flex items-center justify-center shadow-soft">{section.emoji || "❓"}</span>
                 <h2 className="font-display font-bold text-lg text-[#002A30] uppercase tracking-wider">{section.category}</h2>
               </div>
               <div className="space-y-3">
-                {section.questions.map(({ q, a }) => (
+                {section.questions.map(({ q, a }: any) => (
                   <FAQItem key={q} q={q} a={a} />
                 ))}
               </div>
@@ -227,19 +195,11 @@ export default function FAQsPage() {
             <div className="h-16 w-16 rounded-3xl bg-[#FCFAF6] border border-[#E8E2D9] flex items-center justify-center mx-auto mb-4 shadow-soft">
               <HelpCircle size={28} className="text-[#48C062]" />
             </div>
-<<<<<<< HEAD
             <h2 className="font-display text-2xl font-black text-[#002A30] uppercase tracking-wide">
               Still have questions?
             </h2>
             <p className="text-xs font-semibold text-[#8C8276] uppercase tracking-wider mb-6">
               Can't find the answer you need? Get in touch with our wellness support team.
-=======
-            <h2 className="text-2xl font-black text-[#002A30] mb-2">
-              {s(settings, "faqs_footer_title")}
-            </h2>
-            <p className="text-[#45353E] mb-6">
-              {s(settings, "faqs_footer_subtext")}
->>>>>>> 3fafafe9dfa2fc6041d3fbf2f0f5c8dcafb59565
             </p>
             {whatsapp ? (
               <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer">
