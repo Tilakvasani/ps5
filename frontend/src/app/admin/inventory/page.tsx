@@ -1,149 +1,117 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Search, Plus, RefreshCw, AlertTriangle } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export default function AdminInventoryPage() {
   const [inventory, setInventory] = useState<any[]>([]);
+  const [movements, setMovements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [movementModal, setMovementModal] = useState<any>(null);
-  const [movement, setMovement] = useState({ qty: "", movementType: "in", notes: "" });
+  const [modal, setModal] = useState(false);
+  const [form, setForm] = useState({ productId:"", type:"IN", qty:"", note:"" });
 
-  const fetchInventory = async () => {
+  const load = async () => {
     setLoading(true);
-    try { const data = await adminApi.getInventory(); setInventory(data); } catch {}
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchInventory(); }, []);
-
-  const filtered = inventory.filter(i =>
-    i.product?.name?.toLowerCase().includes(search.toLowerCase()) ||
-    i.product?.sku?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const handleMovement = async () => {
-    if (!movementModal || !movement.qty) return;
     try {
-      await adminApi.addMovement({
-        productId: movementModal.productId,
-        variantId: movementModal.variantId,
-        movementType: movement.movementType,
-        qty: Number(movement.qty),
-        notes: movement.notes,
-      });
-      toast.success("Stock updated!");
-      setMovementModal(null);
-      setMovement({ qty: "", movementType: "in", notes: "" });
-      fetchInventory();
-    } catch (err: any) { toast.error(err.message); }
+      const [inv, mov] = await Promise.all([adminApi.getInventory(), adminApi.getMovements()]);
+      setInventory(Array.isArray(inv) ? inv : inv.items || []);
+      setMovements(Array.isArray(mov) ? mov : mov.movements || []);
+    } catch {} setLoading(false);
   };
+  useEffect(() => { load(); }, []);
 
-  const lowStock = filtered.filter(i => i.qtyInStock <= i.lowStockThreshold);
+  const addMovement = async () => {
+    try {
+      await adminApi.addMovement({ productId:Number(form.productId), type:form.type, qty:Number(form.qty), note:form.note });
+      toast.success("Inventory updated!"); setModal(false); setForm({ productId:"", type:"IN", qty:"", note:"" }); load();
+    } catch (e: any) { toast.error(e.message); }
+  };
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-black text-[#001c54]">Inventory</h1>
-          <p className="text-[#45353E] text-sm mt-1">{inventory.length} SKUs tracked</p>
-        </div>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"20px" }}>
+        <h1 style={{ fontSize:"24px", fontWeight:900, letterSpacing:"-1px" }}>INVENTORY</h1>
+        <button onClick={() => setModal(true)} className="zbtn-or" style={{ fontSize:"11px", padding:"9px 16px" }}>
+          <Plus size={13} /> ADD MOVEMENT
+        </button>
       </div>
 
-      {lowStock.length > 0 && (
-        <div className="flex items-center gap-3 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 mb-4 text-sm">
-          <AlertTriangle size={16} className="text-yellow-400" />
-          <span className="text-yellow-200"><span className="font-bold">{lowStock.length} items</span> are at or below low stock threshold</span>
-        </div>
-      )}
-
-      <div className="flex gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#45353E]" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or SKU..." className="input-field pl-9 text-sm" />
-        </div>
-        <button onClick={fetchInventory} className="btn-outline p-2.5"><RefreshCw size={16} /></button>
+      {/* Stock overview */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))", gap:"10px", marginBottom:"20px" }}>
+        {inventory.map((item: any) => {
+          const stock = item.stock ?? item.quantity ?? 0;
+          const color = stock <= 0 ? "#DC2626" : stock <= 10 ? "#F59E0B" : "#16A34A";
+          return (
+            <div key={item.id || item.productId} className="zcard" style={{ borderTop:`3px solid ${color}` }}>
+              <div style={{ fontSize:"11px", fontWeight:800, marginBottom:"4px", letterSpacing:"-0.2px" }}>{item.name || item.product?.name}</div>
+              <div style={{ fontSize:"22px", fontWeight:900, letterSpacing:"-1px", color }}>{stock}</div>
+              <div style={{ fontSize:"10px", color:"#888", fontWeight:700 }}>UNITS IN STOCK</div>
+            </div>
+          );
+        })}
+        {!loading && inventory.length === 0 && (
+          <div style={{ padding:"20px", color:"#888", fontSize:"13px", gridColumn:"1/-1" }}>No inventory data yet.</div>
+        )}
       </div>
 
-      <div className="card p-0 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[#E8E2D9] text-[#45353E] text-left">
-                {["Product", "SKU / Variant", "In Stock", "Reserved", "Available", "Low Stock At", "Action"].map(h => (
-                  <th key={h} className="px-4 py-3 font-semibold whitespace-nowrap">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {loading ? Array.from({ length: 10 }).map((_, i) => (
-                <tr key={i}><td colSpan={7} className="px-4 py-3"><div className="h-4 rounded bg-[#FCFAF6] animate-pulse" /></td></tr>
-              )) : filtered.map(item => {
-                const available = item.qtyInStock - item.reservedQty;
-                const isLow = item.qtyInStock <= item.lowStockThreshold;
-                return (
-                  <tr key={item.id} className={`hover:bg-[#FCFAF6] transition-colors ${isLow ? "bg-yellow-500/5" : ""}`}>
-                    <td className="px-4 py-3">
-                      <p className="font-semibold text-[#001c54] line-clamp-1 max-w-[180px]">{item.product?.name}</p>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-[#45353E] text-xs">
-                      {item.variant ? item.variant.sku : item.product?.sku}
-                      {item.variant && <p className="text-[#45353E]">{item.variant.variantName}</p>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`font-bold text-lg ${isLow ? "text-yellow-400" : "text-[#001c54]"}`}>{item.qtyInStock}</span>
-                    </td>
-                    <td className="px-4 py-3 text-[#45353E]">{item.reservedQty}</td>
-                    <td className="px-4 py-3">
-                      <span className={`badge ${available > 0 ? "badge-success" : "badge-danger"}`}>{available}</span>
-                    </td>
-                    <td className="px-4 py-3 text-[#45353E]">{item.lowStockThreshold}</td>
-                    <td className="px-4 py-3">
-                      <button onClick={() => setMovementModal(item)}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-[#EB9220] hover:text-[#EB9220] border border-[#EB9220]/20 hover:border-[#EB9220]/40 px-3 py-1.5 rounded-lg transition-all">
-                        <Plus size={12} /> Adjust
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {/* Movements table */}
+      <div style={{ fontSize:"12px", fontWeight:900, letterSpacing:"0.5px", marginBottom:"10px" }}>RECENT MOVEMENTS</div>
+      <div className="zcard" style={{ padding:0, overflow:"hidden" }}>
+        <div className="ztr ztr-head" style={{ gridTemplateColumns:"1.5fr 0.8fr 0.6fr 1.2fr 0.8fr" }}>
+          <span>PRODUCT</span><span>TYPE</span><span>QTY</span><span>NOTE</span><span>DATE</span>
         </div>
+        {movements.slice(0,20).map((m: any, i: number) => (
+          <div key={m.id} className="ztr" style={{ gridTemplateColumns:"1.5fr 0.8fr 0.6fr 1.2fr 0.8fr", background:i%2?"#FFF":"#FAFAFA" }}>
+            <span style={{ fontSize:"12px", fontWeight:700 }}>{m.product?.name || m.productId}</span>
+            <span className={`zbadge ${m.type==="IN"?"zbadge-gr":"zbadge-rd"}`}>{m.type}</span>
+            <span style={{ fontWeight:800, fontSize:"13px" }}>{m.type==="OUT" ? `-${m.qty}` : `+${m.qty}`}</span>
+            <span style={{ fontSize:"11px", color:"#888" }}>{m.note || "—"}</span>
+            <span style={{ fontSize:"11px", fontWeight:600 }}>{new Date(m.createdAt).toLocaleDateString("en-IN",{ day:"numeric", month:"short" })}</span>
+          </div>
+        ))}
+        {!loading && movements.length === 0 && <div style={{ padding:"30px", textAlign:"center", color:"#888", fontSize:"13px" }}>No movements recorded.</div>}
       </div>
 
-      {/* Movement Modal */}
-      {movementModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white  px-4">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md card p-6">
-            <h2 className="font-bold text-[#001c54] mb-1">Adjust Stock</h2>
-            <p className="text-sm text-[#45353E] mb-5">{movementModal.product?.name}{movementModal.variant ? ` — ${movementModal.variant.variantName}` : ""}</p>
-            <div className="space-y-4">
+      {/* Modal */}
+      {modal && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.6)", zIndex:100, display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <div className="zcard" style={{ width:"100%", maxWidth:"380px" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"16px" }}>
+              <div style={{ fontSize:"14px", fontWeight:900 }}>ADD INVENTORY MOVEMENT</div>
+              <button onClick={() => setModal(false)} style={{ background:"none", border:"none", cursor:"pointer" }}><X size={16} /></button>
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
               <div>
-                <label className="label-text">Movement Type</label>
-                <select value={movement.movementType} onChange={e => setMovement(m => ({ ...m, movementType: e.target.value }))} className="input-field">
-                  <option value="in">Stock In (Purchase / Return)</option>
-                  <option value="out">Stock Out (Damage / Manual)</option>
-                  <option value="adjustment">Adjustment</option>
+                <div className="zlabel">Product</div>
+                <select className="zinp" value={form.productId} onChange={e => setForm(f => ({ ...f, productId:e.target.value }))}>
+                  <option value="">Select product</option>
+                  {inventory.map((item: any) => <option key={item.id} value={item.productId || item.id}>{item.name || item.product?.name}</option>)}
                 </select>
               </div>
-              <div>
-                <label className="label-text">Quantity</label>
-                <input type="number" min="1" value={movement.qty} onChange={e => setMovement(m => ({ ...m, qty: e.target.value }))} className="input-field" placeholder="e.g. 50" />
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px" }}>
+                <div>
+                  <div className="zlabel">Type</div>
+                  <select className="zinp" value={form.type} onChange={e => setForm(f => ({ ...f, type:e.target.value }))}>
+                    <option value="IN">Stock In (+)</option>
+                    <option value="OUT">Stock Out (-)</option>
+                  </select>
+                </div>
+                <div>
+                  <div className="zlabel">Quantity</div>
+                  <input className="zinp" type="number" min="1" value={form.qty} onChange={e => setForm(f => ({ ...f, qty:e.target.value }))} />
+                </div>
               </div>
               <div>
-                <label className="label-text">Notes (optional)</label>
-                <input value={movement.notes} onChange={e => setMovement(m => ({ ...m, notes: e.target.value }))} className="input-field" placeholder="Reason or reference" />
+                <div className="zlabel">Note (optional)</div>
+                <input className="zinp" placeholder="e.g. Restocked from supplier" value={form.note} onChange={e => setForm(f => ({ ...f, note:e.target.value }))} />
               </div>
-              <div className="flex gap-3 pt-2">
-                <motion.button whileHover={{ scale: 1.02 }} onClick={handleMovement} className="btn-primary flex-1 py-2.5">Save Movement</motion.button>
-                <button onClick={() => setMovementModal(null)} className="btn-outline px-5 py-2.5">Cancel</button>
+              <div style={{ display:"flex", gap:"8px" }}>
+                <button onClick={() => setModal(false)} className="zbtn-out" style={{ flex:1, justifyContent:"center" }}>CANCEL</button>
+                <button onClick={addMovement} className="zbtn-or" style={{ flex:2, justifyContent:"center" }}>SAVE</button>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       )}
     </div>

@@ -1,109 +1,83 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Plus, Edit3, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, X } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [cats, setCats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState<any>(null); // null = closed, {} = new, {id,...} = edit
-  const [form, setForm] = useState({ name: "", description: "", parentId: "", isActive: true });
+  const [modal, setModal] = useState<any>(null);
+  const [form, setForm] = useState({ name:"", description:"", isActive:true });
 
-  const fetch = async () => { setLoading(true); try { setCategories(await adminApi.getCategories()); } catch {} setLoading(false); };
-  useEffect(() => { fetch(); }, []);
+  const load = async () => { setLoading(true); try { setCats(await adminApi.getCategories()); } catch {} setLoading(false); };
+  useEffect(() => { load(); }, []);
 
-  const openNew = () => { setForm({ name: "", description: "", parentId: "", isActive: true }); setModal({}); };
-  const openEdit = (c: any) => { setForm({ name: c.name, description: c.description || "", parentId: c.parentId?.toString() || "", isActive: c.isActive }); setModal(c); };
-
-  const handleSave = async () => {
+  const save = async () => {
     try {
-      const data = { ...form, parentId: form.parentId ? Number(form.parentId) : null };
-      if (modal?.id) { await adminApi.updateCategory(modal.id, data); toast.success("Updated!"); }
-      else { await adminApi.createCategory(data); toast.success("Created!"); }
-      setModal(null); fetch();
-    } catch (err: any) { toast.error(err.message); }
+      if (modal?.id) await adminApi.updateCategory(modal.id, form);
+      else await adminApi.createCategory(form);
+      toast.success(modal?.id ? "Updated!" : "Created!"); setModal(null); load();
+    } catch (e: any) { toast.error(e.message); }
   };
 
-  const handleDelete = async (id: number) => {
+  const del = async (id: number) => {
     if (!confirm("Delete this category?")) return;
-    try { await adminApi.deleteCategory(id); toast.success("Deleted"); fetch(); } catch (err: any) { toast.error(err.message); }
+    try { await adminApi.deleteCategory(id); toast.success("Deleted!"); load(); } catch (e: any) { toast.error(e.message); }
   };
-
-  const roots = categories.filter(c => !c.parentId);
-  const children = (pid: number) => categories.filter(c => c.parentId === pid);
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-black text-[#001c54]">Categories</h1>
-        <button onClick={openNew} className="btn-primary flex items-center gap-2"><Plus size={16} /> Add Category</button>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"20px" }}>
+        <h1 style={{ fontSize:"24px", fontWeight:900, letterSpacing:"-1px" }}>CATEGORIES</h1>
+        <button onClick={() => { setForm({ name:"", description:"", isActive:true }); setModal({}); }} className="zbtn-or" style={{ fontSize:"11px", padding:"9px 16px" }}>
+          <Plus size={13} /> ADD CATEGORY
+        </button>
       </div>
 
-      <div className="card p-0 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead><tr className="border-b border-[#E8E2D9] text-[#45353E] text-left">
-            {["Name", "Parent", "Products", "Status", "Actions"].map(h => <th key={h} className="px-4 py-3 font-semibold">{h}</th>)}
-          </tr></thead>
-          <tbody className="divide-y divide-white/5">
-            {loading ? Array.from({ length: 6 }).map((_, i) => <tr key={i}><td colSpan={5} className="px-4 py-3"><div className="h-4 rounded bg-[#FCFAF6] animate-pulse" /></td></tr>)
-              : roots.map(cat => (
-              <>
-                <tr key={cat.id} className="hover:bg-[#FCFAF6] transition-colors font-semibold">
-                  <td className="px-4 py-3 text-[#001c54]">{cat.name}</td>
-                  <td className="px-4 py-3 text-[#45353E]">—</td>
-                  <td className="px-4 py-3 text-[#45353E]">{cat._count?.products ?? 0}</td>
-                  <td className="px-4 py-3"><span className={`badge ${cat.isActive ? "badge-success" : "badge-danger"}`}>{cat.isActive ? "Active" : "Inactive"}</span></td>
-                  <td className="px-4 py-3 flex gap-1">
-                    <button onClick={() => openEdit(cat)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#EB9220] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
-                    <button onClick={() => handleDelete(cat.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-red-400 hover:bg-red-400/10 transition-all"><Trash2 size={14} /></button>
-                  </td>
-                </tr>
-                {children(cat.id).map(child => (
-                  <tr key={child.id} className="hover:bg-[#FCFAF6] transition-colors">
-                    <td className="px-4 py-3 pl-10 text-[#001c54]">↳ {child.name}</td>
-                    <td className="px-4 py-3 text-[#45353E]">{cat.name}</td>
-                    <td className="px-4 py-3 text-[#45353E]">{child._count?.products ?? 0}</td>
-                    <td className="px-4 py-3"><span className={`badge ${child.isActive ? "badge-success" : "badge-danger"}`}>{child.isActive ? "Active" : "Inactive"}</span></td>
-                    <td className="px-4 py-3 flex gap-1">
-                      <button onClick={() => openEdit(child)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#EB9220] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
-                      <button onClick={() => handleDelete(child.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-red-400 hover:bg-red-400/10 transition-all"><Trash2 size={14} /></button>
-                    </td>
-                  </tr>
-                ))}
-              </>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))", gap:"12px" }}>
+        {loading ? [...Array(4)].map((_,i) => (
+          <div key={i} style={{ height:"100px", background:"#F0F0F0", borderRadius:"10px" }} />
+        )) : cats.map(c => (
+          <div key={c.id} className="zcard">
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"6px" }}>
+              <div style={{ fontSize:"13px", fontWeight:800, letterSpacing:"-0.3px" }}>{c.name}</div>
+              <span className={`zbadge ${c.isActive?"zbadge-gr":"zbadge-rd"}`}>{c.isActive?"ACTIVE":"OFF"}</span>
+            </div>
+            <div style={{ fontSize:"11px", color:"#888", marginBottom:"12px", lineHeight:1.5 }}>{c.description || "No description"}</div>
+            <div style={{ fontSize:"10px", color:"#888", marginBottom:"12px" }}>{c._count?.products ?? 0} products</div>
+            <div style={{ display:"flex", gap:"8px" }}>
+              <button onClick={() => { setForm({ name:c.name, description:c.description||"", isActive:c.isActive }); setModal(c); }} className="zbtn-out" style={{ flex:1, fontSize:"10px", padding:"7px", justifyContent:"center" }}>
+                <Edit size={12} /> EDIT
+              </button>
+              <button onClick={() => del(c.id)} style={{ background:"none", border:"1.5px solid #DC2626", borderRadius:"7px", padding:"7px 10px", cursor:"pointer", color:"#DC2626" }}>
+                <Trash2 size={12} />
+              </button>
+            </div>
+          </div>
+        ))}
+        {!loading && cats.length === 0 && <div style={{ padding:"20px", color:"#888", fontSize:"13px" }}>No categories yet.</div>}
       </div>
 
       {modal !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white  px-4">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md card p-6">
-            <h2 className="font-bold text-[#001c54] mb-5">{modal?.id ? "Edit" : "New"} Category</h2>
-            <div className="space-y-4">
-              <div><label className="label-text">Name *</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="input-field" /></div>
-              <div><label className="label-text">Description</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="input-field resize-none" rows={2} /></div>
-              <div><label className="label-text">Parent Category</label>
-                <select value={form.parentId} onChange={e => setForm(f => ({ ...f, parentId: e.target.value }))} className="input-field">
-                  <option value="">— Root Category —</option>
-                  {roots.filter(c => c.id !== modal?.id).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </div>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <span className="text-sm text-[#45353E]">Active</span>
-                <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-[#EB9220]" : "bg-[#FFFFFF]"}`}>
-                  <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${form.isActive ? "translate-x-6" : "translate-x-1"}`} />
-                </button>
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.6)", zIndex:100, display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <div className="zcard" style={{ width:"100%", maxWidth:"380px" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"16px" }}>
+              <div style={{ fontSize:"14px", fontWeight:900 }}>{modal?.id ? "EDIT CATEGORY" : "NEW CATEGORY"}</div>
+              <button onClick={() => setModal(null)} style={{ background:"none", border:"none", cursor:"pointer" }}><X size={16} /></button>
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
+              <input className="zinp" placeholder="Category name" value={form.name} onChange={e => setForm(f => ({ ...f, name:e.target.value }))} />
+              <textarea className="zinp" rows={3} placeholder="Description (optional)" value={form.description} onChange={e => setForm(f => ({ ...f, description:e.target.value }))} style={{ resize:"none" }} />
+              <label style={{ display:"flex", alignItems:"center", gap:"8px", fontSize:"12px", fontWeight:600, cursor:"pointer" }}>
+                <input type="checkbox" checked={form.isActive} onChange={e => setForm(f => ({ ...f, isActive:e.target.checked }))} /> Active
               </label>
+              <div style={{ display:"flex", gap:"8px" }}>
+                <button onClick={() => setModal(null)} className="zbtn-out" style={{ flex:1, justifyContent:"center" }}>CANCEL</button>
+                <button onClick={save} className="zbtn-or" style={{ flex:2, justifyContent:"center" }}>SAVE</button>
+              </div>
             </div>
-            <div className="flex gap-3 mt-5">
-              <button onClick={handleSave} className="btn-primary flex-1 py-2.5">Save</button>
-              <button onClick={() => setModal(null)} className="btn-outline px-5 py-2.5">Cancel</button>
-            </div>
-          </motion.div>
+          </div>
         </div>
       )}
     </div>

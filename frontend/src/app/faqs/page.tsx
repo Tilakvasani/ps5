@@ -1,214 +1,75 @@
 "use client";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, MessageCircle } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { useEffect } from "react";
-import { fetchSettings } from "@/lib/useSettings";
+import Link from "next/link";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const FAQS = [
-  {
-    category: "Product Related",
-    emoji: "📦",
-    questions: [
-      {
-        q: "Can these tablets be chewed directly?",
-        a: "Absolutely not! These are 'Effervescent' tablets. Put them in water, watch the magic (fizz) and then drink. Eating them directly is not a good idea!",
-      },
-      {
-        q: "How much sugar is in this?",
-        a: "Less! We believe in taste, not in loads of sugar. Staying fit has now become delicious.",
-      },
-      {
-        q: "How many tablets can be taken in a day?",
-        a: "Usually 1 tablet a day is enough. But if you are working out excessively, you can take it as per your doctor's advice.",
-      },
-    ],
-  },
-  {
-    category: "Safety & Quality",
-    emoji: "🛡️",
-    questions: [
-      {
-        q: "Is this safe?",
-        a: "100%! Our products are made from high-quality ingredients and comply with all regulations for nutraceuticals.",
-      },
-      {
-        q: "Will there be any side effects from taking this?",
-        a: "This is a health supplement, not a medicine. If you are allergic to anything specific, please check the ingredients list or ask your doctor.",
-      },
-    ],
-  },
-  {
-    category: "Orders & Delivery",
-    emoji: "🚚",
-    questions: [
-      {
-        q: "When will my order arrive?",
-        a: "We know you don't like to wait! Zupwell will be at your doorstep within 3 to 5 days of ordering.",
-      },
-      {
-        q: "Can I cancel my order?",
-        a: "Yes, you can cancel until the product ships. Once it leaves, it will be here to boost your energy!",
-      },
-    ],
-  },
-  {
-    category: "General Questions",
-    emoji: "💡",
-    questions: [
-      {
-        q: "Why should I choose Zupwell?",
-        a: "Because we make health stylish and delicious. Otherwise, try it once, you will understand for yourself!",
-      },
-    ],
-  },
+  { q: "How do I use Zupwell tablets?", a: "Drop one tablet into a glass of 200–250ml of water, wait about 20 seconds for it to fully dissolve, and drink. That's it. No blender, no shaker, no measuring." },
+  { q: "Can I take it every day?", a: "Yes, Zupwell is formulated for daily use. One tablet a day is the recommended starting point. If you're highly active or sweating heavily, you can take up to two tablets — one in the morning and one after your workout." },
+  { q: "Does it actually taste good?", a: "We spent a long time on the flavour. It should taste like a refreshing fizzy drink — not a medicine, not a science experiment. Try it once and let us know." },
+  { q: "Can I take it on an empty stomach?", a: "Yes. Since it's dissolved in water, it's easy on the stomach. That said, some people prefer taking supplements with a light meal — both work fine." },
+  { q: "What exactly is inside a Zupwell tablet?", a: "Every tablet contains a blend of key electrolytes (Sodium, Potassium, Magnesium, Calcium, Chloride), vitamins, and natural flavour. No added sugar, no artificial colours, no hidden fillers. Full ingredient list is on the pack." },
+  { q: "Is it safe for people with health conditions?", a: "Zupwell is a food supplement, not a medicine. If you have a diagnosed health condition or take prescription medications, we recommend checking with your doctor first — just to be sure it fits your specific situation." },
+  { q: "Is it suitable for vegetarians?", a: "Yes, 100%. Zupwell tablets are fully vegetarian. No animal-derived ingredients anywhere in the formula." },
+  { q: "Does it contain caffeine or stimulants?", a: "No. Zupwell contains zero caffeine, zero stimulants. The energy benefit comes from proper electrolyte balance and hydration — which is how your body is actually supposed to function." },
+  { q: "How long will delivery take?", a: "Most orders are delivered within 3 to 5 business days across India. You'll get a tracking link as soon as your order is dispatched." },
+  { q: "What's your return policy?", a: "If you receive a damaged or incorrect product, contact us within 48 hours and we'll fix it — replacement or full refund. For change-of-mind returns, unopened products can be returned within 7 days of delivery." },
+  { q: "Do you offer bulk or wholesale pricing?", a: "We do. If you're buying for a gym, sports team, clinic, or retail outlet, reach out to us directly at support@zupwell.com and we'll work out the right arrangement." },
 ];
 
-function FAQItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className={`border border-[#E8E2D9] rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-[#EB9220]/40 shadow-sm" : "hover:border-[#EB9220]/20"}`}>
-      <button onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left">
-        <span className={`font-semibold text-sm md:text-base transition-colors ${open ? "text-[#EB9220]" : "text-[#001c54]"}`}>
-          {q}
-        </span>
-        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }} className="shrink-0">
-          <ChevronDown size={18} className={open ? "text-[#EB9220]" : "text-[#8C8276]"} />
-        </motion.div>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-          >
-            <div className="px-5 pb-5 text-sm text-[#45353E] leading-relaxed border-t border-[#FCFAF6] pt-3">
-              {a}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+const CATS = ["ALL", "PRODUCT", "SHIPPING", "RETURNS"];
 
-export default function FAQsPage() {
-  const [whatsapp, setWhatsapp] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
+export default function FAQPage() {
+  const [open, setOpen] = useState<number | null>(0);
+  const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    fetchSettings()
-      .then(s => setWhatsapp(s.contact_whatsapp || ""))
-      .catch(() => {});
-    const onBust = (e: StorageEvent) => {
-      if (e.key === "zupwell-settings-bust")
-        fetchSettings().then(s => setWhatsapp(s.contact_whatsapp || "")).catch(() => {});
-    };
-    window.addEventListener("storage", onBust);
-    return () => window.removeEventListener("storage", onBust);
-  }, []);
-
-  const categories = ["All", ...FAQS.map(f => f.category)];
-  const filtered = activeCategory === "All" ? FAQS : FAQS.filter(f => f.category === activeCategory);
+  const filtered = FAQS.filter(f => f.q.toLowerCase().includes(search.toLowerCase()) || f.a.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <main className="min-h-screen bg-[#FCFAF6] overflow-x-hidden">
+    <>
       <Navbar />
 
-      {/* ── Hero ── */}
-      <section className="relative pt-32 pb-16 px-6 bg-white overflow-hidden">
-        <div className="pointer-events-none absolute -top-40 -right-40 h-[400px] w-[400px] rounded-full bg-[#EB9220]/6 " />
-        <div className="relative mx-auto max-w-3xl text-center">
-          <motion.span initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-block text-xs font-semibold uppercase tracking-widest text-[#EB9220] mb-4">
-            FAQs
-          </motion.span>
-          <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="text-5xl md:text-6xl font-black text-[#001c54] mb-4 leading-tight">
-            Got <span className="gradient-text">Questions?</span>
-          </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="text-lg text-[#45353E]">
-            Everything you need to know about Zupwell and our products.
-          </motion.p>
+      <section style={{ background: "var(--dk)", padding: "48px 24px", textAlign: "center" }}>
+        <h1 style={{ fontSize: "clamp(28px,5vw,48px)", fontWeight: 900, letterSpacing: "-2px", color: "var(--wh)", marginBottom: "6px" }}>
+          GOT QUESTIONS?<br /><span style={{ color: "var(--or)" }}>WE GOT ANSWERS.</span>
+        </h1>
+        <div style={{ maxWidth: "380px", margin: "20px auto 0" }}>
+          <input className="zinp" placeholder="Search questions..." value={search} onChange={e => setSearch(e.target.value)} style={{ background: "var(--dk-card)", borderColor: "var(--bd-soft)", color: "var(--wh)" }} />
         </div>
       </section>
 
-      {/* ── Category Filter ── */}
-      <section className="py-8 px-6 bg-white border-b border-[#E8E2D9]">
-        <div className="mx-auto max-w-3xl flex items-center gap-2 flex-wrap justify-center">
-          {categories.map(cat => (
-            <button key={cat} onClick={() => setActiveCategory(cat)}
-              className={`text-sm px-4 py-2 rounded-full font-semibold transition-all ${
-                activeCategory === cat
-                  ? "bg-[#EB9220] text-white"
-                  : "bg-[#FCFAF6] text-[#45353E] hover:bg-[#EB9220]/10 hover:text-[#EB9220]"
-              }`}>
-              {cat}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* ── FAQ Accordions ── */}
-      <section className="py-16 px-6">
-        <div className="mx-auto max-w-3xl space-y-10">
-          {filtered.map((section, i) => (
-            <motion.div key={section.category}
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-2xl">{section.emoji}</span>
-                <h2 className="text-xl font-black text-[#001c54]">{section.category}</h2>
+      <section style={{ padding: "40px 24px", background: "var(--dk)" }}>
+        <div style={{ maxWidth: "680px", margin: "0 auto" }}>
+          {filtered.map((faq, i) => (
+            <div key={i} className="zcard" style={{ marginBottom: "8px", cursor: "pointer", borderLeft: open === i ? "3px solid var(--or)" : "1.5px solid var(--bd-soft)" }}
+              onClick={() => setOpen(open === i ? null : i)}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+                <span style={{ fontSize: "13px", fontWeight: 800, letterSpacing: "-0.2px", lineHeight: 1.4, color: "var(--wh)" }}>{faq.q}</span>
+                {open === i ? <ChevronUp size={16} color="var(--or)" style={{ flexShrink: 0 }} /> : <ChevronDown size={16} color="var(--mu)" style={{ flexShrink: 0 }} />}
               </div>
-              <div className="space-y-3">
-                {section.questions.map(({ q, a }) => (
-                  <FAQItem key={q} q={q} a={a} />
-                ))}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Still have a question ── */}
-      <section className="py-16 px-6 bg-white">
-        <div className="mx-auto max-w-xl text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <div className="h-16 w-16 rounded-2xl bg-[#F0EFEA] flex items-center justify-center mx-auto mb-4">
-              <MessageCircle size={28} className="text-[#EB9220]" />
+              {open === i && (
+                <div style={{ marginTop: "12px", fontSize: "13px", color: "#8F9CAE", lineHeight: 1.7, fontWeight: 500, borderTop: "1px solid var(--bd-soft)", paddingTop: "12px" }}>
+                  {faq.a}
+                </div>
+              )}
             </div>
-            <h2 className="text-2xl font-black text-[#001c54] mb-2">
-              Still have a question?
-            </h2>
-            <p className="text-[#45353E] mb-6">
-              Can't find what you're looking for? We're just a message away!
-            </p>
-            {whatsapp ? (
-              <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer">
-                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  className="btn-primary flex items-center gap-2 px-8 py-3 mx-auto">
-                  <MessageCircle size={16} /> WhatsApp Us
-                </motion.button>
-              </a>
-            ) : (
-              <a href="mailto:support@zupwell.com">
-                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  className="btn-primary flex items-center gap-2 px-8 py-3 mx-auto">
-                  <MessageCircle size={16} /> Contact Us
-                </motion.button>
-              </a>
-            )}
-          </motion.div>
+          ))}
+
+          {filtered.length === 0 && (
+            <div style={{ textAlign: "center", padding: "40px", color: "#8F9CAE" }}>No results found for "{search}"</div>
+          )}
+
+          <div style={{ background: "var(--dk-card)", border: "1.5px solid var(--bd-soft)", borderRadius: "10px", padding: "24px", textAlign: "center", marginTop: "20px" }}>
+            <div style={{ fontSize: "16px", fontWeight: 900, color: "var(--wh)", letterSpacing: "-0.5px", marginBottom: "6px" }}>DIDN&apos;T FIND YOUR ANSWER?</div>
+            <div style={{ fontSize: "12px", color: "#8F9CAE", marginBottom: "14px" }}>We’re available Mon–Sat, 9AM–6PM IST. Real people, not bots.</div>
+            <Link href="/contact" className="zbtn-or" style={{ padding: "11px 22px", fontSize: "11px", borderRadius: "30px" }}>GET IN TOUCH →</Link>
+          </div>
         </div>
       </section>
 
       <Footer />
-    </main>
+    </>
   );
 }

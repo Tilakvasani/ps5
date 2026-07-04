@@ -13,56 +13,52 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     setLoading(true);
-    adminApi.getUsers({ page, perPage, search }).then(d => { setUsers(d.users); setTotal(d.total); }).catch(() => {}).finally(() => setLoading(false));
+    adminApi.getUsers({ page, perPage, search })
+      .then((d: any) => { setUsers(d.users || d || []); setTotal(d.total || 0); })
+      .catch(() => {}).finally(() => setLoading(false));
   }, [page, search]);
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-3xl font-black text-[#001c54]">Users</h1><p className="text-[#45353E] text-sm mt-1">{total} registered users</p></div>
+      <h1 style={{ fontSize:"24px", fontWeight:900, letterSpacing:"-1px", marginBottom:"18px" }}>USERS</h1>
+      <div style={{ position:"relative", marginBottom:"16px" }}>
+        <Search size={13} style={{ position:"absolute", left:"12px", top:"50%", transform:"translateY(-50%)", color:"#888" }} />
+        <input className="zinp" placeholder="Search users..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} style={{ paddingLeft:"34px" }} />
       </div>
-      <div className="flex gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#45353E]" />
-          <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="Name, email, phone..." className="input-field pl-9 text-sm" />
+      <div className="zcard" style={{ padding:0, overflow:"hidden" }}>
+        <div className="ztr ztr-head" style={{ gridTemplateColumns:"1.5fr 1.5fr 0.8fr 0.8fr 80px" }}>
+          <span>NAME</span><span>EMAIL</span><span>PHONE</span><span>JOINED</span><span>ORDERS</span>
         </div>
-      </div>
-      <div className="card p-0 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead><tr className="border-b border-[#E8E2D9] text-[#45353E] text-left">
-            {["User", "Phone", "Orders", "Total Spent", "Verified", "Joined"].map(h => <th key={h} className="px-4 py-3 font-semibold">{h}</th>)}
-          </tr></thead>
-          <tbody className="divide-y divide-white/5">
-            {loading ? Array.from({ length: 8 }).map((_, i) => <tr key={i}><td colSpan={6} className="px-4 py-3"><div className="h-4 rounded bg-[#FCFAF6] animate-pulse" /></td></tr>)
-              : users.map(u => (
-              <tr key={u.id} className="hover:bg-[#FCFAF6] transition-colors">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-[#FCFAF6] flex items-center justify-center text-xs font-black text-black flex-shrink-0">
-                      {u.name?.[0]?.toUpperCase()}
-                    </div>
-                    <div><p className="font-semibold text-[#001c54]">{u.name}</p><p className="text-xs text-[#45353E]">{u.email}</p></div>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-[#45353E]">{u.phone || "—"}</td>
-                <td className="px-4 py-3 text-[#45353E]">{u._count?.orders ?? 0}</td>
-                <td className="px-4 py-3 font-bold text-[#001c54]">₹{Number(u.totalSpent || 0).toFixed(2)}</td>
-                <td className="px-4 py-3"><span className={`badge ${u.isVerified ? "badge-success" : "badge-warning"}`}>{u.isVerified ? "Yes" : "No"}</span></td>
-                <td className="px-4 py-3 text-[#45353E] text-xs">{new Date(u.createdAt).toLocaleDateString("en-IN")}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {Math.ceil(total / perPage) > 1 && (
-          <div className="flex justify-between items-center px-4 py-3 border-t border-[#E8E2D9]">
-            <p className="text-xs text-[#45353E]">Page {page} of {Math.ceil(total / perPage)}</p>
-            <div className="flex gap-1">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-outline text-xs px-3 py-1.5 disabled:opacity-30">← Prev</button>
-              <button onClick={() => setPage(p => p + 1)} disabled={page >= Math.ceil(total / perPage)} className="btn-outline text-xs px-3 py-1.5 disabled:opacity-30">Next →</button>
+        {loading ? (
+          [...Array(6)].map((_,i) => (
+            <div key={i} className="ztr" style={{ gridTemplateColumns:"1.5fr 1.5fr 0.8fr 0.8fr 80px", background:i%2?"#FFF":"#FAFAFA" }}>
+              {[...Array(5)].map((_,j) => <div key={j} style={{ height:"14px", background:"#F0F0F0", borderRadius:"4px" }} />)}
             </div>
+          ))
+        ) : users.length === 0 ? (
+          <div style={{ padding:"40px", textAlign:"center", color:"#888", fontSize:"13px" }}>No users found.</div>
+        ) : users.map((u, i) => (
+          <div key={u.id} className="ztr" style={{ gridTemplateColumns:"1.5fr 1.5fr 0.8fr 0.8fr 80px", background:i%2?"#FFF":"#FAFAFA" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+              <div style={{ width:"28px", height:"28px", borderRadius:"50%", background:"#FF4500", color:"#FFF", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"11px", fontWeight:900, flexShrink:0 }}>
+                {u.name?.[0]?.toUpperCase() || "?"}
+              </div>
+              <span style={{ fontSize:"12px", fontWeight:700 }}>{u.name}</span>
+            </div>
+            <span style={{ fontSize:"11px", color:"#888" }}>{u.email}</span>
+            <span style={{ fontSize:"11px", color:"#888" }}>{u.phone || "—"}</span>
+            <span style={{ fontSize:"11px", fontWeight:600 }}>{new Date(u.createdAt).toLocaleDateString("en-IN",{ day:"numeric", month:"short", year:"2-digit" })}</span>
+            <span style={{ fontSize:"12px", fontWeight:800 }}>{u._count?.orders ?? 0}</span>
           </div>
-        )}
+        ))}
       </div>
+      {total > perPage && (
+        <div style={{ display:"flex", gap:"6px", justifyContent:"flex-end", marginTop:"12px" }}>
+          <button onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1} className="zpill zpill-off" style={{ fontSize:"10px", padding:"5px 12px" }}>← PREV</button>
+          <span style={{ fontSize:"11px", fontWeight:700, padding:"6px 12px" }}>Page {page} of {Math.ceil(total/perPage)}</span>
+          <button onClick={() => setPage(p => p+1)} disabled={page>=Math.ceil(total/perPage)} className="zpill zpill-off" style={{ fontSize:"10px", padding:"5px 12px" }}>NEXT →</button>
+        </div>
+      )}
     </div>
   );
 }

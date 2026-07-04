@@ -1,163 +1,111 @@
 "use client";
-import { useSettings, calcShipping } from "@/lib/useSettings";
-import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Tag } from "lucide-react";
+import Link from "next/link";
+import { Trash2, ArrowRight, ShieldCheck, Tag } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useStore } from "@/lib/store";
-import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CartPage() {
-  const { cart, updateCartQty, removeFromCart, user } = useStore();
-  const { cgstRate, sgstRate, freeShippingThreshold, defaultShippingCharge } = useSettings();
+  const { cart, removeFromCart, updateCartQty } = useStore();
   const [coupon, setCoupon] = useState("");
-  const [couponApplied, setCouponApplied] = useState(false);
-  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [discount, setDiscount] = useState(0);
 
-  const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
-  const cgst = subtotal * cgstRate;
-  const sgst = subtotal * sgstRate;
-  const shipping = calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
-  const discount = couponApplied ? couponDiscount : 0;
-  const rawTotal = subtotal + cgst + sgst + shipping - discount;
-  const total = Math.round(rawTotal);
-  const roundOffDiff = total - rawTotal;
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const shipping = subtotal >= 500 ? 0 : 50;
+  const total = subtotal - discount + shipping;
 
-  const applyCoupon = async () => {
-    if (!coupon.trim()) { toast.error("Enter a coupon code"); return; }
-    try {
-      const { cartApi } = await import("@/lib/api");
-      const data = await cartApi.applyCoupon(coupon.trim());
-      setCouponDiscount(data.discountAmount || subtotal * (data.discountPercent / 100));
-      setCouponApplied(true);
-      toast.success(`Coupon applied! ${data.discountPercent}% off`);
-    } catch (err: any) {
-      toast.error(err.message || "Invalid coupon code");
-    }
+  const applyCoupon = () => {
+    if (coupon.toUpperCase() === "ZUPFIRST") { setDiscount(50); toast.success("₹50 off applied!"); }
+    else toast.error("Invalid coupon code");
   };
 
-  if (cart.length === 0) return (
-    <main className="min-h-screen bg-[#FCFAF6]">
-      <Navbar />
-      <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-          <div className="h-24 w-24 rounded-3xl bg-[#FCFAF6] border border-[#E8E2D9] flex items-center justify-center mb-6 mx-auto">
-            <ShoppingCart size={36} className="text-[#001c54]/30" />
-          </div>
-          <h2 className="text-3xl font-black text-[#001c54] mb-3">Your cart is empty</h2>
-          <p className="text-[#45353E] mb-8">Add some products to get started</p>
-          <Link href="/products"><motion.button whileHover={{ scale: 1.04 }} className="btn-primary px-8 py-3">Browse Products</motion.button></Link>
-        </motion.div>
-      </div>
-      <Footer />
-    </main>
-  );
-
   return (
-    <main className="min-h-screen bg-[#FCFAF6]">
+    <>
       <Navbar />
-      <div className="pt-24 pb-16 px-6 mx-auto max-w-7xl">
-        <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-black text-[#001c54] mb-8">
-          Your <span className="gradient-text">Cart</span>
-          <span className="ml-3 text-lg text-[#45353E]">({cart.length} items)</span>
-        </motion.h1>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px" }}>
+        <h1 style={{ fontSize: "clamp(28px,4vw,40px)", fontWeight: 900, letterSpacing: "-2px", marginBottom: "24px", color: "#8f9cae" }}>
+          YOUR CART <span style={{ fontSize: "16px", fontWeight: 600, color: "#8F9CAE", letterSpacing: "0" }}>({cart.reduce((s,i)=>s+i.qty,0)} items)</span>
+        </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
-            <AnimatePresence>
-              {cart.map((item, i) => (
-                <motion.div key={`${item.productId}-${item.variantId}`}
-                  initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ delay: i * 0.05 }}
-                  className="card flex gap-4">
-                  {/* Image */}
-                  <div className="h-20 w-20 flex-shrink-0 rounded-xl bg-[#FCFAF6] border border-[#E8E2D9] overflow-hidden">
-                    {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" /> :
-                      <div className="w-full h-full flex items-center justify-center text-[#001c54]/20"><ShoppingCart size={24} /></div>}
+        {cart.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "80px 24px" }}>
+            <div style={{ fontSize: "64px", marginBottom: "16px" }}>🛒</div>
+            <h2 style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "-1px", marginBottom: "10px", color: "#8f9cae" }}>YOUR CART IS EMPTY</h2>
+            <p style={{ color: "#8F9CAE", fontSize: "13px", marginBottom: "24px" }}>Go grab something good</p>
+            <Link href="/products" className="zbtn-or" style={{ padding: "14px 28px", fontSize: "12px", borderRadius: "30px" }}>SHOP NOW →</Link>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "20px", alignItems: "start" }}>
+            {/* Cart items */}
+            <div>
+              {cart.map(item => (
+                <div key={item.productId} className="zcard" style={{ display: "flex", gap: "14px", alignItems: "center", marginBottom: "10px" }}>
+                  <div style={{ width: "66px", height: "66px", borderRadius: "8px", border: "1.5px solid var(--bd-soft)", overflow: "hidden", flexShrink: 0, background: "var(--dk-card)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {item.imageUrl ? <img src={item.imageUrl} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: "28px" }}>🍊</span>}
                   </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-[#001c54] text-sm mb-0.5 line-clamp-1">{item.name}</h3>
-                    <p className="text-xs text-[#45353E] mb-3">{item.unit} · {item.sku}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 rounded-lg border border-[#E8E2D9] bg-[#FCFAF6] p-0.5">
-                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.qty - 1)}
-                          className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#FFFFFF] transition-colors"><Minus size={12} /></button>
-                        <span className="w-6 text-center text-sm font-bold">{item.qty}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: "13px", fontWeight: 800, letterSpacing: "-0.3px", marginBottom: "2px" }}>{item.name}</div>
+                    <div style={{ fontSize: "10px", color: "#8F9CAE", fontWeight: 600, marginBottom: "10px" }}>{item.unit}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "14px", border: "1.5px solid var(--bd-soft)", borderRadius: "7px", padding: "6px 14px", fontWeight: 900, fontSize: "13px", background: "var(--dk-card)" }}>
+                        <button onClick={() => item.qty > 1 ? updateCartQty(item.productId, item.variantId, item.qty - 1) : removeFromCart(item.productId, item.variantId)}
+                          style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 900, fontSize: "16px", color: "#8F9CAE" }}>−</button>
+                        <span>{item.qty}</span>
                         <button onClick={() => updateCartQty(item.productId, item.variantId, item.qty + 1)}
-                          className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#FFFFFF] transition-colors"><Plus size={12} /></button>
+                          style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 900, fontSize: "16px", color: "var(--or)" }}>+</button>
                       </div>
-                      <div className="text-right">
-                        <div className="font-bold text-[#001c54]">₹{(item.price * item.qty).toFixed(2)}</div>
-                        <div className="text-xs text-[#45353E]">₹{item.price.toFixed(2)} each</div>
-                      </div>
+                      <span style={{ fontSize: "16px", fontWeight: 900, letterSpacing: "-0.5px" }}>₹{(item.price * item.qty).toFixed(0)}</span>
                     </div>
                   </div>
-
-                  {/* Remove */}
-                  <button onClick={() => removeFromCart(item.productId, item.variantId)}
-                    className="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-lg text-red-400/60 hover:text-red-400 hover:bg-red-400/10 transition-all">
-                    <Trash2 size={14} />
+                  <button onClick={() => removeFromCart(item.productId, item.variantId)} style={{ background: "none", border: "none", cursor: "pointer", color: "#8F9CAE", alignSelf: "flex-start" }}>
+                    <Trash2 size={15} />
                   </button>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-
-          {/* Order Summary */}
-          <div className="space-y-4">
-            {/* Coupon */}
-            <div className="card">
-              <div className="flex items-center gap-2 mb-3">
-                <Tag size={16} className="text-[#EB9220]" />
-                <span className="font-semibold text-[#001c54] text-sm">Coupon Code</span>
-              </div>
-              <div className="flex gap-2">
-                <input value={coupon} onChange={(e) => setCoupon(e.target.value)} placeholder="Enter coupon" className="input-field text-sm flex-1" />
-                <button onClick={applyCoupon} className="btn-primary text-sm px-4 py-2 flex-shrink-0">Apply</button>
-              </div>
-              {couponApplied && <p className="text-xs text-[#EB9220] mt-2">✓ Coupon applied — 10% off!</p>}
-            </div>
-
-            {/* Summary */}
-            <div className="card">
-              <h2 className="font-bold text-[#001c54] mb-4">Order Summary</h2>
-              <div className="space-y-2 text-sm mb-4">
-                <div className="flex justify-between text-[#45353E]"><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>
-                <div className="flex justify-between text-[#45353E]"><span>CGST @2.5%</span><span>₹{cgst.toFixed(2)}</span></div>
-                <div className="flex justify-between text-[#45353E]"><span>SGST @2.5%</span><span>₹{sgst.toFixed(2)}</span></div>
-                <div className="flex justify-between text-[#45353E]">
-                  <span>Shipping</span>
-                  <span>{shipping === 0 ? <span className="text-[#EB9220]">FREE</span> : `₹${shipping.toFixed(2)}`}</span>
                 </div>
-                {discount > 0 && <div className="flex justify-between text-[#EB9220]"><span>Discount</span><span>-₹{discount.toFixed(2)}</span></div>}
-                {roundOffDiff !== 0 && (
-                  <div className="flex justify-between text-[#8C8276] text-xs italic"><span>Round Off</span><span>{roundOffDiff > 0 ? "+" : ""}₹{roundOffDiff.toFixed(2)}</span></div>
-                )}
-              </div>
-              <div className="border-t border-[#E8E2D9] pt-4 flex justify-between items-center">
-                <span className="font-bold text-[#001c54]">Total</span>
-                <span className="text-2xl font-black gradient-text">₹{total.toFixed(0)}</span>
-              </div>
-              <p className="text-xs text-[#45353E] mt-1 text-right">Inclusive of GST</p>
+              ))}
+            </div>
 
-              <Link href={user ? "/checkout" : "/login?next=/checkout"} className="block mt-6">
-                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                  className="btn-primary w-full flex items-center justify-center gap-2 py-3">
-                  Proceed to Checkout <ArrowRight size={16} />
-                </motion.button>
+            {/* Order Summary */}
+            <div className="zcard" style={{ position: "sticky", top: "90px" }}>
+              <div style={{ fontSize: "12px", fontWeight: 900, letterSpacing: "0.8px", marginBottom: "16px" }}>ORDER SUMMARY</div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", fontWeight: 600, marginBottom: "8px" }}>
+                <span style={{ color: "#8F9CAE" }}>Subtotal</span><span>₹{subtotal.toFixed(0)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", fontWeight: 600, marginBottom: "12px" }}>
+                <span style={{ color: "#8F9CAE" }}>Shipping</span>
+                <span style={{ color: shipping === 0 ? "var(--lm)" : "var(--wh)", fontWeight: 800 }}>{shipping === 0 ? "FREE" : `₹${shipping}`}</span>
+              </div>
+              {/* Coupon */}
+              <div style={{ display: "flex", gap: "6px", marginBottom: "10px" }}>
+                <input className="zinp" placeholder="Coupon code" value={coupon} onChange={e => setCoupon(e.target.value)} style={{ flex: 1, fontSize: "12px", padding: "9px 12px" }} />
+                <button onClick={applyCoupon} className="zbtn-dk" style={{ fontSize: "11px", padding: "0 14px", flexShrink: 0, background: "var(--dk-card)", border: "1.5px solid var(--bd-soft)" }}>APPLY</button>
+              </div>
+              {discount > 0 && (
+                <div style={{ background: "rgba(22, 101, 52, 0.15)", border: "1.5px solid #166534", borderRadius: "7px", padding: "9px 12px", fontSize: "11px", fontWeight: 700, color: "#EDFADF", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <Tag size={12} /> ZUPFIRST applied — ₹{discount} off!
+                </div>
+              )}
+              {subtotal < 500 && (
+                <div style={{ background: "rgba(255, 92, 0, 0.15)", border: "1.5px solid rgba(255, 92, 0, 0.35)", borderRadius: "7px", padding: "9px 12px", fontSize: "11px", fontWeight: 600, color: "var(--or)", marginBottom: "12px" }}>
+                  Add ₹{(500 - subtotal).toFixed(0)} more for FREE shipping!
+                </div>
+              )}
+              <div style={{ height: "1.5px", background: "var(--bd-soft)", margin: "14px 0" }} />
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "18px", fontWeight: 900, letterSpacing: "-0.5px", marginBottom: "16px" }}>
+                <span>TOTAL</span><span>₹{total.toFixed(0)}</span>
+              </div>
+              <Link href="/checkout" className="zbtn-or" style={{ width: "100%", padding: "14px", fontSize: "13px", borderRadius: "30px", justifyContent: "center" }}>
+                CHECKOUT <ArrowRight size={14} />
               </Link>
-              <Link href="/products">
-                <button className="mt-2 w-full btn-outline text-sm py-2">Continue Shopping</button>
-              </Link>
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "6px", marginTop: "12px", fontSize: "10px", fontWeight: 700, color: "#8F9CAE" }}>
+                <ShieldCheck size={13} color="#8F9CAE" /> SECURE & ENCRYPTED CHECKOUT
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
       <Footer />
-    </main>
+    </>
   );
 }

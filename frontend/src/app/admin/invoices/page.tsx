@@ -1,74 +1,57 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Download, Search, RefreshCw } from "lucide-react";
+import { Download, X } from "lucide-react";
 import { adminApi, invoicesApi } from "@/lib/api";
 import toast from "react-hot-toast";
-
-const STATUS_BADGE: Record<string, string> = {
-  issued: "badge-success", cancelled: "badge-danger", draft: "badge-warning",
-};
 
 export default function AdminInvoicesPage() {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
 
-  const fetch = async () => { setLoading(true); try { const d = await adminApi.getInvoices({ search }); setInvoices(d); } catch {} setLoading(false); };
-  useEffect(() => { fetch(); }, [search]);
+  useEffect(() => {
+    adminApi.getInvoices().then((d: any) => setInvoices(Array.isArray(d) ? d : d.invoices || [])).catch(() => {}).finally(() => setLoading(false));
+  }, []);
 
   const cancel = async (id: number) => {
     if (!confirm("Cancel this invoice?")) return;
-    try { await adminApi.cancelInvoice(id); toast.success("Invoice cancelled"); fetch(); } catch (err: any) { toast.error(err.message); }
+    try { await adminApi.cancelInvoice(id); toast.success("Cancelled!"); setInvoices(i => i.map(x => x.id===id ? { ...x, status:"CANCELLED" } : x)); }
+    catch (e: any) { toast.error(e.message); }
   };
+
+  const STATUS_CLS: Record<string,string> = { PAID:"zbadge-gr", PENDING:"zbadge-am", CANCELLED:"zbadge-rd" };
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-3xl font-black text-[#001c54]">Invoices</h1><p className="text-[#45353E] text-sm mt-1">GST Tax Invoices</p></div>
-      </div>
-      <div className="flex gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#45353E]" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Invoice #, customer..." className="input-field pl-9 text-sm" />
+      <h1 style={{ fontSize:"24px", fontWeight:900, letterSpacing:"-1px", marginBottom:"20px" }}>INVOICES</h1>
+      <div className="zcard" style={{ padding:0, overflow:"hidden" }}>
+        <div className="ztr ztr-head" style={{ gridTemplateColumns:"1.2fr 1.2fr 0.8fr 0.8fr 80px 100px" }}>
+          <span>INVOICE #</span><span>CUSTOMER</span><span>DATE</span><span>AMOUNT</span><span>STATUS</span><span>ACTIONS</span>
         </div>
-        <button onClick={fetch} className="btn-outline p-2.5"><RefreshCw size={16} /></button>
-      </div>
-      <div className="card p-0 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead><tr className="border-b border-[#E8E2D9] text-[#45353E] text-left">
-              {["Invoice #", "Order #", "Customer", "Amount", "GST", "Status", "Date", "Download", "Action"].map(h => <th key={h} className="px-4 py-3 font-semibold">{h}</th>)}
-            </tr></thead>
-            <tbody className="divide-y divide-white/5">
-              {loading ? Array.from({ length: 8 }).map((_, i) => <tr key={i}><td colSpan={9} className="px-4 py-3"><div className="h-4 rounded bg-[#FCFAF6] animate-pulse" /></td></tr>)
-                : invoices.map((inv: any) => (
-                <tr key={inv.id} className="hover:bg-[#FCFAF6] transition-colors">
-                  <td className="px-4 py-3 font-mono text-[#001c54] font-bold text-xs">{inv.invoiceNumber}</td>
-                  <td className="px-4 py-3 font-mono text-[#45353E] text-xs">{inv.order?.orderNumber}</td>
-                  <td className="px-4 py-3 text-[#45353E]">{inv.order?.user?.name || "—"}</td>
-                  <td className="px-4 py-3 font-bold text-[#001c54]">₹{Number(inv.totalAmount).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-[#45353E]">₹{(Number(inv.cgstAmount) + Number(inv.sgstAmount) + Number(inv.igstAmount)).toFixed(2)}</td>
-                  <td className="px-4 py-3"><span className={`badge ${STATUS_BADGE[inv.status] || "badge-info"}`}>{inv.status}</span></td>
-                  <td className="px-4 py-3 text-[#45353E] text-xs">{new Date(inv.createdAt).toLocaleDateString("en-IN")}</td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={async () => {
-                        try { await invoicesApi.downloadPdf(inv.invoiceNumber); }
-                        catch (err: any) { toast.error(err.message || "Download failed"); }
-                      }}
-                      className="flex items-center gap-1 text-xs text-[#EB9220] hover:text-[#EB9220]"
-                    ><Download size={12} /> PDF</button>
-                  </td>
-                  <td className="px-4 py-3">
-                    {inv.status !== "cancelled" && (
-                      <button onClick={() => cancel(inv.id)} className="text-xs text-red-400/60 hover:text-red-400 transition-colors">Cancel</button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {loading ? [...Array(5)].map((_,i) => (
+          <div key={i} className="ztr" style={{ gridTemplateColumns:"1.2fr 1.2fr 0.8fr 0.8fr 80px 100px", background:i%2?"#FFF":"#FAFAFA" }}>
+            {[...Array(6)].map((_,j) => <div key={j} style={{ height:"14px", background:"#F0F0F0", borderRadius:"4px" }} />)}
+          </div>
+        )) : invoices.length === 0 ? (
+          <div style={{ padding:"40px", textAlign:"center", color:"#888", fontSize:"13px" }}>No invoices yet.</div>
+        ) : invoices.map((inv, i) => (
+          <div key={inv.id} className="ztr" style={{ gridTemplateColumns:"1.2fr 1.2fr 0.8fr 0.8fr 80px 100px", background:i%2?"#FFF":"#FAFAFA" }}>
+            <span style={{ fontWeight:800, fontSize:"12px" }}>{inv.invoiceNumber}</span>
+            <div><div style={{ fontWeight:700, fontSize:"12px" }}>{inv.order?.user?.name || "—"}</div><div style={{ fontSize:"10px", color:"#888" }}>{inv.order?.user?.email}</div></div>
+            <span style={{ fontSize:"11px", fontWeight:600 }}>{new Date(inv.createdAt).toLocaleDateString("en-IN",{ day:"numeric", month:"short", year:"2-digit" })}</span>
+            <span style={{ fontSize:"13px", fontWeight:800 }}>₹{Number(inv.totalAmount||0).toFixed(0)}</span>
+            <span><span className={`zbadge ${STATUS_CLS[inv.status]||"zbadge-dk"}`}>{inv.status}</span></span>
+            <div style={{ display:"flex", gap:"8px" }}>
+              <button onClick={() => invoicesApi.downloadPdf(inv.invoiceNumber)} style={{ background:"none", border:"none", cursor:"pointer" }} title="Download PDF">
+                <Download size={14} color="#FF4500" />
+              </button>
+              {inv.status !== "CANCELLED" && (
+                <button onClick={() => cancel(inv.id)} style={{ background:"none", border:"none", cursor:"pointer" }} title="Cancel">
+                  <X size={14} color="#DC2626" />
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -1,246 +1,135 @@
 "use client";
-import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { User, Package, MapPin, LogOut, Download, Plus, Trash2, Edit3 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useStore } from "@/lib/store";
-import { accountApi, ordersApi, invoicesApi } from "@/lib/api";
 import { useLogout } from "@/lib/useAuth";
-import toast from "react-hot-toast";
+import { ordersApi } from "@/lib/api";
+import { LayoutDashboard, Package, MapPin, Heart, Star, Settings, LogOut, RefreshCw } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+const TABS = [
+  { key: "dashboard", label: "DASHBOARD", icon: LayoutDashboard },
+  { key: "orders",    label: "ORDERS",    icon: Package },
+  { key: "addresses", label: "ADDRESSES", icon: MapPin },
+  { key: "wishlist",  label: "WISHLIST",  icon: Heart },
+  { key: "rewards",   label: "REWARDS",   icon: Star },
+  { key: "settings",  label: "SETTINGS",  icon: Settings },
+];
 
-const STATUS_BADGE: Record<string, string> = {
-  pending: "badge-warning", confirmed: "badge-info", processing: "badge-info",
-  shipped: "badge-purple", delivered: "badge-success", cancelled: "badge-danger",
-};
+const STATUS_BADGE: Record<string,string> = { DELIVERED: "zbadge-gr", PROCESSING: "zbadge-or", SHIPPED: "zbadge-bu", CANCELLED: "zbadge-rd" };
 
-function AccountPageContent() {
-  const { user, setUser, logout } = useStore();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [tab, setTab] = useState(searchParams.get("tab") || "profile");
-  const [orders, setOrders] = useState<any[]>([]);
-  const [addresses, setAddresses] = useState<any[]>([]);
-  const [profile, setProfile] = useState({ name: user?.name || "", phone: user?.phone || "" });
-  const [addingAddr, setAddingAddr] = useState(false);
-  const [newAddr, setNewAddr] = useState({ fullName: "", phone: "", addressLine1: "", city: "Ahmedabad", state: "Gujarat", pincode: "", gstin: "", label: "work" });
-
-  useEffect(() => { if (!user) router.push("/login"); }, [user, router]);
-
-  useEffect(() => {
-    if (tab === "orders") ordersApi.list().then(setOrders).catch(() => {});
-    if (tab === "addresses") accountApi.getAddresses().then(setAddresses).catch(() => {});
-  }, [tab]);
-
-  const handleUpdateProfile = async () => {
-    try {
-      const updated = await accountApi.updateProfile(profile);
-      setUser(updated);
-      toast.success("Profile updated!");
-    } catch (err: any) { toast.error(err.message); }
-  };
-
-  const handleAddAddress = async () => {
-    try {
-      const addr = await accountApi.addAddress(newAddr);
-      setAddresses([...addresses, addr]);
-      setAddingAddr(false);
-      toast.success("Address added!");
-    } catch (err: any) { toast.error(err.message); }
-  };
-
-  const handleDeleteAddress = async (id: number) => {
-    try {
-      await accountApi.deleteAddress(id);
-      setAddresses(addresses.filter(a => a.id !== id));
-      toast.success("Address deleted");
-    } catch (err: any) { toast.error(err.message); }
-  };
-
+export default function AccountPage() {
+  const { user } = useStore();
   const handleLogout = useLogout();
+  const router = useRouter();
+  const [tab, setTab] = useState("dashboard");
+  const [orders, setOrders] = useState<any[]>([]);
 
-  const TABS = [
-    { id: "profile", label: "Profile", icon: User },
-    { id: "orders", label: "Orders", icon: Package },
-    { id: "addresses", label: "Addresses", icon: MapPin },
-  ];
+  useEffect(() => { if (!user) router.push("/login"); }, [user]);
+  useEffect(() => { ordersApi.list().then(setOrders).catch(() => {}); }, []);
+
+  if (!user) return null;
 
   return (
-    <main className="min-h-screen bg-[#FCFAF6]">
+    <>
       <Navbar />
-      <div className="pt-24 pb-16 px-6 mx-auto max-w-6xl">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-black text-[#001c54]">My Account</h1>
-            <p className="text-[#45353E] text-sm mt-1">{user?.email}</p>
+      <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", minHeight: "80vh" }}>
+        {/* Sidebar */}
+        <div style={{ background: "var(--dk)", padding: "24px 14px" }}>
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "var(--or)", color: "#FFF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: 900, border: "1.5px solid #1E2D4A", marginBottom: "10px" }}>
+              {user.name[0].toUpperCase()}
+            </div>
+            <div style={{ color: "#FFF", fontSize: "13px", fontWeight: 900, letterSpacing: "-0.3px" }}>{user.name.toUpperCase()}</div>
+            <div style={{ color: "#627D98", fontSize: "10px", fontWeight: 600, marginTop: "2px" }}>{user.email}</div>
           </div>
-          <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 border border-red-400/20 hover:border-red-400/40 px-4 py-2 rounded-xl transition-all">
-            <LogOut size={14} /> Sign Out
-          </button>
+          <nav style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            {TABS.map(({ key, label, icon: Icon }) => (
+              <button key={key} onClick={() => setTab(key)} className={`zslink${tab === key ? " active" : ""}`} style={{ background: "none", border: "none", cursor: "pointer", width: "100%", textAlign: "left" }}>
+                <Icon size={14} /> {label}
+              </button>
+            ))}
+            <button onClick={handleLogout} className="zslink" style={{ color: "var(--or)", background: "none", border: "none", cursor: "pointer", marginTop: "16px", textAlign: "left", width: "100%" }}>
+              <LogOut size={14} /> LOGOUT
+            </button>
+          </nav>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <aside className="lg:col-span-1">
-            <div className="card space-y-1">
-              <div className="flex items-center gap-3 pb-4 mb-2 border-b border-[#E8E2D9]">
-                <div className="h-12 w-12 rounded-xl bg-[#FCFAF6] flex items-center justify-center text-lg font-black text-black">
-                  {user?.name?.[0]?.toUpperCase()}
-                </div>
-                <div>
-                  <p className="font-bold text-[#001c54] text-sm">{user?.name}</p>
-                  <p className="text-xs text-[#45353E]">Customer</p>
-                </div>
+        {/* Content */}
+        <div style={{ padding: "28px 24px", background: "var(--dk)" }}>
+          {tab === "dashboard" && (
+            <div>
+              <h1 style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "-1px", marginBottom: "20px" }}>
+                WELCOME BACK, {user.name.split(" ")[0].toUpperCase()}!
+              </h1>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px", marginBottom: "20px" }}>
+                {[{ num: orders.length, lbl: "TOTAL ORDERS" },{ num: 564, lbl: "REWARD POINTS", color: "var(--or)" },{ num: 0, lbl: "WISHLIST" }].map(({ num, lbl, color }) => (
+                  <div key={lbl} className="zstat" style={{ textAlign: "center" }}>
+                    <div className="zstat-num" style={{ color: color || "var(--wh)" }}>{num}</div>
+                    <div className="zstat-lbl">{lbl}</div>
+                  </div>
+                ))}
               </div>
-              {TABS.map((t) => (
-                <button key={t.id} onClick={() => setTab(t.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === t.id ? "bg-[#EB9220]/20 text-[#EB9220]" : "text-[#45353E] hover:text-[#001c54] hover:bg-[#FCFAF6]"}`}>
-                  <t.icon size={15} /> {t.label}
-                </button>
-              ))}
+              <div style={{ fontSize: "12px", fontWeight: 900, letterSpacing: "0.5px", marginBottom: "10px" }}>RECENT ORDERS</div>
+              <div className="zcard" style={{ padding: 0, overflow: "hidden" }}>
+                <div className="ztr ztr-head" style={{ gridTemplateColumns: "1.2fr 0.7fr 0.8fr 90px 70px" }}>
+                  <span>ORDER</span><span>DATE</span><span>TOTAL</span><span>STATUS</span><span></span>
+                </div>
+                {orders.slice(0,3).map((o, i) => (
+                  <div key={o.id} className="ztr" style={{ gridTemplateColumns: "1.2fr 0.7fr 0.8fr 90px 70px" }}>
+                    <div><strong style={{ fontSize: "12px" }}>#{o.orderNumber}</strong><div style={{ fontSize: "10px", color: "#8F9CAE" }}>{o.items?.length || 0} item(s)</div></div>
+                    <span style={{ fontSize: "11px", fontWeight: 600 }}>{new Date(o.createdAt).toLocaleDateString("en-IN",{ day:"numeric",month:"short" })}</span>
+                    <span style={{ fontSize: "13px", fontWeight: 800 }}>₹{Number(o.totalAmount || 0).toFixed(0)}</span>
+                    <span><span className={`zbadge ${STATUS_BADGE[o.status] || "zbadge-dk"}`}>{o.status}</span></span>
+                    <button onClick={() => setTab("orders")} style={{ fontSize: "10px", fontWeight: 800, color: "var(--or)", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
+                      <RefreshCw size={10} /> REORDER
+                    </button>
+                  </div>
+                ))}
+                {orders.length === 0 && (
+                  <div style={{ padding: "32px", textAlign: "center", fontSize: "13px", color: "#8F9CAE" }}>
+                    No orders yet. <Link href="/products" style={{ color: "var(--or)", fontWeight: 700, textDecoration: "none" }}>Start shopping!</Link>
+                  </div>
+                )}
+              </div>
             </div>
-          </aside>
+          )}
 
-          {/* Content */}
-          <div className="lg:col-span-3">
-            {/* Profile Tab */}
-            {tab === "profile" && (
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="card">
-                <h2 className="font-bold text-[#001c54] mb-6">Profile Information</h2>
-                <div className="space-y-4 max-w-md">
-                  <div>
-                    <label className="text-sm font-semibold text-[#45353E] mb-1.5 block">Full Name</label>
-                    <input value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} className="input-field" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold text-[#45353E] mb-1.5 block">Email</label>
-                    <input value={user?.email || ""} disabled className="input-field opacity-50 cursor-not-allowed" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold text-[#45353E] mb-1.5 block">Phone</label>
-                    <input value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} className="input-field" />
-                  </div>
-                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleUpdateProfile} className="btn-primary px-6 py-2.5">
-                    Save Changes
-                  </motion.button>
+          {tab === "orders" && (
+            <div>
+              <h1 style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "-1px", marginBottom: "20px" }}>MY ORDERS</h1>
+              <div className="zcard" style={{ padding: 0, overflow: "hidden" }}>
+                <div className="ztr ztr-head" style={{ gridTemplateColumns: "1.2fr 0.7fr 0.8fr 90px 100px" }}>
+                  <span>ORDER</span><span>DATE</span><span>TOTAL</span><span>STATUS</span><span>ACTION</span>
                 </div>
-              </motion.div>
-            )}
-
-            {/* Orders Tab */}
-            {tab === "orders" && (
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                <h2 className="font-bold text-[#001c54] mb-4">Order History</h2>
-                {orders.length === 0 ? (
-                  <div className="card text-center py-12 text-[#45353E]">
-                    <Package size={40} className="mx-auto mb-3 opacity-30" />
-                    <p>No orders yet</p>
+                {orders.map(o => (
+                  <div key={o.id} className="ztr" style={{ gridTemplateColumns: "1.2fr 0.7fr 0.8fr 90px 100px" }}>
+                    <div><strong style={{ fontSize: "12px" }}>#{o.orderNumber}</strong><div style={{ fontSize: "10px", color: "#8F9CAE" }}>{o.items?.map((i:any)=>i.name).join(", ").slice(0,30)}</div></div>
+                    <span style={{ fontSize: "11px", fontWeight: 600 }}>{new Date(o.createdAt).toLocaleDateString("en-IN",{ day:"numeric",month:"short",year:"2-digit" })}</span>
+                    <span style={{ fontSize: "13px", fontWeight: 800 }}>₹{Number(o.totalAmount || 0).toFixed(0)}</span>
+                    <span><span className={`zbadge ${STATUS_BADGE[o.status] || "zbadge-dk"}`}>{o.status}</span></span>
+                    <Link href={`/order/${o.orderNumber}`} style={{ fontSize: "10px", fontWeight: 800, color: "var(--or)", textDecoration: "none", letterSpacing: "0.5px" }}>VIEW DETAILS</Link>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    {orders.map(order => (
-                      <Link key={order.id} href={`/order/${order.orderNumber}`}>
-                      <div className="card hover:border-[#EB9220] hover:shadow-md transition-all cursor-pointer">
-                        <div className="flex items-start justify-between gap-4 flex-wrap">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-mono text-sm font-bold text-[#001c54]">{order.orderNumber}</span>
-                              <span className={`badge ${STATUS_BADGE[order.status] || "badge-info"}`}>{order.status}</span>
-                            </div>
-                            <p className="text-xs text-[#45353E]">{new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
-                            <p className="text-sm text-[#45353E] mt-1">{order.items?.length} item(s)</p>
-                          </div>
-                          <div className="text-right flex flex-col items-end gap-1">
-                            <p className="text-lg font-black gradient-text">₹{Number(order.totalAmount).toFixed(2)}</p>
-                            {order.invoice && (
-                              <button
-                                onClick={async (e) => {
-                                  e.preventDefault(); // stop Link navigation
-                                  e.stopPropagation();
-                                  try {
-                                    await invoicesApi.downloadPdf(order.invoice.invoiceNumber);
-                                  } catch (err: any) {
-                                    toast.error(err.message || "Download failed");
-                                  }
-                                }}
-                                className="flex items-center gap-1 text-xs text-[#EB9220] hover:text-[#EB9220] mt-1"
-                              >
-                                <Download size={11} /> Invoice PDF
-                              </button>
-                            )}
-                            <span className="text-xs text-[#45353E] mt-1">View Details →</span>
-                          </div>
-                        </div>
-                      </div>
-                      </Link>
-                    ))}
-                  </div>
+                ))}
+                {orders.length === 0 && (
+                  <div style={{ padding: "40px", textAlign: "center", color: "#8F9CAE", fontSize: "13px" }}>No orders yet.</div>
                 )}
-              </motion.div>
-            )}
+              </div>
+            </div>
+          )}
 
-            {/* Addresses Tab */}
-            {tab === "addresses" && (
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-bold text-[#001c54]">Saved Addresses</h2>
-                  <button onClick={() => setAddingAddr(!addingAddr)} className="btn-primary text-sm px-4 py-2 flex items-center gap-1.5">
-                    <Plus size={14} /> Add Address
-                  </button>
-                </div>
-
-                {addingAddr && (
-                  <div className="card mb-4 space-y-3">
-                    <h3 className="font-semibold text-[#001c54] text-sm">New Address</h3>
-                    {[["fullName","Full Name"],["phone","Phone"],["addressLine1","Address Line 1"],["city","City"],["state","State"],["pincode","Pincode"],["gstin","GSTIN (optional)"]].map(([k, label]) => (
-                      <div key={k}>
-                        <label className="text-xs text-[#45353E] mb-1 block">{label}</label>
-                        <input value={(newAddr as any)[k]} onChange={e => setNewAddr(n => ({ ...n, [k]: e.target.value }))} className="input-field text-sm" placeholder={label} />
-                      </div>
-                    ))}
-                    <div className="flex gap-2">
-                      <button onClick={handleAddAddress} className="btn-primary text-sm px-4 py-2">Save</button>
-                      <button onClick={() => setAddingAddr(false)} className="btn-outline text-sm px-4 py-2">Cancel</button>
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {addresses.map(addr => (
-                    <div key={addr.id} className="card relative group">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="badge badge-info capitalize">{addr.label}</span>
-                        {addr.isDefault && <span className="badge badge-success">Default</span>}
-                      </div>
-                      <p className="font-bold text-[#001c54] text-sm">{addr.fullName}</p>
-                      <p className="text-sm text-[#45353E] mt-1 leading-relaxed">{addr.addressLine1}<br />{addr.city}, {addr.state} - {addr.pincode}</p>
-                      <p className="text-sm text-[#45353E] mt-1">{addr.phone}</p>
-                      {addr.gstin && <p className="text-xs text-[#EB9220] mt-1">GSTIN: {addr.gstin}</p>}
-                      <button onClick={() => handleDeleteAddress(addr.id)}
-                        className="absolute top-4 right-4 h-8 w-8 flex items-center justify-center rounded-lg text-red-400/40 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </div>
+          {(tab === "addresses" || tab === "wishlist" || tab === "rewards" || tab === "settings") && (
+            <div style={{ textAlign: "center", padding: "60px 24px" }}>
+              <div style={{ fontSize: "48px", marginBottom: "14px" }}>🚧</div>
+              <h2 style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-1px", marginBottom: "8px", color: "var(--wh)" }}>{tab.toUpperCase()} COMING SOON</h2>
+              <p style={{ color: "#8F9CAE", fontSize: "13px" }}>We're building this. Check back soon!</p>
+            </div>
+          )}
         </div>
       </div>
       <Footer />
-    </main>
-  );
-}
-
-export default function AccountPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-[#FCFAF6] flex items-center justify-center"><div className="h-8 w-8 rounded-full border-2 border-[#EB9220]/40 border-t-[#EB9220] animate-spin" /></div>}>
-      <AccountPageContent />
-    </Suspense>
+    </>
   );
 }

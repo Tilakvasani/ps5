@@ -1,157 +1,85 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Plus, Search, Edit3, Trash2, Eye, RefreshCw } from "lucide-react";
-import { adminApi } from "@/lib/api";
 import Link from "next/link";
+import { Plus, Edit, Trash2, Search } from "lucide-react";
+import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const perPage = 15;
 
-  const fetchProducts = async () => {
+  const load = () => {
     setLoading(true);
-    try {
-      const data = await adminApi.getProducts({ page, perPage, search });
-      setProducts(data.products);
-      setTotal(data.total);
-    } catch {}
-    setLoading(false);
+    adminApi.getProducts({ search }).then((d: any) => {
+      setProducts(Array.isArray(d) ? d : d.products || []);
+    }).catch(() => {}).finally(() => setLoading(false));
   };
 
-  useEffect(() => { fetchProducts(); }, [page, search]);
+  useEffect(() => { load(); }, [search]);
 
-  const handleDelete = async (id: number, name: string) => {
-    if (!confirm(`Delete "${name}"?`)) return;
-    try {
-      await adminApi.deleteProduct(id);
-      toast.success("Product deleted");
-      fetchProducts();
-    } catch (err: any) { toast.error(err.message); }
+  const handleDelete = async (id: number) => {
+    if (!confirm("Delete this product?")) return;
+    try { await adminApi.deleteProduct(id); toast.success("Deleted!"); setProducts(p => p.filter(x => x.id !== id)); }
+    catch (e: any) { toast.error(e.message); }
   };
 
-  const toggleActive = async (product: any) => {
-    const fd = new FormData();
-    fd.append("isActive", String(!product.isActive));
-    try {
-      await adminApi.updateProduct(product.id, fd);
-      setProducts(ps => ps.map(p => p.id === product.id ? { ...p, isActive: !p.isActive } : p));
-    } catch (err: any) { toast.error(err.message); }
+  const getStockBadge = (stock: number) => {
+    if (stock <= 0)  return <span className="zbadge zbadge-rd">OUT OF STOCK</span>;
+    if (stock <= 10) return <span className="zbadge zbadge-am">LOW STOCK</span>;
+    return <span className="zbadge zbadge-gr">ACTIVE</span>;
   };
-
-  const totalPages = Math.ceil(total / perPage);
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-black text-[#001c54]">Products</h1>
-          <p className="text-[#45353E] text-sm mt-1">{total} total products</p>
-        </div>
-        <Link href="/admin/products/new">
-          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="btn-primary flex items-center gap-2">
-            <Plus size={16} /> Add Product
-          </motion.button>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"20px" }}>
+        <h1 style={{ fontSize:"24px", fontWeight:900, letterSpacing:"-1px" }}>PRODUCTS</h1>
+        <Link href="/admin/products/new" className="zbtn-or" style={{ fontSize:"11px", padding:"9px 16px" }}>
+          <Plus size={13} /> ADD PRODUCT
         </Link>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#45353E]" />
-          <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
-            placeholder="Search products..." className="input-field pl-9 text-sm" />
-        </div>
-        <button onClick={fetchProducts} className="btn-outline p-2.5"><RefreshCw size={16} /></button>
+      <div style={{ position:"relative", marginBottom:"16px" }}>
+        <Search size={13} style={{ position:"absolute", left:"12px", top:"50%", transform:"translateY(-50%)", color:"#888" }} />
+        <input className="zinp" placeholder="Search products..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft:"34px" }} />
       </div>
 
-      {/* Table */}
-      <div className="card p-0 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[#E8E2D9] text-[#45353E] text-left">
-                {["Image", "Name", "SKU", "Category", "Price", "Stock", "Status", "Actions"].map(h => (
-                  <th key={h} className="px-4 py-3 font-semibold whitespace-nowrap">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {loading ? (
-                Array.from({ length: 8 }).map((_, i) => (
-                  <tr key={i}><td colSpan={8} className="px-4 py-3"><div className="h-4 rounded bg-[#FCFAF6] animate-pulse" /></td></tr>
-                ))
-              ) : products.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-12 text-center text-[#45353E]">No products found</td></tr>
-              ) : products.map(p => (
-                <motion.tr key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-[#FCFAF6] transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="h-10 w-10 rounded-lg bg-[#FCFAF6] overflow-hidden border border-[#E8E2D9]">
-                      {p.images?.[0]?.imageUrl ? <img src={p.images[0].imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full" />}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-[#001c54] line-clamp-1 max-w-[200px]">{p.name}</p>
-                    {p.brand && <p className="text-xs text-[#45353E]">{p.brand}</p>}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-[#45353E] text-xs">{p.sku}</td>
-                  <td className="px-4 py-3 text-[#45353E]">{p.category?.name || "—"}</td>
-                  <td className="px-4 py-3">
-                    <p className="font-bold text-[#001c54]">₹{Number(p.sellingPrice).toFixed(2)}</p>
-                    {Number(p.discountPercent) > 0 && <p className="text-xs text-[#EB9220]">-{p.discountPercent}% off</p>}
-                  </td>
-                  <td className="px-4 py-3">
-                    {p.inventory?.[0] ? (
-                      <span className={`badge ${p.inventory[0].qtyInStock <= p.inventory[0].lowStockThreshold ? "badge-warning" : "badge-success"}`}>
-                        {p.inventory[0].qtyInStock}
-                      </span>
-                    ) : <span className="text-[#45353E]">—</span>}
-                  </td>
-                  <td className="px-4 py-3">
-                    <button onClick={() => toggleActive(p)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${p.isActive ? "bg-[#EB9220]" : "bg-[#FFFFFF]"}`}>
-                      <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${p.isActive ? "translate-x-6" : "translate-x-1"}`} />
-                    </button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1">
-                      <Link href={`/products/${p.slug}`} target="_blank">
-                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#001c54] hover:bg-[#FFFFFF] transition-all"><Eye size={14} /></button>
-                      </Link>
-                      <Link href={`/admin/products/${p.id}`}>
-                        <button className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-[#EB9220] hover:bg-[#F0EFEA] transition-all"><Edit3 size={14} /></button>
-                      </Link>
-                      <button onClick={() => handleDelete(p.id, p.name)}
-                        className="h-8 w-8 flex items-center justify-center rounded-lg text-[#45353E] hover:text-red-400 hover:bg-red-400/10 transition-all">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="zcard" style={{ padding:0, overflow:"hidden" }}>
+        <div className="ztr ztr-head" style={{ gridTemplateColumns:"42px 1.6fr 0.8fr 0.7fr 0.8fr 100px 70px" }}>
+          <span></span><span>PRODUCT</span><span>SKU</span><span>PRICE</span><span>STOCK</span><span>STATUS</span><span>ACTIONS</span>
         </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-[#E8E2D9]">
-            <p className="text-xs text-[#45353E]">Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}</p>
-            <div className="flex gap-1">
-              {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => (
-                <button key={i} onClick={() => setPage(i + 1)}
-                  className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all ${page === i + 1 ? "bg-[#EB9220] text-[#001c54]" : "text-[#45353E] hover:bg-[#FFFFFF]"}`}>
-                  {i + 1}
-                </button>
-              ))}
+        {loading ? (
+          [...Array(5)].map((_,i) => (
+            <div key={i} className="ztr" style={{ gridTemplateColumns:"42px 1.6fr 0.8fr 0.7fr 0.8fr 100px 70px", background: i%2?"#FFF":"#FAFAFA" }}>
+              {[...Array(7)].map((_,j) => <div key={j} style={{ height:"14px", background:"#F0F0F0", borderRadius:"4px" }} />)}
+            </div>
+          ))
+        ) : products.length === 0 ? (
+          <div style={{ padding:"40px", textAlign:"center", color:"#888", fontSize:"13px" }}>
+            {search ? `No products matching "${search}"` : "No products yet. "}<Link href="/admin/products/new" style={{ color:"#FF4500", fontWeight:700, textDecoration:"none" }}>Add one!</Link>
+          </div>
+        ) : products.map((p, i) => (
+          <div key={p.id} className="ztr" style={{ gridTemplateColumns:"42px 1.6fr 0.8fr 0.7fr 0.8fr 100px 70px", background: i%2?"#FFF":"#FAFAFA" }}>
+            <div style={{ width:"32px", height:"32px", borderRadius:"6px", background:"#F0F0F0", border:"1.5px solid #0A0A0A", overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center" }}>
+              {p.images?.[0]?.imageUrl ? <img src={p.images[0].imageUrl} style={{ width:"100%", height:"100%", objectFit:"cover" }} alt={p.name} /> : <span style={{ fontSize:"14px" }}>📦</span>}
+            </div>
+            <div><div style={{ fontWeight:800, fontSize:"12px" }}>{p.name}</div><div style={{ fontSize:"10px", color:"#888" }}>{p.unit}</div></div>
+            <span style={{ fontSize:"11px", color:"#888", fontWeight:600 }}>{p.hsnCode || p.slug}</span>
+            <span style={{ fontSize:"13px", fontWeight:800 }}>₹{Number(p.sellingPrice||0).toFixed(0)}</span>
+            <span style={{ fontSize:"12px", fontWeight:700, color:(p.stock??999)<=0?"#DC2626":(p.stock??999)<=10?"#F59E0B":"#0A0A0A" }}>
+              {p.stock ?? "—"} units
+            </span>
+            {getStockBadge(p.stock ?? 999)}
+            <div style={{ display:"flex", gap:"10px" }}>
+              <Link href={`/admin/products/${p.id}`}><Edit size={15} color="#FF4500" /></Link>
+              <button onClick={() => handleDelete(p.id)} style={{ background:"none", border:"none", cursor:"pointer", padding:0 }}><Trash2 size={15} color="#DC2626" /></button>
             </div>
           </div>
-        )}
+        ))}
+      </div>
+      <div style={{ display:"flex", justifyContent:"space-between", marginTop:"12px" }}>
+        <span style={{ fontSize:"11px", color:"#888", fontWeight:700 }}>SHOWING {products.length} PRODUCTS</span>
       </div>
     </div>
   );
