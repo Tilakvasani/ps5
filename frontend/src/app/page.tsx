@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle, Quote, Droplets, Brain, Flame, Leaf } from "lucide-react";
+import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle, Quote, Droplets, Brain, Flame, Leaf, Sparkles, Activity } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { CertLogo } from "@/components/storefront/CertLogos";
@@ -26,7 +26,7 @@ const WHY_CHOOSE = [
   { icon: Droplets, title: "Water Upgrade", desc: "Give your plain water a powerful, professional upgrade with every sip." },
   { icon: Zap,      title: "Performance Fuel", desc: "Fast-absorbing formula designed for your busy, non-stop lifestyle." },
   { icon: Brain,    title: "Science-Backed", desc: "Formulated with clinically studied ingredients for real results." },
-  { icon: Leaf,     title: "Clean Ingredients", desc: "No junk, no fillers. Just what your body actually needs." },
+  { icon: Sparkles, title: "Clean Ingredients", desc: "No junk, no fillers. Just what your body actually needs." },
 ];
 
 const D = {
@@ -182,7 +182,7 @@ export default function HomePage() {
               🔥 PERFORMANCE NUTRITION
             </span>
           </motion.div>
-          <motion.h1 {...fadeUp(0.05)} className="text-5xl md:text-7xl font-black leading-[1.05] mb-4 whitespace-pre-line" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
+          <motion.h1 {...fadeUp(0.05)} className="text-3xl sm:text-5xl md:text-7xl font-black leading-[1.05] mb-4 whitespace-pre-line" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
             {s(settings, "hero_title")}
           </motion.h1>
 
@@ -196,17 +196,17 @@ export default function HomePage() {
             {s(settings, "hero_subtext")}
           </motion.p>
 
-          <motion.div {...fadeUp(0.3)} className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/products">
-              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                className="zbtn-or flex items-center gap-2"
+          <motion.div {...fadeUp(0.3)} className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-stretch max-w-md mx-auto sm:max-w-none">
+            <Link href="/products" className="w-full sm:w-auto">
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                className="zbtn-or w-full flex items-center justify-center gap-2"
                 style={{ padding: "14px 28px", fontSize: "13px", borderRadius: "7px" }}>
                 Choose Your Power <ArrowRight size={16} />
               </motion.button>
             </Link>
-            <Link href="/register">
-              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                className="zbtn-out flex items-center gap-2"
+            <Link href="/register" className="w-full sm:w-auto">
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                className="zbtn-out w-full flex items-center justify-center gap-2"
                 style={{ padding: "14px 28px", fontSize: "13px" }}>
                 Start Your Hustle <ChevronRight size={16} />
               </motion.button>
@@ -262,7 +262,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
             {[
               { icon: Brain,    title: "Scientific Formula", desc: "A fusion of science and taste." },
-              { icon: Leaf,     title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
+              { icon: Activity, title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
               { icon: Zap,      title: "Instant Absorption", desc: "Rocket-like speed, instant action." },
               { icon: Shield,   title: "Pocket Friendly",    desc: "It even fits in your jeans pocket." },
               { icon: Award,    title: "Best Flavour",       desc: "Absolutely fresh, as if straight from the garden." },
@@ -287,7 +287,7 @@ export default function HomePage() {
           Certified & Compliant
         </p>
         <div className="relative">
-          <div className="flex gap-12 animate-marquee whitespace-nowrap" style={{ animationDuration: "18s" }}>
+          <div className="flex gap-12 animate-marquee whitespace-nowrap" style={{ animationDuration: "14s" }}>
             {[...certEntries, ...certEntries, ...certEntries].map(({ key, label }, idx) =>
               s(settings, key) ? (
                 <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />

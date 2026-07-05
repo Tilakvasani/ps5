@@ -84,7 +84,7 @@ export default function ContactPage() {
           <motion.span {...fadeUp(0)} className="inline-block zbadge zbadge-or mb-4">
             Contact Us
           </motion.span>
-          <motion.h1 {...fadeUp(0.1)} className="text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
+          <motion.h1 {...fadeUp(0.1)} className="text-3xl sm:text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
             Got Questions?<br />
             <span style={{ color: "var(--or)" }}>We've Got Answers!</span>
           </motion.h1>
@@ -224,7 +224,7 @@ export default function ContactPage() {
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               className="zbtn-or w-full py-3 flex items-center justify-center gap-2 disabled:opacity-50">
               <Send size={16} />
-              {sending ? "Sending..." : whatsappLink ? "Send Inquiry via WhatsApp" : "Let's Do Business"}
+              {sending ? "Sending..." : "Send Inquiry"}
             </motion.button>
 
             <p className="text-xs text-center" style={{ color: "#8F9CAE" }}>

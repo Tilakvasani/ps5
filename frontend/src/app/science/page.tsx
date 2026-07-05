@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { FlaskConical, Shield, Leaf, Droplets, Award, CheckCircle, Microscope, Package } from "lucide-react";
+import { FlaskConical, Shield, Leaf, Droplets, Award, CheckCircle, Microscope, Package, Globe } from "lucide-react";
 import { fetchSettings } from "@/lib/useSettings";
 import { fadeUp } from "@/lib/utils";
 
@@ -68,7 +68,7 @@ export default function SciencePage() {
 
   const manufacturing = [
     {
-      icon: Leaf,
+      icon: Globe,
       title: s(settings, "science_process1_title"),
       desc: s(settings, "science_process1_desc"),
       num: "01",
@@ -178,7 +178,7 @@ export default function SciencePage() {
             </span>
           </motion.div>
 
-          <motion.h1 {...fadeUp(0.08)} className="font-black text-5xl md:text-7xl leading-none mb-6" style={{ color: "#627d98" }}>
+          <motion.h1 {...fadeUp(0.08)} className="font-black text-3xl sm:text-5xl md:text-7xl leading-tight mb-6" style={{ color: "#627d98" }}>
             {renderTitle(s(settings, "science_hero_title"))}
           </motion.h1>
 
@@ -194,7 +194,7 @@ export default function SciencePage() {
           <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "var(--or)" }}>
             {s(settings, "science_process_badge")}
           </p>
-          <h2 className="font-black text-4xl md:text-5xl whitespace-pre-line leading-tight" style={{ color: "#627d98" }}>
+          <h2 className="font-black text-2xl sm:text-4xl md:text-5xl whitespace-pre-line leading-tight" style={{ color: "#627d98" }}>
             {s(settings, "science_process_title")}
           </h2>
         </motion.div>
@@ -284,7 +284,7 @@ export default function SciencePage() {
             <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "var(--or)" }}>
               {s(settings, "science_clean_badge")}
             </p>
-            <h2 className="font-black text-4xl md:text-5xl mb-6 whitespace-pre-line leading-tight" style={{ color: "#627d98" }}>
+            <h2 className="font-black text-2xl sm:text-4xl md:text-5xl mb-6 whitespace-pre-line leading-tight" style={{ color: "#627d98" }}>
               {s(settings, "science_clean_title")}
             </h2>
             <p className="text-lg leading-relaxed mb-8" style={{ color: "#8F9CAE" }}>

@@ -39,7 +39,6 @@ export default function Footer() {
   const socials = [
     { href: s.social_instagram, icon: <InstagramIcon />, label: "Instagram" },
     { href: s.social_facebook,  icon: <FacebookIcon />,  label: "Facebook" },
-    { href: s.social_youtube,   icon: <YoutubeIcon />,   label: "YouTube" },
   ].filter(s => s.href);
 
   const colHeadStyle = {

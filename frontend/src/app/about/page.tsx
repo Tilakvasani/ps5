@@ -65,7 +65,7 @@ export default function AboutPage() {
             About Zupwell
           </motion.span>
           <motion.h1 {...fadeUp(0.1)}
-            className="text-5xl md:text-6xl font-black leading-tight mb-6"
+            className="text-3xl sm:text-4xl md:text-6xl font-black leading-tight mb-6"
             style={{ color: "#627d98" }}>
             &quot;{s(settings, "about_punchline")}&quot;
           </motion.h1>
@@ -190,16 +190,16 @@ export default function AboutPage() {
             <h2 className="text-2xl font-black mb-4" style={{ color: "#627d98" }}>
               Ready to fuel your hustle?
             </h2>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/products">
-                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  className="btn-primary flex items-center gap-2 px-8 py-3">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-stretch max-w-sm mx-auto sm:max-w-none">
+              <Link href="/products" className="w-full sm:w-auto">
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="btn-primary w-full flex items-center justify-center gap-2 px-8 py-3 text-sm font-bold">
                   Upgrade Now <ArrowRight size={16} />
                 </motion.button>
               </Link>
-              <Link href="/contact">
-                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  className="btn-outline px-8 py-3">
+              <Link href="/contact" className="w-full sm:w-auto">
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="btn-primary w-full flex items-center justify-center gap-2 px-8 py-3 text-sm font-bold">
                   Contact Us
                 </motion.button>
               </Link>

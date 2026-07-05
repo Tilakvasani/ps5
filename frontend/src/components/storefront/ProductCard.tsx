@@ -109,7 +109,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <div className="flex items-center justify-between">
             <div>
               <span style={{ fontSize: "15px", fontWeight: 900, color: "#F8F8F8", letterSpacing: "-0.5px" }}>
-                Price ₹{finalPrice}
+                <span style={{ fontSize: "10px", fontWeight: 700, color: "#8F9CAE", marginRight: "3px", textTransform: "uppercase" }}>mrp</span>₹{finalPrice}
               </span>
               <p style={{ fontSize: "9px", color: "#8F9CAE", marginTop: "1px" }}>includes all taxes</p>
             </div>

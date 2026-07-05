@@ -248,7 +248,7 @@
   .zmarquee-track {
     display: inline-flex;
     white-space: nowrap;
-    animation: marquee 18s linear infinite;
+    animation: marquee 14s linear infinite;
   }
 
   /* ── BACK-COMPAT ALIASES ── */

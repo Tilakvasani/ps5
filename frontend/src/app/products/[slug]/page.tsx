@@ -70,7 +70,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [qty, setQty] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
-  const [activeTab, setActiveTab] = useState<"desc"|"howto"|"nutrition"|"specs"|"reviews">("desc");
+  const [activeTab, setActiveTab] = useState<string>("desc");
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewHover, setReviewHover] = useState(0);
   const [reviewTitle, setReviewTitle] = useState("");
@@ -120,6 +120,14 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const handleAddToCart = () => {
     addToCart({ productId: product.id, variantId: selectedVariant?.id, name: product.name, sku: product.sku, price, qty, imageUrl: primaryImage, unit: product.unit });
     toast.success("Added to cart! 🛒");
+  };
+
+  const handleScrollToReviews = () => {
+    setActiveTab("reviews");
+    setTimeout(() => {
+      const el = document.getElementById("accordion-reviews");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
   };
 
   const TABS = [
@@ -238,21 +246,26 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               {product.name}
             </h1>
 
-            {product.avgRating && (
-              <div className="flex items-center gap-2 mb-5">
+            <div className="flex items-center gap-2 mb-5">
+              <button 
+                onClick={handleScrollToReviews}
+                className="flex items-center gap-2 hover:opacity-85 transition-opacity text-left"
+              >
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
                   style={{ background: "#0C1E3E", border: "1.5px solid #1E2D4A" }}>
                   <div className="flex gap-0.5">
                     {Array.from({length:5}).map((_,i) => (
-                      <Star key={i} size={13} className={i<Math.round(product.avgRating)?"fill-yellow-400 text-yellow-400":""}
-                        style={i>=Math.round(product.avgRating)?{color:C.border}:{}}/>
+                      <Star key={i} size={13} className={i < Math.round(product.avgRating || 5) ? "fill-yellow-400 text-yellow-400" : ""}
+                        style={i >= Math.round(product.avgRating || 5) ? { color: C.border } : {}}/>
                     ))}
                   </div>
-                  <span className="text-sm font-bold ml-1" style={{ color: "#FFFFFF" }}>{product.avgRating?.toFixed(1)}</span>
+                  <span className="text-sm font-bold ml-1" style={{ color: "#FFFFFF" }}>{(product.avgRating || 5).toFixed(1)}</span>
                 </div>
-                <span className="text-sm" style={{ color: C.mid }}>({product._count?.reviews} reviews)</span>
-              </div>
-            )}
+                <span className="text-sm border-b border-dashed hover:text-[var(--or)] hover:border-[var(--or)] transition-colors" style={{ color: C.mid, borderColor: C.border }}>
+                  ({product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length} reviews)
+                </span>
+              </button>
+            </div>
 
             {/* Variants */}
             {product.variants?.length > 0 && (
@@ -277,7 +290,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             {/* Price card — dark surface */}
             <div className="rounded-2xl p-5 mb-5" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
               <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-4xl font-bold" style={{ color: "#F8F8F8", letterSpacing: "-0.04em" }}>Price: ₹{Math.round(price * (1 + cgstRate + sgstRate))}</span>
+                <span className="text-4xl font-bold" style={{ color: "#F8F8F8", letterSpacing: "-0.04em" }}>
+                  <span className="text-lg font-bold text-[#8F9CAE] mr-1.5 uppercase" style={{ verticalAlign: "middle" }}>mrp:</span>
+                  ₹{Math.round(price * (1 + cgstRate + sgstRate))}
+                </span>
               </div>
               <p className="text-xs mt-1.5" style={{ color: C.light }}>includes all taxes</p>
               {qty > 1 && (
@@ -332,213 +348,226 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           </div>
         </div>
 
-        {/* ── Tabs ── */}
-        <div className="mt-16 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${C.border}` }}>
-          <div className="flex overflow-x-auto" style={{ background: C.surface, borderBottom: `1.5px solid ${C.border}` }}>
-            {TABS.map((tab) => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className="flex-shrink-0 px-6 py-4 text-sm font-semibold whitespace-nowrap relative transition-colors duration-150"
-                style={{
-                  background: activeTab===tab.id ? "#0A1628" : "transparent",
-                  color: activeTab===tab.id ? C.mintHex : C.mid,
-                  borderBottom: activeTab===tab.id ? `2px solid ${C.mintHex}` : "2px solid transparent",
-                }}>
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        {/* ── Accordion List (Dropdown style) ── */}
+        <div className="mt-16 space-y-4">
+          {TABS.map((tab) => {
+            const isOpen = activeTab === tab.id;
+            const label = tab.id === "reviews" 
+              ? `Reviews (${product.reviews?.length || 0})` 
+              : tab.label;
+            
+            return (
+              <div key={tab.id} id={`accordion-${tab.id}`} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${C.border}`, background: C.surface }}>
+                <button
+                  onClick={() => setActiveTab(isOpen ? "" : tab.id)}
+                  className="w-full px-6 py-5 flex items-center justify-between text-base font-bold transition-all text-left"
+                  style={{ color: isOpen ? C.mintHex : "#627d98" }}
+                >
+                  <span>{label}</span>
+                  <span className="transition-transform duration-200" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", color: C.mintHex }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </span>
+                </button>
+                
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <div className="p-6 md:p-8" style={{ background: "#0A1628", borderTop: `1.5px solid ${C.border}` }}>
+                        {tab.id === "desc" && (
+                          <div className="text-sm leading-relaxed" style={{ color: C.mid }}>
+                            <div dangerouslySetInnerHTML={{__html: sanitizeHtml(product.description || product.shortDescription || "No description available.")}}/>
+                          </div>
+                        )}
 
-          <div className="p-8" style={{ background: "#0A1628" }}>
+                        {tab.id === "howto" && (
+                          <div>
+                            <h3 className="font-bold text-2xl mb-8" style={{ color: "#627d98" }}>
+                              How to Use — <span style={{ color: C.mintHex }}>The Simple Way</span>
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                              {HOW_TO_USE.map((step,i) => (
+                                <div key={i}
+                                  className="flex flex-col items-center text-center p-7 rounded-2xl"
+                                  style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
+                                  <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-5"
+                                    style={{ background: "rgba(255,92,0,0.1)" }}>
+                                    <step.icon size={22} style={{ color: C.mintHex }}/>
+                                  </div>
+                                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: C.mintHex, letterSpacing:"0.15em" }}>
+                                    Step {step.step}
+                                  </div>
+                                  <h4 className="font-bold text-lg mb-2" style={{ color: "#627d98" }}>{step.title}</h4>
+                                  <p className="text-sm" style={{ color: C.mid }}>{step.desc}</p>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="p-4 rounded-2xl" style={{ background: "rgba(255,92,0,0.08)", border: "1.5px solid rgba(255,92,0,0.2)" }}>
+                              <p className="text-sm" style={{ color: "#8F9CAE" }}>
+                                <span className="font-bold" style={{ color: C.mintHex }}>Pro tip:</span> Use cold water for best fizz. One tablet per 200 ml glass. Take daily for best results.
+                              </p>
+                            </div>
+                          </div>
+                        )}
 
-            {activeTab==="desc" && (
-              <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-sm leading-relaxed" style={{ color: C.mid }}>
-                <div dangerouslySetInnerHTML={{__html: sanitizeHtml(product.description || product.shortDescription || "No description available.")}}/>
-              </motion.div>
-            )}
+                        {tab.id === "nutrition" && (
+                          <div>
+                            <h3 className="font-bold text-2xl mb-8" style={{ color: "#627d98" }}>Nutritional Facts</h3>
+                            <div className="max-w-sm rounded-2xl overflow-hidden" style={{ border: `2px solid #1E2D4A` }}>
+                              <div className="p-5" style={{ background: "#0C1E3E" }}>
+                                <p className="text-xl font-bold" style={{ color: "#FFFFFF" }}>Nutrition Facts</p>
+                                <p className="text-xs mt-1" style={{ color: "#8F9CAE" }}>Per tablet (approx. values)</p>
+                              </div>
+                              <div className="divide-y" style={{ background: "#051124", borderColor: "#1E2D4A" }}>
+                                {(nutritionalFacts?Object.entries(nutritionalFacts):[
+                                  ["Energy","20 kcal"],["Carbohydrates","5g"],["Sugars","<1g"],
+                                  ["Sodium","300mg"],["Potassium","200mg"],["Magnesium","100mg"],
+                                  ["Vitamin C","100mg"],["Vitamin B6","1.4mg"],["Zinc","5mg"]
+                                ]).map(([k,v]) => (
+                                  <div key={k as string} className="flex justify-between px-5 py-3 text-sm" style={{ borderBottom: `1px solid #1E2D4A` }}>
+                                    <span style={{ color: C.mid }}>{k as string}</span>
+                                    <span className="font-semibold" style={{ color: "#FFFFFF" }}>{v as string}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="px-5 py-3" style={{ background: "#0C1E3E", borderTop: `1px solid #1E2D4A` }}>
+                                <p className="text-[10px]" style={{ color: C.light }}>* Approximate values. Actual values may vary by variant.</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
-            {activeTab==="howto" && (
-              <motion.div initial={{opacity:0}} animate={{opacity:1}}>
-                <h3 className="font-bold text-2xl mb-8" style={{ color: "#627d98" }}>
-                  How to Use — <span style={{ color: C.mintHex }}>The Simple Way</span>
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-                  {HOW_TO_USE.map((step,i) => (
-                    <motion.div key={i} initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{delay:i*0.08}}
-                      className="flex flex-col items-center text-center p-7 rounded-2xl"
-                      style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
-                      <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-5"
-                        style={{ background: "rgba(255,92,0,0.1)" }}>
-                        <step.icon size={22} style={{ color: C.mintHex }}/>
+                        {tab.id === "specs" && (
+                          <div>
+                            <h3 className="font-bold text-2xl mb-6" style={{ color: "#627d98" }}>Specifications</h3>
+                            <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${C.border}` }}>
+                              {[["Brand",product.brand||"—"],["Category",product.category?.name||"—"]].map(([k,v],i,arr) => (
+                                <div key={k} className="flex text-sm" style={{ background: i%2===0 ? "#0A1628" : C.surface, borderBottom: i<arr.length-1?`1px solid ${C.border}`:"none" }}>
+                                  <div className="w-1/3 px-5 py-4 font-semibold" style={{ color: C.mid }}>{k}</div>
+                                  <div className="flex-1 px-5 py-4" style={{ color: "#FFFFFF" }}>{v}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {tab.id === "reviews" && (
+                          <div className="space-y-8">
+                            <div>
+                              <h3 className="font-bold text-2xl mb-6" style={{ color: "#627d98" }}>Customer Reviews</h3>
+                              {product.reviews?.length ? (
+                                <div className="space-y-4">
+                                  {product.reviews.map((r: any) => (
+                                    <div key={r.id} className="p-5 rounded-2xl" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: C.border} : {}}/>)}</div>
+                                        <span className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>{r.user?.name}</span>
+                                      </div>
+                                      {r.title && <p className="font-medium mb-1" style={{ color: "#627d98" }}>{r.title}</p>}
+                                      <p className="text-sm" style={{ color: C.mid }}>{r.body}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="space-y-4">
+                                  {FALLBACK_REVIEWS.map((r) => (
+                                    <div key={r.id} className="p-5 rounded-2xl" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: C.border} : {}}/>)}</div>
+                                        <span className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>{r.name}</span>
+                                      </div>
+                                      <p className="font-medium mb-1" style={{ color: "#627d98" }}>{r.title}</p>
+                                      <p className="text-sm" style={{ color: C.mid }}>{r.body}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="rounded-3xl p-6" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
+                              <h3 className="font-bold text-xl mb-5" style={{ color: "#627d98" }}>Write a Review</h3>
+
+                              {!token ? (
+                                <div className="text-center py-6">
+                                  <p className="text-sm mb-3" style={{ color: C.mid }}>Please sign in to leave a review</p>
+                                  <a href="/login" className="inline-block px-6 py-2.5 rounded-xl text-white text-sm font-semibold" style={{ background: C.mint }}>Sign In</a>
+                                </div>
+                              ) : reviewSuccess ? (
+                                <div className="text-center py-6">
+                                  <CheckCircle size={40} className="mx-auto mb-3" style={{ color: C.mintHex }} />
+                                  <p className="font-bold" style={{ color: "#627d98" }}>Thank you for your review!</p>
+                                  <p className="text-sm mt-1" style={{ color: C.mid }}>It will appear after approval.</p>
+                                </div>
+                              ) : (
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="text-sm font-semibold block mb-2" style={{ color: "#627d98" }}>Your Rating</label>
+                                    <div className="flex gap-1">
+                                      {Array.from({length:5}).map((_,i) => (
+                                        <button key={i} type="button"
+                                          onMouseEnter={() => setReviewHover(i+1)}
+                                          onMouseLeave={() => setReviewHover(0)}
+                                          onClick={() => setReviewRating(i+1)}>
+                                          <Star size={28}
+                                            className={(reviewHover || reviewRating) > i ? "fill-yellow-400 text-yellow-400" : ""}
+                                            style={(reviewHover || reviewRating) > i ? {} : {color: C.border}} />
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <label className="text-sm font-semibold block mb-1" style={{ color: "#627d98" }}>Review Title <span className="font-normal opacity-60">(optional)</span></label>
+                                    <input value={reviewTitle} onChange={e => setReviewTitle(e.target.value)}
+                                      placeholder="e.g. Great product!"
+                                      className="w-full px-4 py-2.5 rounded-xl text-sm outline-none"
+                                      style={{ border: `1.5px solid ${C.border}`, background: "#051124", color: "#FFFFFF" }} />
+                                  </div>
+
+                                  <div>
+                                    <label className="text-sm font-semibold block mb-1" style={{ color: "#627d98" }}>Your Review</label>
+                                    <textarea value={reviewBody} onChange={e => setReviewBody(e.target.value)}
+                                      rows={4} placeholder="Share your experience with this product..."
+                                      className="w-full px-4 py-2.5 rounded-xl text-sm outline-none resize-none"
+                                      style={{ border: `1.5px solid ${C.border}`, background: "#051124", color: "#FFFFFF" }} />
+                                  </div>
+
+                                  <button
+                                    disabled={!reviewBody.trim() || reviewSubmitting}
+                                    onClick={async () => {
+                                      if (!reviewBody.trim()) return;
+                                      setReviewSubmitting(true);
+                                      try {
+                                        await publicApi.submitReview({ productId: product.id, rating: reviewRating, title: reviewTitle || undefined, body: reviewBody });
+                                        setReviewSuccess(true);
+                                      } catch (err: any) {
+                                        toast.error(err.response?.data?.error || "Failed to submit review");
+                                      }
+                                      setReviewSubmitting(false);
+                                    }}
+                                    className="w-full py-3 rounded-xl font-bold text-white text-sm transition-opacity disabled:opacity-50"
+                                    style={{ background: C.mint }}>
+                                    {reviewSubmitting ? "Submitting..." : "Submit Review"}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: C.mintHex, letterSpacing:"0.15em" }}>
-                        Step {step.step}
-                      </div>
-                      <h4 className="font-bold text-lg mb-2" style={{ color: "#627d98" }}>{step.title}</h4>
-                      <p className="text-sm" style={{ color: C.mid }}>{step.desc}</p>
                     </motion.div>
-                  ))}
-                </div>
-                <div className="p-4 rounded-2xl" style={{ background: "rgba(255,92,0,0.08)", border: "1.5px solid rgba(255,92,0,0.2)" }}>
-                  <p className="text-sm" style={{ color: "#8F9CAE" }}>
-                    <span className="font-bold" style={{ color: C.mintHex }}>Pro tip:</span> Use cold water for best fizz. One tablet per 200 ml glass. Take daily for best results.
-                  </p>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab==="nutrition" && (
-              <motion.div initial={{opacity:0}} animate={{opacity:1}}>
-                <h3 className="font-bold text-2xl mb-8" style={{ color: "#627d98" }}>Nutritional Facts</h3>
-                <div className="max-w-sm rounded-2xl overflow-hidden" style={{ border: `2px solid #1E2D4A` }}>
-                  <div className="p-5" style={{ background: "#0C1E3E" }}>
-                    <p className="text-xl font-bold" style={{ color: "#FFFFFF" }}>Nutrition Facts</p>
-                    <p className="text-xs mt-1" style={{ color: "#8F9CAE" }}>Per tablet (approx. values)</p>
-                  </div>
-                  <div className="divide-y" style={{ background: "#051124", borderColor: "#1E2D4A" }}>
-                    {(nutritionalFacts?Object.entries(nutritionalFacts):[
-                      ["Energy","20 kcal"],["Carbohydrates","5g"],["Sugars","<1g"],
-                      ["Sodium","300mg"],["Potassium","200mg"],["Magnesium","100mg"],
-                      ["Vitamin C","100mg"],["Vitamin B6","1.4mg"],["Zinc","5mg"]
-                    ]).map(([k,v]) => (
-                      <div key={k as string} className="flex justify-between px-5 py-3 text-sm" style={{ borderBottom: `1px solid #1E2D4A` }}>
-                        <span style={{ color: C.mid }}>{k as string}</span>
-                        <span className="font-semibold" style={{ color: "#FFFFFF" }}>{v as string}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="px-5 py-3" style={{ background: "#0C1E3E", borderTop: `1px solid #1E2D4A` }}>
-                    <p className="text-[10px]" style={{ color: C.light }}>* Approximate values. Actual values may vary by variant.</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab==="specs" && (
-              <motion.div initial={{opacity:0}} animate={{opacity:1}}>
-                <h3 className="font-bold text-2xl mb-6" style={{ color: "#627d98" }}>Specifications</h3>
-                <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${C.border}` }}>
-                  {[["Brand",product.brand||"—"],["Category",product.category?.name||"—"]].map(([k,v],i,arr) => (
-                    <div key={k} className="flex text-sm" style={{ background: i%2===0 ? "#0A1628" : C.surface, borderBottom: i<arr.length-1?`1px solid ${C.border}`:"none" }}>
-                      <div className="w-1/3 px-5 py-4 font-semibold" style={{ color: C.mid }}>{k}</div>
-                      <div className="flex-1 px-5 py-4" style={{ color: "#FFFFFF" }}>{v}</div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab==="reviews" && (
-              <motion.div initial={{opacity:0}} animate={{opacity:1}} className="space-y-8">
-
-                {/* ── Existing Reviews ── */}
-                <div>
-                  <h3 className="font-bold text-2xl mb-6" style={{ color: "#627d98" }}>Customer Reviews</h3>
-                  {product.reviews?.length ? (
-                    <div className="space-y-4">
-                      {product.reviews.map((r: any) => (
-                        <div key={r.id} className="p-5 rounded-2xl" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: C.border} : {}}/>)}</div>
-                            <span className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>{r.user?.name}</span>
-                          </div>
-                          {r.title && <p className="font-medium mb-1" style={{ color: "#627d98" }}>{r.title}</p>}
-                          <p className="text-sm" style={{ color: C.mid }}>{r.body}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {FALLBACK_REVIEWS.map((r) => (
-                        <div key={r.id} className="p-5 rounded-2xl" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: C.border} : {}}/>)}</div>
-                            <span className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>{r.name}</span>
-                          </div>
-                          <p className="font-medium mb-1" style={{ color: "#627d98" }}>{r.title}</p>
-                          <p className="text-sm" style={{ color: C.mid }}>{r.body}</p>
-                        </div>
-                      ))}
-                    </div>
                   )}
-                </div>
-
-                {/* ── Write a Review ── */}
-                <div className="rounded-3xl p-6" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
-                  <h3 className="font-bold text-xl mb-5" style={{ color: "#627d98" }}>Write a Review</h3>
-
-                  {!token ? (
-                    <div className="text-center py-6">
-                      <p className="text-sm mb-3" style={{ color: C.mid }}>Please sign in to leave a review</p>
-                      <a href="/login" className="inline-block px-6 py-2.5 rounded-xl text-white text-sm font-semibold" style={{ background: C.mint }}>Sign In</a>
-                    </div>
-                  ) : reviewSuccess ? (
-                    <div className="text-center py-6">
-                      <CheckCircle size={40} className="mx-auto mb-3" style={{ color: C.mintHex }} />
-                      <p className="font-bold" style={{ color: "#627d98" }}>Thank you for your review!</p>
-                      <p className="text-sm mt-1" style={{ color: C.mid }}>It will appear after approval.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* Star picker */}
-                      <div>
-                        <label className="text-sm font-semibold block mb-2" style={{ color: "#627d98" }}>Your Rating</label>
-                        <div className="flex gap-1">
-                          {Array.from({length:5}).map((_,i) => (
-                            <button key={i} type="button"
-                              onMouseEnter={() => setReviewHover(i+1)}
-                              onMouseLeave={() => setReviewHover(0)}
-                              onClick={() => setReviewRating(i+1)}>
-                              <Star size={28}
-                                className={(reviewHover || reviewRating) > i ? "fill-yellow-400 text-yellow-400" : ""}
-                                style={(reviewHover || reviewRating) > i ? {} : {color: C.border}} />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Title */}
-                      <div>
-                        <label className="text-sm font-semibold block mb-1" style={{ color: "#627d98" }}>Review Title <span className="font-normal opacity-60">(optional)</span></label>
-                        <input value={reviewTitle} onChange={e => setReviewTitle(e.target.value)}
-                          placeholder="e.g. Great product!"
-                          className="w-full px-4 py-2.5 rounded-xl text-sm outline-none"
-                          style={{ border: `1.5px solid ${C.border}`, background: "#051124", color: "#FFFFFF" }} />
-                      </div>
-
-                      {/* Body */}
-                      <div>
-                        <label className="text-sm font-semibold block mb-1" style={{ color: "#627d98" }}>Your Review</label>
-                        <textarea value={reviewBody} onChange={e => setReviewBody(e.target.value)}
-                          rows={4} placeholder="Share your experience with this product..."
-                          className="w-full px-4 py-2.5 rounded-xl text-sm outline-none resize-none"
-                          style={{ border: `1.5px solid ${C.border}`, background: "#051124", color: "#FFFFFF" }} />
-                      </div>
-
-                      {/* Submit */}
-                      <button
-                        disabled={!reviewBody.trim() || reviewSubmitting}
-                        onClick={async () => {
-                          if (!reviewBody.trim()) return;
-                          setReviewSubmitting(true);
-                          try {
-                            await publicApi.submitReview({ productId: product.id, rating: reviewRating, title: reviewTitle || undefined, body: reviewBody });
-                            setReviewSuccess(true);
-                          } catch (err: any) {
-                            toast.error(err.response?.data?.error || "Failed to submit review");
-                          }
-                          setReviewSubmitting(false);
-                        }}
-                        className="w-full py-3 rounded-xl font-bold text-white text-sm transition-opacity disabled:opacity-50"
-                        style={{ background: C.mint }}>
-                        {reviewSubmitting ? "Submitting..." : "Submit Review"}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-              </motion.div>
-            )}
-          </div>
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </div>
       </div>
       <Footer />
