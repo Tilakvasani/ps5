@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import ZupwellChat from "@/components/ZupwellChat";
 import WhatsAppButton from "@/components/storefront/WhatsAppButton";
 import ServerWakeup from "@/components/ServerWakeup";
 import { Toaster } from "react-hot-toast";
@@ -49,7 +48,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AuthSync />
         <ServerWakeup />
-        <ZupwellChat />
         <WhatsAppButton />
         {children}
         <Toaster

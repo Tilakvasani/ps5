@@ -90,9 +90,9 @@ export default function AboutPage() {
           {/* Visual block */}
           <motion.div {...fadeUp(0.1)} className="grid grid-cols-2 gap-4">
             {[
-              { val: "200+", label: "Products" },
-              { val: "50K+", label: "Customers" },
-              { val: "100%", label: "Authentic" },
+              { val: s(settings, "hero_stat1_value") || "200+", label: s(settings, "hero_stat1_label") || "Products" },
+              { val: s(settings, "hero_stat2_value") || "50K+", label: s(settings, "hero_stat2_label") || "Customers" },
+              { val: s(settings, "hero_stat3_value") || "100%", label: s(settings, "hero_stat3_label") || "Authentic" },
               { val: "3-5",  label: "Days Delivery" },
             ].map(({ val, label }) => (
               <div key={label} className="card text-center py-8">

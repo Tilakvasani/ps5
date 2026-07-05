@@ -66,7 +66,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center px-6 py-12" style={{ background: 'var(--dk)' }}>
+    <main className="relative min-h-screen flex flex-col items-center justify-center pt-14 pb-12 px-6" style={{ background: 'var(--dk)' }}>
       <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium transition-colors"
         style={{ color: '#8F9CAE' }}
         onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
@@ -83,7 +83,7 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center mb-4">
             <span className="text-4xl font-black" style={{ color: '#FFFFFF', fontWeight: 900, letterSpacing: '-1.5px' }}>
-              Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, marginLeft: "2px", verticalAlign: "super", color: 'var(--or)' }}>™</sup>
+              Zupwell<sup style={{ fontSize: "16px", fontWeight: 700, color: '#8F9CAE', marginLeft: "1px", verticalAlign: "super" }}>TM</sup>
             </span>
           </Link>
           <h1 className="text-3xl font-black" style={{ color: '#627d98' }}>Create account</h1>

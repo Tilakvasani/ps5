@@ -1,0 +1,87 @@
+"use client";
+import Navbar from "@/components/storefront/Navbar";
+import Footer from "@/components/storefront/Footer";
+import { CertLogo } from "@/components/storefront/CertLogos";
+import { motion } from "framer-motion";
+import { ShieldCheck } from "lucide-react";
+
+export default function CertificationsPage() {
+  const certs = [
+    {
+      label: "FSSAI",
+      title: "Food Safety and Standards Authority of India",
+      desc: "Licensed under FSSAI regulations. This ensures our manufacturing practices, ingredient safety, and packaging standards comply fully with national food safety guidelines.",
+    },
+    {
+      label: "GMP",
+      title: "Good Manufacturing Practices",
+      desc: "WHO-GMP compliant manufacturing processes. This guarantees that all products are consistently produced and controlled according to international quality standards.",
+    },
+    {
+      label: "ISO",
+      title: "ISO 9001:2015 Certification",
+      desc: "ISO 9001:2015 Certified facility. We adhere to rigorous quality management system (QMS) protocols, ensuring safety, reliability, and continuous improvement across all stages of production.",
+    },
+    {
+      label: "HACCP",
+      title: "Hazard Analysis Critical Control Point",
+      desc: "HACCP Certified system. A systematic preventive approach to food safety from biological, chemical, and physical hazards in production processes.",
+    },
+  ];
+
+  return (
+    <main className="min-h-screen flex flex-col justify-between" style={{ background: "var(--dk)" }}>
+      <div>
+        <Navbar />
+
+        <div className="pt-32 pb-20 px-6 mx-auto max-w-5xl">
+          <div className="text-center mb-16">
+            <span className="inline-block zbadge zbadge-or mb-4" style={{ fontSize: "10px", letterSpacing: "1.2px" }}>
+              🛡️ VERIFIED QUALITY
+            </span>
+            <h1 className="text-4xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
+              Our <span style={{ color: "var(--or)" }}>Certifications</span>
+            </h1>
+            <p className="text-sm max-w-xl mx-auto leading-relaxed" style={{ color: "#8F9CAE", fontWeight: 500 }}>
+              At Zupwell, quality isn't just a buzzword. We back our formulations with official certifications from globally recognized regulatory bodies.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {certs.map((c, i) => (
+              <motion.div
+                key={c.label}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="zcard flex flex-col md:flex-row items-start gap-6 p-8"
+                style={{ borderColor: "#1E2D4A" }}
+              >
+                <div className="shrink-0 flex items-center justify-center p-3 rounded-2xl bg-white/5 border border-[#1E2D4A]" style={{ minWidth: 80, height: 80 }}>
+                  <CertLogo label={c.label} className="h-12 object-contain" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold mb-2 text-white flex items-center gap-2">
+                    {c.label} <span className="text-xs font-semibold px-2 py-0.5 rounded-lg bg-orange-500/10 text-[var(--or)]">CERTIFIED</span>
+                  </h3>
+                  <p className="font-semibold text-sm mb-2" style={{ color: "#627d98" }}>{c.title}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: "#8F9CAE" }}>{c.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-16 p-8 rounded-3xl text-center border border-dashed border-[#FF5C00]/30" style={{ background: "rgba(255,92,0,0.03)" }}>
+            <h3 className="text-lg font-bold mb-2 text-white flex items-center justify-center gap-2">
+              <ShieldCheck size={20} className="text-[var(--or)]" /> Quality & Safety Commitment
+            </h3>
+            <p className="text-sm max-w-2xl mx-auto leading-relaxed" style={{ color: "#8F9CAE" }}>
+              Every single batch of Zupwell tablets undergoes strict internal laboratory testing and independent third-party microbiological validation before releasing to the market. We guarantee 100% authenticity and safety.
+            </p>
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </main>
+  );
+}

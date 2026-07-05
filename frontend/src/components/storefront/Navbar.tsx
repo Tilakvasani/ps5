@@ -5,13 +5,46 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Menu, X, HeartPulse, User, LogOut, Search } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useLogout } from "@/lib/useAuth";
+import { productsApi } from "@/lib/api";
+import { useSettings } from "@/lib/useSettings";
 
 export default function Navbar() {
   const { user, cart } = useStore();
+  const { cgstRate, sgstRate } = useSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userDropOpen, setUserDropOpen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const dropRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(() => {
+      productsApi
+        .list({ search: searchQuery, page: 1, perPage: 8 })
+        .then((data) => {
+          setSearchResults(data?.products || []);
+        })
+        .catch(() => {});
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (showSearch) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+      setSearchQuery("");
+      setSearchResults([]);
+    }
+  }, [showSearch]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -25,7 +58,7 @@ export default function Navbar() {
   const handleLogout = useLogout();
 
   const NAV_LINKS = [
-    ["SHOP ALL",    "/products"],
+    ["SHOP",        "/products"],
     ["SCIENCE",     "/science"],
     ["ABOUT",       "/about"],
     ["FAQs",        "/faqs"],
@@ -34,50 +67,6 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 z-50 w-full">
-      {/* ── Announcement Bar ── */}
-      <div
-        style={{
-          background: "#FFB800",
-          color: "#051124",
-          fontSize: "12px",
-          fontWeight: 700,
-          padding: "6px 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <span
-          style={{
-            background: "#FF5C00",
-            color: "#FFF",
-            fontSize: "9px",
-            fontWeight: 900,
-            padding: "2px 8px",
-            borderRadius: "30px",
-            letterSpacing: "0.8px",
-            marginRight: 10,
-          }}
-        >
-          OFFER
-        </span>
-        <span style={{ flex: 1, textAlign: "center" }}>
-          🔥 FREE SHIPPING on orders above ₹499 — Limited time!
-        </span>
-        <Link
-          href="/products"
-          style={{
-            color: "#051124",
-            fontWeight: 800,
-            fontSize: "11px",
-            textDecoration: "underline",
-            whiteSpace: "nowrap",
-          }}
-        >
-          SHOP BUNDLES NOW →
-        </Link>
-      </div>
-
       {/* ── Main Nav ── */}
       <div
         style={{
@@ -98,7 +87,7 @@ export default function Navbar() {
               textDecoration: "none",
             }}
           >
-            zupwell<span style={{ color: "var(--or)" }}>•</span>
+            Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "#8F9CAE", marginLeft: "1px", verticalAlign: "super" }}>TM</sup>
           </Link>
 
           {/* Desktop Nav */}
@@ -128,6 +117,7 @@ export default function Navbar() {
 
             {/* Search icon */}
             <button
+              onClick={() => setShowSearch(true)}
               className="hidden md:flex p-2 transition-colors"
               style={{ color: "#8F9CAE" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#FFFFFF")}
@@ -243,6 +233,16 @@ export default function Navbar() {
               </div>
             )}
 
+            {/* Mobile search */}
+            <button
+              className="md:hidden p-1 transition-colors"
+              style={{ color: "#8F9CAE" }}
+              onClick={() => setShowSearch(true)}
+              aria-label="Search"
+            >
+              <Search size={20} />
+            </button>
+
             {/* Mobile hamburger */}
             <button
               className="md:hidden transition-colors p-1"
@@ -308,6 +308,89 @@ export default function Navbar() {
                     </Link>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {/* Search Modal Overlay */}
+        <AnimatePresence>
+          {showSearch && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex flex-col pt-24 px-6 md:px-12 pb-6"
+              style={{ background: "rgba(5, 17, 36, 0.96)", backdropFilter: "blur(8px)" }}
+            >
+              <div className="mx-auto w-full max-w-2xl flex flex-col h-full">
+                {/* Search Bar Input Row */}
+                <div className="flex items-center gap-3 pb-4 border-b" style={{ borderColor: "#1E2D4A" }}>
+                  <Search size={22} className="text-orange-500 shrink-0" style={{ color: "var(--or)" }} />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search for product (e.g. Electrolytes)..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-transparent text-xl font-bold border-none outline-none text-white placeholder-gray-500"
+                  />
+                  <button
+                    onClick={() => setShowSearch(false)}
+                    className="p-2 rounded-full hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
+                  >
+                    <X size={22} />
+                  </button>
+                </div>
+
+                {/* Results Container */}
+                <div className="flex-1 overflow-y-auto mt-6 pr-2 custom-scrollbar">
+                  {searchQuery.trim() === "" ? (
+                    <div className="text-center py-12 text-sm text-gray-400">
+                      Type name of the product above to search.
+                    </div>
+                  ) : searchResults.length === 0 ? (
+                    <div className="text-center py-12 text-sm text-gray-400">
+                      No products found matching &quot;{searchQuery}&quot;.
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {searchResults.map((product) => {
+                        const primaryImage = product.images?.find((i: any) => i.isPrimary)?.imageUrl || product.images?.[0]?.imageUrl;
+                        const finalPrice = Math.round(Number(product.sellingPrice) * (1 + cgstRate + sgstRate));
+                        return (
+                          <Link
+                            key={product.id}
+                            href={`/products/${product.slug}`}
+                            onClick={() => setShowSearch(false)}
+                            className="flex items-center gap-4 p-3 rounded-2xl border transition-all hover:bg-white/5"
+                            style={{ borderColor: "#1E2D4A", background: "#0C1E3E" }}
+                          >
+                            {primaryImage ? (
+                              <img
+                                src={primaryImage}
+                                alt={product.name}
+                                className="h-14 w-14 rounded-xl object-cover bg-white/5"
+                              />
+                            ) : (
+                              <div className="h-14 w-14 rounded-xl flex items-center justify-center bg-white/5 text-gray-500">
+                                💊
+                              </div>
+                            )}
+                            <div className="flex-1">
+                              <h4 className="font-bold text-sm text-white">{product.name}</h4>
+                              <p className="text-xs text-orange-500 mt-0.5" style={{ color: "var(--or)" }}>
+                                ₹{finalPrice} <span className="text-gray-500 text-[10px] ml-1">includes all taxes</span>
+                              </p>
+                            </div>
+                            <span className="text-[10px] font-bold text-gray-400 group-hover:text-white px-3 py-1 rounded-lg border border-gray-600">
+                              VIEW
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             </motion.div>
           )}

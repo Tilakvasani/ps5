@@ -21,21 +21,13 @@ export function GmpLogo({ className = "h-12" }: { className?: string }) {
   );
 }
 
-export function FsscLogo({ className = "h-12" }: { className?: string }) {
-  return (
-    <img
-      src="/fssc.png"
-      alt="FSSC 22000 Certified"
-      className={`${className} object-contain inline-block shrink-0`}
-    />
-  );
-}
+
 
 export function IsoLogo({ className = "h-12" }: { className?: string }) {
   return (
     <img
       src="/iso.svg"
-      alt="ISO Certified"
+      alt="ISO 9001:2015 Certified"
       className={`${className} object-contain inline-block shrink-0`}
     />
   );
@@ -60,19 +52,17 @@ export function CertLogo({ label, className }: CertLogoProps) {
   const cleanLabel = label.toUpperCase();
 
   if (cleanLabel.includes("FSSAI")) {
-    return <FssaiLogo className={`h-8 ${className || ""}`} />;
+    return <FssaiLogo className={className || "h-8"} />;
   }
   if (cleanLabel.includes("GMP")) {
-    return <GmpLogo className={`h-11 ${className || ""}`} />;
+    return <GmpLogo className={className || "h-11"} />;
   }
-  if (cleanLabel.includes("FSSC") || cleanLabel.includes("22000")) {
-    return <FsscLogo className={`h-11 ${className || ""}`} />;
-  }
+
   if (cleanLabel.includes("ISO")) {
-    return <IsoLogo className={`h-11 ${className || ""}`} />;
+    return <IsoLogo className={className || "h-11"} />;
   }
   if (cleanLabel.includes("HACCP")) {
-    return <HaccpLogo className={`h-11 ${className || ""}`} />;
+    return <HaccpLogo className={className || "h-11"} />;
   }
 
   // Fallback — dark navy card style

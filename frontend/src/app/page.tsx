@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle, Quote, Droplets, Brain, Flame, Leaf } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
+import { CertLogo } from "@/components/storefront/CertLogos";
 import { publicApi } from "@/lib/api";
 import { getSettingsCache, fetchSettings } from "@/lib/useSettings";
 import { fadeUp } from "@/lib/utils";
@@ -291,12 +292,7 @@ export default function HomePage() {
               s(settings, key) ? (
                 <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
               ) : (
-                <div key={idx} className="inline-flex items-center gap-2 shrink-0 rounded-lg px-5 py-2.5"
-                  style={{ border: "1.5px solid #1E2D4A", background: "#051124" }}>
-                  <CheckCircle size={13} style={{ color: "var(--or)" }} />
-                  <span style={{ fontSize: "13px", fontWeight: 900, color: "#FFFFFF" }}>{label}</span>
-                  <span style={{ fontSize: "11px", color: "var(--or)", fontWeight: 700 }}>Certified</span>
-                </div>
+                <CertLogo key={idx} label={label} className="h-14 opacity-70 hover:opacity-100 transition-opacity" />
               )
             )}
           </div>

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Save } from "lucide-react";
+import { Save, Upload, X } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import { invalidateSettingsCache } from "@/lib/useSettings";
 import toast from "react-hot-toast";
@@ -51,13 +51,12 @@ const SETTING_GROUPS = [
   },
   {
     label: "Home Page — Certificate Logos",
-    desc: "Paste image URLs for FSSAI, ISO, GMP logos shown on home page",
+    desc: "Upload or paste image URLs for FSSAI, ISO, GMP, HACCP logos",
     keys: [
-      { key: "cert_fssai_logo", label: "FSSAI Logo URL",  type: "text" },
-      { key: "cert_iso_logo",   label: "ISO Logo URL",    type: "text" },
-      { key: "cert_gmp_logo",   label: "GMP Logo URL",    type: "text" },
-      { key: "cert_haccp_logo", label: "HACCP Logo URL",  type: "text" },
-      { key: "cert_fssc_logo",  label: "FSSC 22000 Logo URL", type: "text" },
+      { key: "cert_fssai_logo", label: "FSSAI Logo",  type: "image" },
+      { key: "cert_iso_logo",   label: "ISO Logo",    type: "image" },
+      { key: "cert_gmp_logo",   label: "GMP Logo",    type: "image" },
+      { key: "cert_haccp_logo", label: "HACCP Logo",  type: "image" },
     ],
   },
   {
@@ -67,7 +66,7 @@ const SETTING_GROUPS = [
       { key: "founder_name",    label: "Founder Name",    type: "text" },
       { key: "founder_title",   label: "Founder Title (e.g. Founder & CEO)", type: "text" },
       { key: "founder_message", label: "Founder's Message", type: "textarea" },
-      { key: "founder_photo",   label: "Founder Photo URL", type: "text" },
+      { key: "founder_photo",   label: "Founder Photo", type: "image" },
     ],
   },
   {
@@ -304,9 +303,57 @@ export default function AdminSettingsPage() {
                         rows={type === "json" ? 8 : 3}
                         placeholder={type === "json" ? '[{"title": "...", "body": "..."}]' : ""}
                       />
+                    ) : type === "image" ? (
+                      <div className="flex flex-col sm:flex-row gap-3 mt-1.5">
+                        {settings[key] ? (
+                          <div className="relative h-20 w-36 shrink-0 rounded-xl overflow-hidden border bg-white/5" style={{ borderColor: "#1E2D4A" }}>
+                            <img src={settings[key]} alt="" className="w-full h-full object-contain" />
+                            <button
+                              type="button"
+                              onClick={() => setSettings(s => ({ ...s, [key]: "" }))}
+                              className="absolute top-1 right-1 h-6 w-6 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors"
+                              style={{ background: "#0C1E3E", color: "#8F9CAE" }}
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="h-20 w-36 shrink-0 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors border-2 border-dashed border-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10">
+                            <Upload size={18} className="mb-1" style={{ color: '#FF5C00' }} />
+                            <span className="text-[10px]" style={{ color: '#8F9CAE' }}>Upload File</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  const file = e.target.files[0];
+                                  const fd = new FormData();
+                                  fd.append("file", file);
+                                  const toastId = toast.loading("Uploading image...");
+                                  try {
+                                    const res = await adminApi.uploadSettingImage(fd);
+                                    setSettings(s => ({ ...s, [key]: res.url }));
+                                    toast.success("Uploaded successfully!", { id: toastId });
+                                  } catch (err: any) {
+                                    toast.error(err.message || "Upload failed", { id: toastId });
+                                  }
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                        )}
+                        <input
+                          type="text"
+                          value={settings[key] || ""}
+                          onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
+                          className="zinp text-sm flex-1"
+                          placeholder="Or paste direct image URL here"
+                        />
+                      </div>
                     ) : (
                       <input
-                        type={type}
+                        type={type === "number" ? "number" : type === "password" ? "password" : type === "email" ? "email" : "text"}
                         value={settings[key] || ""}
                         onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
                         className="zinp text-sm"

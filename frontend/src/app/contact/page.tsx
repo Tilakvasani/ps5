@@ -67,9 +67,11 @@ export default function ContactPage() {
     setSending(false);
   };
 
-  const whatsappLink = s(settings, "contact_whatsapp")
-    ? `https://wa.me/${s(settings, "contact_whatsapp")}`
-    : null;
+  const rawWhatsApp = s(settings, "contact_whatsapp") || s(settings, "site_phone") || "916355466208";
+  const cleanWhatsApp = rawWhatsApp.replace(/[^0-9]/g, "");
+  const whatsappLink = `https://wa.me/${cleanWhatsApp}`;
+  const rawDisplay = s(settings, "contact_whatsapp") || s(settings, "site_phone") || "91 6355466208";
+  const displayWhatsApp = rawDisplay.startsWith("+") ? rawDisplay : `+${rawDisplay}`;
 
   return (
     <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--dk)" }}>
@@ -94,83 +96,46 @@ export default function ContactPage() {
 
       {/* ── Contact Cards ── */}
       <section className="py-16 px-6">
-        <div className="mx-auto max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mx-auto max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-6 justify-center">
 
           {/* WhatsApp */}
-          {whatsappLink && (
-            <motion.a {...fadeUp(0)} href={whatsappLink} target="_blank" rel="noopener noreferrer"
-              className="zcard flex flex-col items-center text-center gap-3 transition-all group cursor-pointer"
-              style={{ borderColor: "#1E2D4A" }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--or)"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "#1E2D4A"; }}
-            >
-              <div className="h-12 w-12 rounded-2xl flex items-center justify-center transition-all" style={{ background: "rgba(37,211,102,0.1)" }}>
-                <MessageCircle size={22} style={{ color: "#25D366" }} />
-              </div>
+          <motion.div {...fadeUp(0)}
+            className="zcard flex flex-col items-center text-center gap-4 transition-all group"
+            style={{ borderColor: "#1E2D4A" }}
+          >
+            <div className="h-12 w-12 rounded-2xl flex items-center justify-center transition-all" style={{ background: "rgba(37,211,102,0.1)" }}>
+              <svg viewBox="0 0 24 24" className="h-6 w-6 opacity-80">
+                <path fill="#25D366" d="M12.012 0C5.398 0 .056 5.348.056 11.962c0 2.115.55 4.18 1.597 5.992L0 24l6.19-1.623a11.93 11.93 0 0 0 5.817 1.517c6.62 0 11.964-5.348 11.964-11.962C23.99 5.348 18.648 0 12.012 0z"/>
+                <path fill="#FFFFFF" d="M17.447 14.432c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.388.248-.669.248-1.238.173-1.388-.074-.149-.272-.248-.57-.397z"/>
+              </svg>
+            </div>
+            <div className="flex-1 flex flex-col justify-between items-center w-full">
               <div>
-                <p className="zlabel mb-1">WhatsApp</p>
-                <p className="font-bold text-sm" style={{ color: "#FFFFFF" }}>+{s(settings, "contact_whatsapp")}</p>
-                <p className="text-xs mt-1 font-semibold" style={{ color: "var(--or)" }}>Chat now →</p>
+                <p className="zlabel mb-1">WhatsApp Us</p>
+                <p className="font-bold text-base mb-3" style={{ color: "#FFFFFF" }}>{displayWhatsApp}</p>
               </div>
-            </motion.a>
-          )}
+              <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="zbtn-or w-full py-2.5 text-xs text-center font-bold rounded-lg block">
+                Chat Us
+              </a>
+            </div>
+          </motion.div>
 
           {/* Support Email */}
-          <motion.a {...fadeUp(0.05)} href={`mailto:${s(settings, "contact_support_email")}`}
-            className="zcard flex flex-col items-center text-center gap-3 transition-all group cursor-pointer"
+          <motion.div {...fadeUp(0.05)}
+            className="zcard flex flex-col items-center text-center gap-4 transition-all group"
             style={{ borderColor: "#1E2D4A" }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--or)"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "#1E2D4A"; }}
           >
             <div className="h-12 w-12 rounded-2xl flex items-center justify-center transition-all" style={{ background: "rgba(255,92,0,0.1)" }}>
               <Mail size={22} style={{ color: "var(--or)" }} />
             </div>
-            <div>
-              <p className="zlabel mb-1">Support Email</p>
-              <p className="font-bold text-sm break-all" style={{ color: "#FFFFFF" }}>{s(settings, "contact_support_email")}</p>
-            </div>
-          </motion.a>
-
-          {/* Info Email */}
-          <motion.a {...fadeUp(0.1)} href={`mailto:${s(settings, "contact_info_email")}`}
-            className="zcard flex flex-col items-center text-center gap-3 transition-all group cursor-pointer"
-            style={{ borderColor: "#1E2D4A" }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--or)"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "#1E2D4A"; }}
-          >
-            <div className="h-12 w-12 rounded-2xl flex items-center justify-center transition-all" style={{ background: "rgba(255,92,0,0.1)" }}>
-              <Mail size={22} style={{ color: "var(--or)" }} />
-            </div>
-            <div>
-              <p className="zlabel mb-1">Info Email</p>
-              <p className="font-bold text-sm break-all" style={{ color: "#FFFFFF" }}>{s(settings, "contact_info_email")}</p>
-            </div>
-          </motion.a>
-
-          {/* Social */}
-          <motion.div {...fadeUp(0.15)} className="zcard flex flex-col items-center text-center gap-3">
-            <div className="h-12 w-12 rounded-2xl flex items-center justify-center" style={{ background: "rgba(168,85,247,0.1)" }}>
-              <Instagram size={22} className="text-purple-500" />
-            </div>
-            <div>
-              <p className="zlabel mb-2">Follow Us</p>
-              <div className="flex items-center justify-center gap-3">
-                {s(settings, "contact_instagram") && (
-                  <a href={s(settings, "contact_instagram")} target="_blank" rel="noopener noreferrer"
-                    className="h-8 w-8 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity" style={{ background: "#0C1E3E", border: "1.5px solid #1E2D4A" }}>
-                    <Instagram size={14} className="text-white" />
-                  </a>
-                )}
-                {s(settings, "contact_facebook") && (
-                  <a href={s(settings, "contact_facebook")} target="_blank" rel="noopener noreferrer"
-                    className="h-8 w-8 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity" style={{ background: "#0C1E3E", border: "1.5px solid #1E2D4A" }}>
-                    <Facebook size={14} className="text-white" />
-                  </a>
-                )}
-                {!s(settings, "contact_instagram") && !s(settings, "contact_facebook") && (
-                  <p className="text-xs" style={{ color: "#8F9CAE" }}>Coming soon</p>
-                )}
+            <div className="flex-1 flex flex-col justify-between items-center w-full">
+              <div>
+                <p className="zlabel mb-1">Support Email</p>
+                <p className="font-bold text-base mb-3 break-all" style={{ color: "#FFFFFF" }}>{s(settings, "contact_support_email")}</p>
               </div>
+              <a href={`mailto:${s(settings, "contact_support_email")}`} className="zbtn-or w-full py-2.5 text-xs text-center font-bold rounded-lg block">
+                Send Email
+              </a>
             </div>
           </motion.div>
         </div>

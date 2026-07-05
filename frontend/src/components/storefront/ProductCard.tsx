@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ShoppingCart, Star } from "lucide-react";
 import { useStore } from "@/lib/store";
 import toast from "react-hot-toast";
+import { useSettings } from "@/lib/useSettings";
 
 interface Product {
   id: number;
@@ -21,8 +22,10 @@ interface Product {
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useStore();
+  const { cgstRate, sgstRate } = useSettings();
   const primaryImage = product.images?.find((i) => i.isPrimary)?.imageUrl || product.images?.[0]?.imageUrl;
   const discount = Number(product.discountPercent);
+  const finalPrice = Math.round(Number(product.sellingPrice) * (1 + cgstRate + sgstRate));
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -64,14 +67,7 @@ export default function ProductCard({ product }: { product: Product }) {
               💊
             </div>
           )}
-          {discount > 0 && (
-            <div
-              className="absolute top-2 left-2 zbadge zbadge-or"
-              style={{ fontSize: "9px" }}
-            >
-              -{discount}% OFF
-            </div>
-          )}
+          {/* Discount badge removed */}
         </div>
 
         {/* Info */}
@@ -112,15 +108,10 @@ export default function ProductCard({ product }: { product: Product }) {
 
           <div className="flex items-center justify-between">
             <div>
-              <span style={{ fontSize: "16px", fontWeight: 900, color: "#F8F8F8", letterSpacing: "-0.5px" }}>
-                ₹{Number(product.sellingPrice).toFixed(0)}
+              <span style={{ fontSize: "15px", fontWeight: 900, color: "#F8F8F8", letterSpacing: "-0.5px" }}>
+                Price ₹{finalPrice}
               </span>
-              {discount > 0 && (
-                <span style={{ marginLeft: "6px", fontSize: "11px", textDecoration: "line-through", color: "#8F9CAE" }}>
-                  ₹{Number(product.basePrice).toFixed(0)}
-                </span>
-              )}
-              <p style={{ fontSize: "9px", color: "#627d98", marginTop: "1px" }}>+ GST</p>
+              <p style={{ fontSize: "9px", color: "#8F9CAE", marginTop: "1px" }}>includes all taxes</p>
             </div>
             <button
               onClick={handleAddToCart}

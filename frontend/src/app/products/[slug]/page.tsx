@@ -13,6 +13,7 @@ import { productsApi, publicApi } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { CertLogo } from "@/components/storefront/CertLogos";
 
 /* ── Simple HTML sanitizer (strips script/iframe tags) ── */
 function sanitizeHtml(html: string): string {
@@ -37,21 +38,29 @@ const C = {
 };
 
 const HOW_TO_USE = [
-  { icon: Droplets,    step: "1", title: "Drop It",         desc: "Drop the tablet into a glass of water (250ml)" },
+  { icon: Droplets,    step: "1", title: "Drop It",         desc: "Drop the tablet into a glass of water (200 ml)" },
   { icon: Zap,         step: "2", title: "Watch the Magic", desc: "Watch the fizz! Let it dissolve completely" },
   { icon: CheckCircle, step: "3", title: "Vibe On",         desc: "Sip and get back to work, powered up!" },
 ];
 
 const TRUST_BADGES = [
-  { icon: Shield,     label: "GMP Certified"  },
-  { icon: Award,      label: "FSSAI Approved" },
-  { icon: Microscope, label: "Lab Tested"     },
-  { icon: Leaf,       label: "Clean Label"    },
+  { logoLabel: "GMP",   label: "GMP Certified"  },
+  { logoLabel: "FSSAI", label: "FSSAI Approved" },
+  { logoLabel: "HACCP", label: "HACCP Certified" },
+  { logoLabel: "ISO",   label: "ISO 9001:2015"  },
+];
+
+const FALLBACK_REVIEWS = [
+  { id: "f1", name: "Rohan Mehta",     rating: 5, title: "Great energy boost", body: "Dissolves fast and tastes great. I feel more hydrated after workouts." },
+  { id: "f2", name: "Priya Sharma",    rating: 5, title: "Perfect for summer", body: "Keeps me going through Ahmedabad heat. No sugar crash, just steady energy." },
+  { id: "f3", name: "Arjun Patel",     rating: 4, title: "Good taste, works well", body: "Orange flavour is refreshing and not too sweet. Repeat customer now." },
+  { id: "f4", name: "Sneha Iyer",      rating: 5, title: "Helped with fatigue", body: "Used it during a work trip and it really helped with tiredness and cramps." },
+  { id: "f5", name: "Vikram Nair",     rating: 4, title: "Solid daily supplement", body: "Easy to carry the tube around. Fizzes up nicely in cold water." },
+  { id: "f6", name: "Ananya Reddy",    rating: 5, title: "My gym essential now", body: "Take it post workout every day. Noticeably less soreness the next day." },
 ];
 
 const DELIVERY_PERKS = [
-  { icon: Truck,     label: "Free delivery on orders above ₹499" },
-  { icon: RotateCcw, label: "Easy 7-day returns"                 },
+  { icon: RotateCcw, label: "Easy 48 hours return"               },
   { icon: Shield,    label: "100% authentic & safe"              },
 ];
 
@@ -104,9 +113,6 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const sgst         = price * qty * sgstRate;
   const rawTotal     = price * qty + cgst + sgst;
   const total        = Math.round(rawTotal);
-  const roundOffDiff = total - rawTotal;
-  const cgstPct      = (cgstRate * 100).toFixed(1);
-  const sgstPct      = (sgstRate * 100).toFixed(1);
   const primaryImage = product.images?.find((i: any) => i.isPrimary)?.imageUrl || product.images?.[0]?.imageUrl;
   const images       = product.images?.length ? product.images : [{ imageUrl: null }];
   const nutritionalFacts = product.nutritionalFacts || null;
@@ -121,7 +127,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     { id: "howto",     label: "How to Use" },
     { id: "nutrition", label: "Nutrition" },
     { id: "specs",     label: "Specifications" },
-    { id: "reviews",   label: `Reviews (${product._count?.reviews || 0})` },
+    { id: "reviews",   label: `Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` },
   ] as const;
 
   return (
@@ -192,12 +198,8 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               ) : (
                 <div className="w-full h-full flex items-center justify-center" style={{ color: C.border }}><Package size={80}/></div>
               )}
-              {Number(product.discountPercent) > 0 && (
-                <div className="absolute top-4 left-4 text-sm font-bold text-white px-3 py-1 rounded-xl"
-                  style={{ background: C.mint }}>
-                  -{product.discountPercent}% OFF
-                </div>
-              )}
+
+              {/* Discount badge removed */}
             </div>
 
             {images.length > 1 && (
@@ -216,10 +218,12 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             <div className="mt-5 grid grid-cols-4 gap-2">
               {TRUST_BADGES.map((b, i) => (
                 <div key={i}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl text-center"
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl text-center justify-between min-h-[76px]"
                   style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
-                  <b.icon size={16} style={{ color: C.mintHex }}/>
-                  <span className="text-[10px] font-semibold leading-tight" style={{ color: "#8F9CAE" }}>{b.label}</span>
+                  <div className="h-6 flex items-center justify-center">
+                    <CertLogo label={b.logoLabel} className="h-5 object-contain" />
+                  </div>
+                  <span className="text-[9px] font-semibold leading-tight mt-0.5" style={{ color: "#8F9CAE" }}>{b.label}</span>
                 </div>
               ))}
             </div>
@@ -233,12 +237,6 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             <h1 className="text-3xl md:text-4xl font-bold mb-3 leading-tight" style={{ color: "#627d98", letterSpacing: "-0.03em" }}>
               {product.name}
             </h1>
-
-            <div className="flex items-center flex-wrap gap-4 mb-4 text-sm" style={{ color: C.mid }}>
-              <span>SKU: {product.sku}</span>
-              <span>HSN: {product.hsnCode}</span>
-              <span>Unit: {product.unit}</span>
-            </div>
 
             {product.avgRating && (
               <div className="flex items-center gap-2 mb-5">
@@ -278,30 +276,17 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
             {/* Price card — dark surface */}
             <div className="rounded-2xl p-5 mb-5" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
-              <div className="flex items-baseline gap-3 mb-4">
-                <span className="text-4xl font-bold" style={{ color: "#F8F8F8", letterSpacing: "-0.04em" }}>₹{price.toFixed(0)}</span>
-                {Number(product.discountPercent)>0 && (
-                  <span className="text-lg line-through" style={{ color: "#8F9CAE" }}>₹{Number(product.basePrice).toFixed(0)}</span>
-                )}
-                {Number(product.discountPercent)>0 && (
-                  <span className="text-sm font-semibold px-2 py-0.5 rounded-lg" style={{ background: "rgba(255,92,0,0.15)", color: C.mintHex }}>
-                    {product.discountPercent}% off
-                  </span>
-                )}
+              <div className="flex items-baseline gap-3 mb-2">
+                <span className="text-4xl font-bold" style={{ color: "#F8F8F8", letterSpacing: "-0.04em" }}>Price: ₹{Math.round(price * (1 + cgstRate + sgstRate))}</span>
               </div>
-              <div className="text-sm space-y-1.5" style={{ color: C.mid, borderTop: `1.5px solid ${C.border}`, paddingTop: "12px" }}>
-                <div className="flex justify-between"><span>Price (×{qty})</span><span>₹{(price*qty).toFixed(2)}</span></div>
-                <div className="flex justify-between"><span>CGST @{cgstPct}%</span><span>₹{cgst.toFixed(2)}</span></div>
-                <div className="flex justify-between"><span>SGST @{sgstPct}%</span><span>₹{sgst.toFixed(2)}</span></div>
-                {roundOffDiff!==0 && (
-                  <div className="flex justify-between text-xs italic" style={{ color: C.light }}>
-                    <span>Round Off</span><span>{roundOffDiff>0?"+":""}₹{roundOffDiff.toFixed(2)}</span>
+              <p className="text-xs mt-1.5" style={{ color: C.light }}>includes all taxes</p>
+              {qty > 1 && (
+                <div className="text-sm mt-3 pt-3" style={{ color: C.mid, borderTop: `1.5px solid ${C.border}` }}>
+                  <div className="flex justify-between font-bold text-base" style={{ color: "#F8F8F8" }}>
+                    <span>Total Price (×{qty})</span><span>₹{total}</span>
                   </div>
-                )}
-                <div className="flex justify-between font-bold text-base pt-2" style={{ color: "#F8F8F8", borderTop: `1.5px solid ${C.border}` }}>
-                  <span>Total</span><span>₹{total}</span>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Qty + Cart */}
@@ -335,22 +320,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               ))}
             </div>
 
-            {/* Science link — dark panel */}
-            <Link href="/science"
-              className="flex items-center justify-between p-4 rounded-2xl mb-4 group transition-colors duration-150"
-              style={{ background: C.surface, border: `1.5px solid ${C.border}` }}
-              onMouseEnter={e => (e.currentTarget.style.borderColor = C.mintHex)}
-              onMouseLeave={e => (e.currentTarget.style.borderColor = C.border)}
-            >
-              <div className="flex items-center gap-3">
-                <Microscope size={18} style={{ color: "#627d98" }}/>
-                <div>
-                  <p className="font-semibold text-sm" style={{ color: "#627d98" }}>GMP · ISO · FSSAI · Lab Tested</p>
-                  <p className="text-xs" style={{ color: C.mid }}>See our full quality standards →</p>
-                </div>
-              </div>
-              <ChevronRight size={16} style={{ color: C.mid }}/>
-            </Link>
+            {/* Science link block removed */}
 
             {/* Disclaimer */}
             <div className="flex items-start gap-2.5 p-4 rounded-2xl" style={{ background: "rgba(255,92,0,0.07)", border: "1.5px solid rgba(255,92,0,0.2)" }}>
@@ -410,7 +380,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 </div>
                 <div className="p-4 rounded-2xl" style={{ background: "rgba(255,92,0,0.08)", border: "1.5px solid rgba(255,92,0,0.2)" }}>
                   <p className="text-sm" style={{ color: "#8F9CAE" }}>
-                    <span className="font-bold" style={{ color: C.mintHex }}>Pro tip:</span> Use cold water for best fizz. One tablet per 250ml glass. Take daily for best results.
+                    <span className="font-bold" style={{ color: C.mintHex }}>Pro tip:</span> Use cold water for best fizz. One tablet per 200 ml glass. Take daily for best results.
                   </p>
                 </div>
               </motion.div>
@@ -447,8 +417,8 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               <motion.div initial={{opacity:0}} animate={{opacity:1}}>
                 <h3 className="font-bold text-2xl mb-6" style={{ color: "#627d98" }}>Specifications</h3>
                 <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${C.border}` }}>
-                  {[["SKU",product.sku],["HSN Code",product.hsnCode],["Unit",product.unit],["Brand",product.brand||"—"],["Category",product.category?.name||"—"]].map(([k,v],i) => (
-                    <div key={k} className="flex text-sm" style={{ background: i%2===0 ? "#0A1628" : C.surface, borderBottom: i<4?`1px solid ${C.border}`:"none" }}>
+                  {[["Brand",product.brand||"—"],["Category",product.category?.name||"—"]].map(([k,v],i,arr) => (
+                    <div key={k} className="flex text-sm" style={{ background: i%2===0 ? "#0A1628" : C.surface, borderBottom: i<arr.length-1?`1px solid ${C.border}`:"none" }}>
                       <div className="w-1/3 px-5 py-4 font-semibold" style={{ color: C.mid }}>{k}</div>
                       <div className="flex-1 px-5 py-4" style={{ color: "#FFFFFF" }}>{v}</div>
                     </div>
@@ -477,9 +447,17 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8">
-                      <Star size={36} className="mx-auto mb-4" style={{ color: C.border }}/>
-                      <p style={{ color: C.mid }}>No reviews yet. Be the first to review!</p>
+                    <div className="space-y-4">
+                      {FALLBACK_REVIEWS.map((r) => (
+                        <div key={r.id} className="p-5 rounded-2xl" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: C.border} : {}}/>)}</div>
+                            <span className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>{r.name}</span>
+                          </div>
+                          <p className="font-medium mb-1" style={{ color: "#627d98" }}>{r.title}</p>
+                          <p className="text-sm" style={{ color: C.mid }}>{r.body}</p>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

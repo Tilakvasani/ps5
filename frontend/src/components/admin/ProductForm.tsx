@@ -173,6 +173,20 @@ export default function ProductForm({ productId }: Props) {
               <div key={img.id} className="relative h-20 w-20 rounded-xl overflow-hidden" style={{ border: '1.5px solid #1E2D4A' }}>
                 <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
                 {img.isPrimary && <span className="absolute bottom-0 left-0 right-0 text-[9px] text-white text-center py-0.5" style={{ background: 'rgba(255,92,0,0.85)' }}>Primary</span>}
+                <button type="button" onClick={async () => {
+                  if (confirm("Are you sure you want to delete this image?")) {
+                    try {
+                      await adminApi.deleteProductImage(img.id);
+                      setExistingImages(prev => prev.filter(x => x.id !== img.id));
+                      toast.success("Image deleted!");
+                    } catch (err: any) {
+                      toast.error(err.message || "Failed to delete image");
+                    }
+                  }
+                }}
+                  className="absolute top-1 right-1 h-5 w-5 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors" style={{ background: '#0C1E3E', color: '#8F9CAE' }}>
+                  <X size={10} />
+                </button>
               </div>
             ))}
             {images.map((img, i) => (

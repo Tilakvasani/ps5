@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { CertLogo } from "@/components/storefront/CertLogos";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -27,6 +28,13 @@ export default function Footer() {
   const stateCode = s.site_state_code  || "24 (Gujarat)";
   const fssai     = s.site_fssai       || "";
   const whatsapp  = s.contact_whatsapp || "";
+
+  const certEntries = [
+    { key: "cert_fssai_logo", label: "FSSAI" },
+    { key: "cert_iso_logo",   label: "ISO" },
+    { key: "cert_gmp_logo",   label: "GMP" },
+    { key: "cert_haccp_logo", label: "HACCP" },
+  ];
 
   const socials = [
     { href: s.social_instagram, icon: <InstagramIcon />, label: "Instagram" },
@@ -70,7 +78,7 @@ export default function Footer() {
                 marginBottom: "10px",
               }}
             >
-              {name}<span style={{ color: "var(--or)" }}>•</span>
+              Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "#8F9CAE", marginLeft: "1px", verticalAlign: "super" }}>TM</sup>
             </div>
             <p style={{ color: "#8f9cae", fontSize: "12px", lineHeight: 1.7, marginBottom: "14px" }}>
               Performance-Driven Nutrition — Science-backed, insanely delicious, and tailored for your 24/7 lifestyle.
@@ -113,7 +121,7 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <span style={colHeadStyle}>Quick Links</span>
-            {[["Home","/"],["Shop / Products","/products"],["Science / Quality","/science"],["About Us","/about"],["FAQs","/faqs"],["Contact Us","/contact"]].map(([l, h]) => (
+            {[["Home","/"],["Shop / Products","/products"],["Science / Quality","/science"],["Certifications","/certifications"],["About Us","/about"],["FAQs","/faqs"],["Contact Us","/contact"]].map(([l, h]) => (
               <Link
                 key={l}
                 href={h}
@@ -179,10 +187,21 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Certification Logos */}
+        <div className="flex flex-wrap justify-center items-center gap-6 pb-6" style={{ borderBottom: "1px solid #1E2D4A", marginBottom: "20px" }}>
+          {certEntries.map(({ key, label }) => {
+            const val = s[key];
+            return val ? (
+              <img key={key} src={val} alt={label} className="h-10 object-contain opacity-60 hover:opacity-100 transition-opacity" />
+            ) : (
+              <CertLogo key={key} label={label} className="h-10 opacity-60 hover:opacity-100 transition-opacity" />
+            );
+          })}
+        </div>
+
         {/* Bottom bar */}
         <div
           className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4"
-          style={{ borderTop: "1px solid #1E2D4A" }}
         >
           <p style={{ fontSize: "11px", color: "#627d98" }}>
             © {new Date().getFullYear()} {name}•. All rights reserved.
