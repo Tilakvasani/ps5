@@ -60,10 +60,10 @@ export default function WhatsAppButton() {
           boxShadow: "0 4px 16px rgba(37,211,102,0.3)",
           transition: "box-shadow 0.2s",
         }}
-        onMouseEnterCapture={(e: React.MouseEvent<HTMLAnchorElement>) => {
+        onMouseOverCapture={(e: React.MouseEvent<HTMLAnchorElement>) => {
           (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(255,92,0,0.35), 0 4px 16px rgba(37,211,102,0.2)";
         }}
-        onMouseLeaveCapture={(e: React.MouseEvent<HTMLAnchorElement>) => {
+        onMouseOutCapture={(e: React.MouseEvent<HTMLAnchorElement>) => {
           (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(37,211,102,0.3)";
         }}
         aria-label="Chat on WhatsApp"
