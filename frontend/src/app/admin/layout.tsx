@@ -1,61 +1,163 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, ShoppingCart, Users, Ticket, Star, Settings, Bell, Search } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAdminLogout } from "@/lib/useAuth";
+import {
+  LayoutDashboard, Package, Tag, Boxes, ShoppingBag, FileText,
+  Users, Ticket, Star, Settings, Bell, LogOut, Menu, X, ChevronRight
+} from "lucide-react";
 
 const NAV = [
-  { label: "DASHBOARD", href: "/admin",          icon: LayoutDashboard },
-  { label: "PRODUCTS",  href: "/admin/products", icon: Package },
-  { label: "ORDERS",    href: "/admin/orders",   icon: ShoppingCart },
-  { label: "USERS",     href: "/admin/users",    icon: Users },
-  { label: "COUPONS",   href: "/admin/coupons",  icon: Ticket },
-  { label: "REVIEWS",   href: "/admin/reviews",  icon: Star },
-  { label: "SETTINGS",  href: "/admin/settings", icon: Settings },
+  { label: "Dashboard",    href: "/admin",                icon: LayoutDashboard },
+  { label: "Products",     href: "/admin/products",       icon: Package },
+  { label: "Categories",   href: "/admin/categories",     icon: Tag },
+  { label: "Inventory",    href: "/admin/inventory",      icon: Boxes },
+  { label: "Orders",       href: "/admin/orders",         icon: ShoppingBag },
+  { label: "Invoices",     href: "/admin/invoices",       icon: FileText },
+  { label: "Users",        href: "/admin/users",          icon: Users },
+  { label: "Coupons",      href: "/admin/coupons",        icon: Ticket },
+  { label: "Reviews",      href: "/admin/reviews",        icon: Star },
+  { label: "Notifications",href: "/admin/notifications",  icon: Bell },
+  { label: "Settings",     href: "/admin/settings",       icon: Settings },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const path = usePathname();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [adminName, setAdminName] = useState("Admin");
+
+  useEffect(() => {
+    const raw = localStorage.getItem("zupwell-admin");
+    if (!raw && !pathname.includes("/admin/login")) {
+      router.push("/admin/login");
+    } else if (raw) {
+      const data = JSON.parse(raw);
+      setAdminName(data?.name || "Admin");
+    }
+  }, [pathname, router]);
+
+  if (pathname === "/admin/login") return <>{children}</>;
+
+  const handleLogout = useAdminLogout();
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", minHeight: "100vh", background: "var(--dk)" }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--dk)" }}>
+      {/* Mobile overlay */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 lg:hidden"
+            style={{ background: "rgba(5,17,36,0.7)" }}
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
-      <div style={{ background: "var(--dk)", padding: "20px 14px", display: "flex", flexDirection: "column" }}>
-        <Link href="/" style={{ fontSize: "18px", fontWeight: 900, letterSpacing: "-1px", color: "var(--wh)", textDecoration: "none", marginBottom: "24px", display: "block" }}>
-          zupwell<span style={{ color: "var(--or)" }}>•</span>
-          <div style={{ fontSize: "9px", fontWeight: 700, color: "#627D98", letterSpacing: "1px", marginTop: "2px" }}>ADMIN PANEL</div>
-        </Link>
-        <nav style={{ display: "flex", flexDirection: "column", gap: "2px", flex: 1 }}>
-          {NAV.map(({ label, href, icon: Icon }) => {
-            const active = path === href || (href !== "/admin" && path.startsWith(href));
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-60 flex-shrink-0 flex flex-col transition-transform duration-300
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto`}
+        style={{ background: "#0C1E3E", borderRight: "1.5px solid #1E2D4A" }}
+      >
+        {/* Logo */}
+        <div className="flex items-center gap-2 px-5 py-4" style={{ borderBottom: "1.5px solid #1E2D4A" }}>
+          <span style={{ fontSize: "18px", fontWeight: 900, letterSpacing: "-1.5px", color: "#FFFFFF" }}>
+            zupwell<span style={{ color: "var(--or)" }}>•</span>
+          </span>
+          <span
+            className="ml-auto text-xs rounded px-1.5 py-0.5"
+            style={{ color: "#8F9CAE", border: "1px solid #1E2D4A", fontSize: "9px", fontWeight: 700, letterSpacing: "0.5px" }}
+          >
+            ADMIN
+          </span>
+          <button className="lg:hidden ml-1" style={{ color: "#8F9CAE" }} onClick={() => setSidebarOpen(false)}>
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+          {NAV.map((item) => {
+            const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
             return (
-              <Link key={label} href={href} className={`zslink${active ? " active" : ""}`}>
-                <Icon size={14} /> {label}
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setSidebarOpen(false)}
+                className={`zslink ${active ? "active" : ""}`}
+                style={active ? { background: "rgba(255,92,0,0.12)", color: "var(--or)" } : {}}
+              >
+                <item.icon size={14} style={{ color: active ? "var(--or)" : "#8F9CAE" }} />
+                {item.label}
+                {active && <ChevronRight size={10} className="ml-auto" style={{ color: "var(--or)" }} />}
               </Link>
             );
           })}
         </nav>
-        <div style={{ borderTop: "1px solid var(--bd-soft)", paddingTop: "14px" }}>
-          <Link href="/" style={{ fontSize: "10px", fontWeight: 700, color: "#627D98", textDecoration: "none", letterSpacing: "0.5px" }}>← BACK TO STORE</Link>
-        </div>
-      </div>
 
-      {/* Main */}
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        {/* Top Bar */}
-        <div style={{ background: "var(--dk-card)", borderBottom: "1.5px solid var(--bd-soft)", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 10 }}>
-          <div style={{ position: "relative" }}>
-            <Search size={14} style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "#8F9CAE" }} />
-            <input className="zinp" placeholder="Search..." style={{ paddingLeft: "32px", width: "200px", fontSize: "11px", padding: "8px 10px 8px 30px" }} />
-          </div>
-          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-            <Bell size={16} color="#8F9CAE" />
-            <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "var(--or)", color: "#FFF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 900, border: "1.5px solid var(--bd-soft)" }}>
-              AD
+        {/* Admin user */}
+        <div style={{ borderTop: "1.5px solid #1E2D4A", padding: "12px" }}>
+          <div className="flex items-center gap-3 mb-3">
+            <div
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-sm font-black text-white shrink-0"
+              style={{ background: "rgba(255,92,0,0.2)", color: "var(--or)" }}
+            >
+              {adminName[0]?.toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-black truncate" style={{ color: "#FFFFFF", letterSpacing: "-0.02em" }}>{adminName}</p>
+              <p style={{ fontSize: "10px", color: "#627d98" }}>Administrator</p>
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 rounded-lg px-3 py-2 transition-all"
+            style={{ color: "#FF5C00", fontSize: "11px", fontWeight: 700 }}
+            onMouseEnter={e => (e.currentTarget.style.background = "#1E2D4A")}
+            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+          >
+            <LogOut size={13} /> Sign Out
+          </button>
         </div>
-        <div style={{ padding: "24px", flex: 1 }}>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Topbar */}
+        <header
+          className="flex items-center gap-4 px-6 py-3 flex-shrink-0"
+          style={{ background: "#0C1E3E", borderBottom: "1.5px solid #1E2D4A" }}
+        >
+          <button className="lg:hidden" style={{ color: "#8F9CAE" }} onClick={() => setSidebarOpen(true)}>
+            <Menu size={20} />
+          </button>
+          <div className="flex-1" />
+          <Link
+            href="/"
+            target="_blank"
+            className="transition-colors rounded-lg px-3 py-1.5"
+            style={{ fontSize: "11px", fontWeight: 700, color: "#8F9CAE", border: "1px solid #1E2D4A" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#FFFFFF")}
+            onMouseLeave={e => (e.currentTarget.style.color = "#8F9CAE")}
+          >
+            View Store ↗
+          </Link>
+          <Link href="/admin/notifications">
+            <div className="relative p-2 cursor-pointer" style={{ color: "#8F9CAE" }}>
+              <Bell size={17} />
+              <span className="absolute top-1 right-1 h-2 w-2 rounded-full" style={{ background: "var(--or)" }} />
+            </div>
+          </Link>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto p-6" style={{ background: "var(--dk)" }}>
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

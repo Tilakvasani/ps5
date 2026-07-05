@@ -5,58 +5,66 @@ import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export default function AdminNotificationsPage() {
-  const [notifs, setNotifs] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => { setLoading(true); try { setNotifs(await adminApi.getNotifications()); } catch {} setLoading(false); };
-  useEffect(() => { load(); }, []);
+  const fetch = async () => { setLoading(true); try { setNotifications(await adminApi.getNotifications()); } catch {} setLoading(false); };
+  useEffect(() => { fetch(); }, []);
 
   const markRead = async (id: number) => {
-    try { await adminApi.markRead(id); setNotifs(n => n.map(x => x.id===id ? { ...x, isRead:true } : x)); } catch {}
-  };
-  const markAll = async () => {
-    try { await adminApi.markAllRead(); setNotifs(n => n.map(x => ({ ...x, isRead:true }))); toast.success("All marked as read!"); } catch {}
+    try { await adminApi.markRead(id); setNotifications(ns => ns.map(n => n.id === id ? { ...n, isRead: true } : n)); } catch {}
   };
 
-  const unread = notifs.filter(n => !n.isRead).length;
+  const markAll = async () => {
+    try { await adminApi.markAllRead(); setNotifications(ns => ns.map(n => ({ ...n, isRead: true }))); toast.success("All marked as read"); } catch {}
+  };
+
+  const unread = notifications.filter(n => !n.isRead).length;
+
+  const ICON: Record<string, string> = {
+    new_order: "🛍️", low_stock: "⚠️", new_user: "👤", payment: "💳", review: "⭐",
+  };
 
   return (
     <div>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"20px" }}>
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 style={{ fontSize:"24px", fontWeight:900, letterSpacing:"-1px" }}>NOTIFICATIONS</h1>
-          {unread > 0 && <div style={{ fontSize:"11px", color:"#FF4500", fontWeight:700, marginTop:"2px" }}>{unread} unread</div>}
+          <h1 className="text-3xl font-black" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>Notifications</h1>
+          {unread > 0 && <p className="text-sm mt-1" style={{ color: "#8F9CAE" }}>{unread} unread</p>}
         </div>
         {unread > 0 && (
-          <button onClick={markAll} className="zbtn-out" style={{ fontSize:"11px", padding:"8px 14px" }}>
-            <CheckCheck size={13} /> MARK ALL READ
-          </button>
+          <button onClick={markAll} className="zbtn-out flex items-center gap-2 text-sm py-2"><CheckCheck size={14} /> Mark all read</button>
         )}
       </div>
 
-      {loading ? (
-        <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
-          {[...Array(5)].map((_,i) => <div key={i} style={{ height:"64px", background:"#F0F0F0", borderRadius:"10px" }} />)}
-        </div>
-      ) : notifs.length === 0 ? (
-        <div style={{ textAlign:"center", padding:"60px" }}>
-          <Bell size={40} color="#E0E0E0" style={{ margin:"0 auto 14px" }} />
-          <div style={{ fontSize:"14px", color:"#888", fontWeight:600 }}>You're all caught up!</div>
-        </div>
-      ) : (
-        <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
-          {notifs.map(n => (
-            <div key={n.id} onClick={() => !n.isRead && markRead(n.id)}
-              className="zcard" style={{ display:"flex", gap:"12px", alignItems:"flex-start", cursor: n.isRead ? "default" : "pointer", background: n.isRead ? "#FAFAFA" : "#FFF", borderLeft: n.isRead ? "1.5px solid #E0E0E0" : "3px solid #FF4500" }}>
-              <div style={{ width:"8px", height:"8px", borderRadius:"50%", background: n.isRead ? "transparent" : "#FF4500", flexShrink:0, marginTop:"5px" }} />
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:"12px", fontWeight: n.isRead ? 600 : 800, color: n.isRead ? "#666" : "#0A0A0A" }}>{n.message || n.title}</div>
-                <div style={{ fontSize:"10px", color:"#888", fontWeight:600, marginTop:"3px" }}>{new Date(n.createdAt).toLocaleString("en-IN")}</div>
-              </div>
+      <div className="space-y-2">
+        {loading ? Array.from({ length: 6 }).map((_, i) => <div key={i} className="zcard h-16 animate-pulse" style={{ background: "#0C1E3E", borderColor: "#1E2D4A" }} />) :
+          notifications.length === 0 ? (
+            <div className="zcard text-center py-16" style={{ color: "#8F9CAE" }}>
+              <Bell size={40} className="mx-auto mb-3 opacity-20" />
+              <p>No notifications</p>
             </div>
-          ))}
-        </div>
-      )}
+          ) : notifications.map((n: any) => (
+            <div key={n.id} onClick={() => !n.isRead && markRead(n.id)}
+              className="zcard flex items-start gap-4 cursor-pointer transition-all"
+              style={{
+                background: !n.isRead ? "rgba(255, 92, 0, 0.08)" : "#0C1E3E",
+                borderColor: !n.isRead ? "var(--or)" : "#1E2D4A",
+                opacity: n.isRead ? 0.65 : 1,
+              }}
+            >
+              <div className="text-2xl flex-shrink-0">{ICON[n.type] || "🔔"}</div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>{n.title}</p>
+                <p className="text-sm mt-0.5" style={{ color: "#8F9CAE" }}>{n.message}</p>
+                <p className="text-xs mt-1" style={{ color: "#627d98" }}>{new Date(n.createdAt).toLocaleString("en-IN")}</p>
+              </div>
+              {!n.isRead && <div className="h-2 w-2 rounded-full flex-shrink-0 mt-1.5" style={{ background: "var(--or)" }} />}
+            </div>
+          ))
+        }
+      </div>
     </div>
   );
 }
+

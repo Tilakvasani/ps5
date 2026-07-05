@@ -1,25 +1,33 @@
 import Link from "next/link";
-import Navbar from "@/components/storefront/Navbar";
-import Footer from "@/components/storefront/Footer";
 
 export default function NotFound() {
   return (
-    <>
-      <Navbar />
-      <div style={{ minHeight:"70vh", display:"flex", alignItems:"center", justifyContent:"center", background:"var(--dk)", padding:"40px 24px" }}>
-        <div style={{ textAlign:"center", maxWidth:"480px" }}>
-          <div style={{ fontSize:"80px", fontWeight:900, letterSpacing:"-4px", color:"var(--wh)", lineHeight:1, marginBottom:"4px" }}>404</div>
-          <div style={{ fontSize:"14px", fontWeight:900, color:"var(--or)", letterSpacing:"2px", marginBottom:"16px" }}>PAGE NOT FOUND</div>
-          <p style={{ fontSize:"13px", color:"#8F9CAE", lineHeight:1.7, marginBottom:"24px", fontWeight:500 }}>
-            Looks like you took a wrong turn. This page doesn't exist — but your hydration journey doesn't have to end here.
-          </p>
-          <div style={{ display:"flex", gap:"10px", justifyContent:"center" }}>
-            <Link href="/" className="zbtn-or" style={{ padding:"13px 24px", fontSize:"12px", borderRadius: "30px" }}>GO HOME</Link>
-            <Link href="/products" className="zbtn-out" style={{ padding:"12px 22px", fontSize:"12px", borderRadius: "30px" }}>SHOP NOW</Link>
-          </div>
-        </div>
+    <main className="min-h-screen flex items-center justify-center px-6" style={{ background: "var(--dk)" }}>
+      <div className="text-center">
+        <h1
+          className="text-[10rem] font-black leading-none"
+          style={{
+            color: "var(--or)",
+            letterSpacing: "-0.05em",
+          }}
+        >
+          404
+        </h1>
+        <h2 className="text-2xl font-black mt-2" style={{ color: "#627d98" }}>
+          Page not found
+        </h2>
+        <p className="mt-2 max-w-sm mx-auto" style={{ color: "#8F9CAE" }}>
+          The page you&apos;re looking for doesn&apos;t exist or has been moved.
+        </p>
+        <Link
+          href="/"
+          className="zbtn-or mt-8 inline-block"
+          style={{ padding: "12px 32px" }}
+        >
+          Go Home
+        </Link>
       </div>
-      <Footer />
-    </>
+    </main>
   );
 }
+

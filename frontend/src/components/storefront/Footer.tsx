@@ -5,108 +5,192 @@ import { useEffect, useState } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+const InstagramIcon = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>);
+const FacebookIcon = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>);
+const YoutubeIcon  = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>);
+
 export default function Footer() {
   const [s, setS] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    fetch(`${API_URL}/api/settings`).then(r => r.json()).then(setS).catch(() => {});
+    fetch(`${API_URL}/api/settings`)
+      .then(r => r.json())
+      .then(data => setS(data))
+      .catch(() => {});
   }, []);
 
-  const name    = s.site_name    || "Zupwell";
-  const email   = s.site_email   || "hello@zupwell.com";
-  const phone   = s.site_phone   || "+91 98765 43210";
-  const address = s.site_address || "Ahmedabad, Gujarat, India";
-  const gstin   = s.site_gstin   || "";
-  const fssai   = s.site_fssai   || "";
-  const wa      = s.contact_whatsapp || "";
+  const name      = s.site_name        || "Zupwell";
+  const email     = s.site_email       || "info@zupwell.com";
+  const phone     = s.site_phone       || "+91 6355466208";
+  const address   = s.site_address     || "Ahmedabad, Gujarat";
+  const gstin     = s.site_gstin       || "";
+  const stateCode = s.site_state_code  || "24 (Gujarat)";
+  const fssai     = s.site_fssai       || "";
+  const whatsapp  = s.contact_whatsapp || "";
 
-  const navLinks = [["HOME","/"],["SHOP","/products"],["SCIENCE","/science"],["ABOUT","/about"],["FAQS","/faqs"],["CONTACT","/contact"]];
-  const legalLinks = [["PRIVACY POLICY","/privacy-policy"],["TERMS & CONDITIONS","/terms-of-service"],["REFUND POLICY","/refund-policy"],["SHIPPING POLICY","/shipping-policy"]];
+  const socials = [
+    { href: s.social_instagram, icon: <InstagramIcon />, label: "Instagram" },
+    { href: s.social_facebook,  icon: <FacebookIcon />,  label: "Facebook" },
+    { href: s.social_youtube,   icon: <YoutubeIcon />,   label: "YouTube" },
+  ].filter(s => s.href);
 
-  const lnkStyle = { fontSize: "11px", fontWeight: 700, color: "#8f9cae", letterSpacing: "0.3px", textDecoration: "none", display: "block", padding: "4px 0", transition: "color 0.12s" };
+  const colHeadStyle = {
+    fontSize: "10px",
+    fontWeight: 900,
+    letterSpacing: "1.2px",
+    color: "#627d98",
+    textTransform: "uppercase" as const,
+    marginBottom: "16px",
+    display: "block",
+  };
+
+  const linkStyle: React.CSSProperties = {
+    color: "#8f9cae",
+    fontSize: "11px",
+    fontWeight: 700,
+    transition: "color 0.15s",
+    display: "block",
+    marginBottom: "8px",
+    textDecoration: "none",
+  };
 
   return (
-    <footer style={{ background: "var(--dk)", borderTop: "1.5px solid #1E2D4A", marginTop: "auto" }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "40px 24px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr", gap: "32px", marginBottom: "32px" }}>
+    <footer style={{ background: "var(--dk)", borderTop: "1.5px solid #1E2D4A" }}>
+      <div className="mx-auto max-w-7xl px-6 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
 
           {/* Brand */}
-          <div>
-            <div style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-1.5px", color: "#FFF", marginBottom: "10px", display: "flex", alignItems: "center" }}>
-              zupwell<span style={{ color: "var(--or)" }}>•</span>
+          <div className="md:col-span-1">
+            <div
+              style={{
+                fontSize: "20px",
+                fontWeight: 900,
+                letterSpacing: "-1.5px",
+                color: "#FFFFFF",
+                marginBottom: "10px",
+              }}
+            >
+              {name}<span style={{ color: "var(--or)" }}>•</span>
             </div>
-            <p style={{ fontSize: "12px", color: "#8F9CAE", lineHeight: 1.7, marginBottom: "12px", fontWeight: 500 }}>
-              Honest nutrition for people who take their health seriously. Clean ingredients, transparent labels, real results.
+            <p style={{ color: "#8f9cae", fontSize: "12px", lineHeight: 1.7, marginBottom: "14px" }}>
+              Performance-Driven Nutrition — Science-backed, insanely delicious, and tailored for your 24/7 lifestyle.
             </p>
-            {(gstin || fssai) && (
-              <div style={{ fontSize: "10px", color: "#8f9cae", fontWeight: 700, lineHeight: 1.8, marginBottom: "14px" }}>
-                {gstin && <div>GSTIN: {gstin}</div>}
-                {fssai && <div>FSSAI: {fssai}</div>}
+            <div style={{ fontSize: "10px", lineHeight: 1.8, color: "#627d98", marginBottom: "14px" }}>
+              {gstin  && <p>GSTIN: {gstin}</p>}
+              {fssai  && <p>FSSAI: {fssai}</p>}
+              <p>State Code: {stateCode}</p>
+            </div>
+            {socials.length > 0 && (
+              <div className="flex items-center gap-2">
+                {socials.map(({ href, icon, label }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="h-8 w-8 rounded-lg flex items-center justify-center transition-all"
+                    style={{
+                      background: "#0C1E3E",
+                      border: "1.5px solid #1E2D4A",
+                      color: "#8f9cae",
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = "var(--or)";
+                      e.currentTarget.style.color = "var(--or)";
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = "#1E2D4A";
+                      e.currentTarget.style.color = "#8f9cae";
+                    }}
+                  >
+                    {icon}
+                  </a>
+                ))}
               </div>
             )}
-            <div style={{ display: "flex", gap: "8px" }}>
-              {[["IG","https://instagram.com"],["TT","https://tiktok.com"],["YT","https://youtube.com"]].map(([l,h]) => (
-                <a key={l} href={s[`social_${l.toLowerCase()}`] || h} target="_blank" rel="noopener noreferrer"
-                  style={{ width: "32px", height: "32px", borderRadius: "6px", background: "var(--dk-card)", border: "1px solid var(--bd-soft)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", fontWeight: 900, color: "#8F9CAE", textDecoration: "none" }}>
-                  {l}
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <div style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.5px", color: "#627D98", marginBottom: "14px" }}>QUICK LINKS</div>
-            {navLinks.map(([l, h]) => (
-              <Link key={l} href={h} style={lnkStyle}
+            <span style={colHeadStyle}>Quick Links</span>
+            {[["Home","/"],["Shop / Products","/products"],["Science / Quality","/science"],["About Us","/about"],["FAQs","/faqs"],["Contact Us","/contact"]].map(([l, h]) => (
+              <Link
+                key={l}
+                href={h}
+                style={linkStyle}
                 onMouseEnter={e => (e.currentTarget.style.color = "var(--or)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#8f9cae")}>{l}</Link>
+                onMouseLeave={e => (e.currentTarget.style.color = "#8f9cae")}
+              >
+                {l}
+              </Link>
             ))}
           </div>
 
           {/* Legal */}
           <div>
-            <div style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.5px", color: "#627D98", marginBottom: "14px" }}>LEGAL</div>
-            {legalLinks.map(([l, h]) => (
-              <Link key={l} href={h} style={lnkStyle}
+            <span style={colHeadStyle}>Legal</span>
+            {[
+              ["Privacy Policy","/privacy-policy"],
+              ["Terms & Conditions","/terms-of-service"],
+              ["Refund & Cancellation","/refund-policy"],
+              ["Shipping Policy","/shipping-policy"],
+              ["Legal Disclaimer","/legal-disclaimer"],
+            ].map(([l, h]) => (
+              <Link
+                key={l}
+                href={h}
+                style={linkStyle}
                 onMouseEnter={e => (e.currentTarget.style.color = "var(--or)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#8f9cae")}>{l}</Link>
+                onMouseLeave={e => (e.currentTarget.style.color = "#8f9cae")}
+              >
+                {l}
+              </Link>
             ))}
           </div>
 
           {/* Contact */}
           <div>
-            <div style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.5px", color: "#627D98", marginBottom: "14px" }}>CONTACT</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                <MapPin size={13} color="var(--or)" style={{ flexShrink: 0, marginTop: 2 }} />
-                <span style={{ fontSize: "11px", color: "#8F9CAE", fontWeight: 500 }}>{address}</span>
+            <span style={colHeadStyle}>Contact Us</span>
+            <div style={{ fontSize: "11px", color: "#8f9cae", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div className="flex items-start gap-2">
+                <MapPin size={13} style={{ color: "var(--or)", marginTop: 2, flexShrink: 0 }} />
+                <span>{address}</span>
               </div>
-              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                <Phone size={13} color="var(--or)" />
-                <span style={{ fontSize: "11px", color: "#8F9CAE", fontWeight: 500 }}>{phone}</span>
+              <div className="flex items-center gap-2">
+                <Phone size={13} style={{ color: "var(--or)", flexShrink: 0 }} />
+                <span>{phone}</span>
               </div>
-              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                <Mail size={13} color="var(--or)" />
-                <span style={{ fontSize: "11px", color: "#8F9CAE", fontWeight: 500 }}>{email}</span>
+              <div className="flex items-center gap-2">
+                <Mail size={13} style={{ color: "var(--or)", flexShrink: 0 }} />
+                <span>{email}</span>
               </div>
-              {wa && (
-                <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer"
-                  style={{ display: "flex", gap: "8px", alignItems: "center", fontSize: "11px", fontWeight: 700, color: "var(--or)", textDecoration: "none" }}>
-                  <MessageCircle size={13} /> WHATSAPP US
+              {whatsapp && (
+                <a
+                  href={`https://wa.me/${whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 font-bold transition-colors"
+                  style={{ color: "var(--or)" }}
+                >
+                  <MessageCircle size={13} /> WhatsApp Us
                 </a>
               )}
             </div>
           </div>
         </div>
 
-        <div style={{ borderTop: "1px solid var(--bd-soft)", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: "#627D98" }}>
-            © {new Date().getFullYear()} {name.toUpperCase()}. ALL RIGHTS RESERVED.
-          </div>
-          <div style={{ fontSize: "10px", color: "#627D98", fontWeight: 600 }}>
-            MADE IN INDIA · FOR PEOPLE WHO ACTUALLY TRY.
-          </div>
+        {/* Bottom bar */}
+        <div
+          className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4"
+          style={{ borderTop: "1px solid #1E2D4A" }}
+        >
+          <p style={{ fontSize: "11px", color: "#627d98" }}>
+            © {new Date().getFullYear()} {name}•. All rights reserved.
+            {fssai && <span className="ml-2">· FSSAI: {fssai}</span>}
+          </p>
+          <p style={{ fontSize: "10px", color: "#627d98" }}>
+            This product is a health supplement and not for medicinal use.
+          </p>
         </div>
       </div>
     </footer>

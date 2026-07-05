@@ -6,14 +6,14 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          orange:   "#FF4500",
-          lime:     "#C8FF00",
-          black:    "#0A0A0A",
-          white:    "#FFFFFF",
-          cream:    "#FFF5F0",
-          gray:     "#F8F8F8",
-          muted:    "#888888",
-          border:   "#0A0A0A",
+          orange: "#FF4500",
+          lime:   "#C8FF00",
+          black:  "#0A0A0A",
+          white:  "#FFFFFF",
+          cream:  "#FFF5F0",
+          gray:   "#F8F8F8",
+          muted:  "#888888",
+          border: "#0A0A0A",
         },
       },
       fontFamily: {

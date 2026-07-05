@@ -1,87 +1,172 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import Navbar from "@/components/storefront/Navbar";
-import Footer from "@/components/storefront/Footer";
-import { authApi } from "@/lib/api";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { authApi, adminApi } from "@/lib/api";
+import { GoogleIcon, FacebookIcon } from "@/components/ui";
 import { useStore } from "@/lib/store";
+import { setAuthCookie } from "@/lib/auth-cookie";
 import toast from "react-hot-toast";
 
+
+
 export default function LoginPage() {
-  const router = useRouter();
-  const { setUser } = useStore();
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--dk)' }}><div className="h-8 w-8 rounded-full animate-spin" style={{ border: '4px solid rgba(255,92,0,0.2)', borderTopColor: 'var(--or)' }} /></div>}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { setUser, setToken } = useStore();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get("next") || "/";
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // 1. Try admin login first (silently)
+    try {
+      const adminData = await adminApi.login(email, password);
+      localStorage.setItem("zupwell-admin", JSON.stringify({ name: adminData.admin.name, token: adminData.accessToken }));
+      toast.success(`Welcome, ${adminData.admin.name}!`);
+      setLoading(false);
+      router.push("/admin");
+      return;
+    } catch {
+      // Not admin — continue
+    }
+
+    // 2. Try regular user login
     try {
       const data = await authApi.login(email, password);
       setUser(data.user);
-      toast.success("Welcome back!");
-      router.push("/account");
+      setToken(data.accessToken);
+      setAuthCookie(data.accessToken); // sync cookie so middleware lets user through
+      toast.success(`Welcome back, ${data.user.name}!`);
+      router.push(nextUrl);
     } catch (err: any) {
-      toast.error(err.message || "Invalid credentials");
-    } finally { setLoading(false); }
+      toast.error(err.message || "Invalid email or password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── FIX: Use production backend URL as fallback (not localhost) ──
+  const handleGoogleLogin = () => {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com";
+    window.location.href = `${API_URL}/api/auth/google`;
+  };
+
+  const handleFacebookLogin = () => {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com";
+    window.location.href = `${API_URL}/api/auth/facebook`;
   };
 
   return (
-    <>
-      <Navbar />
-      <div style={{ minHeight: "80vh", background: "var(--dk)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
-        <div className="zcard" style={{ width: "100%", maxWidth: "380px", padding: "30px" }}>
-          <div style={{ textAlign: "center", marginBottom: "22px" }}>
-            <Link href="/" style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-1px", color: "var(--wh)", textDecoration: "none" }}>
-              zupwell<span style={{ color: "var(--or)" }}>•</span>
-            </Link>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "#8F9CAE", marginTop: "4px", letterSpacing: "0.5px" }}>YOUR HYDRATION HQ</div>
-          </div>
+    <main className="relative min-h-screen flex items-center justify-center px-6" style={{ background: 'var(--dk)' }}>
+      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium transition-colors"
+        style={{ color: '#8F9CAE' }}
+        onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
+        onMouseLeave={e => (e.currentTarget.style.color = '#8F9CAE')}>
+        <ArrowLeft size={16} /> Back to Home
+      </Link>
 
-          {/* Tabs */}
-          <div style={{ display: "flex", background: "var(--dk)", border: "1.5px solid var(--bd-soft)", borderRadius: "8px", padding: "3px", marginBottom: "20px" }}>
-            <div style={{ flex: 1, textAlign: "center", background: "var(--dk-card)", borderRadius: "6px", padding: "9px", fontSize: "11px", fontWeight: 800, border: "1.5px solid var(--bd-soft)", color: "var(--wh)", letterSpacing: "0.5px" }}>SIGN IN</div>
-            <Link href="/register" style={{ flex: 1, textAlign: "center", padding: "9px", fontSize: "11px", fontWeight: 700, color: "#8F9CAE", letterSpacing: "0.5px", textDecoration: "none" }}>REGISTER</Link>
-          </div>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 left-1/4 h-[500px] w-[500px] rounded-full" style={{ background: 'rgba(255,92,0,0.06)' }} />
+        <div className="absolute -bottom-40 right-1/4 h-[400px] w-[400px] rounded-full" style={{ background: 'rgba(5,17,36,0.5)' }} />
+      </div>
 
-          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <input className="zinp" type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} required />
-            <input className="zinp" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
-            <div style={{ textAlign: "right" }}>
-              <Link href="/forgot-password" style={{ fontSize: "11px", fontWeight: 700, color: "var(--or)", textDecoration: "none" }}>Forgot password?</Link>
-            </div>
-            <button type="submit" className="zbtn-or" disabled={loading} style={{ width: "100%", padding: "14px", fontSize: "12px", borderRadius: "30px", justifyContent: "center", letterSpacing: "1px" }}>
-              {loading ? "SIGNING IN..." : "SIGN IN"}
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="relative w-full max-w-md">
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center justify-center mb-4">
+            <span className="text-4xl font-black" style={{ color: '#FFFFFF', fontWeight: 900, letterSpacing: '-1.5px' }}>
+              Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, marginLeft: "2px", verticalAlign: "super", color: 'var(--or)' }}>™</sup>
+            </span>
+          </Link>
+          <h1 className="text-3xl font-black" style={{ color: '#627d98' }}>Welcome back</h1>
+          <p className="mt-1" style={{ color: '#8F9CAE' }}>Sign in to your account</p>
+        </div>
+
+        <div className="card" style={{ padding: '32px' }}>
+          {/* Social Login Buttons */}
+          <div className="space-y-3 mb-6">
+            <button onClick={handleGoogleLogin}
+              className="zbtn-out w-full justify-center flex items-center gap-3 text-sm font-semibold" style={{ borderRadius: '8px', padding: '11px' }}>
+              <GoogleIcon /> Continue with Google
             </button>
+            <button onClick={handleFacebookLogin}
+              className="zbtn-out w-full justify-center flex items-center gap-3 text-sm font-semibold" style={{ borderRadius: '8px', padding: '11px' }}>
+              <FacebookIcon /> Continue with Facebook
+            </button>
+          </div>
+
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1" style={{ background: '#1E2D4A' }} />
+            <span className="text-xs uppercase tracking-wide" style={{ color: '#627d98' }}>or with email</span>
+            <div className="h-px flex-1" style={{ background: '#1E2D4A' }} />
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block mb-1.5" style={{ color: '#627d98', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px' }}>Email</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
+                className="input-field" placeholder="you@company.com" autoComplete="email" />
+            </div>
+            <div>
+              <label className="block mb-1.5" style={{ color: '#627d98', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px' }}>Password</label>
+              <div className="relative">
+                <input type={showPass ? "text" : "password"} value={password}
+                  onChange={e => setPassword(e.target.value)} required
+                  className="input-field pr-10" placeholder="••••••••" autoComplete="current-password" />
+                <button type="button" onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: '#8F9CAE' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#8F9CAE')}>
+                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              <div className="text-right mt-1">
+                <Link href="/forgot-password" className="text-xs" style={{ color: 'var(--or)' }}>Forgot password?</Link>
+              </div>
+            </div>
+
+            <motion.button type="submit" disabled={loading}
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+              className="btn-primary w-full py-3 mt-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              {loading
+                ? <span className="flex items-center justify-center gap-2">
+                    <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                    Signing in...
+                  </span>
+                : "Sign In"
+              }
+            </motion.button>
           </form>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "14px 0" }}>
-            <div style={{ flex: 1, height: "1.5px", background: "var(--bd-soft)" }} />
-            <span style={{ fontSize: "10px", fontWeight: 800, color: "#8F9CAE" }}>OR</span>
-            <div style={{ flex: 1, height: "1.5px", background: "var(--bd-soft)" }} />
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1" style={{ background: '#1E2D4A' }} />
+            <span className="text-xs uppercase tracking-wide" style={{ color: '#627d98' }}>or</span>
+            <div className="h-px flex-1" style={{ background: '#1E2D4A' }} />
           </div>
 
-          <button className="zbtn-out" style={{ width: "100%", padding: "12px", justifyContent: "center", letterSpacing: "0.5px", borderRadius: "30px" }}>
-            CONTINUE WITH GOOGLE
-          </button>
-
-          <div style={{ marginTop: "16px", background: "rgba(255, 92, 0, 0.08)", border: "1.5px solid var(--bd-soft)", borderRadius: "8px", padding: "14px" }}>
-            <div style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "0.5px", marginBottom: "8px", color: "var(--wh)" }}>WHY JOIN ZUPWELL•?</div>
-            {["Track orders in real-time", "Earn loyalty reward points", "Early access to new drops"].map(b => (
-              <div key={b} style={{ fontSize: "11px", fontWeight: 600, display: "flex", gap: "6px", alignItems: "center", marginBottom: "4px", color: "#8F9CAE" }}>
-                <span style={{ color: "var(--or)", fontWeight: 900 }}>★</span> {b}
-              </div>
-            ))}
-          </div>
-
-          <div style={{ textAlign: "center", marginTop: "14px", fontSize: "11px", color: "#8F9CAE" }}>
-            New here? <Link href="/register" style={{ color: "var(--or)", fontWeight: 700, textDecoration: "none" }}>Create account</Link>
-          </div>
+          <p className="text-center text-sm" style={{ color: '#8F9CAE' }}>
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="font-semibold" style={{ color: 'var(--or)' }}>Create one free</Link>
+          </p>
         </div>
-      </div>
-      <Footer />
-    </>
+      </motion.div>
+    </main>
   );
 }
+// LoginForm ends above; LoginPage wraps it in Suspense

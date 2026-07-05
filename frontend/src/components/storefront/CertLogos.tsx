@@ -59,7 +59,6 @@ interface CertLogoProps {
 export function CertLogo({ label, className }: CertLogoProps) {
   const cleanLabel = label.toUpperCase();
 
-  // We assign custom, visually balanced heights to match the FSSAI logo weight
   if (cleanLabel.includes("FSSAI")) {
     return <FssaiLogo className={`h-8 ${className || ""}`} />;
   }
@@ -76,11 +75,17 @@ export function CertLogo({ label, className }: CertLogoProps) {
     return <HaccpLogo className={`h-11 ${className || ""}`} />;
   }
 
-  // Fallback
+  // Fallback — dark navy card style
   return (
-    <div className="inline-flex items-center gap-1 shrink-0 border border-[#E8E2D9] rounded-lg px-2.5 py-0.5 bg-[#FCFAF6] h-7">
-      <span className="text-[11px] font-bold text-[#001c54]">{label}</span>
-      <span className="text-[9px] text-[#EB9220] font-semibold">Certified</span>
+    <div
+      className="inline-flex items-center gap-1.5 shrink-0 rounded-lg px-3 py-1.5 h-8"
+      style={{
+        background: "#0C1E3E",
+        border: "1.5px solid #1E2D4A",
+      }}
+    >
+      <span style={{ fontSize: "11px", fontWeight: 900, color: "#FFFFFF", letterSpacing: "0.5px" }}>{label}</span>
+      <span style={{ fontSize: "9px", color: "var(--or)", fontWeight: 800 }}>CERTIFIED</span>
     </div>
   );
 }

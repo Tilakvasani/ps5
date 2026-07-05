@@ -1,104 +1,331 @@
 "use client";
 import { useEffect, useState } from "react";
-import { adminApi } from "@/lib/api";
-import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 import { Save } from "lucide-react";
+import { adminApi } from "@/lib/api";
+import { invalidateSettingsCache } from "@/lib/useSettings";
+import toast from "react-hot-toast";
 
-const SECTIONS = [
-  { label:"STORE INFO", fields:[
-    { key:"site_name",    label:"Store Name",     type:"text" },
-    { key:"site_email",   label:"Support Email",  type:"email" },
-    { key:"site_phone",   label:"Phone",          type:"text" },
-    { key:"site_address", label:"Address",        type:"text" },
-    { key:"site_gstin",   label:"GSTIN",          type:"text" },
-    { key:"site_fssai",   label:"FSSAI Number",   type:"text" },
-  ]},
-  { label:"HERO SECTION", fields:[
-    { key:"hero_title",        label:"Hero Title",       type:"text" },
-    { key:"hero_subtext",      label:"Hero Subtext",     type:"textarea" },
-    { key:"hero_badge",        label:"Badge Text",       type:"text" },
-    { key:"hero_stat1_value",  label:"Stat 1 Value",     type:"text" },
-    { key:"hero_stat2_value",  label:"Stat 2 Value",     type:"text" },
-  ]},
-  { label:"SOCIAL LINKS", fields:[
-    { key:"contact_whatsapp",  label:"WhatsApp Number",  type:"text" },
-    { key:"social_ig",         label:"Instagram URL",    type:"url" },
-    { key:"social_tt",         label:"TikTok URL",       type:"url" },
-    { key:"social_yt",         label:"YouTube URL",      type:"url" },
-  ]},
-  { label:"SHIPPING", fields:[
-    { key:"free_shipping_threshold", label:"Free Shipping Above (₹)", type:"number" },
-    { key:"standard_shipping_fee",   label:"Standard Shipping (₹)",  type:"number" },
-    { key:"express_shipping_fee",    label:"Express Shipping (₹)",   type:"number" },
-  ]},
+const SETTING_GROUPS = [
+  {
+    label: "Store Information",
+    keys: [
+      { key: "site_name",       label: "Store Name",    type: "text" },
+      { key: "site_email",      label: "Contact Email", type: "email" },
+      { key: "site_phone",      label: "Contact Phone / WhatsApp No.", type: "text" },
+      { key: "site_address",    label: "Address",       type: "textarea" },
+      { key: "site_gstin",      label: "GSTIN",         type: "text" },
+      { key: "site_state_code", label: "State Code",    type: "text" },
+      { key: "site_fssai",      label: "FSSAI License Number", type: "text" },
+    ],
+  },
+  {
+    label: "Home Page — Hero Section",
+    desc: "Controls the big headline and tagline on the home page",
+    keys: [
+      { key: "hero_title",        label: "Hero Title (English)", type: "text" },
+      { key: "hero_tagline",      label: "Hero Tagline (Gujarati/Hindi)", type: "text" },
+      { key: "hero_badge",        label: "Top Badge Text (e.g. Ahmedabad's #1 Health Supplement Store)", type: "text" },
+      { key: "hero_subtext",      label: "Hero Subtext (below headline)", type: "textarea" },
+      { key: "hero_stat1_value",  label: "Stat 1 Value (e.g. 200+)", type: "text" },
+      { key: "hero_stat1_label",  label: "Stat 1 Label (e.g. Products)", type: "text" },
+      { key: "hero_stat2_value",  label: "Stat 2 Value (e.g. 50K+)", type: "text" },
+      { key: "hero_stat2_label",  label: "Stat 2 Label (e.g. Happy Customers)", type: "text" },
+      { key: "hero_stat3_value",  label: "Stat 3 Value (e.g. 100%)", type: "text" },
+      { key: "hero_stat3_label",  label: "Stat 3 Label (e.g. Authentic)", type: "text" },
+    ],
+  },
+  {
+    label: "Home Page — Why Zupwell Features",
+    desc: "The 4 feature cards (icon, title, description). Icons are fixed — only text changes.",
+    keys: [
+      { key: "feature1_title", label: "Feature 1 Title", type: "text" },
+      { key: "feature1_desc",  label: "Feature 1 Description", type: "textarea" },
+      { key: "feature2_title", label: "Feature 2 Title", type: "text" },
+      { key: "feature2_desc",  label: "Feature 2 Description", type: "textarea" },
+      { key: "feature3_title", label: "Feature 3 Title", type: "text" },
+      { key: "feature3_desc",  label: "Feature 3 Description", type: "textarea" },
+      { key: "feature4_title", label: "Feature 4 Title", type: "text" },
+      { key: "feature4_desc",  label: "Feature 4 Description", type: "textarea" },
+    ],
+  },
+  {
+    label: "Home Page — Certificate Logos",
+    desc: "Paste image URLs for FSSAI, ISO, GMP logos shown on home page",
+    keys: [
+      { key: "cert_fssai_logo", label: "FSSAI Logo URL",  type: "text" },
+      { key: "cert_iso_logo",   label: "ISO Logo URL",    type: "text" },
+      { key: "cert_gmp_logo",   label: "GMP Logo URL",    type: "text" },
+      { key: "cert_haccp_logo", label: "HACCP Logo URL",  type: "text" },
+      { key: "cert_fssc_logo",  label: "FSSC 22000 Logo URL", type: "text" },
+    ],
+  },
+  {
+    label: "Home Page — Founder's Message",
+    desc: "Shown on home page and About Us page",
+    keys: [
+      { key: "founder_name",    label: "Founder Name",    type: "text" },
+      { key: "founder_title",   label: "Founder Title (e.g. Founder & CEO)", type: "text" },
+      { key: "founder_message", label: "Founder's Message", type: "textarea" },
+      { key: "founder_photo",   label: "Founder Photo URL", type: "text" },
+    ],
+  },
+  {
+    label: "About Us Page",
+    desc: "Content for the About Us page sections",
+    keys: [
+      { key: "about_punchline",    label: "Punchline", type: "text" },
+      { key: "about_description",  label: "About Zupwell (short paragraph)", type: "textarea" },
+      { key: "about_brand_story",  label: "Brand Story", type: "textarea" },
+      { key: "about_mission",      label: "Our Mission", type: "textarea" },
+      { key: "about_vision",       label: "Our Vision", type: "textarea" },
+      { key: "about_future",       label: "Future of Zupwell", type: "textarea" },
+      { key: "about_why1_title",   label: "Why Zupwell — Point 1 Title", type: "text" },
+      { key: "about_why1_desc",    label: "Why Zupwell — Point 1 Description", type: "textarea" },
+      { key: "about_why2_title",   label: "Why Zupwell — Point 2 Title", type: "text" },
+      { key: "about_why2_desc",    label: "Why Zupwell — Point 2 Description", type: "textarea" },
+      { key: "about_why3_title",   label: "Why Zupwell — Point 3 Title", type: "text" },
+      { key: "about_why3_desc",    label: "Why Zupwell — Point 3 Description", type: "textarea" },
+      { key: "about_story_badge",  label: "Story Section Badge", type: "text" },
+      { key: "about_story_title",  label: "Story Section Title", type: "text" },
+      { key: "about_why_title",    label: "Why Section Title", type: "text" },
+      { key: "about_why_subtitle", label: "Why Section Subtitle", type: "text" },
+      { key: "about_future_title", label: "Future Section Title", type: "text" },
+      { key: "about_cta_title",    label: "CTA Section Title", type: "text" },
+    ],
+  },
+  {
+    label: "Science Page",
+    desc: "Content for the Science & Quality page sections",
+    keys: [
+      { key: "science_hero_badge", label: "Hero Badge", type: "text" },
+      { key: "science_hero_title", label: "Hero Title", type: "text" },
+      { key: "science_hero_subtext", label: "Hero Subtext", type: "textarea" },
+      { key: "science_process_badge", label: "Process Section Badge", type: "text" },
+      { key: "science_process_title", label: "Process Section Title", type: "textarea" },
+      { key: "science_process1_title", label: "Process Point 1 Title", type: "text" },
+      { key: "science_process1_desc", label: "Process Point 1 Description", type: "textarea" },
+      { key: "science_process2_title", label: "Process Point 2 Title", type: "text" },
+      { key: "science_process2_desc", label: "Process Point 2 Description", type: "textarea" },
+      { key: "science_cert_badge", label: "Certifications Section Badge", type: "text" },
+      { key: "science_cert_title", label: "Certifications Section Title", type: "text" },
+      { key: "science_cert_subtext", label: "Certifications Section Subtext", type: "textarea" },
+      { key: "science_cert1_title", label: "Certification 1 Title", type: "text" },
+      { key: "science_cert1_desc", label: "Certification 1 Description", type: "textarea" },
+      { key: "science_cert2_title", label: "Certification 2 Title", type: "text" },
+      { key: "science_cert2_desc", label: "Certification 2 Description", type: "textarea" },
+      { key: "science_cert3_title", label: "Certification 3 Title", type: "text" },
+      { key: "science_cert3_desc", label: "Certification 3 Description", type: "textarea" },
+      { key: "science_clean_badge", label: "Clean Label Badge", type: "text" },
+      { key: "science_clean_title", label: "Clean Label Title", type: "textarea" },
+      { key: "science_clean_desc", label: "Clean Label Description", type: "textarea" },
+      { key: "science_clean1_label", label: "Clean Label Point 1 Label", type: "text" },
+      { key: "science_clean1_sub", label: "Clean Label Point 1 Subtext", type: "textarea" },
+      { key: "science_clean2_label", label: "Clean Label Point 2 Label", type: "text" },
+      { key: "science_clean2_sub", label: "Clean Label Point 2 Subtext", type: "textarea" },
+      { key: "science_clean3_label", label: "Clean Label Point 3 Label", type: "text" },
+      { key: "science_clean3_sub", label: "Clean Label Point 3 Subtext", type: "textarea" },
+      { key: "science_tube_title", label: "Tube Design Section Title", type: "textarea" },
+      { key: "science_tube_desc", label: "Tube Design Section Description", type: "textarea" },
+      { key: "science_tube_f1_title", label: "Tube Design Feature 1 Title", type: "text" },
+      { key: "science_tube_f1_desc", label: "Tube Design Feature 1 Desc", type: "text" },
+      { key: "science_tube_f2_title", label: "Tube Design Feature 2 Title", type: "text" },
+      { key: "science_tube_f2_desc", label: "Tube Design Feature 2 Desc", type: "text" },
+      { key: "science_tube_f3_title", label: "Tube Design Feature 3 Title", type: "text" },
+      { key: "science_tube_f3_desc", label: "Tube Design Feature 3 Desc", type: "text" },
+      { key: "science_tube_f4_title", label: "Tube Design Feature 4 Title", type: "text" },
+      { key: "science_tube_f4_desc", label: "Tube Design Feature 4 Desc", type: "text" },
+      { key: "science_cta_title", label: "CTA Section Title", type: "text" },
+      { key: "science_cta_subtext", label: "CTA Section Subtext", type: "textarea" },
+      { key: "science_cta_btn", label: "CTA Section Button Text", type: "text" },
+    ],
+  },
+  {
+    label: "Contact Us Page",
+    desc: "Content for Contact Us and Distributor Inquiry section",
+    keys: [
+      { key: "contact_whatsapp",      label: "WhatsApp Number (with country code, e.g. 919876543210)", type: "text" },
+      { key: "contact_support_email", label: "Support Email", type: "email" },
+      { key: "contact_info_email",    label: "Info Email", type: "email" },
+      { key: "contact_instagram",     label: "Instagram URL", type: "text" },
+      { key: "contact_facebook",      label: "Facebook URL", type: "text" },
+      { key: "contact_hero_badge",    label: "Hero Badge", type: "text" },
+      { key: "contact_hero_title",    label: "Hero Title", type: "text" },
+      { key: "contact_hero_subtext",  label: "Hero Subtext", type: "textarea" },
+      { key: "contact_form_badge",    label: "Distributor Form Badge", type: "text" },
+      { key: "contact_form_title",    label: "Distributor Form Title", type: "text" },
+      { key: "contact_form_subtext",  label: "Distributor Form Subtext", type: "textarea" },
+      { key: "contact_form_footer",   label: "Distributor Form Footnote", type: "text" },
+    ],
+  },
+  {
+    label: "FAQs Page",
+    desc: "Frequently Asked Questions configuration",
+    keys: [
+      { key: "faqs_hero_badge", label: "Hero Badge", type: "text" },
+      { key: "faqs_hero_title", label: "Hero Title", type: "text" },
+      { key: "faqs_hero_subtext", label: "Hero Subtext", type: "textarea" },
+      { key: "faqs_footer_title", label: "Footer Title (still have questions?)", type: "text" },
+      { key: "faqs_footer_subtext", label: "Footer Subtext", type: "textarea" },
+      { key: "faqs_list_json", label: "FAQs List (JSON Format)", type: "json" },
+    ],
+  },
+  {
+    label: "Legal Policy Pages",
+    desc: "Content and sections for all 5 legal policies (Privacy, Terms, Refund, Shipping, Disclaimer)",
+    keys: [
+      // Privacy Policy
+      { key: "policy_privacy_badge", label: "Privacy Policy — Badge", type: "text" },
+      { key: "policy_privacy_title", label: "Privacy Policy — Title", type: "text" },
+      { key: "policy_privacy_subtitle", label: "Privacy Policy — Subtitle", type: "textarea" },
+      { key: "policy_privacy_updated", label: "Privacy Policy — Last Updated", type: "text" },
+      { key: "policy_privacy_sections_json", label: "Privacy Policy — Sections (JSON List of {title, body})", type: "json" },
+
+      // Terms of Service
+      { key: "policy_terms_badge", label: "Terms of Service — Badge", type: "text" },
+      { key: "policy_terms_title", label: "Terms of Service — Title", type: "text" },
+      { key: "policy_terms_subtitle", label: "Terms of Service — Subtitle", type: "textarea" },
+      { key: "policy_terms_updated", label: "Terms of Service — Last Updated", type: "text" },
+      { key: "policy_terms_sections_json", label: "Terms of Service — Sections (JSON List of {title, body})", type: "json" },
+
+      // Refund Policy
+      { key: "policy_refund_badge", label: "Refund Policy — Badge", type: "text" },
+      { key: "policy_refund_title", label: "Refund Policy — Title", type: "text" },
+      { key: "policy_refund_subtitle", label: "Refund Policy — Subtitle", type: "textarea" },
+      { key: "policy_refund_updated", label: "Refund Policy — Last Updated", type: "text" },
+      { key: "policy_refund_sections_json", label: "Refund Policy — Sections (JSON List of {title, body})", type: "json" },
+
+      // Shipping Policy
+      { key: "policy_shipping_badge", label: "Shipping Policy — Badge", type: "text" },
+      { key: "policy_shipping_title", label: "Shipping Policy — Title", type: "text" },
+      { key: "policy_shipping_subtitle", label: "Shipping Policy — Subtitle", type: "textarea" },
+      { key: "policy_shipping_updated", label: "Shipping Policy — Last Updated", type: "text" },
+      { key: "policy_shipping_sections_json", label: "Shipping Policy — Sections (JSON List of {title, body})", type: "json" },
+
+      // Legal Disclaimer
+      { key: "policy_disclaimer_badge", label: "Legal Disclaimer — Badge", type: "text" },
+      { key: "policy_disclaimer_title", label: "Legal Disclaimer — Title", type: "text" },
+      { key: "policy_disclaimer_subtitle", label: "Legal Disclaimer — Subtitle", type: "textarea" },
+      { key: "policy_disclaimer_updated", label: "Legal Disclaimer — Last Updated", type: "text" },
+      { key: "policy_disclaimer_sections_json", label: "Legal Disclaimer — Sections (JSON List of {title, body})", type: "json" },
+    ],
+  },
+  {
+    label: "Social Media",
+    keys: [
+      { key: "social_instagram", label: "Instagram URL", type: "text" },
+      { key: "social_facebook",  label: "Facebook URL",  type: "text" },
+      { key: "social_youtube",   label: "YouTube URL",   type: "text" },
+      { key: "social_linkedin",  label: "LinkedIn URL",  type: "text" },
+    ],
+  },
+  {
+    label: "Order Settings",
+    keys: [
+      { key: "gst_rate",                label: "GST Rate % (e.g. 5 for 5%, split equally as CGST+SGST)", type: "number" },
+      { key: "free_shipping_threshold", label: "Free Shipping Above (₹)", type: "number" },
+      { key: "default_shipping_charge", label: "Default Shipping Charge (₹)", type: "number" },
+      { key: "order_prefix",           label: "Order Number Prefix", type: "text" },
+    ],
+  },
+  {
+    label: "Razorpay",
+    keys: [
+      { key: "razorpay_key_id",     label: "Key ID",                     type: "text" },
+      { key: "razorpay_key_secret", label: "Key Secret (write-only)",    type: "password" },
+    ],
+  },
+  {
+    label: "Email (SMTP)",
+    keys: [
+      { key: "smtp_host", label: "SMTP Host",     type: "text" },
+      { key: "smtp_port", label: "SMTP Port",     type: "text" },
+      { key: "smtp_user", label: "SMTP User",     type: "text" },
+      { key: "smtp_pass", label: "SMTP Password", type: "password" },
+      { key: "smtp_from", label: "From Email",    type: "email" },
+    ],
+  },
 ];
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<Record<string,string>>({});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [activeSection, setActiveSection] = useState(0);
+  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [loading, setLoading]   = useState(true);
+  const [saving, setSaving]     = useState(false);
 
   useEffect(() => {
-    adminApi.getSettings().then((d: any) => {
-      const map: Record<string,string> = {};
-      (Array.isArray(d) ? d : Object.entries(d).map(([k,v]) => ({ key:k, value:v }))).forEach((s: any) => { map[s.key] = s.value ?? ""; });
-      setSettings(map);
+    adminApi.getSettings().then((data: any[]) => {
+      const obj: Record<string, string> = {};
+      data.forEach(s => { obj[s.key] = s.value; });
+      setSettings(obj);
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  const save = async () => {
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
     setSaving(true);
-    try { await adminApi.updateSettings(settings); toast.success("Settings saved!"); }
-    catch (e: any) { toast.error(e.message); }
-    finally { setSaving(false); }
+    try {
+      await adminApi.updateSettings(settings);
+      invalidateSettingsCache();
+      try { window.localStorage.setItem("zupwell-settings-bust", Date.now().toString()); } catch {}
+      toast.success("Settings saved! Changes are now live on the website.");
+    } catch (err: any) { toast.error(err.message); }
+    setSaving(false);
   };
 
-  if (loading) return <div style={{ padding:"40px", textAlign:"center", color:"#888" }}>Loading settings...</div>;
+  if (loading) return (
+    <div className="flex justify-center py-20">
+      <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)", borderTopColor: "transparent" }} />
+    </div>
+  );
 
   return (
     <div>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"20px" }}>
-        <h1 style={{ fontSize:"24px", fontWeight:900, letterSpacing:"-1px" }}>SETTINGS</h1>
-        <button onClick={save} disabled={saving} className="zbtn-or" style={{ fontSize:"11px", padding:"9px 16px" }}>
-          <Save size={13} /> {saving ? "SAVING..." : "SAVE ALL"}
-        </button>
-      </div>
-
-      <div style={{ display:"grid", gridTemplateColumns:"200px 1fr", gap:"16px", alignItems:"start" }}>
-        {/* Section tabs */}
-        <div className="zcard" style={{ padding:"8px" }}>
-          {SECTIONS.map((s, i) => (
-            <button key={s.label} onClick={() => setActiveSection(i)}
-              className={`zslink${activeSection===i?" active":""}`}
-              style={{ background:"none", border:"none", cursor:"pointer", width:"100%", textAlign:"left", marginBottom:"2px", fontSize:"11px" }}>
-              {s.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Fields */}
-        <div className="zcard">
-          <div style={{ fontSize:"12px", fontWeight:900, letterSpacing:"0.5px", marginBottom:"16px" }}>{SECTIONS[activeSection].label}</div>
-          <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
-            {SECTIONS[activeSection].fields.map(f => (
-              <div key={f.key}>
-                <div className="zlabel">{f.label}</div>
-                {f.type === "textarea" ? (
-                  <textarea className="zinp" rows={3} value={settings[f.key] || ""} onChange={e => setSettings(s => ({ ...s, [f.key]: e.target.value }))} style={{ resize:"none" }} />
-                ) : (
-                  <input className="zinp" type={f.type} value={settings[f.key] || ""} onChange={e => setSettings(s => ({ ...s, [f.key]: e.target.value }))} />
+      <h1 className="text-3xl font-black mb-2" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>Settings</h1>
+      <p className="text-sm mb-6" style={{ color: "#8F9CAE" }}>All changes here reflect live on the website. No code changes needed.</p>
+      <form onSubmit={handleSave}>
+        <div className="space-y-6 max-w-3xl">
+          {SETTING_GROUPS.map(group => (
+            <div key={group.label} className="zcard">
+              <div className="mb-4 pb-3 border-b" style={{ borderColor: "#1E2D4A" }}>
+                <h2 className="font-bold" style={{ color: "#627d98" }}>{group.label}</h2>
+                {(group as any).desc && (
+                  <p className="text-xs mt-1" style={{ color: "#8F9CAE" }}>{(group as any).desc}</p>
                 )}
               </div>
-            ))}
-          </div>
-          <div style={{ marginTop:"18px" }}>
-            <button onClick={save} disabled={saving} className="zbtn-or" style={{ fontSize:"11px", padding:"11px 22px" }}>
-              <Save size={13} /> {saving ? "SAVING..." : "SAVE CHANGES"}
-            </button>
-          </div>
+              <div className="space-y-3">
+                {group.keys.map(({ key, label, type }) => (
+                  <div key={key}>
+                    <label className="zlabel">{label}</label>
+                    {type === "textarea" || type === "json" ? (
+                      <textarea
+                        value={settings[key] || ""}
+                        onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
+                        className={`zinp text-sm ${type === "json" ? "font-mono h-40 resize-y" : "resize-none h-20"}`}
+                        rows={type === "json" ? 8 : 3}
+                        placeholder={type === "json" ? '[{"title": "...", "body": "..."}]' : ""}
+                      />
+                    ) : (
+                      <input
+                        type={type}
+                        value={settings[key] || ""}
+                        onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
+                        className="zinp text-sm"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <motion.button type="submit" disabled={saving}
+            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+            className="zbtn-or flex items-center gap-2 px-8 py-3 disabled:opacity-50">
+            <Save size={16} /> {saving ? "Saving..." : "Save All Settings"}
+          </motion.button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
+

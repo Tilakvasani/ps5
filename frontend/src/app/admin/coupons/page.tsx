@@ -1,109 +1,113 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Plus, Edit3, Trash2, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { Plus, Edit3, Trash2 } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
-
-const EMPTY = { code:"", description:"", discountType:"percent", discountValue:"", minOrderValue:"0", maxDiscount:"", usageLimit:"", validFrom:"", validTo:"", isActive:true };
 
 export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<any>(null);
-  const [form, setForm] = useState<any>(EMPTY);
+  const [form, setForm] = useState({ code: "", description: "", discountType: "percent", discountValue: "", minOrderValue: "0", maxDiscount: "", usageLimit: "", validFrom: "", validTo: "", isActive: true });
 
-  const load = async () => { setLoading(true); try { setCoupons(await adminApi.getCoupons()); } catch {} setLoading(false); };
-  useEffect(() => { load(); }, []);
+  const fetch = async () => { setLoading(true); try { setCoupons(await adminApi.getCoupons()); } catch {} setLoading(false); };
+  useEffect(() => { fetch(); }, []);
 
-  const u = (k: string, v: any) => setForm((f: any) => ({ ...f, [k]: v }));
-
-  const save = async () => {
-    try {
-      const payload = { ...form, discountValue: Number(form.discountValue), minOrderValue: Number(form.minOrderValue), maxDiscount: form.maxDiscount ? Number(form.maxDiscount) : null, usageLimit: form.usageLimit ? Number(form.usageLimit) : null };
-      if (modal?.id) await adminApi.updateCoupon(modal.id, payload);
-      else await adminApi.createCoupon(payload);
-      toast.success(modal?.id ? "Updated!" : "Created!"); setModal(null); load();
-    } catch (e: any) { toast.error(e.message); }
+  const openNew = () => { setForm({ code: "", description: "", discountType: "percent", discountValue: "", minOrderValue: "0", maxDiscount: "", usageLimit: "", validFrom: "", validTo: "", isActive: true }); setModal({}); };
+  const openEdit = (c: any) => {
+    setForm({ code: c.code, description: c.description || "", discountType: c.discountType, discountValue: c.discountValue, minOrderValue: c.minOrderValue, maxDiscount: c.maxDiscount || "", usageLimit: c.usageLimit || "", validFrom: c.validFrom?.slice(0, 10) || "", validTo: c.validTo?.slice(0, 10) || "", isActive: c.isActive });
+    setModal(c);
   };
 
-  const del = async (id: number) => {
+  const handleSave = async () => {
+    try {
+      if (modal?.id) { await adminApi.updateCoupon(modal.id, form); toast.success("Updated!"); }
+      else { await adminApi.createCoupon(form); toast.success("Coupon created!"); }
+      setModal(null); fetch();
+    } catch (err: any) { toast.error(err.message); }
+  };
+
+  const handleDelete = async (id: number) => {
     if (!confirm("Delete coupon?")) return;
-    try { await adminApi.deleteCoupon(id); toast.success("Deleted!"); load(); } catch (e: any) { toast.error(e.message); }
+    try { await adminApi.deleteCoupon(id); toast.success("Deleted"); fetch(); } catch (err: any) { toast.error(err.message); }
   };
 
   return (
     <div>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"20px" }}>
-        <h1 style={{ fontSize:"24px", fontWeight:900, letterSpacing:"-1px" }}>COUPONS</h1>
-        <button onClick={() => { setForm(EMPTY); setModal({}); }} className="zbtn-or" style={{ fontSize:"11px", padding:"9px 16px" }}>
-          <Plus size={13} /> ADD COUPON
-        </button>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-black" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>Coupons</h1>
+        <button onClick={openNew} className="zbtn-or flex items-center gap-2"><Plus size={16} /> New Coupon</button>
+      </div>
+      <div className="zcard p-0 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b" style={{ borderColor: "#1E2D4A", color: "#8F9CAE", background: "#0C1E3E" }}>
+              {["Code", "Type", "Value", "Min Order", "Used", "Valid Until", "Status", "Actions"].map(h => <th key={h} className="px-4 py-3 font-semibold text-left">{h}</th>)}
+            </tr>
+          </thead>
+          <tbody className="divide-y" style={{ borderColor: "#1E2D4A" }}>
+            {loading ? Array.from({ length: 5 }).map((_, i) => <tr key={i}><td colSpan={8} className="px-4 py-3"><div className="h-4 rounded animate-pulse" style={{ background: "#1E2D4A" }} /></td></tr>)
+              : coupons.map(c => (
+              <tr key={c.id} className="transition-colors" style={{ color: "#FFFFFF" }} onMouseEnter={e => e.currentTarget.style.background = "#1E2D4A"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                <td className="px-4 py-3 font-mono font-bold" style={{ color: "var(--or)" }}>{c.code}</td>
+                <td className="px-4 py-3 capitalize" style={{ color: "#8F9CAE" }}>{c.discountType}</td>
+                <td className="px-4 py-3 font-bold" style={{ color: "#FFFFFF" }}>{c.discountType === "percent" ? `${c.discountValue}%` : `₹${c.discountValue}`}</td>
+                <td className="px-4 py-3" style={{ color: "#8F9CAE" }}>₹{c.minOrderValue}</td>
+                <td className="px-4 py-3" style={{ color: "#8F9CAE" }}>{c.usedCount || 0}{c.usageLimit ? `/${c.usageLimit}` : ""}</td>
+                <td className="px-4 py-3 text-xs" style={{ color: "#8F9CAE" }}>{c.validTo ? new Date(c.validTo).toLocaleDateString("en-IN") : "—"}</td>
+                <td className="px-4 py-3"><span className={`zbadge ${c.isActive ? "zbadge-gr" : "zbadge-rd"}`}>{c.isActive ? "Active" : "Inactive"}</span></td>
+                <td className="px-4 py-3 flex gap-1">
+                  <button onClick={() => openEdit(c)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "#8F9CAE" }} onMouseEnter={e => { e.currentTarget.style.color = "var(--or)"; e.currentTarget.style.background = "#0C1E3E"; }} onMouseLeave={e => { e.currentTarget.style.color = "#8F9CAE"; e.currentTarget.style.background = "transparent"; }}><Edit3 size={14} /></button>
+                  <button onClick={() => handleDelete(c.id)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "#8F9CAE" }} onMouseEnter={e => { e.currentTarget.style.color = "#EF4444"; e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"; }} onMouseLeave={e => { e.currentTarget.style.color = "#8F9CAE"; e.currentTarget.style.background = "transparent"; }}><Trash2 size={14} /></button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      <div className="zcard" style={{ padding:0, overflow:"hidden" }}>
-        <div className="ztr ztr-head" style={{ gridTemplateColumns:"1.2fr 0.8fr 0.8fr 0.8fr 0.7fr 80px 70px" }}>
-          <span>CODE</span><span>TYPE</span><span>VALUE</span><span>MIN ORDER</span><span>USED</span><span>STATUS</span><span>ACTIONS</span>
-        </div>
-        {loading ? [...Array(4)].map((_,i) => (
-          <div key={i} className="ztr" style={{ gridTemplateColumns:"1.2fr 0.8fr 0.8fr 0.8fr 0.7fr 80px 70px", background:i%2?"#FFF":"#FAFAFA" }}>
-            {[...Array(7)].map((_,j) => <div key={j} style={{ height:"14px", background:"#F0F0F0", borderRadius:"4px" }} />)}
-          </div>
-        )) : coupons.length === 0 ? (
-          <div style={{ padding:"40px", textAlign:"center", color:"#888", fontSize:"13px" }}>No coupons yet.</div>
-        ) : coupons.map((c, i) => (
-          <div key={c.id} className="ztr" style={{ gridTemplateColumns:"1.2fr 0.8fr 0.8fr 0.8fr 0.7fr 80px 70px", background:i%2?"#FFF":"#FAFAFA" }}>
-            <div><div style={{ fontWeight:900, fontSize:"12px", letterSpacing:"0.5px" }}>{c.code}</div><div style={{ fontSize:"10px", color:"#888" }}>{c.description}</div></div>
-            <span className="zbadge zbadge-dk" style={{ fontSize:"9px" }}>{c.discountType}</span>
-            <span style={{ fontWeight:800 }}>{c.discountType === "percent" ? `${c.discountValue}%` : `₹${c.discountValue}`}</span>
-            <span style={{ fontSize:"11px" }}>₹{c.minOrderValue}</span>
-            <span style={{ fontSize:"11px" }}>{c.usageCount || 0}{c.usageLimit ? ` / ${c.usageLimit}` : ""}</span>
-            <span className={`zbadge ${c.isActive ? "zbadge-gr" : "zbadge-rd"}`}>{c.isActive ? "ACTIVE" : "OFF"}</span>
-            <div style={{ display:"flex", gap:"8px" }}>
-              <button onClick={() => { setForm({ code:c.code, description:c.description||"", discountType:c.discountType, discountValue:c.discountValue, minOrderValue:c.minOrderValue, maxDiscount:c.maxDiscount||"", usageLimit:c.usageLimit||"", validFrom:c.validFrom?.slice(0,10)||"", validTo:c.validTo?.slice(0,10)||"", isActive:c.isActive }); setModal(c); }} style={{ background:"none", border:"none", cursor:"pointer" }}><Edit3 size={14} color="#FF4500" /></button>
-              <button onClick={() => del(c.id)} style={{ background:"none", border:"none", cursor:"pointer" }}><Trash2 size={14} color="#DC2626" /></button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Modal */}
       {modal !== null && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.6)", zIndex:100, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }}>
-          <div className="zcard" style={{ width:"100%", maxWidth:"460px", maxHeight:"90vh", overflowY:"auto" }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"18px" }}>
-              <div style={{ fontSize:"14px", fontWeight:900, letterSpacing:"-0.5px" }}>{modal?.id ? "EDIT COUPON" : "NEW COUPON"}</div>
-              <button onClick={() => setModal(null)} style={{ background:"none", border:"none", cursor:"pointer" }}><X size={18} /></button>
-            </div>
-            <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
-              <input className="zinp" placeholder="Coupon code (e.g. SAVE20)" value={form.code} onChange={e => u("code", e.target.value.toUpperCase())} />
-              <input className="zinp" placeholder="Description (optional)" value={form.description} onChange={e => u("description", e.target.value)} />
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px" }}>
-                <select className="zinp" value={form.discountType} onChange={e => u("discountType", e.target.value)}>
-                  <option value="percent">Percentage %</option>
-                  <option value="flat">Flat ₹</option>
-                </select>
-                <input className="zinp" type="number" placeholder="Discount value" value={form.discountValue} onChange={e => u("discountValue", e.target.value)} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(5, 17, 36, 0.7)" }}>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-lg zcard p-6 max-h-[90vh] overflow-y-auto" style={{ background: "#0C1E3E", border: "1.5px solid #1E2D4A" }}>
+            <h2 className="font-bold mb-5" style={{ color: "#627d98" }}>{modal?.id ? "Edit" : "New"} Coupon</h2>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="zlabel">Code *</label><input value={form.code} onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))} className="zinp" placeholder="SAVE10" /></div>
+                <div><label className="zlabel">Type</label>
+                  <select value={form.discountType} onChange={e => setForm(f => ({ ...f, discountType: e.target.value }))} className="zinp">
+                    <option value="percent">Percentage</option><option value="flat">Flat Amount</option>
+                  </select>
+                </div>
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px" }}>
-                <input className="zinp" type="number" placeholder="Min order ₹" value={form.minOrderValue} onChange={e => u("minOrderValue", e.target.value)} />
-                <input className="zinp" type="number" placeholder="Max discount ₹ (optional)" value={form.maxDiscount} onChange={e => u("maxDiscount", e.target.value)} />
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="zlabel">Discount Value</label><input type="number" value={form.discountValue} onChange={e => setForm(f => ({ ...f, discountValue: e.target.value }))} className="zinp" /></div>
+                <div><label className="zlabel">Min Order (₹)</label><input type="number" value={form.minOrderValue} onChange={e => setForm(f => ({ ...f, minOrderValue: e.target.value }))} className="zinp" /></div>
               </div>
-              <input className="zinp" type="number" placeholder="Usage limit (optional)" value={form.usageLimit} onChange={e => u("usageLimit", e.target.value)} />
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px" }}>
-                <div><div className="zlabel">Valid From</div><input className="zinp" type="date" value={form.validFrom} onChange={e => u("validFrom", e.target.value)} /></div>
-                <div><div className="zlabel">Valid To</div><input className="zinp" type="date" value={form.validTo} onChange={e => u("validTo", e.target.value)} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="zlabel">Max Discount (₹)</label><input type="number" value={form.maxDiscount} onChange={e => setForm(f => ({ ...f, maxDiscount: e.target.value }))} className="zinp" placeholder="Optional" /></div>
+                <div><label className="zlabel">Usage Limit</label><input type="number" value={form.usageLimit} onChange={e => setForm(f => ({ ...f, usageLimit: e.target.value }))} className="zinp" placeholder="Unlimited" /></div>
               </div>
-              <label style={{ display:"flex", alignItems:"center", gap:"8px", fontSize:"12px", fontWeight:600, cursor:"pointer" }}>
-                <input type="checkbox" checked={form.isActive} onChange={e => u("isActive", e.target.checked)} /> Active
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="zlabel">Valid From</label><input type="date" value={form.validFrom} onChange={e => setForm(f => ({ ...f, validFrom: e.target.value }))} className="zinp" /></div>
+                <div><label className="zlabel">Valid To</label><input type="date" value={form.validTo} onChange={e => setForm(f => ({ ...f, validTo: e.target.value }))} className="zinp" /></div>
+              </div>
+              <div><label className="zlabel">Description</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="zinp resize-none" rows={2} /></div>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <span className="text-sm" style={{ color: "#8F9CAE" }}>Active</span>
+                <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-[var(--or)]" : "bg-[#051124]"}`} style={{ border: "1.5px solid #1E2D4A" }}>
+                  <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${form.isActive ? "translate-x-6" : "translate-x-1"}`} />
+                </button>
               </label>
-              <div style={{ display:"flex", gap:"8px", marginTop:"4px" }}>
-                <button onClick={() => setModal(null)} className="zbtn-out" style={{ flex:1, justifyContent:"center" }}>CANCEL</button>
-                <button onClick={save} className="zbtn-or" style={{ flex:2, justifyContent:"center" }}>SAVE COUPON</button>
-              </div>
             </div>
-          </div>
+            <div className="flex gap-3 mt-5">
+              <button onClick={handleSave} className="zbtn-or flex-1 py-2.5">Save Coupon</button>
+              <button onClick={() => setModal(null)} className="zbtn-out px-5 py-2.5">Cancel</button>
+            </div>
+          </motion.div>
         </div>
       )}
     </div>
   );
 }
+
