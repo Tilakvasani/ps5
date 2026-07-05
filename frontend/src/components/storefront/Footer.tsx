@@ -85,7 +85,6 @@ export default function Footer() {
             <div style={{ fontSize: "10px", lineHeight: 1.8, color: "#627d98", marginBottom: "14px" }}>
               {gstin  && <p>GSTIN: {gstin}</p>}
               {fssai  && <p>FSSAI: {fssai}</p>}
-              <p>State Code: {stateCode}</p>
             </div>
             {socials.length > 0 && (
               <div className="flex items-center gap-2">

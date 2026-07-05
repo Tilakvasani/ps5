@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { CertLogo } from "@/components/storefront/CertLogos";
-import { FlaskConical, Shield, Leaf, Droplets, Award, CheckCircle, Microscope, Package, Globe } from "lucide-react";
+import { FlaskConical, Shield, Leaf, Droplets, Award, CheckCircle, Microscope, Package, Globe, Cylinder, Beaker, GlassWater, Waves, Sparkles, Activity, Zap, TestTube } from "lucide-react";
 import { fetchSettings } from "@/lib/useSettings";
 import { fadeUp } from "@/lib/utils";
 
@@ -18,20 +18,20 @@ const D: Record<string, string> = {
   science_process1_desc: "We source raw materials from the finest suppliers worldwide. Every ingredient is laboratory tested for purity and efficacy before it ever reaches you.",
   science_process2_title: "Effervescent Technology",
   science_process2_desc: "Our proprietary effervescent formula dissolves completely in water, unlocking fast nutrient absorption. Maximum bioavailability — every single time.",
-  science_cert_badge: "Verified & Trusted",
-  science_cert_title: "Safety & Certifications",
-  science_cert_subtext: "Every product earns its place on your shelf through rigorous testing and official certification.",
+  science_cert_badge: "Quality & Safety",
+  science_cert_title: "Certified & Verified",
+  science_cert_desc: "Every single product is manufactured in state-of-the-art facilities following international safety protocols.",
   science_cert1_title: "GMP & ISO Certified",
   science_cert1_desc: "Manufactured in WHO-GMP and ISO certified facilities. International standards of hygiene and quality — followed without compromise.",
   science_cert2_title: "FSSAI Approved",
   science_cert2_desc: "Every Zupwell product is manufactured and tested under the strict regulations of FSSAI — India's food safety authority.",
   science_cert3_title: "Lab Tested Batches",
-  science_cert3_desc: "Each batch undergoes microbiological testing before market release. 100% verified. 100% safe.",
-  science_clean_badge: "No Shortcuts",
-  science_clean_title: "Clean Label\nPromise",
-  science_clean_desc: "What you see is what you get. No hidden fillers, no misleading labels, no compromises. Pure ingredients, honest transparency.",
+  science_cert3_desc: "Each batch is microbiologically tested before being released into the market. 100% verified. 100% safe.",
+  science_clean_badge: "Clean Label",
+  science_clean_title: "100% Transparent\nZero Compromise",
+  science_clean_desc: "We believe you have the right to know exactly what goes into your body. That's why we have a clean-label promise.",
   science_clean1_label: "Moisture-Lock Packaging",
-  science_clean1_sub: "Precision-sealed tubes keep tablets fresh and potent for longer.",
+  science_clean1_sub: "Airtight seal guarantees freshness and prevents tablet degradation from humidity.",
   science_clean2_label: "Transparent Labelling",
   science_clean2_sub: "What's on the label is exactly what's inside — nothing hidden.",
   science_clean3_label: "No Artificial Colours",
@@ -75,7 +75,7 @@ export default function SciencePage() {
       num: "01",
     },
     {
-      icon: Droplets,
+      icon: TestTube,
       title: s(settings, "science_process2_title"),
       desc: s(settings, "science_process2_desc"),
       num: "02",
@@ -217,12 +217,6 @@ export default function SciencePage() {
               >
                 {item.num}
               </span>
-              <div
-                className="h-14 w-14 rounded-2xl flex items-center justify-center mb-6"
-                style={{ background: "rgba(255,92,0,0.12)" }}
-              >
-                <item.icon size={26} style={{ color: "var(--or)" }} />
-              </div>
               <h3 className="font-black text-2xl mb-3" style={{ color: "#627d98" }}>{item.title}</h3>
               <p style={{ color: "#8F9CAE" }} className="leading-relaxed">{item.desc}</p>
             </motion.div>
@@ -339,7 +333,6 @@ export default function SciencePage() {
                   transform: "translate(30%, -30%)",
                 }}
               />
-              <Package size={48} className="mb-6" style={{ color: "var(--or)" }} />
               <h3 className="font-black text-3xl mb-4 whitespace-pre-line leading-tight" style={{ color: "#627d98" }}>
                 {s(settings, "science_tube_title")}
               </h3>

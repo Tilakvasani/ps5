@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Zap, Heart, Eye, Star, ArrowRight, FlaskConical } from "lucide-react";
+import { Heart, Eye, Star, ArrowRight, FlaskConical, Droplets, Zap, Sparkles, Target, HeartHandshake } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { fetchSettings } from "@/lib/useSettings";
@@ -43,11 +43,12 @@ export default function AboutPage() {
     return () => window.removeEventListener("storage", onBust);
   }, []);
 
-  const why = [1, 2, 3].map(n => ({
-    title: s(settings, `about_why${n}_title`),
-    desc:  s(settings, `about_why${n}_desc`),
-    icon:  [FlaskConical, Heart, Star][n - 1],
-  }));
+  const why = [
+    { icon: HeartHandshake, title: "Daily Wellness Support", desc: "Helps support hydration, immunity, and overall well-being so you can perform at your best every day." },
+    { icon: Zap,            title: "Fast Performance",       desc: "Quick-dissolving, fast-absorbing formula built for modern, active lifestyles." },
+    { icon: FlaskConical,   title: "Science-Backed Formula", desc: "Powered by clinically researched ingredients for trusted daily nutrition." },
+    { icon: Sparkles,       title: "Clean & Pure",           desc: "No unnecessary fillers — only quality ingredients your body needs." },
+  ];
 
   return (
     <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--dk)" }}>
@@ -109,7 +110,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8">
           <motion.div {...fadeUp(0)} className="card border-l-4 rounded-l-none" style={{ borderLeftColor: "var(--or)" }}>
             <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-4" style={{ background: "rgba(255,92,0,0.12)" }}>
-              <Heart size={20} style={{ color: "var(--or)" }} />
+              <Target size={20} style={{ color: "var(--or)" }} />
             </div>
             <h3 className="text-xl font-black mb-3" style={{ color: "#627d98" }}>Our Mission</h3>
             <p className="leading-relaxed" style={{ color: "#8F9CAE" }}>{s(settings, "about_mission")}</p>
@@ -124,16 +125,16 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── Why Zupwell ── */}
+      {/* ── Why Choose Zupwell ── */}
       <section className="py-20 px-6">
         <div className="mx-auto max-w-5xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: "#627d98" }}>
-              Why <span className="gradient-text">Zupwell?</span>
+              Why Choose <span className="gradient-text">Zupwell?</span>
             </h2>
-            <p style={{ color: "#8F9CAE" }}>Three reasons our customers never look back</p>
+            <p style={{ color: "#8F9CAE" }}>Four reasons our customers never look back</p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {why.map((w, i) => (
               <motion.div key={i} {...fadeUp(i * 0.1)} className="card text-center group transition-all"
                 style={{ borderColor: "rgba(255,92,0,0.15)" }}>

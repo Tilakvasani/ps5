@@ -56,7 +56,7 @@ const FAQS = [
   },
   {
     category: "General",
-    emoji: "💡",
+    emoji: "💬",
     questions: [
       {
         q: "Why should I choose Zupwell?",

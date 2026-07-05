@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle, Quote, Droplets, Brain, Flame, Leaf, Sparkles, Activity } from "lucide-react";
+import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle, Quote, Droplets, Brain, Flame, Leaf, Sparkles, Activity, FlaskConical, Tag, Citrus } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { CertLogo } from "@/components/storefront/CertLogos";
@@ -22,12 +22,6 @@ const CATEGORIES = [
   { name: "Wellness",     emoji: "🧘", slug: "wellness",     desc: "Sleep, stress & gut health" },
 ];
 
-const WHY_CHOOSE = [
-  { icon: Droplets, title: "Water Upgrade", desc: "Give your plain water a powerful, professional upgrade with every sip." },
-  { icon: Zap,      title: "Performance Fuel", desc: "Fast-absorbing formula designed for your busy, non-stop lifestyle." },
-  { icon: Brain,    title: "Science-Backed", desc: "Formulated with clinically studied ingredients for real results." },
-  { icon: Sparkles, title: "Clean Ingredients", desc: "No junk, no fillers. Just what your body actually needs." },
-];
 
 const D = {
   hero_title:       "Give Your Water a\nProfessional Upgrade.",
@@ -59,14 +53,14 @@ const BLOG_POSTS = [
     body: "Most people underestimate the power of hydration. Even a 2% drop in body water can reduce your physical performance by up to 20% and cloud your mental focus. Plain water alone doesn't cut it — your body also needs electrolytes like sodium, potassium, and magnesium to actually absorb and use that water at the cellular level. That's exactly why Zupwell's effervescent formula is built around rapid hydration science — giving your cells what they need in seconds, not hours.",
   },
   {
-    emoji: "⚡",
+    emoji: "🔍",
     tag: "Science",
     date: "",
     title: "Electrolytes vs Sports Drinks — What's the Difference?",
-    body: "Sports drinks are loaded with sugar, artificial colours, and calories you don't need. Electrolyte supplements like Zupwell deliver the same hydration benefits — sodium, potassium, magnesium, vitamin C — with less sugar and zero compromise. The effervescent technology ensures faster absorption compared to gulping down a sugary drink. If you're working out, commuting in the heat, or simply staying productive all day, pure electrolytes beat sports drinks every single time.",
+    body: "Sports drinks are loaded with sugar, artificial colours, and calories you don't need. Electrolyte supplements like Zupwell deliver the same hydration benefits — sodium, potassium, magnesium, vitamin C — with less sugar and zero compromise. The effervescent technology ensures faster absorption compared to gulping down a sugary drink. If you're working out, commuting in the heat, or simply staying productivity all day, pure electrolytes beat sports drinks every single time.",
   },
   {
-    emoji: "🏃",
+    emoji: "💪",
     tag: "Performance",
     date: "",
     title: "Pre-Workout Nutrition: What Actually Works",
@@ -225,30 +219,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Why Choose Zupwell ── */}
-      <section className="py-20 px-6" style={{ background: "#0C1E3E" }}>
-        <div className="mx-auto max-w-7xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
-              Why Choose Zupwell?
-            </h2>
-            <p style={{ color: "#8F9CAE", fontWeight: 600 }}>Smart-Fuel for Modern Humans.</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {WHY_CHOOSE.map((item, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}
-                className="zcard text-center">
-                <div className="h-14 w-14 mx-auto rounded-2xl flex items-center justify-center mb-4"
-                  style={{ background: "rgba(255,92,0,0.1)" }}>
-                  <item.icon size={24} style={{ color: "var(--or)" }} />
-                </div>
-                <h3 className="font-black mb-2" style={{ color: "#627d98", fontSize: "14px", letterSpacing: "-0.03em" }}>{item.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#8F9CAE" }}>{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── Why is Our Product Special? ── */}
       <section className="py-20 px-6" style={{ background: "var(--dk)" }}>
@@ -261,11 +231,11 @@ export default function HomePage() {
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
             {[
-              { icon: Brain,    title: "Scientific Formula", desc: "A fusion of science and taste." },
-              { icon: Activity, title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
-              { icon: Zap,      title: "Instant Absorption", desc: "Rocket-like speed, instant action." },
-              { icon: Shield,   title: "Pocket Friendly",    desc: "It even fits in your jeans pocket." },
-              { icon: Award,    title: "Best Flavour",       desc: "Absolutely fresh, as if straight from the garden." },
+              { icon: FlaskConical, title: "Scientific Formula", desc: "A fusion of science and taste." },
+              { icon: Activity,     title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
+              { icon: Zap,          title: "Instant Absorption", desc: "Rocket-like speed, instant action." },
+              { icon: Tag,          title: "Pocket Friendly",    desc: "It even fits in your jeans pocket." },
+              { icon: Citrus,       title: "Best Flavour",       desc: "Absolutely fresh, as if straight from the garden." },
             ].map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}
                 className="zcard text-center">
