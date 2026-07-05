@@ -77,7 +77,7 @@ export default function Footer() {
                 marginBottom: "10px",
               }}
             >
-              Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "#8F9CAE", marginLeft: "1px", verticalAlign: "super" }}>TM</sup>
+              Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "#8F9CAE", marginLeft: "2.5px", letterSpacing: "1px", verticalAlign: "super" }}>TM</sup>
             </div>
             <p style={{ color: "#8f9cae", fontSize: "12px", lineHeight: 1.7, marginBottom: "14px" }}>
               Performance-Driven Nutrition — Science-backed, insanely delicious, and tailored for your 24/7 lifestyle.
@@ -203,8 +203,7 @@ export default function Footer() {
           className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4"
         >
           <p style={{ fontSize: "11px", color: "#627d98" }}>
-            © {new Date().getFullYear()} {name}•. All rights reserved.
-            {fssai && <span className="ml-2">· FSSAI: {fssai}</span>}
+            © {new Date().getFullYear()} {name}. All rights reserved.
           </p>
           <p style={{ fontSize: "10px", color: "#627d98" }}>
             This product is a health supplement and not for medicinal use.

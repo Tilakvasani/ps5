@@ -87,7 +87,7 @@ export default function Navbar() {
               textDecoration: "none",
             }}
           >
-            Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "#8F9CAE", marginLeft: "1px", verticalAlign: "super" }}>TM</sup>
+            Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "#8F9CAE", marginLeft: "2.5px", letterSpacing: "1px", verticalAlign: "super" }}>TM</sup>
           </Link>
 
           {/* Desktop Nav */}

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
+import { CertLogo } from "@/components/storefront/CertLogos";
 import { FlaskConical, Shield, Leaf, Droplets, Award, CheckCircle, Microscope, Package, Globe } from "lucide-react";
 import { fetchSettings } from "@/lib/useSettings";
 import { fadeUp } from "@/lib/utils";
@@ -264,10 +265,24 @@ export default function SciencePage() {
                 transition={{ duration: 0.3 }}
               >
                 <div
-                  className="h-14 w-14 rounded-2xl flex items-center justify-center mb-6"
-                  style={{ background: cert.bg, border: "1.5px solid #1E2D4A" }}
+                  className="h-14 flex items-center mb-6 gap-3"
                 >
-                  <cert.icon size={24} style={{ color: cert.color }} />
+                  {i === 0 && (
+                    <>
+                      <CertLogo label="GMP" className="h-10 object-contain" />
+                      <CertLogo label="ISO" className="h-10 object-contain" />
+                    </>
+                  )}
+                  {i === 1 && (
+                    <CertLogo label="FSSAI" className="h-7 object-contain" />
+                  )}
+                  {i === 2 && (
+                    <div
+                      className="h-12 w-12 rounded-xl flex items-center justify-center bg-white/5 border border-[#1E2D4A]"
+                    >
+                      <Microscope size={22} style={{ color: cert.color }} />
+                    </div>
+                  )}
                 </div>
                 <h3 className="font-black text-xl mb-3">{cert.title}</h3>
                 <p className="text-white/65 leading-relaxed text-sm">{cert.desc}</p>

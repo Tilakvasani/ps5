@@ -204,11 +204,11 @@ export default function HomePage() {
                 Choose Your Power <ArrowRight size={16} />
               </motion.button>
             </Link>
-            <Link href="/register" className="w-full sm:w-auto">
+            <Link href="/login" className="w-full sm:w-auto">
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                 className="zbtn-out w-full flex items-center justify-center gap-2"
                 style={{ padding: "14px 28px", fontSize: "13px" }}>
-                Start Your Hustle <ChevronRight size={16} />
+                Sign In <ChevronRight size={16} />
               </motion.button>
             </Link>
           </motion.div>
@@ -287,7 +287,7 @@ export default function HomePage() {
           Certified & Compliant
         </p>
         <div className="relative">
-          <div className="flex gap-12 animate-marquee whitespace-nowrap" style={{ animationDuration: "14s" }}>
+          <div className="flex gap-12 animate-marquee whitespace-nowrap" style={{ animationDuration: "9s" }}>
             {[...certEntries, ...certEntries, ...certEntries].map(({ key, label }, idx) =>
               s(settings, key) ? (
                 <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
@@ -422,11 +422,11 @@ export default function HomePage() {
               Create a free account to access exclusive pricing, personalised recommendations, and your complete order history.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/register">
+              <Link href="/login">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                   className="zbtn-or"
                   style={{ padding: "14px 28px", fontSize: "13px" }}>
-                  Try Zupwell
+                  Sign In
                 </motion.button>
               </Link>
               <Link href="/products">

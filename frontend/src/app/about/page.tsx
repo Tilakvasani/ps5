@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Zap, Heart, Eye, Star, ArrowRight } from "lucide-react";
+import { Zap, Heart, Eye, Star, ArrowRight, FlaskConical } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { fetchSettings } from "@/lib/useSettings";
@@ -46,7 +46,7 @@ export default function AboutPage() {
   const why = [1, 2, 3].map(n => ({
     title: s(settings, `about_why${n}_title`),
     desc:  s(settings, `about_why${n}_desc`),
-    icon:  [Zap, Heart, Star][n - 1],
+    icon:  [FlaskConical, Heart, Star][n - 1],
   }));
 
   return (

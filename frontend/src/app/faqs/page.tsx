@@ -55,7 +55,7 @@ const FAQS = [
     ],
   },
   {
-    category: "General Questions",
+    category: "General",
     emoji: "💡",
     questions: [
       {
