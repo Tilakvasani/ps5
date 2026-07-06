@@ -34,7 +34,13 @@ export default function WhatsAppButton() {
             initial={{ opacity: 0, x: 10, scale: 0.9 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 10, scale: 0.9 }}
-            className="bg-white text-[#002A30] text-xs font-semibold px-3 py-2 rounded-xl shadow-lg border border-[#E8E2D9] whitespace-nowrap mr-1"
+            className="text-xs font-semibold px-3 py-2 rounded-xl whitespace-nowrap mr-1"
+            style={{
+              background: "#0C1E3E",
+              color: "#FFFFFF",
+              border: "1.5px solid #1E2D4A",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+            }}
           >
             💬 Chat with us on WhatsApp!
           </motion.div>
@@ -49,7 +55,17 @@ export default function WhatsAppButton() {
         whileTap={{ scale: 0.95 }}
         onMouseEnter={() => setTooltip(true)}
         onMouseLeave={() => setTooltip(false)}
-        className="h-14 w-14 rounded-full bg-[#25D366] shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow"
+        className="h-14 w-14 rounded-full bg-[#25D366] flex items-center justify-center relative"
+        style={{
+          boxShadow: "0 4px 16px rgba(37,211,102,0.3)",
+          transition: "box-shadow 0.2s",
+        }}
+        onMouseOverCapture={(e: React.MouseEvent<HTMLAnchorElement>) => {
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(255,92,0,0.35), 0 4px 16px rgba(37,211,102,0.2)";
+        }}
+        onMouseOutCapture={(e: React.MouseEvent<HTMLAnchorElement>) => {
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(37,211,102,0.3)";
+        }}
         aria-label="Chat on WhatsApp"
       >
         {/* WhatsApp SVG Icon */}

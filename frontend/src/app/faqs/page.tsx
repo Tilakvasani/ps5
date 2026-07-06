@@ -1,9 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, MessageCircle } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
+import { useEffect } from "react";
 import { fetchSettings } from "@/lib/useSettings";
 
 const FAQS = [
@@ -54,8 +55,8 @@ const FAQS = [
     ],
   },
   {
-    category: "General Questions",
-    emoji: "💡",
+    category: "General",
+    emoji: "💬",
     questions: [
       {
         q: "Why should I choose Zupwell?",
@@ -65,28 +66,19 @@ const FAQS = [
   },
 ];
 
-const D: Record<string, string> = {
-  faqs_hero_badge: "FAQs",
-  faqs_hero_title: "Got Questions?",
-  faqs_hero_subtext: "Everything you need to know about Zupwell and our products.",
-  faqs_footer_title: "Still have a question?",
-  faqs_footer_subtext: "Can't find what you're looking for? We're just a message away!",
-};
-
-const s = (settings: Record<string, string>, key: string) =>
-  settings[key] || D[key] || "";
-
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className={`border border-[#E8E2D9] rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-[#48C062]/40 shadow-sm" : "hover:border-[#48C062]/20"}`}>
+    <div className="zcard p-0 overflow-hidden" style={{ borderColor: open ? "var(--or)" : "#0C1E39" }}>
       <button onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left">
-        <span className={`font-semibold text-sm md:text-base transition-colors ${open ? "text-[#48C062]" : "text-[#002A30]"}`}>
+        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+        style={{ background: "#0C1E39" }}
+      >
+        <span className="font-semibold text-sm md:text-base transition-colors" style={{ color: open ? "var(--or)" : "#FFFFFF" }}>
           {q}
         </span>
         <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }} className="shrink-0">
-          <ChevronDown size={18} className={open ? "text-[#48C062]" : "text-[#8C8276]"} />
+          <ChevronDown size={18} style={{ color: open ? "var(--or)" : "#F8F8F8" }} />
         </motion.div>
       </button>
       <AnimatePresence initial={false}>
@@ -97,7 +89,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
-            <div className="px-5 pb-5 text-sm text-[#45353E] leading-relaxed border-t border-[#FCFAF6] pt-3">
+            <div className="px-5 pb-5 text-sm leading-relaxed pt-3" style={{ color: "#F8F8F8", borderTop: "1px solid #0C1E39" }}>
               {a}
             </div>
           </motion.div>
@@ -108,75 +100,59 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function FAQsPage() {
-  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [whatsapp, setWhatsapp] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
-    fetchSettings().then(setSettings).catch(() => {});
+    fetchSettings()
+      .then(s => setWhatsapp(s.contact_whatsapp || ""))
+      .catch(() => {});
     const onBust = (e: StorageEvent) => {
       if (e.key === "zupwell-settings-bust")
-        fetchSettings().then(setSettings).catch(() => {});
+        fetchSettings().then(s => setWhatsapp(s.contact_whatsapp || "")).catch(() => {});
     };
     window.addEventListener("storage", onBust);
     return () => window.removeEventListener("storage", onBust);
   }, []);
 
-  const whatsapp = settings.contact_whatsapp || "";
-
-  // Parse FAQs list from settings
-  let faqs = FAQS;
-  if (settings.faqs_list_json) {
-    try {
-      const parsed = JSON.parse(settings.faqs_list_json);
-      if (Array.isArray(parsed)) {
-        faqs = parsed;
-      }
-    } catch (err) {
-      console.error("Failed to parse FAQs JSON:", err);
-    }
-  }
-
-  const categories = ["All", ...faqs.map((f: any) => f.category)];
-  const filtered = activeCategory === "All" ? faqs : faqs.filter((f: any) => f.category === activeCategory);
+  const categories = ["All", ...FAQS.map(f => f.category)];
+  const filtered = activeCategory === "All" ? FAQS : FAQS.filter(f => f.category === activeCategory);
 
   return (
-    <main className="min-h-screen bg-[#FCFAF6] overflow-x-hidden">
+    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--dk)" }}>
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="relative pt-32 pb-16 px-6 bg-white overflow-hidden">
-        <div className="pointer-events-none absolute -top-40 -right-40 h-[400px] w-[400px] rounded-full bg-[#48C062]/6 " />
+      <section className="relative pt-32 pb-16 px-6 overflow-hidden" style={{ background: "#0C1E39", borderBottom: "1.5px solid #0C1E39" }}>
+        <div className="pointer-events-none absolute -top-40 -right-40 h-[400px] w-[400px] rounded-full" style={{ background: "rgba(255, 92, 0, 0.06)" }} />
         <div className="relative mx-auto max-w-3xl text-center">
           <motion.span initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-block text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-4">
-            {s(settings, "faqs_hero_badge")}
+            className="inline-block zbadge zbadge-or mb-4">
+            FAQs
           </motion.span>
           <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="text-5xl md:text-6xl font-black text-[#002A30] mb-4 leading-tight">
-            {s(settings, "faqs_hero_title").split(/(Questions\?)/i).map((part, i) => {
-              if (part.toLowerCase() === "questions?") {
-                return <span key={i} className="gradient-text">{part}</span>;
-              }
-              return part;
-            })}
+            className="text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
+            Got <span style={{ color: "var(--or)" }}>Questions?</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="text-lg text-[#45353E]">
-            {s(settings, "faqs_hero_subtext")}
+            className="text-lg" style={{ color: "#F8F8F8" }}>
+            Everything you need to know about Zupwell and our products.
           </motion.p>
         </div>
       </section>
 
       {/* ── Category Filter ── */}
-      <section className="py-8 px-6 bg-white border-b border-[#E8E2D9]">
+      <section className="py-8 px-6 border-b" style={{ background: "var(--dk)", borderColor: "#0C1E39" }}>
         <div className="mx-auto max-w-3xl flex items-center gap-2 flex-wrap justify-center">
           {categories.map(cat => (
             <button key={cat} onClick={() => setActiveCategory(cat)}
-              className={`text-sm px-4 py-2 rounded-full font-semibold transition-all ${
-                activeCategory === cat
-                  ? "bg-[#48C062] text-white"
-                  : "bg-[#FCFAF6] text-[#45353E] hover:bg-[#48C062]/10 hover:text-[#48C062]"
-              }`}>
+              className="zpill font-semibold transition-all"
+              style={{
+                background: activeCategory === cat ? "var(--or)" : "transparent",
+                color: activeCategory === cat ? "#FFFFFF" : "#F8F8F8",
+                borderColor: activeCategory === cat ? "var(--or)" : "#0C1E39",
+              }}
+            >
               {cat}
             </button>
           ))}
@@ -192,7 +168,7 @@ export default function FAQsPage() {
               viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-2xl">{section.emoji}</span>
-                <h2 className="text-xl font-black text-[#002A30]">{section.category}</h2>
+                <h2 className="text-xl font-black" style={{ color: "#FFFFFF", letterSpacing: "-0.03em" }}>{section.category}</h2>
               </div>
               <div className="space-y-3">
                 {section.questions.map(({ q, a }) => (
@@ -205,29 +181,29 @@ export default function FAQsPage() {
       </section>
 
       {/* ── Still have a question ── */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-16 px-6" style={{ background: "#0C1E39", borderTop: "1.5px solid #0C1E39" }}>
         <div className="mx-auto max-w-xl text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <div className="h-16 w-16 rounded-2xl bg-[#F0EFEA] flex items-center justify-center mx-auto mb-4">
-              <MessageCircle size={28} className="text-[#48C062]" />
+            <div className="h-16 w-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(255, 92, 0, 0.1)" }}>
+              <MessageCircle size={28} style={{ color: "var(--or)" }} />
             </div>
-            <h2 className="text-2xl font-black text-[#002A30] mb-2">
-              {s(settings, "faqs_footer_title")}
+            <h2 className="text-2xl font-black mb-2" style={{ color: "#FFFFFF" }}>
+              Still have a question?
             </h2>
-            <p className="text-[#45353E] mb-6">
-              {s(settings, "faqs_footer_subtext")}
+            <p className="mb-6" style={{ color: "#F8F8F8" }}>
+              Can't find what you're looking for? We're just a message away!
             </p>
             {whatsapp ? (
               <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  className="btn-primary flex items-center gap-2 px-8 py-3 mx-auto">
+                  className="zbtn-or flex items-center gap-2 px-8 py-3 mx-auto">
                   <MessageCircle size={16} /> WhatsApp Us
                 </motion.button>
               </a>
             ) : (
               <a href="mailto:support@zupwell.com">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  className="btn-primary flex items-center gap-2 px-8 py-3 mx-auto">
+                  className="zbtn-or flex items-center gap-2 px-8 py-3 mx-auto">
                   <MessageCircle size={16} /> Contact Us
                 </motion.button>
               </a>
@@ -240,3 +216,4 @@ export default function FAQsPage() {
     </main>
   );
 }
+

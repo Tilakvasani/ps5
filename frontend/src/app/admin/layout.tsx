@@ -44,56 +44,83 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const handleLogout = useAdminLogout();
 
   return (
-    <div className="flex h-screen bg-[#FCFAF6] overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--dk)" }}>
       {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-white lg:hidden" onClick={() => setSidebarOpen(false)} />
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 lg:hidden"
+            style={{ background: "rgba(5,17,36,0.7)" }}
+            onClick={() => setSidebarOpen(false)}
+          />
         )}
       </AnimatePresence>
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0 border-r border-[#E8E2D9] bg-white  flex flex-col transition-transform duration-300
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto`}>
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-60 flex-shrink-0 flex flex-col transition-transform duration-300
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto`}
+        style={{ background: "#0C1E3E", borderRight: "1.5px solid #1E2D4A" }}
+      >
         {/* Logo */}
-        <div className="flex items-center gap-1 px-5 py-5 border-b border-[#E8E2D9]">
-          <span className="text-xl font-black" style={{ background: "#48C062", }}>
-            Zupwell<sup style={{ fontSize: "0.55em", fontWeight: 700, color: "#48C062", marginLeft: "2px", verticalAlign: "super" }}>™</sup>
+        <div className="flex items-center gap-2 px-5 py-4" style={{ borderBottom: "1.5px solid #1E2D4A" }}>
+          <span style={{ fontSize: "18px", fontWeight: 900, letterSpacing: "-1.5px", color: "#FFFFFF" }}>
+            zupwell<span style={{ color: "var(--or)" }}>•</span>
           </span>
-          <span className="ml-auto text-xs text-[#45353E] border border-[#E8E2D9] rounded px-1.5 py-0.5">Admin</span>
-          <button className="lg:hidden text-[#45353E] hover:text-[#002A30] ml-1" onClick={() => setSidebarOpen(false)}><X size={18} /></button>
+          <span
+            className="ml-auto text-xs rounded px-1.5 py-0.5"
+            style={{ color: "#8F9CAE", border: "1px solid #1E2D4A", fontSize: "9px", fontWeight: 700, letterSpacing: "0.5px" }}
+          >
+            ADMIN
+          </span>
+          <button className="lg:hidden ml-1" style={{ color: "#8F9CAE" }} onClick={() => setSidebarOpen(false)}>
+            <X size={16} />
+          </button>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
+        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
           {NAV.map((item) => {
             const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
             return (
-              <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all group ${
-                  active ? "bg-[#48C062]/20 text-[#48C062]" : "text-[#45353E] hover:text-[#002A30] hover:bg-[#FCFAF6]"}`}>
-                <item.icon size={16} className={active ? "text-[#48C062]" : "text-[#45353E] group-hover:text-[#002A30]"} />
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setSidebarOpen(false)}
+                className={`zslink ${active ? "active" : ""}`}
+                style={active ? { background: "rgba(255,92,0,0.12)", color: "var(--or)" } : {}}
+              >
+                <item.icon size={14} style={{ color: active ? "var(--or)" : "#8F9CAE" }} />
                 {item.label}
-                {active && <ChevronRight size={12} className="ml-auto" />}
+                {active && <ChevronRight size={10} className="ml-auto" style={{ color: "var(--or)" }} />}
               </Link>
             );
           })}
         </nav>
 
         {/* Admin user */}
-        <div className="border-t border-[#E8E2D9] p-4">
+        <div style={{ borderTop: "1.5px solid #1E2D4A", padding: "12px" }}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-9 w-9 rounded-xl bg-[#FCFAF6] flex items-center justify-center text-sm font-black text-black">
+            <div
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-sm font-black text-white shrink-0"
+              style={{ background: "rgba(255,92,0,0.2)", color: "var(--or)" }}
+            >
               {adminName[0]?.toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-[#002A30] truncate">{adminName}</p>
-              <p className="text-xs text-[#45353E]">Administrator</p>
+              <p className="text-sm font-black truncate" style={{ color: "#FFFFFF", letterSpacing: "-0.02em" }}>{adminName}</p>
+              <p style={{ fontSize: "10px", color: "#627d98" }}>Administrator</p>
             </div>
           </div>
-          <button onClick={handleLogout} className="w-full flex items-center gap-2 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition-all">
-            <LogOut size={14} /> Sign Out
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 rounded-lg px-3 py-2 transition-all"
+            style={{ color: "#FF5C00", fontSize: "11px", fontWeight: 700 }}
+            onMouseEnter={e => (e.currentTarget.style.background = "#1E2D4A")}
+            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+          >
+            <LogOut size={13} /> Sign Out
           </button>
         </div>
       </aside>
@@ -101,24 +128,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
-        <header className="flex items-center gap-4 border-b border-[#E8E2D9] bg-white  px-6 py-3 flex-shrink-0">
-          <button className="lg:hidden text-[#45353E] hover:text-[#002A30]" onClick={() => setSidebarOpen(true)}>
-            <Menu size={22} />
+        <header
+          className="flex items-center gap-4 px-6 py-3 flex-shrink-0"
+          style={{ background: "#0C1E3E", borderBottom: "1.5px solid #1E2D4A" }}
+        >
+          <button className="lg:hidden" style={{ color: "#8F9CAE" }} onClick={() => setSidebarOpen(true)}>
+            <Menu size={20} />
           </button>
           <div className="flex-1" />
-          <Link href="/" target="_blank" className="text-xs text-[#45353E] hover:text-[#002A30] transition-colors border border-[#E8E2D9] rounded-lg px-3 py-1.5">
+          <Link
+            href="/"
+            target="_blank"
+            className="transition-colors rounded-lg px-3 py-1.5"
+            style={{ fontSize: "11px", fontWeight: 700, color: "#8F9CAE", border: "1px solid #1E2D4A" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#FFFFFF")}
+            onMouseLeave={e => (e.currentTarget.style.color = "#8F9CAE")}
+          >
             View Store ↗
           </Link>
           <Link href="/admin/notifications">
-            <div className="relative p-2 text-[#45353E] hover:text-[#002A30] cursor-pointer">
-              <Bell size={18} />
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[#48C062]" />
+            <div className="relative p-2 cursor-pointer" style={{ color: "#8F9CAE" }}>
+              <Bell size={17} />
+              <span className="absolute top-1 right-1 h-2 w-2 rounded-full" style={{ background: "var(--or)" }} />
             </div>
           </Link>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6" style={{ background: "var(--dk)" }}>
           {children}
         </main>
       </div>

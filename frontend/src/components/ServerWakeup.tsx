@@ -13,14 +13,11 @@ import { useEffect } from "react";
 
 const NODE_API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com";
-const CHAT_API_URL =
-  process.env.NEXT_PUBLIC_CHAT_API_URL || "https://whatsappchatbot-jfki.onrender.com";
 
 const PING_INTERVAL_MS = 14 * 60 * 1000; // 14 minutes
 
 function pingServers() {
   fetch(`${NODE_API_URL}/health`).catch(() => {});
-  fetch(`${CHAT_API_URL}/health`).catch(() => {});
 }
 
 export default function ServerWakeup() {

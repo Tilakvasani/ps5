@@ -2,10 +2,6 @@
  * ui.tsx — Shared UI Components
  * ==============================
  * Reusable micro-components used across multiple pages.
- * 
- * Previously duplicated:
- *   - GoogleIcon: login/page.tsx + register/page.tsx
- *   - LoadingSpinner: multiple pages
  */
 import React from "react";
 
@@ -40,7 +36,8 @@ const SPINNER_SIZES = { sm: "h-4 w-4", md: "h-8 w-8", lg: "h-12 w-12" };
 /** Reusable spinner — used on page-level loading states */
 export const LoadingSpinner = ({ size = "md", className = "" }: SpinnerProps) => (
   <div
-    className={`rounded-full border-4 border-[#48C062]/30 border-t-[#48C062] animate-spin ${SPINNER_SIZES[size]} ${className}`}
+    className={`rounded-full border-4 border-[var(--or)]/30 border-t-[var(--or)] animate-spin ${SPINNER_SIZES[size]} ${className}`}
+    style={{ borderColor: "rgba(255,92,0,0.2)", borderTopColor: "var(--or)" }}
     role="status"
     aria-label="Loading"
   />
@@ -48,7 +45,7 @@ export const LoadingSpinner = ({ size = "md", className = "" }: SpinnerProps) =>
 
 /** Full-page loading screen */
 export const PageLoader = () => (
-  <div className="min-h-screen bg-[#FCFAF6] flex items-center justify-center">
+  <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--dk)" }}>
     <LoadingSpinner size="lg" />
   </div>
 );
@@ -62,15 +59,15 @@ interface BadgeProps {
 }
 
 const BADGE_VARIANTS = {
-  green:  "bg-emerald-100 text-emerald-700",
-  blue:   "bg-blue-100 text-blue-700",
-  yellow: "bg-yellow-100 text-yellow-700",
-  red:    "bg-red-100 text-red-600",
-  gray:   "bg-[#FCFAF6] text-[#45353E]",
+  green:  "zbadge zbadge-gr",
+  blue:   "zbadge zbadge-bu",
+  yellow: "zbadge zbadge-am",
+  red:    "zbadge zbadge-rd",
+  gray:   "zbadge zbadge-dk",
 };
 
 export const Badge = ({ children, variant = "gray", className = "" }: BadgeProps) => (
-  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${BADGE_VARIANTS[variant]} ${className}`}>
+  <span className={`${BADGE_VARIANTS[variant]} ${className}`}>
     {children}
   </span>
 );
@@ -86,9 +83,9 @@ interface EmptyStateProps {
 
 export const EmptyState = ({ icon, title, description, action }: EmptyStateProps) => (
   <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
-    {icon && <div className="text-4xl mb-2">{icon}</div>}
-    <p className="font-bold text-[#002A30] text-lg">{title}</p>
-    {description && <p className="text-sm text-[#45353E] max-w-sm">{description}</p>}
+    {icon && <div className="text-4xl mb-2" style={{ opacity: 0.5 }}>{icon}</div>}
+    <p className="font-black text-lg" style={{ color: "#FFFFFF", letterSpacing: "-0.03em" }}>{title}</p>
+    {description && <p className="text-sm max-w-sm" style={{ color: "#8F9CAE" }}>{description}</p>}
     {action && <div className="mt-4">{action}</div>}
   </div>
 );

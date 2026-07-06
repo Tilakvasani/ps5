@@ -2,25 +2,27 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen bg-[#FCFAF6] flex items-center justify-center px-6">
+    <main className="min-h-screen flex items-center justify-center px-6" style={{ background: "var(--dk)" }}>
       <div className="text-center">
         <h1
           className="text-[10rem] font-black leading-none"
           style={{
-            background: "#48C062",
-            }}
+            color: "var(--or)",
+            letterSpacing: "-0.05em",
+          }}
         >
           404
         </h1>
-        <h2 className="text-2xl font-black text-[#002A30] mt-2">
+        <h2 className="text-2xl font-black mt-2" style={{ color: "#FFFFFF" }}>
           Page not found
         </h2>
-        <p className="text-[#45353E] mt-2 max-w-sm mx-auto">
+        <p className="mt-2 max-w-sm mx-auto" style={{ color: "#F8F8F8", opacity: 0.85 }}>
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
         <Link
           href="/"
-          className="mt-8 inline-block bg-[#48C062] hover:bg-[#359E4C] text-white px-8 py-3 rounded-xl font-semibold transition-colors"
+          className="zbtn-or mt-8 inline-block"
+          style={{ padding: "12px 32px" }}
         >
           Go Home
         </Link>
@@ -28,3 +30,4 @@ export default function NotFound() {
     </main>
   );
 }
+

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import ZupwellChat from "@/components/ZupwellChat";
 import WhatsAppButton from "@/components/storefront/WhatsAppButton";
 import ServerWakeup from "@/components/ServerWakeup";
 import { Toaster } from "react-hot-toast";
@@ -49,22 +48,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AuthSync />
         <ServerWakeup />
-        <ZupwellChat />
         <WhatsAppButton />
         {children}
         <Toaster
           position="top-right"
           toastOptions={{
             style: {
-              background: "#FFFFFF",
-              color: "#002A30",
-              border: "1px solid #E8E2D9",
-              
-              borderRadius: "12px",
-              fontFamily: "DM Sans, sans-serif",
-              fontSize: "14px",
+              background: "#0C1E3E",
+              color: "#FFFFFF",
+              border: "1.5px solid #1E2D4A",
+              borderRadius: "10px",
+              fontFamily: "Inter, sans-serif",
+              fontSize: "13px",
             },
-            success: { iconTheme: { primary: "#48C062", secondary: "#FFFFFF" } },
+            success: { iconTheme: { primary: "var(--or)", secondary: "#FFFFFF" } },
             error:   { iconTheme: { primary: "#ef4444", secondary: "#FFFFFF" } },
           }}
         />

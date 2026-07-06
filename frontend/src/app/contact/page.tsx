@@ -15,13 +15,6 @@ const D: Record<string, string> = {
   contact_info_email:    "info@zupwell.com",
   contact_instagram:     "",
   contact_facebook:      "",
-  contact_hero_badge:    "Contact Us",
-  contact_hero_title:    "Got Questions?\nWe've Got Answers!",
-  contact_hero_subtext:  "Reach out to us anytime — we're always happy to help.",
-  contact_form_badge:    "Grow with Zupwell",
-  contact_form_title:    "Distributor Inquiry",
-  contact_form_subtext:  "Interested in partnering with us? Fill in your details and let's do business!",
-  contact_form_footer:   "We typically respond within 24 hours on business days.",
 };
 
 const s = (settings: Record<string, string>, key: string) =>
@@ -74,196 +67,168 @@ export default function ContactPage() {
     setSending(false);
   };
 
-  const whatsappLink = s(settings, "contact_whatsapp")
-    ? `https://wa.me/${s(settings, "contact_whatsapp")}`
-    : null;
+  const rawWhatsApp = s(settings, "contact_whatsapp") || s(settings, "site_phone") || "916355466208";
+  const cleanWhatsApp = rawWhatsApp.replace(/[^0-9]/g, "");
+  const whatsappLink = `https://wa.me/${cleanWhatsApp}`;
+  const rawDisplay = s(settings, "contact_whatsapp") || s(settings, "site_phone") || "91 6355466208";
+  const displayWhatsApp = rawDisplay.startsWith("+") ? rawDisplay : `+${rawDisplay}`;
 
   return (
-    <main className="min-h-screen bg-[#FCFAF6] overflow-x-hidden">
+    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--dk)" }}>
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="relative pt-32 pb-16 px-6 bg-white overflow-hidden">
-        <div className="pointer-events-none absolute -top-40 -left-40 h-[400px] w-[400px] rounded-full bg-[#48C062]/6 " />
+      <section className="relative pt-32 pb-16 px-6 overflow-hidden" style={{ background: "#0C1E39", borderBottom: "1.5px solid #0C1E39" }}>
+        <div className="pointer-events-none absolute -top-40 -left-40 h-[400px] w-[400px] rounded-full" style={{ background: "rgba(255,92,0,0.06)" }} />
         <div className="relative mx-auto max-w-3xl text-center">
-          <motion.span {...fadeUp(0)} className="inline-block text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-4">
-            {s(settings, "contact_hero_badge")}
+          <motion.span {...fadeUp(0)} className="inline-block zbadge zbadge-or mb-4">
+            Contact Us
           </motion.span>
-          <motion.h1 {...fadeUp(0.1)} className="text-5xl md:text-6xl font-black text-[#002A30] mb-4 leading-tight whitespace-pre-line">
-            {s(settings, "contact_hero_title").split(/(We've Got Answers!|We\'ve Got Answers!)/i).map((part, i) => {
-              const isMatch = part.toLowerCase() === "we've got answers!" || part.toLowerCase() === "we\'ve got answers!";
-              return isMatch ? <span key={i} className="gradient-text">{part}</span> : part;
-            })}
+          <motion.h1 {...fadeUp(0.1)} className="text-3xl sm:text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
+            Got Questions?<br />
+            <span style={{ color: "var(--or)" }}>We've Got Answers!</span>
           </motion.h1>
-          <motion.p {...fadeUp(0.2)} className="text-lg text-[#45353E]">
-            {s(settings, "contact_hero_subtext")}
+          <motion.p {...fadeUp(0.2)} className="text-lg" style={{ color: "#F8F8F8" }}>
+            Reach out to us anytime — we're always happy to help.
           </motion.p>
         </div>
       </section>
 
       {/* ── Contact Cards ── */}
       <section className="py-16 px-6">
-        <div className="mx-auto max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mx-auto max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-6 justify-center">
 
           {/* WhatsApp */}
-          {whatsappLink && (
-            <motion.a {...fadeUp(0)} href={whatsappLink} target="_blank" rel="noopener noreferrer"
-              className="card flex flex-col items-center text-center gap-3 hover:border-green-400/40 hover:bg-[#F0EFEA]/50 transition-all group cursor-pointer">
-              <div className="h-12 w-12 rounded-2xl bg-[#F0EFEA] flex items-center justify-center group-hover:bg-green-100 transition-all">
-                <MessageCircle size={22} className="text-[#48C062]" />
-              </div>
+          <motion.div {...fadeUp(0)}
+            className="zcard flex flex-col items-center text-center gap-4 transition-all group"
+            style={{ borderColor: "#0C1E39" }}
+          >
+            <div className="h-12 w-12 rounded-2xl flex items-center justify-center transition-all" style={{ background: "rgba(37,211,102,0.1)" }}>
+              <svg viewBox="0 0 24 24" className="h-6 w-6 opacity-80">
+                <path fill="#25D366" d="M12.012 0C5.398 0 .056 5.348.056 11.962c0 2.115.55 4.18 1.597 5.992L0 24l6.19-1.623a11.93 11.93 0 0 0 5.817 1.517c6.62 0 11.964-5.348 11.964-11.962C23.99 5.348 18.648 0 12.012 0z"/>
+                <path fill="#FFFFFF" d="M17.447 14.432c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.388.248-.669.248-1.238.173-1.388-.074-.149-.272-.248-.57-.397z"/>
+              </svg>
+            </div>
+            <div className="flex-1 flex flex-col justify-between items-center w-full">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#45353E] mb-1">WhatsApp</p>
-                <p className="font-bold text-[#002A30] text-sm">+{s(settings, "contact_whatsapp")}</p>
-                <p className="text-xs text-[#48C062] mt-1 font-semibold">Chat now →</p>
+                <p className="zlabel mb-1">WhatsApp Us</p>
+                <p className="font-bold text-base mb-3" style={{ color: "#FFFFFF" }}>{displayWhatsApp}</p>
               </div>
-            </motion.a>
-          )}
+              <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="zbtn-or w-full py-2.5 text-xs text-center font-bold rounded-lg block">
+                Chat Us
+              </a>
+            </div>
+          </motion.div>
 
           {/* Support Email */}
-          <motion.a {...fadeUp(0.05)} href={`mailto:${s(settings, "contact_support_email")}`}
-            className="card flex flex-col items-center text-center gap-3 hover:border-[#48C062]/30 transition-all group cursor-pointer">
-            <div className="h-12 w-12 rounded-2xl bg-[#48C062]/10 flex items-center justify-center group-hover:bg-[#48C062]/20 transition-all">
-              <Mail size={22} className="text-[#48C062]" />
+          <motion.div {...fadeUp(0.05)}
+            className="zcard flex flex-col items-center text-center gap-4 transition-all group"
+            style={{ borderColor: "#0C1E39" }}
+          >
+            <div className="h-12 w-12 rounded-2xl flex items-center justify-center transition-all" style={{ background: "rgba(255,92,0,0.1)" }}>
+              <Mail size={22} style={{ color: "var(--or)" }} />
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#45353E] mb-1">Support Email</p>
-              <p className="font-bold text-[#002A30] text-sm break-all">{s(settings, "contact_support_email")}</p>
-            </div>
-          </motion.a>
-
-          {/* Info Email */}
-          <motion.a {...fadeUp(0.1)} href={`mailto:${s(settings, "contact_info_email")}`}
-            className="card flex flex-col items-center text-center gap-3 hover:border-[#48C062]/30 transition-all group cursor-pointer">
-            <div className="h-12 w-12 rounded-2xl bg-[#48C062]/10 flex items-center justify-center group-hover:bg-[#48C062]/20 transition-all">
-              <Mail size={22} className="text-[#48C062]" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#45353E] mb-1">Info Email</p>
-              <p className="font-bold text-[#002A30] text-sm break-all">{s(settings, "contact_info_email")}</p>
-            </div>
-          </motion.a>
-
-          {/* Social */}
-          <motion.div {...fadeUp(0.15)} className="card flex flex-col items-center text-center gap-3">
-            <div className="h-12 w-12 rounded-2xl bg-purple-50 flex items-center justify-center">
-              <Instagram size={22} className="text-purple-500" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#45353E] mb-2">Follow Us</p>
-              <div className="flex items-center justify-center gap-3">
-                {s(settings, "contact_instagram") && (
-                  <a href={s(settings, "contact_instagram")} target="_blank" rel="noopener noreferrer"
-                    className="h-8 w-8 rounded-lg bg-[#FCFAF6] flex items-center justify-center hover:opacity-80 transition-opacity">
-                    <Instagram size={14} className="text-white" />
-                  </a>
-                )}
-                {s(settings, "contact_facebook") && (
-                  <a href={s(settings, "contact_facebook")} target="_blank" rel="noopener noreferrer"
-                    className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center hover:opacity-80 transition-opacity">
-                    <Facebook size={14} className="text-white" />
-                  </a>
-                )}
-                {!s(settings, "contact_instagram") && !s(settings, "contact_facebook") && (
-                  <p className="text-xs text-[#8C8276]">Coming soon</p>
-                )}
+            <div className="flex-1 flex flex-col justify-between items-center w-full">
+              <div>
+                <p className="zlabel mb-1">Support Email</p>
+                <p className="font-bold text-base mb-3 break-all" style={{ color: "#FFFFFF" }}>{s(settings, "contact_support_email")}</p>
               </div>
+              <a href={`mailto:${s(settings, "contact_support_email")}`} className="zbtn-or w-full py-2.5 text-xs text-center font-bold rounded-lg block">
+                Send Email
+              </a>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* ── Distributor Inquiry Form ── */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-16 px-6" style={{ background: "var(--dk)" }}>
         <div className="mx-auto max-w-3xl">
           <motion.div {...fadeUp(0)} className="text-center mb-10">
-            <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-3">
-              {s(settings, "contact_form_badge")}
+            <span className="inline-block zbadge zbadge-or mb-3">
+              Grow with Zupwell
             </span>
-            <h2 className="text-3xl md:text-4xl font-black text-[#002A30] mb-3">
-              {s(settings, "contact_form_title").split(/(Inquiry)/i).map((part, i) => {
-                const isMatch = part.toLowerCase() === "inquiry";
-                return isMatch ? <span key={i} className="gradient-text">{part}</span> : part;
-              })}
+            <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
+              Distributor <span style={{ color: "var(--or)" }}>Inquiry</span>
             </h2>
-            <p className="text-[#45353E]">
-              {s(settings, "contact_form_subtext")}
+            <p style={{ color: "#F8F8F8" }}>
+              Interested in partnering with us? Fill in your details and let's do business!
             </p>
           </motion.div>
 
-          <motion.form {...fadeUp(0.1)} onSubmit={handleSubmit} className="card space-y-5">
+          <motion.form {...fadeUp(0.1)} onSubmit={handleSubmit} className="zcard space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Full Name */}
               <div>
-                <label className="label-text flex items-center gap-1.5">
-                  <User size={13} className="text-[#48C062]" /> Full Name *
+                <label className="zlabel flex items-center gap-1.5">
+                  <User size={13} style={{ color: "var(--or)" }} /> Full Name *
                 </label>
                 <input type="text" value={form.fullName} required
                   onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
-                  className="input-field text-sm" placeholder="Your full name" />
+                  className="zinp text-sm" placeholder="Your full name" />
               </div>
 
               {/* Firm Name */}
               <div>
-                <label className="label-text flex items-center gap-1.5">
-                  <Building size={13} className="text-[#48C062]" /> Firm Name
+                <label className="zlabel flex items-center gap-1.5">
+                  <Building size={13} style={{ color: "var(--or)" }} /> Firm Name
                 </label>
                 <input type="text" value={form.firmName}
                   onChange={e => setForm(f => ({ ...f, firmName: e.target.value }))}
-                  className="input-field text-sm" placeholder="Your firm / company name" />
+                  className="zinp text-sm" placeholder="Your firm / company name" />
               </div>
 
               {/* City */}
               <div>
-                <label className="label-text flex items-center gap-1.5">
-                  <MapPin size={13} className="text-[#48C062]" /> City *
+                <label className="zlabel flex items-center gap-1.5">
+                  <MapPin size={13} style={{ color: "var(--or)" }} /> City *
                 </label>
                 <input type="text" value={form.city} required
                   onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-                  className="input-field text-sm" placeholder="Your city" />
+                  className="zinp text-sm" placeholder="Your city" />
               </div>
 
               {/* State */}
               <div>
-                <label className="label-text flex items-center gap-1.5">
-                  <MapPin size={13} className="text-[#48C062]" /> State
+                <label className="zlabel flex items-center gap-1.5">
+                  <MapPin size={13} style={{ color: "var(--or)" }} /> State
                 </label>
                 <input type="text" value={form.state}
                   onChange={e => setForm(f => ({ ...f, state: e.target.value }))}
-                  className="input-field text-sm" placeholder="Your state" />
+                  className="zinp text-sm" placeholder="Your state" />
               </div>
             </div>
 
             {/* Experience */}
             <div>
-              <label className="label-text flex items-center gap-1.5">
-                <Briefcase size={13} className="text-[#48C062]" /> Experience in Distribution
+              <label className="zlabel flex items-center gap-1.5">
+                <Briefcase size={13} style={{ color: "var(--or)" }} /> Experience in Distribution
               </label>
               <input type="text" value={form.experience}
                 onChange={e => setForm(f => ({ ...f, experience: e.target.value }))}
-                className="input-field text-sm" placeholder="e.g. 3 years in FMCG, new to distribution, etc." />
+                className="zinp text-sm" placeholder="e.g. 3 years in FMCG, new to distribution, etc." />
             </div>
 
             {/* Message */}
             <div>
-              <label className="label-text flex items-center gap-1.5">
-                <FileText size={13} className="text-[#48C062]" /> Message *
+              <label className="zlabel flex items-center gap-1.5">
+                <FileText size={13} style={{ color: "var(--or)" }} /> Message *
               </label>
               <textarea value={form.message} required rows={4}
                 onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                className="input-field text-sm resize-none"
+                className="zinp text-sm resize-none"
                 placeholder="Tell us about your distribution network, area of operation, and what you're looking for..." />
             </div>
 
             <motion.button type="submit" disabled={sending}
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              className="btn-primary w-full py-3 flex items-center justify-center gap-2 disabled:opacity-50">
+              className="zbtn-or w-full py-3 flex items-center justify-center gap-2 disabled:opacity-50">
               <Send size={16} />
-              {sending ? "Sending..." : whatsappLink ? "Send Inquiry via WhatsApp" : "Let's Do Business"}
+              {sending ? "Sending..." : "Send Inquiry"}
             </motion.button>
 
-            <p className="text-xs text-center text-[#8C8276]">
-              {s(settings, "contact_form_footer")}
+            <p className="text-xs text-center" style={{ color: "#F8F8F8" }}>
+              We typically respond within 24 hours on business days.
             </p>
           </motion.form>
         </div>
@@ -273,3 +238,4 @@ export default function ContactPage() {
     </main>
   );
 }
+

@@ -16,55 +16,55 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
   }, [params.orderNumber]);
 
   if (loading) return (
-    <main className="min-h-screen bg-[#FCFAF6] flex items-center justify-center">
+    <main className="min-h-screen flex items-center justify-center" style={{ background: 'var(--dk)' }}>
       <Navbar />
-      <div className="h-8 w-8 rounded-full border-2 border-[#48C062] border-t-transparent animate-spin mt-20" />
+      <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin mt-20" style={{ borderColor: 'var(--or)', borderTopColor: 'transparent' }} />
     </main>
   );
 
   return (
-    <main className="min-h-screen bg-[#FCFAF6]">
+    <main className="min-h-screen" style={{ background: 'var(--dk)' }}>
       <Navbar />
       <div className="pt-24 pb-16 px-6 mx-auto max-w-3xl">
         {/* Success Header */}
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center mb-10">
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 border border-[#C3E5D9] mb-4">
-            <CheckCircle size={40} className="text-[#48C062]" />
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full mb-4" style={{ background: 'rgba(255,92,0,0.15)', border: '1.5px solid var(--or)' }}>
+            <CheckCircle size={40} style={{ color: 'var(--or)' }} />
           </div>
-          <h1 className="text-4xl font-black text-[#002A30] mb-2">Order Confirmed! 🎉</h1>
-          <p className="text-[#45353E]">Order <span className="text-[#48C062] font-mono font-bold">{params.orderNumber}</span> has been placed successfully.</p>
+          <h1 className="text-4xl font-black mb-2" style={{ color: '#627d98' }}>Order Confirmed! 🎉</h1>
+          <p style={{ color: '#8F9CAE' }}>Order <span className="font-mono font-bold" style={{ color: 'var(--or)' }}>{params.orderNumber}</span> has been placed successfully.</p>
         </motion.div>
 
         {order && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-4">
             {/* Order Details */}
             <div className="card">
-              <h2 className="font-bold text-[#002A30] mb-4 flex items-center gap-2"><Package size={18} className="text-[#48C062]" /> Order Details</h2>
+              <h2 className="font-bold mb-4 flex items-center gap-2" style={{ color: '#627d98' }}><Package size={18} style={{ color: 'var(--or)' }} /> Order Details</h2>
               <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                 {[["Order Number", order.orderNumber], ["Status", order.status], ["Payment", order.paymentMethod], ["Date", new Date(order.createdAt).toLocaleDateString("en-IN")]].map(([k, v]) => (
                   <div key={k}>
-                    <p className="text-[#45353E] mb-0.5">{k}</p>
-                    <p className="text-[#002A30] font-semibold capitalize">{v}</p>
+                    <p className="mb-0.5" style={{ color: '#8F9CAE' }}>{k}</p>
+                    <p className="font-semibold capitalize" style={{ color: '#FFFFFF' }}>{v}</p>
                   </div>
                 ))}
               </div>
 
               {/* Items */}
-              <div className="border-t border-[#E8E2D9] pt-4 space-y-2">
+              <div className="border-t pt-4 space-y-2" style={{ borderColor: '#1E2D4A' }}>
                 {order.items?.map((item: any) => (
                   <div key={item.id} className="flex justify-between text-sm">
-                    <span className="text-[#45353E]">{item.product?.name} × {item.qty}</span>
-                    <span className="text-[#002A30] font-semibold">₹{Number(item.unitPrice * item.qty).toFixed(2)}</span>
+                    <span style={{ color: '#8F9CAE' }}>{item.product?.name} × {item.qty}</span>
+                    <span className="font-semibold" style={{ color: '#FFFFFF' }}>₹{Number(item.unitPrice * item.qty).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
 
               {/* Totals */}
-              <div className="border-t border-[#E8E2D9] pt-4 mt-4 space-y-1 text-sm">
-                <div className="flex justify-between text-[#45353E]"><span>Subtotal</span><span>₹{Number(order.subtotal).toFixed(2)}</span></div>
-                <div className="flex justify-between text-[#45353E]"><span>CGST</span><span>₹{Number(order.cgstAmount).toFixed(2)}</span></div>
-                <div className="flex justify-between text-[#45353E]"><span>SGST</span><span>₹{Number(order.sgstAmount).toFixed(2)}</span></div>
-                <div className="flex justify-between font-bold text-[#002A30] border-t border-[#E8E2D9] pt-2 mt-1">
+              <div className="border-t pt-4 mt-4 space-y-1 text-sm" style={{ borderColor: '#1E2D4A' }}>
+                <div className="flex justify-between" style={{ color: '#8F9CAE' }}><span>Subtotal</span><span>₹{Number(order.subtotal).toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: '#8F9CAE' }}><span>CGST</span><span>₹{Number(order.cgstAmount).toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: '#8F9CAE' }}><span>SGST</span><span>₹{Number(order.sgstAmount).toFixed(2)}</span></div>
+                <div className="flex justify-between font-bold border-t pt-2 mt-1" style={{ color: '#FFFFFF', borderColor: '#1E2D4A' }}>
                   <span>Total Paid</span><span className="gradient-text text-lg">₹{Number(order.totalAmount).toFixed(2)}</span>
                 </div>
               </div>
@@ -73,12 +73,12 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
             {/* Delivery Address */}
             {order.address && (
               <div className="card">
-                <h2 className="font-bold text-[#002A30] mb-3">Delivery Address</h2>
-                <p className="text-sm text-[#45353E] leading-relaxed">
+                <h2 className="font-bold mb-3" style={{ color: '#627d98' }}>Delivery Address</h2>
+                <p className="text-sm leading-relaxed" style={{ color: '#8F9CAE' }}>
                   {order.address.fullName}<br />
                   {order.address.addressLine1}, {order.address.city}, {order.address.state} - {order.address.pincode}<br />
                   📞 {order.address.phone}
-                  {order.address.gstin && <><br /><span className="text-[#48C062]">GSTIN: {order.address.gstin}</span></>}
+                  {order.address.gstin && <><br /><span style={{ color: 'var(--or)' }}>GSTIN: {order.address.gstin}</span></>}
                 </p>
               </div>
             )}
@@ -87,8 +87,8 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
             {order.invoice && (
               <div className="card flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-[#002A30]">GST Invoice Ready</p>
-                  <p className="text-sm text-[#45353E]">{order.invoice.invoiceNumber}</p>
+                  <p className="font-bold" style={{ color: '#627d98' }}>GST Invoice Ready</p>
+                  <p className="text-sm" style={{ color: '#8F9CAE' }}>{order.invoice.invoiceNumber}</p>
                 </div>
                 <a href={invoicesApi.getPdf(order.invoice.invoiceNumber)} target="_blank" rel="noopener noreferrer">
                   <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} className="btn-primary flex items-center gap-2 text-sm px-4 py-2">

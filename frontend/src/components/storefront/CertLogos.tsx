@@ -21,21 +21,13 @@ export function GmpLogo({ className = "h-12" }: { className?: string }) {
   );
 }
 
-export function FsscLogo({ className = "h-12" }: { className?: string }) {
-  return (
-    <img
-      src="/fssc.png"
-      alt="FSSC 22000 Certified"
-      className={`${className} object-contain inline-block shrink-0`}
-    />
-  );
-}
+
 
 export function IsoLogo({ className = "h-12" }: { className?: string }) {
   return (
     <img
       src="/iso.svg"
-      alt="ISO Certified"
+      alt="ISO 9001:2015 Certified"
       className={`${className} object-contain inline-block shrink-0`}
     />
   );
@@ -59,28 +51,31 @@ interface CertLogoProps {
 export function CertLogo({ label, className }: CertLogoProps) {
   const cleanLabel = label.toUpperCase();
 
-  // We assign custom, visually balanced heights to match the FSSAI logo weight
   if (cleanLabel.includes("FSSAI")) {
-    return <FssaiLogo className={`h-8 ${className || ""}`} />;
+    return <FssaiLogo className={className || "h-8"} />;
   }
   if (cleanLabel.includes("GMP")) {
-    return <GmpLogo className={`h-11 ${className || ""}`} />;
-  }
-  if (cleanLabel.includes("FSSC") || cleanLabel.includes("22000")) {
-    return <FsscLogo className={`h-11 ${className || ""}`} />;
-  }
-  if (cleanLabel.includes("ISO")) {
-    return <IsoLogo className={`h-11 ${className || ""}`} />;
-  }
-  if (cleanLabel.includes("HACCP")) {
-    return <HaccpLogo className={`h-11 ${className || ""}`} />;
+    return <GmpLogo className={className || "h-11"} />;
   }
 
-  // Fallback
+  if (cleanLabel.includes("ISO")) {
+    return <IsoLogo className={className || "h-11"} />;
+  }
+  if (cleanLabel.includes("HACCP")) {
+    return <HaccpLogo className={className || "h-11"} />;
+  }
+
+  // Fallback — dark navy card style
   return (
-    <div className="inline-flex items-center gap-1 shrink-0 border border-[#E8E2D9] rounded-lg px-2.5 py-0.5 bg-[#FCFAF6] h-7">
-      <span className="text-[11px] font-bold text-[#002A30]">{label}</span>
-      <span className="text-[9px] text-[#48C062] font-semibold">Certified</span>
+    <div
+      className="inline-flex items-center gap-1.5 shrink-0 rounded-lg px-3 py-1.5 h-8"
+      style={{
+        background: "#0C1E3E",
+        border: "1.5px solid #1E2D4A",
+      }}
+    >
+      <span style={{ fontSize: "11px", fontWeight: 900, color: "#FFFFFF", letterSpacing: "0.5px" }}>{label}</span>
+      <span style={{ fontSize: "9px", color: "var(--or)", fontWeight: 800 }}>CERTIFIED</span>
     </div>
   );
 }

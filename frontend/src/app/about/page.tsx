@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Zap, Heart, Eye, Star, ArrowRight } from "lucide-react";
+import { Heart, Eye, Star, ArrowRight, FlaskConical, Droplets, Zap, Sparkles, Target, HeartHandshake } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { fetchSettings } from "@/lib/useSettings";
@@ -25,12 +25,6 @@ const D: Record<string, string> = {
   founder_title:     "Founder & CEO, Zupwell",
   founder_message:   "At Zupwell, I started with a simple observation: traditional supplements often feel like a chore — hard to swallow, slow to absorb, and difficult to integrate into a busy life. I founded Zupwell to bridge the gap between clinical effectiveness and modern convenience. Through Zupwell, my endeavor is to ensure that everyone can fulfil their dreams without compromising their health.",
   founder_photo:     "",
-  about_story_badge:  "Our Story",
-  about_story_title:  "Born to solve a real problem",
-  about_why_title:    "Why Zupwell?",
-  about_why_subtitle: "Three reasons our customers never look back",
-  about_future_title: "The Future of Zupwell",
-  about_cta_title:    "Ready to fuel your hustle?",
 };
 
 const s = (settings: Record<string, string>, key: string) =>
@@ -49,31 +43,54 @@ export default function AboutPage() {
     return () => window.removeEventListener("storage", onBust);
   }, []);
 
-  const why = [1, 2, 3].map(n => ({
-    title: s(settings, `about_why${n}_title`),
-    desc:  s(settings, `about_why${n}_desc`),
-    icon:  [Zap, Heart, Star][n - 1],
-  }));
+  const why = [
+    { icon: HeartHandshake, title: "Daily Wellness Support", desc: "Helps support hydration, immunity, and overall well-being so you can perform at your best every day." },
+    { icon: Zap,            title: "Fast Performance",       desc: "Quick-dissolving, fast-absorbing formula built for modern, active lifestyles." },
+    { icon: FlaskConical,   title: "Science-Backed Formula", desc: "Powered by clinically researched ingredients for trusted daily nutrition." },
+    { icon: Sparkles,       title: "Clean & Pure",           desc: "No unnecessary fillers — only quality ingredients your body needs." },
+  ];
 
   return (
-    <main className="min-h-screen bg-[#FCFAF6] overflow-x-hidden">
+    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--dk)" }}>
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="relative pt-32 pb-20 px-6 bg-white overflow-hidden">
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+        {/* futuristic background mesh */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `
+              radial-gradient(circle at 10% 20%, rgba(255, 79, 0, 0.12) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(30, 45, 74, 0.5) 0%, transparent 50%),
+              linear-gradient(180deg, #051124 0%, #0C1E3E 100%)
+            `,
+          }}
+        />
+        {/* abstract vector nodes overlay */}
+        <div 
+          className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{
+            backgroundImage: "radial-gradient(rgba(255, 79, 0, 0.12) 1.5px, transparent 1.5px), linear-gradient(to right, rgba(30, 45, 74, 0.2) 1px, transparent 1px)",
+            backgroundSize: "30px 30px, 60px 60px"
+          }}
+        />
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-[#48C062]/6 " />
+          <div className="absolute top-10 right-10 h-[400px] w-[400px] rounded-full border border-dashed opacity-20 animate-spin-slow" style={{ borderColor: "#FF4F00" }} />
+          <div className="absolute -bottom-20 left-20 h-[300px] w-[300px] rounded-full border border-[#FF4F00] opacity-10" />
         </div>
         <div className="relative mx-auto max-w-4xl text-center">
           <motion.span {...fadeUp(0)}
-            className="inline-block text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-4">
+            className="inline-block text-xs font-semibold uppercase tracking-widest mb-4"
+            style={{ color: "var(--or)" }}>
             About Zupwell
           </motion.span>
           <motion.h1 {...fadeUp(0.1)}
-            className="text-5xl md:text-6xl font-black text-[#002A30] leading-tight mb-6">
-            "{s(settings, "about_punchline")}"
+            className="text-3xl sm:text-4xl md:text-6xl font-black leading-tight mb-6"
+            style={{ color: "#FFFFFF" }}>
+            &quot;{s(settings, "about_punchline")}&quot;
           </motion.h1>
-          <motion.p {...fadeUp(0.2)} className="text-lg text-[#45353E] max-w-2xl mx-auto leading-relaxed">
+          <motion.p {...fadeUp(0.2)} className="text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.85 }}>
             {s(settings, "about_description")}
           </motion.p>
         </div>
@@ -83,32 +100,25 @@ export default function AboutPage() {
       <section className="py-20 px-6">
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <motion.div {...fadeUp(0)}>
-            <span className="text-xs font-semibold uppercase tracking-widest text-[#48C062] mb-3 block">
-              {s(settings, "about_story_badge")}
-            </span>
-            <h2 className="text-3xl md:text-4xl font-black text-[#002A30] mb-6 leading-tight">
-              {s(settings, "about_story_title").split(/(real problem)/i).map((part, i) => {
-                if (part.toLowerCase() === "real problem") {
-                  return <span key={i} className="gradient-text">{part}</span>;
-                }
-                return part;
-              })}
+            <span className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: "var(--or)" }}>Our Story</span>
+            <h2 className="text-3xl md:text-4xl font-black mb-6 leading-tight" style={{ color: "#FFFFFF" }}>
+              Born to solve a <span className="gradient-text">real problem</span>
             </h2>
-            <p className="text-[#45353E] leading-relaxed text-lg">
+            <p className="leading-relaxed text-lg" style={{ color: "#F8F8F8", opacity: 0.85 }}>
               {s(settings, "about_brand_story")}
             </p>
           </motion.div>
           {/* Visual block */}
           <motion.div {...fadeUp(0.1)} className="grid grid-cols-2 gap-4">
             {[
-              { val: "200+", label: "Products" },
-              { val: "50K+", label: "Customers" },
-              { val: "100%", label: "Authentic" },
+              { val: s(settings, "hero_stat1_value") || "200+", label: s(settings, "hero_stat1_label") || "Products" },
+              { val: s(settings, "hero_stat2_value") || "50K+", label: s(settings, "hero_stat2_label") || "Customers" },
+              { val: s(settings, "hero_stat3_value") || "100%", label: s(settings, "hero_stat3_label") || "Authentic" },
               { val: "3-5",  label: "Days Delivery" },
             ].map(({ val, label }) => (
-              <div key={label} className="card text-center py-8">
+              <div key={label} className="card text-center py-8" style={{ background: "#0C1E39", border: "1.5px solid #0C1E39" }}>
                 <p className="text-3xl font-black gradient-text">{val}</p>
-                <p className="text-sm text-[#45353E] mt-1">{label}</p>
+                <p className="text-sm mt-1" style={{ color: "#F8F8F8", opacity: 0.75 }}>{label}</p>
               </div>
             ))}
           </motion.div>
@@ -116,47 +126,44 @@ export default function AboutPage() {
       </section>
 
       {/* ── Mission & Vision ── */}
-      <section className="py-20 px-6 bg-white">
+      <section className="py-20 px-6" style={{ background: "#0C1E39" }}>
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8">
-          <motion.div {...fadeUp(0)} className="card border-l-4 border-l-[#48C062] rounded-l-none">
-            <div className="h-10 w-10 rounded-xl bg-[#48C062]/10 flex items-center justify-center mb-4">
-              <Heart size={20} className="text-[#48C062]" />
+          <motion.div {...fadeUp(0)} className="card border-l-4 rounded-l-none" style={{ borderLeftColor: "var(--or)", background: "#051124", border: "1.5px solid #0C1E39" }}>
+            <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-4" style={{ background: "rgba(255,92,0,0.12)" }}>
+              <Target size={20} style={{ color: "var(--or)" }} />
             </div>
-            <h3 className="text-xl font-black text-[#002A30] mb-3">Our Mission</h3>
-            <p className="text-[#45353E] leading-relaxed">{s(settings, "about_mission")}</p>
+            <h3 className="text-xl font-black mb-3" style={{ color: "#FFFFFF" }}>Our Mission</h3>
+            <p className="leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.8 }}>{s(settings, "about_mission")}</p>
           </motion.div>
-          <motion.div {...fadeUp(0.1)} className="card border-l-4 border-l-[#48C062] rounded-l-none">
-            <div className="h-10 w-10 rounded-xl bg-[#48C062]/10 flex items-center justify-center mb-4">
-              <Eye size={20} className="text-[#48C062]" />
+          <motion.div {...fadeUp(0.1)} className="card border-l-4 rounded-l-none" style={{ borderLeftColor: "var(--or)", background: "#051124", border: "1.5px solid #0C1E39" }}>
+            <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-4" style={{ background: "rgba(255,92,0,0.12)" }}>
+              <Eye size={20} style={{ color: "var(--or)" }} />
             </div>
-            <h3 className="text-xl font-black text-[#002A30] mb-3">Our Vision</h3>
-            <p className="text-[#45353E] leading-relaxed">{s(settings, "about_vision")}</p>
+            <h3 className="text-xl font-black mb-3" style={{ color: "#FFFFFF" }}>Our Vision</h3>
+            <p className="leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.8 }}>{s(settings, "about_vision")}</p>
           </motion.div>
         </div>
       </section>
 
-      {/* ── Why Zupwell ── */}
+      {/* ── Why Choose Zupwell ── */}
       <section className="py-20 px-6">
         <div className="mx-auto max-w-5xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black text-[#002A30] mb-3">
-              {s(settings, "about_why_title").split(/(Zupwell\?)/i).map((part, i) => {
-                if (part.toLowerCase() === "zupwell?") {
-                  return <span key={i} className="gradient-text">{part}</span>;
-                }
-                return part;
-              })}
+            <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: "#FFFFFF" }}>
+              Why Choose <span className="gradient-text">Zupwell?</span>
             </h2>
-            <p className="text-[#45353E]">{s(settings, "about_why_subtitle")}</p>
+            <p style={{ color: "#F8F8F8", opacity: 0.8 }}>Four reasons our customers never look back</p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {why.map((w, i) => (
-              <motion.div key={i} {...fadeUp(i * 0.1)} className="card text-center group hover:border-[#48C062]/30 transition-all">
-                <div className="h-14 w-14 mx-auto rounded-2xl bg-[#48C062]/10 flex items-center justify-center mb-4 group-hover:bg-[#48C062]/20 transition-all">
-                  <w.icon size={24} className="text-[#48C062]" />
+              <motion.div key={i} {...fadeUp(i * 0.1)} className="card text-center group transition-all"
+                style={{ borderColor: "rgba(255,92,0,0.15)", background: "#0C1E39" }}>
+                <div className="h-14 w-14 mx-auto rounded-2xl flex items-center justify-center mb-4 transition-all"
+                  style={{ background: "rgba(255,92,0,0.10)" }}>
+                  <w.icon size={24} style={{ color: "var(--or)" }} />
                 </div>
-                <h3 className="font-bold text-[#002A30] mb-2 text-lg">{w.title}</h3>
-                <p className="text-sm text-[#45353E] leading-relaxed">{w.desc}</p>
+                <h3 className="font-bold mb-2 text-lg" style={{ color: "#FFFFFF" }}>{w.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.8 }}>{w.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -170,18 +177,14 @@ export default function AboutPage() {
         <section className="py-20 px-6">
           <div className="mx-auto max-w-4xl">
             <motion.div {...fadeUp(0)} className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-black text-[#002A30]">
-                {s(settings, "about_future_title").split(/(Zupwell)/i).map((part, i) => {
-                  if (part.toLowerCase() === "zupwell") {
-                    return <span key={i} className="gradient-text">{part}</span>;
-                  }
-                  return part;
-                })}
+              <h2 className="text-3xl md:text-4xl font-black" style={{ color: "#FFFFFF" }}>
+                The Future of <span className="gradient-text">Zupwell</span>
               </h2>
             </motion.div>
             <motion.div {...fadeUp(0.1)}
-              className="card border border-[#48C062]/20 bg-[#FCFAF6]">
-              <p className="text-[#45353E] leading-relaxed text-lg mb-6">
+              className="card"
+              style={{ border: "1.5px solid rgba(255,92,0,0.2)", background: "#0C1E39" }}>
+              <p className="leading-relaxed text-lg mb-6" style={{ color: "#F8F8F8", opacity: 0.85 }}>
                 {s(settings, "about_future")}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -190,8 +193,8 @@ export default function AboutPage() {
                   "Energy and focus formulations",
                   "Specialized recovery blends",
                 ].map((item) => (
-                  <div key={item} className="flex items-start gap-2 text-sm text-[#45353E]">
-                    <span className="text-[#48C062] mt-0.5 shrink-0">→</span>
+                  <div key={item} className="flex items-start gap-2 text-sm" style={{ color: "#F8F8F8", opacity: 0.8 }}>
+                    <span className="mt-0.5 shrink-0" style={{ color: "var(--or)" }}>→</span>
                     {item}
                   </div>
                 ))}
@@ -202,22 +205,22 @@ export default function AboutPage() {
       )}
 
       {/* ── CTA ── */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-16 px-6" style={{ background: "#0C1E39" }}>
         <div className="mx-auto max-w-2xl text-center">
           <motion.div {...fadeUp(0)}>
-            <h2 className="text-2xl font-black text-[#002A30] mb-4">
-              {s(settings, "about_cta_title")}
+            <h2 className="text-2xl font-black mb-4" style={{ color: "#FFFFFF" }}>
+              Ready to fuel your hustle?
             </h2>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/products">
-                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  className="btn-primary flex items-center gap-2 px-8 py-3">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-stretch max-w-sm mx-auto sm:max-w-none">
+              <Link href="/products" className="w-full sm:w-auto">
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="btn-primary w-full flex items-center justify-center gap-2 px-8 py-3 text-sm font-bold">
                   Upgrade Now <ArrowRight size={16} />
                 </motion.button>
               </Link>
-              <Link href="/contact">
-                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  className="btn-outline px-8 py-3">
+              <Link href="/contact" className="w-full sm:w-auto">
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="btn-primary w-full flex items-center justify-center gap-2 px-8 py-3 text-sm font-bold">
                   Contact Us
                 </motion.button>
               </Link>

@@ -65,10 +65,10 @@ export default function CheckoutPage() {
   }, [user, router]);
 
   if (cart.length === 0) return (
-    <main className="min-h-screen bg-[#FCFAF6]">
+    <main style={{ minHeight: "100vh", background: "var(--dk)" }}>
       <Navbar />
       <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
-        <p className="text-2xl font-bold text-[#002A30] mb-4">Your cart is empty</p>
+        <p style={{ fontSize: "1.5rem", fontWeight: 700, color: "#FFFFFF", marginBottom: 16 }}>Your cart is empty</p>
         <Link href="/products"><button className="btn-primary px-6 py-3">Shop Now</button></Link>
       </div>
     </main>
@@ -133,7 +133,7 @@ export default function CheckoutPage() {
             },
           },
           prefill: { name: user?.name, email: user?.email },
-          theme: { color: "#48C062" },
+          theme: { color: "#FF5C00" },
         };
         new (window as any).Razorpay(options).open();
       } else {
@@ -149,20 +149,26 @@ export default function CheckoutPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FCFAF6]">
+    <main style={{ minHeight: "100vh", background: "var(--dk)" }}>
       <Navbar />
       <div className="pt-24 pb-16 px-6 mx-auto max-w-6xl">
-        <h1 className="text-4xl font-black text-[#002A30] mb-8">Checkout</h1>
+        <h1 style={{ fontSize: "2.25rem", fontWeight: 900, color: "#FFFFFF", marginBottom: 32 }}>Checkout</h1>
 
         {/* Steps */}
         <div className="flex items-center gap-4 mb-10">
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center gap-2">
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i <= step ? "bg-[#48C062] text-white" : "bg-white text-[#45353E]"}`}>
+              <div style={{
+                height: 32, width: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "0.875rem", fontWeight: 700, transition: "all 0.2s",
+                background: i <= step ? "var(--or)" : "#0C1E39",
+                color: i <= step ? "#FFFFFF" : "#F8F8F8",
+                border: i <= step ? "none" : "1.5px solid #0C1E39",
+              }}>
                 {i < step ? <CheckCircle size={16} /> : i + 1}
               </div>
-              <span className={`text-sm font-semibold ${i <= step ? "text-[#002A30]" : "text-[#45353E]"}`}>{s}</span>
-              {i < STEPS.length - 1 && <ChevronRight size={14} className="text-[#002A30]/30 mx-2" />}
+              <span style={{ fontSize: "0.875rem", fontWeight: 600, color: i <= step ? "#FFFFFF" : "#F8F8F8" }}>{s}</span>
+              {i < STEPS.length - 1 && <ChevronRight size={14} style={{ color: "rgba(248,248,248,0.3)", margin: "0 8px" }} />}
             </div>
           ))}
         </div>
@@ -173,30 +179,34 @@ export default function CheckoutPage() {
             {/* Step 0: Address */}
             {step === 0 && (
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                <div className="card mb-4">
+                <div style={{ background: "#0C1E39", border: "1.5px solid #0C1E39", borderRadius: 10, padding: 20, marginBottom: 16 }}>
                   <div className="flex items-center gap-2 mb-4">
-                    <MapPin size={18} className="text-[#48C062]" />
-                    <h2 className="font-bold text-[#002A30]">Delivery Address</h2>
+                    <MapPin size={18} style={{ color: "var(--or)" }} />
+                    <h2 style={{ fontWeight: 700, color: "#FFFFFF" }}>Delivery Address</h2>
                   </div>
                   {addresses.map((addr) => (
-                    <label key={addr.id} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${selectedAddress === addr.id ? "border-[#48C062] bg-[#48C062]/10" : "border-[#E8E2D9]"}`}>
-                      <input type="radio" name="address" checked={selectedAddress === addr.id} onChange={() => setSelectedAddress(addr.id)} className="mt-1 accent-[#48C062]" />
+                    <label key={addr.id} style={{
+                      display: "flex", gap: 12, padding: 16, borderRadius: 12, cursor: "pointer", marginBottom: 12, transition: "all 0.2s",
+                      border: selectedAddress === addr.id ? "1.5px solid var(--or)" : "1.5px solid #0C1E39",
+                      background: selectedAddress === addr.id ? "rgba(255,92,0,0.08)" : "transparent",
+                    }}>
+                      <input type="radio" name="address" checked={selectedAddress === addr.id} onChange={() => setSelectedAddress(addr.id)} className="mt-1 accent-[#FF5C00]" />
                       <div className="text-sm">
-                        <p className="font-bold text-[#002A30]">{addr.fullName}</p>
-                        <p className="text-[#45353E]">{addr.addressLine1}, {addr.city}, {addr.state} - {addr.pincode}</p>
-                        <p className="text-[#45353E]">{addr.phone}</p>
-                        {addr.gstin && <p className="text-xs text-[#48C062] mt-1">GSTIN: {addr.gstin}</p>}
+                        <p style={{ fontWeight: 700, color: "#FFFFFF" }}>{addr.fullName}</p>
+                        <p style={{ color: "#F8F8F8" }}>{addr.addressLine1}, {addr.city}, {addr.state} - {addr.pincode}</p>
+                        <p style={{ color: "#F8F8F8" }}>{addr.phone}</p>
+                        {addr.gstin && <p style={{ fontSize: "0.75rem", color: "var(--or)", marginTop: 4 }}>GSTIN: {addr.gstin}</p>}
                       </div>
                     </label>
                   ))}
-                  <button onClick={() => setAddingAddr(!addingAddr)} className="flex items-center gap-2 text-sm text-[#48C062] hover:text-[#48C062] mt-2">
+                  <button onClick={() => setAddingAddr(!addingAddr)} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.875rem", color: "var(--or)", marginTop: 8 }}>
                     <Plus size={14} /> Add new address
                   </button>
                   {addingAddr && (
-                    <div className="mt-4 space-y-3 border-t border-[#E8E2D9] pt-4">
+                    <div style={{ marginTop: 16, borderTop: "1.5px solid #0C1E39", paddingTop: 16 }} className="space-y-3">
                       {[["fullName","Full Name"],["phone","Phone"],["addressLine1","Address Line 1"],["city","City"],["state","State"],["pincode","Pincode"],["gstin","GSTIN (optional)"]].map(([k, label]) => (
                         <div key={k}>
-                          <label className="text-xs text-[#45353E] mb-1 block">{label}</label>
+                          <label style={{ fontSize: "0.75rem", color: "#F8F8F8", marginBottom: 4, display: "block" }}>{label}</label>
                           <input type="text" value={(newAddr as any)[k]} onChange={(e) => setNewAddr(n => ({ ...n, [k]: e.target.value }))} className="input-field text-sm" placeholder={label} />
                         </div>
                       ))}
@@ -213,23 +223,27 @@ export default function CheckoutPage() {
             {/* Step 1: Payment */}
             {step === 1 && (
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                <div className="card mb-4">
+                <div style={{ background: "#0C1E39", border: "1.5px solid #0C1E39", borderRadius: 10, padding: 20, marginBottom: 16 }}>
                   <div className="flex items-center gap-2 mb-4">
-                    <CreditCard size={18} className="text-[#48C062]" />
-                    <h2 className="font-bold text-[#002A30]">Payment Method</h2>
+                    <CreditCard size={18} style={{ color: "var(--or)" }} />
+                    <h2 style={{ fontWeight: 700, color: "#FFFFFF" }}>Payment Method</h2>
                   </div>
                   {[["razorpay","Razorpay (UPI, Card, Netbanking)","🔐"],["cod","Cash on Delivery","💵"]].map(([val, label, icon]) => (
-                    <label key={val} className={`flex gap-3 p-4 rounded-xl border cursor-pointer mb-3 transition-all ${paymentMethod === val ? "border-[#48C062] bg-[#48C062]/10" : "border-[#E8E2D9]"}`}>
-                      <input type="radio" name="payment" checked={paymentMethod === val as any} onChange={() => setPaymentMethod(val as any)} className="mt-1 accent-[#48C062]" />
+                    <label key={val} style={{
+                      display: "flex", gap: 12, padding: 16, borderRadius: 12, cursor: "pointer", marginBottom: 12, transition: "all 0.2s",
+                      border: paymentMethod === val ? "1.5px solid var(--or)" : "1.5px solid #0C1E39",
+                      background: paymentMethod === val ? "rgba(255,92,0,0.08)" : "transparent",
+                    }}>
+                      <input type="radio" name="payment" checked={paymentMethod === val as any} onChange={() => setPaymentMethod(val as any)} className="mt-1 accent-[#FF5C00]" />
                       <div>
-                        <span className="text-sm font-semibold text-[#002A30]">{icon} {label}</span>
-                        {val === "razorpay" && <p className="text-xs text-[#45353E] mt-0.5">Secure payments powered by Razorpay</p>}
-                        {val === "cod" && <p className="text-xs text-[#45353E] mt-0.5">Pay when your order arrives</p>}
+                        <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#FFFFFF" }}>{icon} {label}</span>
+                        {val === "razorpay" && <p style={{ fontSize: "0.75rem", color: "#F8F8F8", marginTop: 2 }}>Secure payments powered by Razorpay</p>}
+                        {val === "cod" && <p style={{ fontSize: "0.75rem", color: "#F8F8F8", marginTop: 2 }}>Pay when your order arrives</p>}
                       </div>
                     </label>
                   ))}
                   <div className="mt-4">
-                    <label className="text-sm font-semibold text-[#45353E] mb-2 block">Coupon Code (optional)</label>
+                    <label style={{ fontSize: "0.875rem", fontWeight: 600, color: "#F8F8F8", marginBottom: 8, display: "block" }}>Coupon Code (optional)</label>
                     <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="input-field text-sm" placeholder="Enter coupon code" />
                   </div>
                 </div>
@@ -245,32 +259,35 @@ export default function CheckoutPage() {
             {/* Step 2: Review */}
             {step === 2 && (
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                <div className="card mb-4">
-                  <h2 className="font-bold text-[#002A30] mb-4">Order Items</h2>
+                <div style={{ background: "#0C1E39", border: "1.5px solid #0C1E39", borderRadius: 10, padding: 20, marginBottom: 16 }}>
+                  <h2 style={{ fontWeight: 700, color: "#FFFFFF", marginBottom: 16 }}>Order Items</h2>
                   <div className="space-y-3">
                     {cart.map((item) => (
                       <div key={`${item.productId}-${item.variantId}`} className="flex justify-between text-sm">
-                        <span className="text-[#45353E]">{item.name} × {item.qty}</span>
-                        <span className="text-[#002A30] font-semibold">₹{(Number(item.price) * Number(item.qty)).toFixed(2)}</span>
+                        <span style={{ color: "#F8F8F8" }}>{item.name} × {item.qty}</span>
+                        <span style={{ color: "#FFFFFF", fontWeight: 600 }}>₹{(Number(item.price) * Number(item.qty)).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Terms Agreement */}
-                <div className={`card mb-4 border transition-all ${agreedToTerms ? "border-emerald-400/40 bg-emerald-50/30" : "border-[#E8E2D9]"}`}>
+                <div style={{
+                  background: "#0C1E39", borderRadius: 10, padding: 20, marginBottom: 16, transition: "all 0.2s",
+                  border: agreedToTerms ? "1.5px solid rgba(52,211,153,0.4)" : "1.5px solid #0C1E39",
+                }}>
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input type="checkbox" checked={agreedToTerms} onChange={e => setAgreedToTerms(e.target.checked)}
-                      className="mt-0.5 accent-[#48C062] h-4 w-4 shrink-0" />
-                    <div className="text-sm text-[#45353E] leading-relaxed">
+                      className="mt-0.5 accent-[#FF5C00] h-4 w-4 shrink-0" />
+                    <div style={{ fontSize: "0.875rem", color: "#F8F8F8", lineHeight: 1.6 }}>
                       <div className="flex items-center gap-1.5 mb-1">
-                        <Shield size={14} className="text-[#48C062] shrink-0" />
-                        <span className="font-semibold text-[#002A30]">I agree to the following policies</span>
+                        <Shield size={14} style={{ color: "var(--or)", flexShrink: 0 }} />
+                        <span style={{ fontWeight: 600, color: "#FFFFFF" }}>I agree to the following policies</span>
                       </div>
                       I have read and agree to the{" "}
-                      <Link href="/terms-of-service" target="_blank" className="text-[#48C062] hover:underline font-medium">Terms & Conditions</Link>,{" "}
-                      <Link href="/privacy-policy" target="_blank" className="text-[#48C062] hover:underline font-medium">Privacy Policy</Link>, and{" "}
-                      <Link href="/refund-policy" target="_blank" className="text-[#48C062] hover:underline font-medium">Refund & Cancellation Policy</Link> of Zupwell.
+                      <Link href="/terms-of-service" target="_blank" style={{ color: "var(--or)", fontWeight: 500 }} className="hover:underline">Terms &amp; Conditions</Link>,{" "}
+                      <Link href="/privacy-policy" target="_blank" style={{ color: "var(--or)", fontWeight: 500 }} className="hover:underline">Privacy Policy</Link>, and{" "}
+                      <Link href="/refund-policy" target="_blank" style={{ color: "var(--or)", fontWeight: 500 }} className="hover:underline">Refund &amp; Cancellation Policy</Link> of Zupwell.
                     </div>
                   </label>
                 </div>
@@ -281,40 +298,40 @@ export default function CheckoutPage() {
                     onClick={handlePlaceOrder} disabled={loading || !agreedToTerms}
                     className="btn-primary flex-1 py-3 disabled:opacity-50 disabled:cursor-not-allowed">
                     {loading
-                      ? <span className="flex items-center justify-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Placing Order...</span>
+                       ? <span className="flex items-center justify-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Placing Order...</span>
                       : `Place Order · ₹${total.toFixed(0)}`}
                   </motion.button>
                 </div>
                 {!agreedToTerms && (
-                  <p className="text-xs text-center text-[#8C8276] mt-2">Please agree to the policies above to place your order.</p>
+                  <p style={{ fontSize: "0.75rem", textAlign: "center", color: "#F8F8F8", marginTop: 8 }}>Please agree to the policies above to place your order.</p>
                 )}
               </motion.div>
             )}
           </div>
 
           {/* Order Summary */}
-          <div className="card h-fit sticky top-24">
-            <h2 className="font-bold text-[#002A30] mb-4">Summary</h2>
+          <div style={{ background: "#0C1E39", border: "1.5px solid #0C1E39", borderRadius: 10, padding: 20 }} className="h-fit sticky top-24">
+            <h2 style={{ fontWeight: 700, color: "#FFFFFF", marginBottom: 16 }}>Summary</h2>
             <div className="space-y-2 text-sm mb-4">
-              <div className="flex justify-between text-[#45353E]"><span>Subtotal ({cart.length} item{cart.length !== 1 ? "s" : ""})</span><span>₹{subtotal.toFixed(2)}</span></div>
-              <div className="flex justify-between text-[#45353E]"><span>CGST @{cgstPct}%</span><span>₹{cgst.toFixed(2)}</span></div>
-              <div className="flex justify-between text-[#45353E]"><span>SGST @{sgstPct}%</span><span>₹{sgst.toFixed(2)}</span></div>
-              <div className="flex justify-between text-[#45353E]">
+              <div className="flex justify-between" style={{ color: "#F8F8F8" }}><span>Subtotal ({cart.length} item{cart.length !== 1 ? "s" : ""})</span><span>₹{subtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between" style={{ color: "#F8F8F8" }}><span>CGST @{cgstPct}%</span><span>₹{cgst.toFixed(2)}</span></div>
+              <div className="flex justify-between" style={{ color: "#F8F8F8" }}><span>SGST @{sgstPct}%</span><span>₹{sgst.toFixed(2)}</span></div>
+              <div className="flex justify-between" style={{ color: "#F8F8F8" }}>
                 <span>Shipping</span>
                 <span>{shipping === 0 ? <span className="text-emerald-500 font-semibold">FREE</span> : `₹${shipping}`}</span>
               </div>
               {shipping > 0 && (
-                <p className="text-xs text-[#8C8276]">Free shipping on orders above ₹{freeShippingThreshold}</p>
+                <p style={{ fontSize: "0.75rem", color: "#F8F8F8" }}>Free shipping on orders above ₹{freeShippingThreshold}</p>
               )}
               {roundOffDiff !== 0 && (
-                <div className="flex justify-between text-[#8C8276] text-xs italic"><span>Round Off</span><span>{roundOffDiff > 0 ? "+" : ""}₹{roundOffDiff.toFixed(2)}</span></div>
+                <div className="flex justify-between text-xs italic" style={{ color: "#F8F8F8" }}><span>Round Off</span><span>{roundOffDiff > 0 ? "+" : ""}₹{roundOffDiff.toFixed(2)}</span></div>
               )}
             </div>
-            <div className="border-t border-[#E8E2D9] pt-4 flex justify-between items-center">
-              <span className="font-bold text-[#002A30]">Total</span>
+            <div style={{ borderTop: "1.5px solid #0C1E39", paddingTop: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontWeight: 700, color: "#FFFFFF" }}>Total</span>
               <span className="text-2xl font-black gradient-text">₹{total.toFixed(0)}</span>
             </div>
-            <p className="text-xs text-[#45353E] mt-1">Inclusive of all taxes</p>
+            <p style={{ fontSize: "0.75rem", color: "#F8F8F8", marginTop: 4 }}>Inclusive of all taxes</p>
           </div>
         </div>
       </div>

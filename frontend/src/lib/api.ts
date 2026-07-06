@@ -163,6 +163,8 @@ export const adminApi = {
     api.put(`/api/admin/products/${id}`, data, { headers: { "Content-Type": "multipart/form-data" } }).then((r) => r.data),
   deleteProduct: (id: number) =>
     api.delete(`/api/admin/products/${id}`).then((r) => r.data),
+  deleteProductImage: (imageId: number) =>
+    api.delete(`/api/admin/products/images/${imageId}`).then((r) => r.data),
 
   // Categories
   getCategories: () => api.get("/api/admin/categories").then((r) => r.data),
@@ -218,6 +220,8 @@ export const adminApi = {
   getSettings: () => api.get("/api/admin/settings").then((r) => r.data),
   updateSettings: (data: Record<string, string>) =>
     api.put("/api/admin/settings", data).then((r) => r.data),
+  uploadSettingImage: (data: FormData) =>
+    api.post("/api/admin/settings/upload", data, { headers: { "Content-Type": "multipart/form-data" } }).then((r) => r.data),
 
   // Notifications
   getNotifications: () => api.get("/api/admin/notifications").then((r) => r.data),

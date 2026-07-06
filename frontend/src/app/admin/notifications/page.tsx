@@ -29,31 +29,37 @@ export default function AdminNotificationsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black text-[#002A30]">Notifications</h1>
-          {unread > 0 && <p className="text-[#45353E] text-sm mt-1">{unread} unread</p>}
+          <h1 className="text-3xl font-black" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>Notifications</h1>
+          {unread > 0 && <p className="text-sm mt-1" style={{ color: "#8F9CAE" }}>{unread} unread</p>}
         </div>
         {unread > 0 && (
-          <button onClick={markAll} className="btn-outline flex items-center gap-2 text-sm py-2"><CheckCheck size={14} /> Mark all read</button>
+          <button onClick={markAll} className="zbtn-out flex items-center gap-2 text-sm py-2"><CheckCheck size={14} /> Mark all read</button>
         )}
       </div>
 
       <div className="space-y-2">
-        {loading ? Array.from({ length: 6 }).map((_, i) => <div key={i} className="card h-16 animate-pulse bg-[#FCFAF6]" />) :
+        {loading ? Array.from({ length: 6 }).map((_, i) => <div key={i} className="zcard h-16 animate-pulse" style={{ background: "#0C1E3E", borderColor: "#1E2D4A" }} />) :
           notifications.length === 0 ? (
-            <div className="card text-center py-16 text-[#45353E]">
+            <div className="zcard text-center py-16" style={{ color: "#8F9CAE" }}>
               <Bell size={40} className="mx-auto mb-3 opacity-20" />
               <p>No notifications</p>
             </div>
           ) : notifications.map((n: any) => (
             <div key={n.id} onClick={() => !n.isRead && markRead(n.id)}
-              className={`card flex items-start gap-4 cursor-pointer transition-all ${!n.isRead ? "border-[#48C062]/20 bg-[#48C062]/5" : "opacity-60"}`}>
+              className="zcard flex items-start gap-4 cursor-pointer transition-all"
+              style={{
+                background: !n.isRead ? "rgba(255, 92, 0, 0.08)" : "#0C1E3E",
+                borderColor: !n.isRead ? "var(--or)" : "#1E2D4A",
+                opacity: n.isRead ? 0.65 : 1,
+              }}
+            >
               <div className="text-2xl flex-shrink-0">{ICON[n.type] || "🔔"}</div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-[#002A30] text-sm">{n.title}</p>
-                <p className="text-sm text-[#45353E] mt-0.5">{n.message}</p>
-                <p className="text-xs text-[#45353E] mt-1">{new Date(n.createdAt).toLocaleString("en-IN")}</p>
+                <p className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>{n.title}</p>
+                <p className="text-sm mt-0.5" style={{ color: "#8F9CAE" }}>{n.message}</p>
+                <p className="text-xs mt-1" style={{ color: "#627d98" }}>{new Date(n.createdAt).toLocaleString("en-IN")}</p>
               </div>
-              {!n.isRead && <div className="h-2 w-2 rounded-full bg-[#48C062] flex-shrink-0 mt-1.5" />}
+              {!n.isRead && <div className="h-2 w-2 rounded-full flex-shrink-0 mt-1.5" style={{ background: "var(--or)" }} />}
             </div>
           ))
         }
@@ -61,3 +67,4 @@ export default function AdminNotificationsPage() {
     </div>
   );
 }
+

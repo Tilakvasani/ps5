@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { FlaskConical, Shield, Leaf, Droplets, Award, CheckCircle, Microscope, Package } from "lucide-react";
+import { CertLogo } from "@/components/storefront/CertLogos";
+import { FlaskConical, Shield, Leaf, Droplets, Award, CheckCircle, Microscope, Package, Globe, Cylinder, Beaker, GlassWater, Waves, Sparkles, Activity, Zap, TestTube } from "lucide-react";
 import { fetchSettings } from "@/lib/useSettings";
 import { fadeUp } from "@/lib/utils";
 
@@ -17,20 +18,20 @@ const D: Record<string, string> = {
   science_process1_desc: "We source raw materials from the finest suppliers worldwide. Every ingredient is laboratory tested for purity and efficacy before it ever reaches you.",
   science_process2_title: "Effervescent Technology",
   science_process2_desc: "Our proprietary effervescent formula dissolves completely in water, unlocking fast nutrient absorption. Maximum bioavailability — every single time.",
-  science_cert_badge: "Verified & Trusted",
-  science_cert_title: "Safety & Certifications",
-  science_cert_subtext: "Every product earns its place on your shelf through rigorous testing and official certification.",
+  science_cert_badge: "Quality & Safety",
+  science_cert_title: "Certified & Verified",
+  science_cert_desc: "Every single product is manufactured in state-of-the-art facilities following international safety protocols.",
   science_cert1_title: "GMP & ISO Certified",
   science_cert1_desc: "Manufactured in WHO-GMP and ISO certified facilities. International standards of hygiene and quality — followed without compromise.",
   science_cert2_title: "FSSAI Approved",
   science_cert2_desc: "Every Zupwell product is manufactured and tested under the strict regulations of FSSAI — India's food safety authority.",
   science_cert3_title: "Lab Tested Batches",
-  science_cert3_desc: "Each batch undergoes microbiological testing before market release. 100% verified. 100% safe.",
-  science_clean_badge: "No Shortcuts",
-  science_clean_title: "Clean Label\nPromise",
-  science_clean_desc: "What you see is what you get. No hidden fillers, no misleading labels, no compromises. Pure ingredients, honest transparency.",
+  science_cert3_desc: "Each batch is microbiologically tested before being released into the market. 100% verified. 100% safe.",
+  science_clean_badge: "Clean Label",
+  science_clean_title: "100% Transparent\nZero Compromise",
+  science_clean_desc: "We believe you have the right to know exactly what goes into your body. That's why we have a clean-label promise.",
   science_clean1_label: "Moisture-Lock Packaging",
-  science_clean1_sub: "Precision-sealed tubes keep tablets fresh and potent for longer.",
+  science_clean1_sub: "Airtight seal guarantees freshness and prevents tablet degradation from humidity.",
   science_clean2_label: "Transparent Labelling",
   science_clean2_sub: "What's on the label is exactly what's inside — nothing hidden.",
   science_clean3_label: "No Artificial Colours",
@@ -68,16 +69,14 @@ export default function SciencePage() {
 
   const manufacturing = [
     {
-      icon: Leaf,
+      icon: Globe,
       title: s(settings, "science_process1_title"),
       desc: s(settings, "science_process1_desc"),
-      num: "01",
     },
     {
-      icon: Droplets,
+      icon: TestTube,
       title: s(settings, "science_process2_title"),
       desc: s(settings, "science_process2_desc"),
-      num: "02",
     },
   ];
 
@@ -86,22 +85,22 @@ export default function SciencePage() {
       icon: Award,
       title: s(settings, "science_cert1_title"),
       desc: s(settings, "science_cert1_desc"),
-      color: "#002A30",
-      bg: "#EAF0F7",
+      color: "#FF5C00",
+      bg: "#0C1E39",
     },
     {
       icon: Shield,
       title: s(settings, "science_cert2_title"),
       desc: s(settings, "science_cert2_desc"),
-      color: "#48C062",
-      bg: "#F0EFEA",
+      color: "#FF5C00",
+      bg: "#0C1E39",
     },
     {
       icon: Microscope,
       title: s(settings, "science_cert3_title"),
       desc: s(settings, "science_cert3_desc"),
-      color: "#48C062",
-      bg: "#F0EFEA",
+      color: "#FF5C00",
+      bg: "#0C1E39",
     },
   ];
 
@@ -127,7 +126,7 @@ export default function SciencePage() {
           <span
             key={i}
             style={{
-              background: "linear-gradient(135deg, #48C062, #2D9B78)",
+              background: "linear-gradient(135deg, #FF5C00, #FFB800)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -142,26 +141,39 @@ export default function SciencePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FCFAF6] overflow-x-hidden">
+    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--dk)" }}>
       <Navbar />
 
       {/* ── HERO ── */}
       <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-        {/* background mesh */}
+        {/* futuristic background mesh */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at 60% 0%, #C3E5D9 0%, transparent 60%), radial-gradient(ellipse at 10% 80%, #EAF0F7 0%, transparent 50%)",
+            background: `
+              radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.15) 0%, transparent 45%),
+              radial-gradient(circle at 80% 70%, rgba(12, 30, 57, 0.6) 0%, transparent 50%),
+              linear-gradient(180deg, rgba(5, 17, 36, 0.8) 0%, var(--dk) 100%)
+            `,
+          }}
+        />
+        {/* cybernetic grid lines overlay */}
+        <div 
+          className="absolute inset-0 opacity-15 pointer-events-none"
+          style={{
+            backgroundImage: "radial-gradient(rgba(255, 92, 0, 0.15) 1px, transparent 1px), linear-gradient(to right, rgba(255, 92, 0, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 92, 0, 0.05) 1px, transparent 1px)",
+            backgroundSize: "40px 40px, 40px 40px, 40px 40px",
+            backgroundPosition: "center center"
           }}
         />
         {/* floating accent rings */}
         <div
-          className="absolute top-24 right-20 w-64 h-64 rounded-full opacity-10 pointer-events-none"
-          style={{ border: "2px solid #48C062", transform: "rotate(20deg)" }}
+          className="absolute top-24 right-20 w-64 h-64 rounded-full opacity-20 pointer-events-none animate-pulse"
+          style={{ border: "2px solid #FF5C00", transform: "rotate(20deg)" }}
         />
         <div
-          className="absolute -bottom-10 -left-16 w-96 h-96 rounded-full opacity-5 pointer-events-none"
-          style={{ border: "3px solid #002A30" }}
+          className="absolute -bottom-10 -left-16 w-96 h-96 rounded-full opacity-10 pointer-events-none"
+          style={{ border: "3px dashed #FF5C00" }}
         />
 
         <div className="relative mx-auto max-w-4xl text-center">
@@ -169,32 +181,67 @@ export default function SciencePage() {
             <span
               className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-6"
               style={{
-                background: "#F0EFEA",
-                color: "#48C062",
-                border: "1px solid #C3E5D9",
+                background: "#0C1E39",
+                color: "var(--or)",
+                border: "1px solid #0C1E39",
               }}
             >
               <FlaskConical size={12} /> {s(settings, "science_hero_badge")}
             </span>
           </motion.div>
 
-          <motion.h1 {...fadeUp(0.08)} className="font-black text-5xl md:text-7xl text-[#002A30] leading-none mb-6">
+          <motion.h1 {...fadeUp(0.08)} className="font-black text-3xl sm:text-5xl md:text-7xl leading-tight mb-6" style={{ color: "#F8F8F8" }}>
             {renderTitle(s(settings, "science_hero_title"))}
           </motion.h1>
 
-          <motion.p {...fadeUp(0.14)} className="text-lg md:text-xl text-[#45353E] max-w-2xl mx-auto leading-relaxed">
+          <motion.p {...fadeUp(0.14)} className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.85 }}>
             {s(settings, "science_hero_subtext")}
           </motion.p>
+        </div>
+      </section>
+
+      {/* ── LAB SHOWCASE GALLERY ── */}
+      <section className="py-12 px-6 mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <motion.div 
+            {...fadeUp(0.1)} 
+            className="group relative rounded-3xl overflow-hidden aspect-[16/10] border-2 border-[#0C1E39] hover:border-[#FF5C00] transition-all duration-300"
+          >
+            <img 
+              src="/assets/laboratory_work.png" 
+              alt="Laboratory work featuring researchers" 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051124]/90 via-transparent to-transparent flex flex-col justify-end p-6">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#FF5C00] mb-1">R&D Facilities</span>
+              <h3 className="text-xl font-black text-white leading-tight">Advanced Formulations Lab</h3>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            {...fadeUp(0.2)} 
+            className="group relative rounded-3xl overflow-hidden aspect-[16/10] border-2 border-[#0C1E39] hover:border-[#FF5C00] transition-all duration-300"
+          >
+            <img 
+              src="/assets/scientists_collaborating.png" 
+              alt="Scientists collaborating on new formulations" 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051124]/90 via-transparent to-transparent flex flex-col justify-end p-6">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#FF5C00] mb-1">Collaborative Innovation</span>
+              <h3 className="text-xl font-black text-white leading-tight">Quality Assurance & Synergy</h3>
+            </div>
+          </motion.div>
         </div>
       </section>
 
       {/* ── MANUFACTURING EXCELLENCE ── */}
       <section className="py-20 px-6 mx-auto max-w-7xl">
         <motion.div {...fadeUp(0)} className="mb-14">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#48C062] mb-3">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "var(--or)" }}>
             {s(settings, "science_process_badge")}
           </p>
-          <h2 className="font-black text-4xl md:text-5xl text-[#002A30] whitespace-pre-line leading-tight">
+          <h2 className="font-black text-2xl sm:text-4xl md:text-5xl whitespace-pre-line leading-tight" style={{ color: "#FFFFFF" }}>
             {s(settings, "science_process_title")}
           </h2>
         </motion.div>
@@ -205,25 +252,12 @@ export default function SciencePage() {
               key={i}
               {...fadeUp(i * 0.1)}
               className="relative rounded-3xl p-8 overflow-hidden group"
-              style={{ background: "#FFFFFF", border: "1px solid #E8E2D9" }}
+              style={{ background: "#0C1E39", border: "1.5px solid #0C1E39" }}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.3 }}
             >
-              {/* big number watermark */}
-              <span
-                className="absolute -top-4 -right-2 font-black text-8xl pointer-events-none select-none"
-                style={{ color: "#EAF0F7", lineHeight: 1 }}
-              >
-                {item.num}
-              </span>
-              <div
-                className="h-14 w-14 rounded-2xl flex items-center justify-center mb-6"
-                style={{ background: "#F0EFEA" }}
-              >
-                <item.icon size={26} className="text-[#48C062]" />
-              </div>
-              <h3 className="font-black text-2xl text-[#002A30] mb-3">{item.title}</h3>
-              <p className="text-[#45353E] leading-relaxed">{item.desc}</p>
+              <h3 className="font-black text-2xl mb-3" style={{ color: "#FFFFFF" }}>{item.title}</h3>
+              <p style={{ color: "#F8F8F8", opacity: 0.8 }} className="leading-relaxed">{item.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -233,7 +267,7 @@ export default function SciencePage() {
       <section
         className="py-24 px-6"
         style={{
-          background: "#48C062",
+          background: "var(--or)",
         }}
       >
         <div className="mx-auto max-w-7xl">
@@ -256,18 +290,32 @@ export default function SciencePage() {
                 {...fadeUp(i * 0.1)}
                 className="rounded-3xl p-8 text-white"
                 style={{
-                  background: "#2B4875",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  background: "#0C1E39",
+                  border: "1.5px solid #0C1E39",
                   backdropFilter: "blur(12px)",
                 }}
-                whileHover={{ borderColor: "#48C062" }}
+                whileHover={{ borderColor: "#FF5C00" }}
                 transition={{ duration: 0.3 }}
               >
                 <div
-                  className="h-14 w-14 rounded-2xl flex items-center justify-center mb-6"
-                  style={{ background: cert.bg, border: "1px solid #E8E2D9" }}
+                  className="h-14 flex items-center mb-6 gap-3"
                 >
-                  <cert.icon size={24} style={{ color: cert.color === "#002A30" ? "#48C062" : cert.color }} />
+                  {i === 0 && (
+                    <>
+                      <CertLogo label="GMP" className="h-10 object-contain" />
+                      <CertLogo label="ISO" className="h-10 object-contain" />
+                    </>
+                  )}
+                  {i === 1 && (
+                    <CertLogo label="FSSAI" className="h-7 object-contain" />
+                  )}
+                  {i === 2 && (
+                    <div
+                      className="h-12 w-12 rounded-xl flex items-center justify-center bg-white/5 border border-[#0C1E39]"
+                    >
+                      <Microscope size={22} style={{ color: cert.color }} />
+                    </div>
+                  )}
                 </div>
                 <h3 className="font-black text-xl mb-3">{cert.title}</h3>
                 <p className="text-white/65 leading-relaxed text-sm">{cert.desc}</p>
@@ -281,13 +329,13 @@ export default function SciencePage() {
       <section className="py-24 px-6 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div {...fadeUp(0)}>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#48C062] mb-3">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "var(--or)" }}>
               {s(settings, "science_clean_badge")}
             </p>
-            <h2 className="font-black text-4xl md:text-5xl text-[#002A30] mb-6 whitespace-pre-line leading-tight">
+            <h2 className="font-black text-2xl sm:text-4xl md:text-5xl mb-6 whitespace-pre-line leading-tight" style={{ color: "#FFFFFF" }}>
               {s(settings, "science_clean_title")}
             </h2>
-            <p className="text-[#45353E] text-lg leading-relaxed mb-8">
+            <p className="text-lg leading-relaxed mb-8" style={{ color: "#F8F8F8", opacity: 0.85 }}>
               {s(settings, "science_clean_desc")}
             </p>
             <div className="space-y-4">
@@ -296,12 +344,12 @@ export default function SciencePage() {
                   key={i}
                   {...fadeUp(i * 0.08)}
                   className="flex items-start gap-4 p-4 rounded-2xl"
-                  style={{ background: "#FFFFFF", border: "1px solid #E8E2D9" }}
+                  style={{ background: "#0C1E39", border: "1.5px solid #0C1E39" }}
                 >
-                  <CheckCircle size={20} className="text-[#48C062] mt-0.5 shrink-0" />
+                  <CheckCircle size={20} className="mt-0.5 shrink-0" style={{ color: "var(--or)" }} />
                   <div>
-                    <p className="font-bold text-[#002A30] text-lg">{item.label}</p>
-                    <p className="text-[#45353E] text-sm mt-0.5">{item.sub}</p>
+                    <p className="font-bold text-lg" style={{ color: "#FFFFFF" }}>{item.label}</p>
+                    <p className="text-sm mt-0.5" style={{ color: "#F8F8F8", opacity: 0.75 }}>{item.sub}</p>
                   </div>
                 </motion.div>
               ))}
@@ -313,29 +361,28 @@ export default function SciencePage() {
             <div
               className="relative rounded-3xl p-10 overflow-hidden"
               style={{
-                background: "#FFFFFF",
-                border: "1px solid #E8E2D9",
+                background: "#0C1E39",
+                border: "1.5px solid #0C1E39",
               }}
             >
               <div
                 className="absolute top-0 right-0 w-48 h-48 rounded-full pointer-events-none"
                 style={{
-                  background: "radial-gradient(circle, #F0EFEA 0%, transparent 70%)",
+                  background: "radial-gradient(circle, rgba(255, 92, 0, 0.08) 0%, transparent 70%)",
                   transform: "translate(30%, -30%)",
                 }}
               />
-              <Package size={48} className="text-[#48C062] mb-6" />
-              <h3 className="font-black text-3xl text-[#002A30] mb-4 whitespace-pre-line leading-tight">
+              <h3 className="font-black text-3xl mb-4 whitespace-pre-line leading-tight" style={{ color: "#FFFFFF" }}>
                 {s(settings, "science_tube_title")}
               </h3>
-              <p className="text-[#45353E] leading-relaxed mb-8">
+              <p className="leading-relaxed mb-8" style={{ color: "#F8F8F8", opacity: 0.8 }}>
                 {s(settings, "science_tube_desc")}
               </p>
               <div className="grid grid-cols-2 gap-4">
                 {tubeFeatures.map(([a, b]) => (
-                  <div key={a} className="rounded-2xl p-4" style={{ background: "#FCFAF6", border: "1px solid #E8E2D9" }}>
-                    <p className="font-bold text-[#002A30] text-sm">{a}</p>
-                    <p className="text-[#45353E] text-xs mt-0.5">{b}</p>
+                  <div key={a} className="rounded-2xl p-4" style={{ background: "var(--dk)", border: "1.5px solid #0C1E39" }}>
+                    <p className="font-bold text-sm" style={{ color: "#FFFFFF" }}>{a}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "#F8F8F8", opacity: 0.75 }}>{b}</p>
                   </div>
                 ))}
               </div>
@@ -349,7 +396,7 @@ export default function SciencePage() {
         <motion.div
           {...fadeUp(0)}
           className="relative rounded-3xl p-12 text-center overflow-hidden"
-          style={{ background: "#48C062" }}
+          style={{ background: "var(--or)" }}
         >
           <div
             className="absolute inset-0 pointer-events-none"
@@ -367,8 +414,8 @@ export default function SciencePage() {
             href="/products"
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
-            className="inline-flex items-center gap-2 bg-white text-[#48C062] font-bold px-8 py-4 rounded-2xl text-lg"
-            style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.12)" }}
+            className="inline-flex items-center gap-2 font-bold px-8 py-4 rounded-2xl text-lg"
+            style={{ background: "#051124", color: "var(--or)", boxShadow: "0 4px 24px rgba(0,0,0,0.24)" }}
           >
             {s(settings, "science_cta_btn")}
           </motion.a>

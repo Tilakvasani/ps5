@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Save } from "lucide-react";
+import { Save, Upload, X } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import { invalidateSettingsCache } from "@/lib/useSettings";
 import toast from "react-hot-toast";
@@ -51,13 +51,12 @@ const SETTING_GROUPS = [
   },
   {
     label: "Home Page — Certificate Logos",
-    desc: "Paste image URLs for FSSAI, ISO, GMP logos shown on home page",
+    desc: "Upload or paste image URLs for FSSAI, ISO, GMP, HACCP logos",
     keys: [
-      { key: "cert_fssai_logo", label: "FSSAI Logo URL",  type: "text" },
-      { key: "cert_iso_logo",   label: "ISO Logo URL",    type: "text" },
-      { key: "cert_gmp_logo",   label: "GMP Logo URL",    type: "text" },
-      { key: "cert_haccp_logo", label: "HACCP Logo URL",  type: "text" },
-      { key: "cert_fssc_logo",  label: "FSSC 22000 Logo URL", type: "text" },
+      { key: "cert_fssai_logo", label: "FSSAI Logo",  type: "image" },
+      { key: "cert_iso_logo",   label: "ISO Logo",    type: "image" },
+      { key: "cert_gmp_logo",   label: "GMP Logo",    type: "image" },
+      { key: "cert_haccp_logo", label: "HACCP Logo",  type: "image" },
     ],
   },
   {
@@ -67,7 +66,7 @@ const SETTING_GROUPS = [
       { key: "founder_name",    label: "Founder Name",    type: "text" },
       { key: "founder_title",   label: "Founder Title (e.g. Founder & CEO)", type: "text" },
       { key: "founder_message", label: "Founder's Message", type: "textarea" },
-      { key: "founder_photo",   label: "Founder Photo URL", type: "text" },
+      { key: "founder_photo",   label: "Founder Photo", type: "image" },
     ],
   },
   {
@@ -265,9 +264,7 @@ export default function AdminSettingsPage() {
     setSaving(true);
     try {
       await adminApi.updateSettings(settings);
-      // 1. Bust the in-memory + localStorage cache
       invalidateSettingsCache();
-      // 2. Broadcast to every open storefront tab so they refresh settings immediately
       try { window.localStorage.setItem("zupwell-settings-bust", Date.now().toString()); } catch {}
       toast.success("Settings saved! Changes are now live on the website.");
     } catch (err: any) { toast.error(err.message); }
@@ -276,42 +273,90 @@ export default function AdminSettingsPage() {
 
   if (loading) return (
     <div className="flex justify-center py-20">
-      <div className="h-8 w-8 rounded-full border-2 border-[#48C062] border-t-transparent animate-spin" />
+      <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)", borderTopColor: "transparent" }} />
     </div>
   );
 
   return (
     <div>
-      <h1 className="text-3xl font-black text-[#002A30] mb-2">Settings</h1>
-      <p className="text-[#45353E] text-sm mb-6">All changes here reflect live on the website. No code changes needed.</p>
+      <h1 className="text-3xl font-black mb-2" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>Settings</h1>
+      <p className="text-sm mb-6" style={{ color: "#8F9CAE" }}>All changes here reflect live on the website. No code changes needed.</p>
       <form onSubmit={handleSave}>
         <div className="space-y-6 max-w-3xl">
           {SETTING_GROUPS.map(group => (
-            <div key={group.label} className="card">
-              <div className="mb-4 pb-3 border-b border-[#E8E2D9]">
-                <h2 className="font-bold text-[#002A30]">{group.label}</h2>
+            <div key={group.label} className="zcard">
+              <div className="mb-4 pb-3 border-b" style={{ borderColor: "#1E2D4A" }}>
+                <h2 className="font-bold" style={{ color: "#627d98" }}>{group.label}</h2>
                 {(group as any).desc && (
-                  <p className="text-xs text-[#45353E] mt-1">{(group as any).desc}</p>
+                  <p className="text-xs mt-1" style={{ color: "#8F9CAE" }}>{(group as any).desc}</p>
                 )}
               </div>
               <div className="space-y-3">
                 {group.keys.map(({ key, label, type }) => (
                   <div key={key}>
-                    <label className="label-text">{label}</label>
+                    <label className="zlabel">{label}</label>
                     {type === "textarea" || type === "json" ? (
                       <textarea
                         value={settings[key] || ""}
                         onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
-                        className={`input-field text-sm ${type === "json" ? "font-mono h-40 resize-y" : "resize-none h-20"}`}
+                        className={`zinp text-sm ${type === "json" ? "font-mono h-40 resize-y" : "resize-none h-20"}`}
                         rows={type === "json" ? 8 : 3}
                         placeholder={type === "json" ? '[{"title": "...", "body": "..."}]' : ""}
                       />
+                    ) : type === "image" ? (
+                      <div className="flex flex-col sm:flex-row gap-3 mt-1.5">
+                        {settings[key] ? (
+                          <div className="relative h-20 w-36 shrink-0 rounded-xl overflow-hidden border bg-white/5" style={{ borderColor: "#1E2D4A" }}>
+                            <img src={settings[key]} alt="" className="w-full h-full object-contain" />
+                            <button
+                              type="button"
+                              onClick={() => setSettings(s => ({ ...s, [key]: "" }))}
+                              className="absolute top-1 right-1 h-6 w-6 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors"
+                              style={{ background: "#0C1E3E", color: "#8F9CAE" }}
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="h-20 w-36 shrink-0 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors border-2 border-dashed border-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10">
+                            <Upload size={18} className="mb-1" style={{ color: '#FF5C00' }} />
+                            <span className="text-[10px]" style={{ color: '#8F9CAE' }}>Upload File</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  const file = e.target.files[0];
+                                  const fd = new FormData();
+                                  fd.append("file", file);
+                                  const toastId = toast.loading("Uploading image...");
+                                  try {
+                                    const res = await adminApi.uploadSettingImage(fd);
+                                    setSettings(s => ({ ...s, [key]: res.url }));
+                                    toast.success("Uploaded successfully!", { id: toastId });
+                                  } catch (err: any) {
+                                    toast.error(err.message || "Upload failed", { id: toastId });
+                                  }
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                        )}
+                        <input
+                          type="text"
+                          value={settings[key] || ""}
+                          onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
+                          className="zinp text-sm flex-1"
+                          placeholder="Or paste direct image URL here"
+                        />
+                      </div>
                     ) : (
                       <input
-                        type={type}
+                        type={type === "number" ? "number" : type === "password" ? "password" : type === "email" ? "email" : "text"}
                         value={settings[key] || ""}
                         onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
-                        className="input-field text-sm"
+                        className="zinp text-sm"
                       />
                     )}
                   </div>
@@ -322,7 +367,7 @@ export default function AdminSettingsPage() {
 
           <motion.button type="submit" disabled={saving}
             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            className="btn-primary flex items-center gap-2 px-8 py-3 disabled:opacity-50">
+            className="zbtn-or flex items-center gap-2 px-8 py-3 disabled:opacity-50">
             <Save size={16} /> {saving ? "Saving..." : "Save All Settings"}
           </motion.button>
         </div>
@@ -330,3 +375,4 @@ export default function AdminSettingsPage() {
     </div>
   );
 }
+
