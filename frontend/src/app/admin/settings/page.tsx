@@ -279,40 +279,41 @@ export default function AdminSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-black mb-2" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>Settings</h1>
-      <p className="text-sm mb-6" style={{ color: "#8F9CAE" }}>All changes here reflect live on the website. No code changes needed.</p>
+      <h1 className="text-3xl font-black mb-2" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>Settings</h1>
+      <p className="text-sm mb-6" style={{ color: "#4A5568" }}>All changes here reflect live on the website. No code changes needed.</p>
       <form onSubmit={handleSave}>
         <div className="space-y-6 max-w-3xl">
           {SETTING_GROUPS.map(group => (
-            <div key={group.label} className="zcard">
-              <div className="mb-4 pb-3 border-b" style={{ borderColor: "#1E2D4A" }}>
-                <h2 className="font-bold" style={{ color: "#627d98" }}>{group.label}</h2>
+            <div key={group.label} className="zcard" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+              <div className="mb-4 pb-3 border-b" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+                <h2 className="font-bold text-lg" style={{ color: "#0C1E39" }}>{group.label}</h2>
                 {(group as any).desc && (
-                  <p className="text-xs mt-1" style={{ color: "#8F9CAE" }}>{(group as any).desc}</p>
+                  <p className="text-xs mt-1" style={{ color: "#4A5568" }}>{(group as any).desc}</p>
                 )}
               </div>
               <div className="space-y-3">
                 {group.keys.map(({ key, label, type }) => (
                   <div key={key}>
-                    <label className="zlabel">{label}</label>
+                    <label className="zlabel flex mb-1" style={{ color: "#0C1E39" }}>{label}</label>
                     {type === "textarea" || type === "json" ? (
                       <textarea
                         value={settings[key] || ""}
                         onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
                         className={`zinp text-sm ${type === "json" ? "font-mono h-40 resize-y" : "resize-none h-20"}`}
+                        style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
                         rows={type === "json" ? 8 : 3}
                         placeholder={type === "json" ? '[{"title": "...", "body": "..."}]' : ""}
                       />
                     ) : type === "image" ? (
                       <div className="flex flex-col sm:flex-row gap-3 mt-1.5">
                         {settings[key] ? (
-                          <div className="relative h-20 w-36 shrink-0 rounded-xl overflow-hidden border bg-white/5" style={{ borderColor: "#1E2D4A" }}>
+                          <div className="relative h-20 w-36 shrink-0 rounded-xl overflow-hidden border bg-white/5" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
                             <img src={settings[key]} alt="" className="w-full h-full object-contain" />
                             <button
                               type="button"
                               onClick={() => setSettings(s => ({ ...s, [key]: "" }))}
                               className="absolute top-1 right-1 h-6 w-6 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors"
-                              style={{ background: "#0C1E3E", color: "#8F9CAE" }}
+                              style={{ background: "#0C1E39", color: "#FFFFFF" }}
                             >
                               <X size={12} />
                             </button>
@@ -320,7 +321,7 @@ export default function AdminSettingsPage() {
                         ) : (
                           <label className="h-20 w-36 shrink-0 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors border-2 border-dashed border-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10">
                             <Upload size={18} className="mb-1" style={{ color: '#FF5C00' }} />
-                            <span className="text-[10px]" style={{ color: '#8F9CAE' }}>Upload File</span>
+                            <span className="text-[10px]" style={{ color: '#0C1E39', fontWeight: 600 }}>Upload File</span>
                             <input
                               type="file"
                               accept="image/*"
@@ -348,6 +349,7 @@ export default function AdminSettingsPage() {
                           value={settings[key] || ""}
                           onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
                           className="zinp text-sm flex-1"
+                          style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
                           placeholder="Or paste direct image URL here"
                         />
                       </div>
@@ -357,6 +359,7 @@ export default function AdminSettingsPage() {
                         value={settings[key] || ""}
                         onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
                         className="zinp text-sm"
+                        style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
                       />
                     )}
                   </div>

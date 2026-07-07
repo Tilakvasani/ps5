@@ -45,14 +45,14 @@ export default function Footer() {
     fontSize: "10px",
     fontWeight: 900,
     letterSpacing: "1.2px",
-    color: "#627d98",
+    color: "#FFFFFF",
     textTransform: "uppercase" as const,
     marginBottom: "16px",
     display: "block",
   };
 
   const linkStyle: React.CSSProperties = {
-    color: "#8f9cae",
+    color: "#F8F8F8",
     fontSize: "11px",
     fontWeight: 700,
     transition: "color 0.15s",
@@ -62,7 +62,7 @@ export default function Footer() {
   };
 
   return (
-    <footer style={{ background: "var(--dk)", borderTop: "1.5px solid #1E2D4A" }}>
+    <footer style={{ background: "var(--dk)", borderTop: "1.5px solid #0C1E39" }}>
       <div className="mx-auto max-w-7xl px-6 py-14">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
 
@@ -77,12 +77,12 @@ export default function Footer() {
                 marginBottom: "10px",
               }}
             >
-              Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "#8F9CAE", marginLeft: "2.5px", letterSpacing: "1px", verticalAlign: "super" }}>TM</sup>
+              Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "#FF5C00", marginLeft: "2.5px", letterSpacing: "1px", verticalAlign: "super" }}>TM</sup>
             </div>
-            <p style={{ color: "#8f9cae", fontSize: "12px", lineHeight: 1.7, marginBottom: "14px" }}>
+            <p style={{ color: "#F8F8F8", opacity: 0.8, fontSize: "12px", lineHeight: 1.7, marginBottom: "14px" }}>
               Performance-Driven Nutrition — Science-backed, insanely delicious, and tailored for your 24/7 lifestyle.
             </p>
-            <div style={{ fontSize: "10px", lineHeight: 1.8, color: "#627d98", marginBottom: "14px" }}>
+            <div style={{ fontSize: "10px", lineHeight: 1.8, color: "#6B7280", marginBottom: "14px" }}>
               {gstin  && <p>GSTIN: {gstin}</p>}
               {fssai  && <p>FSSAI: {fssai}</p>}
             </div>
@@ -96,17 +96,17 @@ export default function Footer() {
                     rel="noopener noreferrer"
                     className="h-8 w-8 rounded-lg flex items-center justify-center transition-all"
                     style={{
-                      background: "#0C1E3E",
-                      border: "1.5px solid #1E2D4A",
-                      color: "#8f9cae",
+                      background: "#0C1E39",
+                      border: "1.5px solid #0C1E39",
+                      color: "#F8F8F8",
                     }}
                     onMouseEnter={e => {
                       e.currentTarget.style.borderColor = "var(--or)";
                       e.currentTarget.style.color = "var(--or)";
                     }}
                     onMouseLeave={e => {
-                      e.currentTarget.style.borderColor = "#1E2D4A";
-                      e.currentTarget.style.color = "#8f9cae";
+                      e.currentTarget.style.borderColor = "#0C1E39";
+                      e.currentTarget.style.color = "#F8F8F8";
                     }}
                   >
                     {icon}
@@ -125,7 +125,7 @@ export default function Footer() {
                 href={h}
                 style={linkStyle}
                 onMouseEnter={e => (e.currentTarget.style.color = "var(--or)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#8f9cae")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#F8F8F8")}
               >
                 {l}
               </Link>
@@ -147,7 +147,7 @@ export default function Footer() {
                 href={h}
                 style={linkStyle}
                 onMouseEnter={e => (e.currentTarget.style.color = "var(--or)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#8f9cae")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#F8F8F8")}
               >
                 {l}
               </Link>
@@ -157,7 +157,7 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <span style={colHeadStyle}>Contact Us</span>
-            <div style={{ fontSize: "11px", color: "#8f9cae", display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ fontSize: "11px", color: "#F8F8F8", opacity: 0.8, display: "flex", flexDirection: "column", gap: "10px" }}>
               <div className="flex items-start gap-2">
                 <MapPin size={13} style={{ color: "var(--or)", marginTop: 2, flexShrink: 0 }} />
                 <span>{address}</span>
@@ -186,7 +186,7 @@ export default function Footer() {
         </div>
 
         {/* Certification Logos */}
-        <div className="flex flex-wrap justify-center items-center gap-6 pb-6" style={{ borderBottom: "1px solid #1E2D4A", marginBottom: "20px" }}>
+        <div className="flex flex-wrap justify-center items-center gap-6 pb-6" style={{ borderBottom: "1px solid #0C1E39", marginBottom: "20px" }}>
           {certEntries.map(({ key, label }) => {
             const val = s[key];
             return val ? (
@@ -201,10 +201,10 @@ export default function Footer() {
         <div
           className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4"
         >
-          <p style={{ fontSize: "11px", color: "#627d98" }}>
+          <p style={{ fontSize: "11px", color: "#6B7280" }}>
             © {new Date().getFullYear()} {name}. All rights reserved.
           </p>
-          <p style={{ fontSize: "10px", color: "#627d98" }}>
+          <p style={{ fontSize: "10px", color: "#6B7280" }}>
             This product is a health supplement and not for medicinal use.
           </p>
         </div>

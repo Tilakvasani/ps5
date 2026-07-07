@@ -75,8 +75,8 @@ function AccountPageContent() {
       <div className="pt-24 pb-16 px-6 mx-auto max-w-6xl">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-black" style={{ color: '#627d98' }}>My Account</h1>
-            <p className="text-sm mt-1" style={{ color: '#8F9CAE' }}>{user?.email}</p>
+            <h1 className="text-3xl font-black" style={{ color: '#FFFFFF' }}>My Account</h1>
+            <p className="text-sm mt-1" style={{ color: '#F8F8F8' }}>{user?.email}</p>
           </div>
           <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 border border-red-400/20 hover:border-red-400/40 px-4 py-2 rounded-xl transition-all">
             <LogOut size={14} /> Sign Out
@@ -87,19 +87,19 @@ function AccountPageContent() {
           {/* Sidebar */}
           <aside className="lg:col-span-1">
             <div className="card space-y-1">
-              <div className="flex items-center gap-3 pb-4 mb-2 border-b" style={{ borderColor: '#1E2D4A' }}>
+              <div className="flex items-center gap-3 pb-4 mb-2 border-b" style={{ borderColor: '#0C1E39' }}>
                 <div className="h-12 w-12 rounded-xl flex items-center justify-center text-lg font-black" style={{ background: 'var(--or)', color: '#FFF' }}>
                   {user?.name?.[0]?.toUpperCase()}
                 </div>
                 <div>
                   <p className="font-bold text-sm" style={{ color: '#FFFFFF' }}>{user?.name}</p>
-                  <p className="text-xs" style={{ color: '#8F9CAE' }}>Customer</p>
+                  <p className="text-xs" style={{ color: '#F8F8F8' }}>Customer</p>
                 </div>
               </div>
               {TABS.map((t) => (
                 <button key={t.id} onClick={() => setTab(t.id)}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                  style={tab === t.id ? { background: 'var(--or)', color: '#FFF' } : { background: 'transparent', color: '#8F9CAE' }}>
+                  style={tab === t.id ? { background: 'var(--or)', color: '#FFF' } : { background: 'transparent', color: '#F8F8F8' }}>
                   <t.icon size={15} /> {t.label}
                 </button>
               ))}
@@ -111,18 +111,18 @@ function AccountPageContent() {
             {/* Profile Tab */}
             {tab === "profile" && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="card">
-                <h2 className="font-bold mb-6" style={{ color: '#627d98' }}>Profile Information</h2>
+                <h2 className="font-bold mb-6" style={{ color: '#FFFFFF' }}>Profile Information</h2>
                 <div className="space-y-4 max-w-md">
                   <div>
-                    <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#8F9CAE' }}>Full Name</label>
+                    <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#F8F8F8' }}>Full Name</label>
                     <input value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} className="input-field" />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#8F9CAE' }}>Email</label>
+                    <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#F8F8F8' }}>Email</label>
                     <input value={user?.email || ""} disabled className="input-field opacity-50 cursor-not-allowed" />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#8F9CAE' }}>Phone</label>
+                    <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#F8F8F8' }}>Phone</label>
                     <input value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} className="input-field" />
                   </div>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleUpdateProfile} className="btn-primary px-6 py-2.5">
@@ -135,9 +135,9 @@ function AccountPageContent() {
             {/* Orders Tab */}
             {tab === "orders" && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                <h2 className="font-bold mb-4" style={{ color: '#627d98' }}>Order History</h2>
+                <h2 className="font-bold mb-4" style={{ color: '#FFFFFF' }}>Order History</h2>
                 {orders.length === 0 ? (
-                  <div className="card text-center py-12" style={{ color: '#8F9CAE' }}>
+                  <div className="card text-center py-12" style={{ color: '#F8F8F8' }}>
                     <Package size={40} className="mx-auto mb-3 opacity-30" />
                     <p>No orders yet</p>
                   </div>
@@ -152,8 +152,8 @@ function AccountPageContent() {
                               <span className="font-mono text-sm font-bold" style={{ color: '#FFFFFF' }}>{order.orderNumber}</span>
                               <span className={`badge ${STATUS_BADGE[order.status] || "badge-info"}`}>{order.status}</span>
                             </div>
-                            <p className="text-xs" style={{ color: '#8F9CAE' }}>{new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
-                            <p className="text-sm mt-1" style={{ color: '#8F9CAE' }}>{order.items?.length} item(s)</p>
+                            <p className="text-xs" style={{ color: '#F8F8F8' }}>{new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+                            <p className="text-sm mt-1" style={{ color: '#F8F8F8' }}>{order.items?.length} item(s)</p>
                           </div>
                           <div className="text-right flex flex-col items-end gap-1">
                             <p className="text-lg font-black gradient-text">₹{Number(order.totalAmount).toFixed(2)}</p>
@@ -174,7 +174,7 @@ function AccountPageContent() {
                                 <Download size={11} /> Invoice PDF
                               </button>
                             )}
-                            <span className="text-xs mt-1" style={{ color: '#8F9CAE' }}>View Details →</span>
+                            <span className="text-xs mt-1" style={{ color: '#F8F8F8' }}>View Details →</span>
                           </div>
                         </div>
                       </div>
@@ -189,7 +189,7 @@ function AccountPageContent() {
             {tab === "addresses" && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-bold" style={{ color: '#627d98' }}>Saved Addresses</h2>
+                  <h2 className="font-bold" style={{ color: '#FFFFFF' }}>Saved Addresses</h2>
                   <button onClick={() => setAddingAddr(!addingAddr)} className="btn-primary text-sm px-4 py-2 flex items-center gap-1.5">
                     <Plus size={14} /> Add Address
                   </button>
@@ -197,10 +197,10 @@ function AccountPageContent() {
 
                 {addingAddr && (
                   <div className="card mb-4 space-y-3">
-                    <h3 className="font-semibold text-sm" style={{ color: '#627d98' }}>New Address</h3>
+                    <h3 className="font-semibold text-sm" style={{ color: '#FFFFFF' }}>New Address</h3>
                     {[["fullName","Full Name"],["phone","Phone"],["addressLine1","Address Line 1"],["city","City"],["state","State"],["pincode","Pincode"],["gstin","GSTIN (optional)"]].map(([k, label]) => (
                       <div key={k}>
-                        <label className="text-xs mb-1 block" style={{ color: '#8F9CAE' }}>{label}</label>
+                        <label className="text-xs mb-1 block" style={{ color: '#F8F8F8' }}>{label}</label>
                         <input value={(newAddr as any)[k]} onChange={e => setNewAddr(n => ({ ...n, [k]: e.target.value }))} className="input-field text-sm" placeholder={label} />
                       </div>
                     ))}
@@ -219,8 +219,8 @@ function AccountPageContent() {
                         {addr.isDefault && <span className="badge badge-success">Default</span>}
                       </div>
                       <p className="font-bold text-sm" style={{ color: '#FFFFFF' }}>{addr.fullName}</p>
-                      <p className="text-sm mt-1 leading-relaxed" style={{ color: '#8F9CAE' }}>{addr.addressLine1}<br />{addr.city}, {addr.state} - {addr.pincode}</p>
-                      <p className="text-sm mt-1" style={{ color: '#8F9CAE' }}>{addr.phone}</p>
+                      <p className="text-sm mt-1 leading-relaxed" style={{ color: '#F8F8F8' }}>{addr.addressLine1}<br />{addr.city}, {addr.state} - {addr.pincode}</p>
+                      <p className="text-sm mt-1" style={{ color: '#F8F8F8' }}>{addr.phone}</p>
                       {addr.gstin && <p className="text-xs mt-1" style={{ color: 'var(--or)' }}>GSTIN: {addr.gstin}</p>}
                       <button onClick={() => handleDeleteAddress(addr.id)}
                         className="absolute top-4 right-4 h-8 w-8 flex items-center justify-center rounded-lg text-red-400/40 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100">

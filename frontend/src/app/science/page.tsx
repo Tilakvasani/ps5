@@ -72,13 +72,11 @@ export default function SciencePage() {
       icon: Globe,
       title: s(settings, "science_process1_title"),
       desc: s(settings, "science_process1_desc"),
-      num: "01",
     },
     {
       icon: TestTube,
       title: s(settings, "science_process2_title"),
       desc: s(settings, "science_process2_desc"),
-      num: "02",
     },
   ];
 
@@ -88,21 +86,21 @@ export default function SciencePage() {
       title: s(settings, "science_cert1_title"),
       desc: s(settings, "science_cert1_desc"),
       color: "#FF5C00",
-      bg: "#0C1E3E",
+      bg: "#0C1E39",
     },
     {
       icon: Shield,
       title: s(settings, "science_cert2_title"),
       desc: s(settings, "science_cert2_desc"),
       color: "#FF5C00",
-      bg: "#0C1E3E",
+      bg: "#0C1E39",
     },
     {
       icon: Microscope,
       title: s(settings, "science_cert3_title"),
       desc: s(settings, "science_cert3_desc"),
       color: "#FF5C00",
-      bg: "#0C1E3E",
+      bg: "#0C1E39",
     },
   ];
 
@@ -128,7 +126,7 @@ export default function SciencePage() {
           <span
             key={i}
             style={{
-              background: "linear-gradient(135deg, #FF5C00, #FF8C42)",
+              background: "linear-gradient(135deg, #FF5C00, #FFB800)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -143,26 +141,39 @@ export default function SciencePage() {
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--dk)" }}>
+    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--gy)" }}>
       <Navbar />
 
       {/* ── HERO ── */}
       <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-        {/* background mesh */}
+        {/* futuristic background mesh */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at 60% 0%, rgba(255,92,0,0.08) 0%, transparent 60%), radial-gradient(ellipse at 10% 80%, rgba(30,45,74,0.4) 0%, transparent 50%)",
+            background: `
+              radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.15) 0%, transparent 45%),
+              radial-gradient(circle at 80% 70%, rgba(12, 30, 57, 0.6) 0%, transparent 50%),
+              linear-gradient(180deg, rgba(5, 17, 36, 0.8) 0%, #051124 100%)
+            `,
+          }}
+        />
+        {/* cybernetic grid lines overlay */}
+        <div 
+          className="absolute inset-0 opacity-15 pointer-events-none"
+          style={{
+            backgroundImage: "radial-gradient(rgba(255, 92, 0, 0.15) 1px, transparent 1px), linear-gradient(to right, rgba(255, 92, 0, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 92, 0, 0.05) 1px, transparent 1px)",
+            backgroundSize: "40px 40px, 40px 40px, 40px 40px",
+            backgroundPosition: "center center"
           }}
         />
         {/* floating accent rings */}
         <div
-          className="absolute top-24 right-20 w-64 h-64 rounded-full opacity-10 pointer-events-none"
-          style={{ border: "2px solid var(--or)", transform: "rotate(20deg)" }}
+          className="absolute top-24 right-20 w-64 h-64 rounded-full opacity-20 pointer-events-none animate-pulse"
+          style={{ border: "2px solid #FF5C00", transform: "rotate(20deg)" }}
         />
         <div
-          className="absolute -bottom-10 -left-16 w-96 h-96 rounded-full opacity-5 pointer-events-none"
-          style={{ border: "3px solid #1E2D4A" }}
+          className="absolute -bottom-10 -left-16 w-96 h-96 rounded-full opacity-10 pointer-events-none"
+          style={{ border: "3px dashed #FF5C00" }}
         />
 
         <div className="relative mx-auto max-w-4xl text-center">
@@ -170,22 +181,57 @@ export default function SciencePage() {
             <span
               className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-6"
               style={{
-                background: "#0C1E3E",
+                background: "#0C1E39",
                 color: "var(--or)",
-                border: "1px solid #1E2D4A",
+                border: "1px solid #0C1E39",
               }}
             >
               <FlaskConical size={12} /> {s(settings, "science_hero_badge")}
             </span>
           </motion.div>
 
-          <motion.h1 {...fadeUp(0.08)} className="font-black text-3xl sm:text-5xl md:text-7xl leading-tight mb-6" style={{ color: "#627d98" }}>
+          <motion.h1 {...fadeUp(0.08)} className="font-black text-3xl sm:text-5xl md:text-7xl leading-tight mb-6" style={{ color: "#FFFFFF" }}>
             {renderTitle(s(settings, "science_hero_title"))}
           </motion.h1>
 
-          <motion.p {...fadeUp(0.14)} className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed" style={{ color: "#8F9CAE" }}>
+          <motion.p {...fadeUp(0.14)} className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.85 }}>
             {s(settings, "science_hero_subtext")}
           </motion.p>
+        </div>
+      </section>
+
+      {/* ── LAB SHOWCASE GALLERY ── */}
+      <section className="py-12 px-6 mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <motion.div 
+            {...fadeUp(0.1)} 
+            className="group relative rounded-3xl overflow-hidden aspect-[16/10] border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
+          >
+            <img 
+              src="/assets/laboratory_work.png" 
+              alt="Laboratory work featuring researchers" 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051124]/90 via-transparent to-transparent flex flex-col justify-end p-6">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#FF5C00] mb-1">R&D Facilities</span>
+              <h3 className="text-xl font-black text-white leading-tight">Advanced Formulations Lab</h3>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            {...fadeUp(0.2)} 
+            className="group relative rounded-3xl overflow-hidden aspect-[16/10] border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
+          >
+            <img 
+              src="/assets/scientists_collaborating.png" 
+              alt="Scientists collaborating on new formulations" 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051124]/90 via-transparent to-transparent flex flex-col justify-end p-6">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#FF5C00] mb-1">Collaborative Innovation</span>
+              <h3 className="text-xl font-black text-white leading-tight">Quality Assurance & Synergy</h3>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -195,7 +241,7 @@ export default function SciencePage() {
           <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "var(--or)" }}>
             {s(settings, "science_process_badge")}
           </p>
-          <h2 className="font-black text-2xl sm:text-4xl md:text-5xl whitespace-pre-line leading-tight" style={{ color: "#627d98" }}>
+          <h2 className="font-black text-2xl sm:text-4xl md:text-5xl whitespace-pre-line leading-tight" style={{ color: "#0C1E39" }}>
             {s(settings, "science_process_title")}
           </h2>
         </motion.div>
@@ -206,19 +252,12 @@ export default function SciencePage() {
               key={i}
               {...fadeUp(i * 0.1)}
               className="relative rounded-3xl p-8 overflow-hidden group"
-              style={{ background: "#0C1E3E", border: "1.5px solid #1E2D4A" }}
+              style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.3 }}
             >
-              {/* big number watermark */}
-              <span
-                className="absolute -top-4 -right-2 font-black text-8xl pointer-events-none select-none"
-                style={{ color: "#1E2D4A", lineHeight: 1 }}
-              >
-                {item.num}
-              </span>
-              <h3 className="font-black text-2xl mb-3" style={{ color: "#627d98" }}>{item.title}</h3>
-              <p style={{ color: "#8F9CAE" }} className="leading-relaxed">{item.desc}</p>
+              <h3 className="font-black text-2xl mb-3" style={{ color: "#0C1E39" }}>{item.title?.replace(/^(0\d|\d)\s*/, "")}</h3>
+              <p style={{ color: "#4A5568", opacity: 0.85 }} className="leading-relaxed">{item.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -239,8 +278,8 @@ export default function SciencePage() {
             <h2 className="font-black text-4xl md:text-5xl text-white">
               {s(settings, "science_cert_title")}
             </h2>
-            <p className="text-white/60 mt-4 text-lg max-w-xl mx-auto">
-              {s(settings, "science_cert_subtext")}
+            <p className="text-white/80 mt-4 text-lg max-w-xl mx-auto">
+              {s(settings, "science_cert_desc")}
             </p>
           </motion.div>
 
@@ -249,13 +288,14 @@ export default function SciencePage() {
               <motion.div
                 key={i}
                 {...fadeUp(i * 0.1)}
-                className="rounded-3xl p-8 text-white"
+                className="rounded-3xl p-8 text-[#0C1E39]"
                 style={{
-                  background: "#0C1E3E",
-                  border: "1.5px solid #1E2D4A",
+                  background: "#FFFFFF",
+                  border: "1.5px solid rgba(12, 30, 57, 0.08)",
+                  boxShadow: "0 10px 30px rgba(12, 30, 57, 0.04)",
                   backdropFilter: "blur(12px)",
                 }}
-                whileHover={{ borderColor: "#FF5C00" }}
+                whileHover={{ borderColor: "var(--or)" }}
                 transition={{ duration: 0.3 }}
               >
                 <div
@@ -263,23 +303,23 @@ export default function SciencePage() {
                 >
                   {i === 0 && (
                     <>
-                      <CertLogo label="GMP" className="h-10 object-contain" />
-                      <CertLogo label="ISO" className="h-10 object-contain" />
+                      <CertLogo label="GMP" className="h-10 object-contain text-[#0C1E39]" />
+                      <CertLogo label="ISO" className="h-10 object-contain text-[#0C1E39]" />
                     </>
                   )}
                   {i === 1 && (
-                    <CertLogo label="FSSAI" className="h-7 object-contain" />
+                    <CertLogo label="FSSAI" className="h-7 object-contain text-[#0C1E39]" />
                   )}
                   {i === 2 && (
                     <div
-                      className="h-12 w-12 rounded-xl flex items-center justify-center bg-white/5 border border-[#1E2D4A]"
+                      className="h-12 w-12 rounded-xl flex items-center justify-center bg-black/5 border border-[#0C1E39]/10"
                     >
                       <Microscope size={22} style={{ color: cert.color }} />
                     </div>
                   )}
                 </div>
                 <h3 className="font-black text-xl mb-3">{cert.title}</h3>
-                <p className="text-white/65 leading-relaxed text-sm">{cert.desc}</p>
+                <p className="text-[#4A5568] leading-relaxed text-sm">{cert.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -287,16 +327,16 @@ export default function SciencePage() {
       </section>
 
       {/* ── CLEAN LABEL ── */}
-      <section className="py-24 px-6 mx-auto max-w-7xl">
+      <section className="pt-24 pb-12 px-6 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div {...fadeUp(0)}>
             <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "var(--or)" }}>
               {s(settings, "science_clean_badge")}
             </p>
-            <h2 className="font-black text-2xl sm:text-4xl md:text-5xl mb-6 whitespace-pre-line leading-tight" style={{ color: "#627d98" }}>
+            <h2 className="font-black text-2xl sm:text-4xl md:text-5xl mb-6 whitespace-pre-line leading-tight" style={{ color: "#0C1E39" }}>
               {s(settings, "science_clean_title")}
             </h2>
-            <p className="text-lg leading-relaxed mb-8" style={{ color: "#8F9CAE" }}>
+            <p className="text-lg leading-relaxed mb-8" style={{ color: "#4A5568", opacity: 0.85 }}>
               {s(settings, "science_clean_desc")}
             </p>
             <div className="space-y-4">
@@ -305,12 +345,12 @@ export default function SciencePage() {
                   key={i}
                   {...fadeUp(i * 0.08)}
                   className="flex items-start gap-4 p-4 rounded-2xl"
-                  style={{ background: "#0C1E3E", border: "1.5px solid #1E2D4A" }}
+                  style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}
                 >
                   <CheckCircle size={20} className="mt-0.5 shrink-0" style={{ color: "var(--or)" }} />
                   <div>
-                    <p className="font-bold text-lg" style={{ color: "#627d98" }}>{item.label}</p>
-                    <p className="text-sm mt-0.5" style={{ color: "#8F9CAE" }}>{item.sub}</p>
+                    <p className="font-bold text-lg" style={{ color: "#0C1E39" }}>{item.label}</p>
+                    <p className="text-sm mt-0.5" style={{ color: "#4A5568", opacity: 0.75 }}>{item.sub}</p>
                   </div>
                 </motion.div>
               ))}
@@ -322,28 +362,28 @@ export default function SciencePage() {
             <div
               className="relative rounded-3xl p-10 overflow-hidden"
               style={{
-                background: "#0C1E3E",
-                border: "1.5px solid #1E2D4A",
+                background: "linear-gradient(135deg, #0C1E39 0%, #051124 100%)",
+                border: "1.5px solid #0C1E39",
               }}
             >
               <div
                 className="absolute top-0 right-0 w-48 h-48 rounded-full pointer-events-none"
                 style={{
-                  background: "radial-gradient(circle, rgba(255,92,0,0.08) 0%, transparent 70%)",
+                  background: "radial-gradient(circle, rgba(255, 92, 0, 0.08) 0%, transparent 70%)",
                   transform: "translate(30%, -30%)",
                 }}
               />
-              <h3 className="font-black text-3xl mb-4 whitespace-pre-line leading-tight" style={{ color: "#627d98" }}>
+              <h3 className="font-black text-3xl mb-4 whitespace-pre-line leading-tight" style={{ color: "#FFFFFF" }}>
                 {s(settings, "science_tube_title")}
               </h3>
-              <p className="leading-relaxed mb-8" style={{ color: "#8F9CAE" }}>
+              <p className="leading-relaxed mb-8" style={{ color: "#F8F8F8", opacity: 0.8 }}>
                 {s(settings, "science_tube_desc")}
               </p>
               <div className="grid grid-cols-2 gap-4">
                 {tubeFeatures.map(([a, b]) => (
-                  <div key={a} className="rounded-2xl p-4" style={{ background: "var(--dk)", border: "1.5px solid #1E2D4A" }}>
-                    <p className="font-bold text-sm" style={{ color: "#627d98" }}>{a}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "#8F9CAE" }}>{b}</p>
+                  <div key={a} className="rounded-2xl p-4" style={{ background: "#0C1E39", border: "1.5px solid rgba(255,255,255,0.05)" }}>
+                    <p className="font-bold text-sm" style={{ color: "#FFFFFF" }}>{a}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "#F8F8F8", opacity: 0.75 }}>{b}</p>
                   </div>
                 ))}
               </div>
@@ -353,7 +393,7 @@ export default function SciencePage() {
       </section>
 
       {/* ── CTA STRIP ── */}
-      <section className="py-20 px-6 mx-auto max-w-7xl">
+      <section className="pt-10 pb-20 px-6 mx-auto max-w-7xl">
         <motion.div
           {...fadeUp(0)}
           className="relative rounded-3xl p-12 text-center overflow-hidden"
@@ -376,7 +416,7 @@ export default function SciencePage() {
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             className="inline-flex items-center gap-2 font-bold px-8 py-4 rounded-2xl text-lg"
-            style={{ background: "#051124", color: "var(--or)", boxShadow: "0 4px 24px rgba(0,0,0,0.24)" }}
+            style={{ background: "#0C1E39", color: "#FFFFFF", boxShadow: "0 4px 24px rgba(0,0,0,0.16)" }}
           >
             {s(settings, "science_cta_btn")}
           </motion.a>

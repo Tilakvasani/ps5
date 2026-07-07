@@ -74,34 +74,34 @@ export default function ContactPage() {
   const displayWhatsApp = rawDisplay.startsWith("+") ? rawDisplay : `+${rawDisplay}`;
 
   return (
-    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--dk)" }}>
+    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--gy)" }}>
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="relative pt-32 pb-16 px-6 overflow-hidden" style={{ background: "#0C1E3E", borderBottom: "1.5px solid #1E2D4A" }}>
+      <section className="relative pt-32 pb-16 px-6 overflow-hidden" style={{ background: "#0C1E39", borderBottom: "1.5px solid #051124" }}>
         <div className="pointer-events-none absolute -top-40 -left-40 h-[400px] w-[400px] rounded-full" style={{ background: "rgba(255,92,0,0.06)" }} />
         <div className="relative mx-auto max-w-3xl text-center">
           <motion.span {...fadeUp(0)} className="inline-block zbadge zbadge-or mb-4">
             Contact Us
           </motion.span>
-          <motion.h1 {...fadeUp(0.1)} className="text-3xl sm:text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
+          <motion.h1 {...fadeUp(0.1)} className="text-3xl sm:text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
             Got Questions?<br />
             <span style={{ color: "var(--or)" }}>We've Got Answers!</span>
           </motion.h1>
-          <motion.p {...fadeUp(0.2)} className="text-lg" style={{ color: "#8F9CAE" }}>
-            Reach out to us anytime — we're always happy to help.
+          <motion.p {...fadeUp(0.2)} className="text-lg" style={{ color: "#F8F8F8", opacity: 0.85 }}>
+            Reach out to us 9 AM to 6 PM — we're always happy to help.
           </motion.p>
         </div>
       </section>
 
       {/* ── Contact Cards ── */}
-      <section className="py-16 px-6">
+      <section className="pt-16 pb-8 px-6">
         <div className="mx-auto max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-6 justify-center">
 
           {/* WhatsApp */}
           <motion.div {...fadeUp(0)}
             className="zcard flex flex-col items-center text-center gap-4 transition-all group"
-            style={{ borderColor: "#1E2D4A" }}
+            style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}
           >
             <div className="h-12 w-12 rounded-2xl flex items-center justify-center transition-all" style={{ background: "rgba(37,211,102,0.1)" }}>
               <svg viewBox="0 0 24 24" className="h-6 w-6 opacity-80">
@@ -111,8 +111,8 @@ export default function ContactPage() {
             </div>
             <div className="flex-1 flex flex-col justify-between items-center w-full">
               <div>
-                <p className="zlabel mb-1">WhatsApp Us</p>
-                <p className="font-bold text-base mb-3" style={{ color: "#FFFFFF" }}>{displayWhatsApp}</p>
+                <p className="zlabel mb-1" style={{ color: "#6B7280" }}>WhatsApp Us</p>
+                <p className="font-bold text-base mb-3" style={{ color: "#0C1E39" }}>{displayWhatsApp}</p>
               </div>
               <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="zbtn-or w-full py-2.5 text-xs text-center font-bold rounded-lg block">
                 Chat Us
@@ -123,15 +123,15 @@ export default function ContactPage() {
           {/* Support Email */}
           <motion.div {...fadeUp(0.05)}
             className="zcard flex flex-col items-center text-center gap-4 transition-all group"
-            style={{ borderColor: "#1E2D4A" }}
+            style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}
           >
             <div className="h-12 w-12 rounded-2xl flex items-center justify-center transition-all" style={{ background: "rgba(255,92,0,0.1)" }}>
               <Mail size={22} style={{ color: "var(--or)" }} />
             </div>
             <div className="flex-1 flex flex-col justify-between items-center w-full">
               <div>
-                <p className="zlabel mb-1">Support Email</p>
-                <p className="font-bold text-base mb-3 break-all" style={{ color: "#FFFFFF" }}>{s(settings, "contact_support_email")}</p>
+                <p className="zlabel mb-1" style={{ color: "#6B7280" }}>Support Email</p>
+                <p className="font-bold text-base mb-3 break-all" style={{ color: "#0C1E39" }}>{s(settings, "contact_support_email")}</p>
               </div>
               <a href={`mailto:${s(settings, "contact_support_email")}`} className="zbtn-or w-full py-2.5 text-xs text-center font-bold rounded-lg block">
                 Send Email
@@ -142,25 +142,25 @@ export default function ContactPage() {
       </section>
 
       {/* ── Distributor Inquiry Form ── */}
-      <section className="py-16 px-6" style={{ background: "var(--dk)" }}>
+      <section className="pt-8 pb-16 px-6" style={{ background: "var(--gy)" }}>
         <div className="mx-auto max-w-3xl">
           <motion.div {...fadeUp(0)} className="text-center mb-10">
             <span className="inline-block zbadge zbadge-or mb-3">
               Grow with Zupwell
             </span>
-            <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
+            <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
               Distributor <span style={{ color: "var(--or)" }}>Inquiry</span>
             </h2>
-            <p style={{ color: "#8F9CAE" }}>
+            <p style={{ color: "#4A5568" }}>
               Interested in partnering with us? Fill in your details and let's do business!
             </p>
           </motion.div>
 
-          <motion.form {...fadeUp(0.1)} onSubmit={handleSubmit} className="zcard space-y-5">
+          <motion.form {...fadeUp(0.1)} onSubmit={handleSubmit} className="zcard space-y-5" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Full Name */}
               <div>
-                <label className="zlabel flex items-center gap-1.5">
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
                   <User size={13} style={{ color: "var(--or)" }} /> Full Name *
                 </label>
                 <input type="text" value={form.fullName} required
@@ -170,7 +170,7 @@ export default function ContactPage() {
 
               {/* Firm Name */}
               <div>
-                <label className="zlabel flex items-center gap-1.5">
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
                   <Building size={13} style={{ color: "var(--or)" }} /> Firm Name
                 </label>
                 <input type="text" value={form.firmName}
@@ -180,7 +180,7 @@ export default function ContactPage() {
 
               {/* City */}
               <div>
-                <label className="zlabel flex items-center gap-1.5">
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
                   <MapPin size={13} style={{ color: "var(--or)" }} /> City *
                 </label>
                 <input type="text" value={form.city} required
@@ -190,7 +190,7 @@ export default function ContactPage() {
 
               {/* State */}
               <div>
-                <label className="zlabel flex items-center gap-1.5">
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
                   <MapPin size={13} style={{ color: "var(--or)" }} /> State
                 </label>
                 <input type="text" value={form.state}
@@ -201,7 +201,7 @@ export default function ContactPage() {
 
             {/* Experience */}
             <div>
-              <label className="zlabel flex items-center gap-1.5">
+              <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
                 <Briefcase size={13} style={{ color: "var(--or)" }} /> Experience in Distribution
               </label>
               <input type="text" value={form.experience}
@@ -211,7 +211,7 @@ export default function ContactPage() {
 
             {/* Message */}
             <div>
-              <label className="zlabel flex items-center gap-1.5">
+              <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
                 <FileText size={13} style={{ color: "var(--or)" }} /> Message *
               </label>
               <textarea value={form.message} required rows={4}
@@ -227,7 +227,7 @@ export default function ContactPage() {
               {sending ? "Sending..." : "Send Inquiry"}
             </motion.button>
 
-            <p className="text-xs text-center" style={{ color: "#8F9CAE" }}>
+            <p className="text-xs text-center" style={{ color: "#6B7280" }}>
               We typically respond within 24 hours on business days.
             </p>
           </motion.form>

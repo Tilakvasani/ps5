@@ -13,10 +13,10 @@ export default function NotFound() {
         >
           404
         </h1>
-        <h2 className="text-2xl font-black mt-2" style={{ color: "#627d98" }}>
+        <h2 className="text-2xl font-black mt-2" style={{ color: "#FFFFFF" }}>
           Page not found
         </h2>
-        <p className="mt-2 max-w-sm mx-auto" style={{ color: "#8F9CAE" }}>
+        <p className="mt-2 max-w-sm mx-auto" style={{ color: "#F8F8F8", opacity: 0.85 }}>
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
         <Link

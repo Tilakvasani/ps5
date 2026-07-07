@@ -50,7 +50,7 @@ export default function ProductCard({ product }: { product: Product }) {
           style={{
             aspectRatio: "1/1",
             background: "#F8F8F8",
-            borderBottom: "1.5px solid var(--bd-soft)",
+            borderBottom: "1.5px solid #EAEAEA",
           }}
         >
           {primaryImage ? (
@@ -62,12 +62,11 @@ export default function ProductCard({ product }: { product: Product }) {
           ) : (
             <div
               className="w-full h-full flex items-center justify-center text-4xl"
-              style={{ color: "#1E2D4A" }}
+              style={{ color: "#0C1E39" }}
             >
               💊
             </div>
           )}
-          {/* Discount badge removed */}
         </div>
 
         {/* Info */}
@@ -81,7 +80,7 @@ export default function ProductCard({ product }: { product: Product }) {
             style={{
               fontSize: "13px",
               fontWeight: 800,
-              color: "#627d98",
+              color: "#0C1E39",
               lineHeight: 1.3,
               marginBottom: "4px",
               letterSpacing: "-0.02em",
@@ -93,14 +92,14 @@ export default function ProductCard({ product }: { product: Product }) {
           >
             {product.name}
           </h3>
-          <p style={{ fontSize: "10px", color: "#8F9CAE", marginBottom: "8px" }}>
+          <p style={{ fontSize: "10px", color: "#6B7280", marginBottom: "8px" }}>
             {product.unit}
           </p>
 
           {product.avgRating && (
             <div className="flex items-center gap-1" style={{ marginBottom: "8px" }}>
-              <Star size={11} style={{ fill: "var(--or)", color: "var(--or)" }} />
-              <span style={{ fontSize: "10px", color: "#8F9CAE" }}>
+              <Star size={11} style={{ fill: "#FFB800", color: "#FFB800" }} />
+              <span style={{ fontSize: "10px", color: "#6B7280" }}>
                 {product.avgRating.toFixed(1)} ({product._count?.reviews})
               </span>
             </div>
@@ -108,15 +107,15 @@ export default function ProductCard({ product }: { product: Product }) {
 
           <div className="flex items-center justify-between">
             <div>
-              <span style={{ fontSize: "15px", fontWeight: 900, color: "#F8F8F8", letterSpacing: "-0.5px" }}>
-                <span style={{ fontSize: "10px", fontWeight: 700, color: "#8F9CAE", marginRight: "3px", textTransform: "uppercase" }}>mrp</span>₹{finalPrice}
+              <span style={{ fontSize: "15px", fontWeight: 900, color: "#FF5C00", letterSpacing: "-0.5px" }}>
+                <span style={{ fontSize: "10px", fontWeight: 700, color: "#6B7280", marginRight: "3px", textTransform: "uppercase" }}>mrp</span>₹{finalPrice}
               </span>
-              <p style={{ fontSize: "9px", color: "#8F9CAE", marginTop: "1px" }}>includes all taxes</p>
+              <p style={{ fontSize: "9px", color: "#6B7280", marginTop: "1px" }}>includes all taxes</p>
             </div>
             <button
               onClick={handleAddToCart}
-              className="zbtn-or"
-              style={{ padding: "8px 12px", fontSize: "11px", borderRadius: "7px" }}
+              className="zbtn-or animate-pulse-subtle"
+              style={{ padding: "8px 16px", fontSize: "11px", borderRadius: "30px" }}
             >
               <ShoppingCart size={11} /> ADD
             </button>

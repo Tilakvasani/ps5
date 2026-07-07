@@ -8,7 +8,7 @@ const DEFAULT_SECTIONS = [
   { title: "Delivery Timeline", body: [
     "Within Ahmedabad: 1-2 business days",
     "Gujarat (other cities): 2-3 business days",
-    "Rest of India: 3-5 business days",
+    "Rest of India: 5-7 business days",
     "These are estimates and may vary based on courier partner performance",
   ]},
   { title: "Shipping Charges", body: "A nominal shipping charge may apply. The exact amount, if any, will be displayed at checkout before you complete your order." },

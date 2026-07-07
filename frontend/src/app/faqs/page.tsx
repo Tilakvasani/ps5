@@ -69,16 +69,16 @@ const FAQS = [
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="zcard p-0 overflow-hidden" style={{ borderColor: open ? "var(--or)" : "#1E2D4A" }}>
+    <div className="zcard p-0 overflow-hidden" style={{ borderColor: open ? "var(--or)" : "rgba(12, 30, 57, 0.08)", background: "#FFFFFF", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
       <button onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
-        style={{ background: "#0C1E3E" }}
+        style={{ background: "#FFFFFF" }}
       >
-        <span className="font-semibold text-sm md:text-base transition-colors" style={{ color: open ? "var(--or)" : "#FFFFFF" }}>
+        <span className="font-semibold text-sm md:text-base transition-colors" style={{ color: open ? "var(--or)" : "#0C1E39" }}>
           {q}
         </span>
         <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }} className="shrink-0">
-          <ChevronDown size={18} style={{ color: open ? "var(--or)" : "#8F9CAE" }} />
+          <ChevronDown size={18} style={{ color: open ? "var(--or)" : "#0C1E39" }} />
         </motion.div>
       </button>
       <AnimatePresence initial={false}>
@@ -89,7 +89,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
-            <div className="px-5 pb-5 text-sm leading-relaxed pt-3" style={{ color: "#8F9CAE", borderTop: "1px solid #1E2D4A" }}>
+            <div className="px-5 pb-5 text-sm leading-relaxed pt-3" style={{ color: "#4A5568", borderTop: "1px solid rgba(12, 30, 57, 0.08)" }}>
               {a}
             </div>
           </motion.div>
@@ -119,38 +119,38 @@ export default function FAQsPage() {
   const filtered = activeCategory === "All" ? FAQS : FAQS.filter(f => f.category === activeCategory);
 
   return (
-    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--dk)" }}>
+    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--gy)" }}>
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="relative pt-32 pb-16 px-6 overflow-hidden" style={{ background: "#0C1E3E", borderBottom: "1.5px solid #1E2D4A" }}>
-        <div className="pointer-events-none absolute -top-40 -right-40 h-[400px] w-[400px] rounded-full" style={{ background: "rgba(255, 92, 0, 0.06)" }} />
+      <section className="relative pt-32 pb-16 px-6 overflow-hidden" style={{ background: "#0C1E39", borderBottom: "1.5px solid #051124" }}>
+        <div className="pointer-events-none absolute -top-40 -left-40 h-[400px] w-[400px] rounded-full" style={{ background: "rgba(255, 92, 0, 0.06)" }} />
         <div className="relative mx-auto max-w-3xl text-center">
           <motion.span initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             className="inline-block zbadge zbadge-or mb-4">
             FAQs
           </motion.span>
           <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
+            className="text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
             Got <span style={{ color: "var(--or)" }}>Questions?</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="text-lg" style={{ color: "#8F9CAE" }}>
+            className="text-lg" style={{ color: "#F8F8F8", opacity: 0.85 }}>
             Everything you need to know about Zupwell and our products.
           </motion.p>
         </div>
       </section>
 
       {/* ── Category Filter ── */}
-      <section className="py-8 px-6 border-b" style={{ background: "var(--dk)", borderColor: "#1E2D4A" }}>
+      <section className="py-8 px-6 border-b" style={{ background: "var(--gy)", borderColor: "rgba(12, 30, 57, 0.08)" }}>
         <div className="mx-auto max-w-3xl flex items-center gap-2 flex-wrap justify-center">
           {categories.map(cat => (
             <button key={cat} onClick={() => setActiveCategory(cat)}
               className="zpill font-semibold transition-all"
               style={{
                 background: activeCategory === cat ? "var(--or)" : "transparent",
-                color: activeCategory === cat ? "#FFFFFF" : "#8F9CAE",
-                borderColor: activeCategory === cat ? "var(--or)" : "#1E2D4A",
+                color: activeCategory === cat ? "#FFFFFF" : "#0C1E39",
+                borderColor: activeCategory === cat ? "var(--or)" : "rgba(12, 30, 57, 0.08)",
               }}
             >
               {cat}
@@ -168,7 +168,7 @@ export default function FAQsPage() {
               viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-2xl">{section.emoji}</span>
-                <h2 className="text-xl font-black" style={{ color: "#627d98", letterSpacing: "-0.03em" }}>{section.category}</h2>
+                <h2 className="text-xl font-black" style={{ color: "#0C1E39", letterSpacing: "-0.03em" }}>{section.category}</h2>
               </div>
               <div className="space-y-3">
                 {section.questions.map(({ q, a }) => (
@@ -181,16 +181,16 @@ export default function FAQsPage() {
       </section>
 
       {/* ── Still have a question ── */}
-      <section className="py-16 px-6" style={{ background: "#0C1E3E", borderTop: "1.5px solid #1E2D4A" }}>
+      <section className="py-16 px-6" style={{ background: "#0C1E39", borderTop: "1.5px solid #051124" }}>
         <div className="mx-auto max-w-xl text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <div className="h-16 w-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(255, 92, 0, 0.1)" }}>
               <MessageCircle size={28} style={{ color: "var(--or)" }} />
             </div>
-            <h2 className="text-2xl font-black mb-2" style={{ color: "#627d98" }}>
+            <h2 className="text-2xl font-black mb-2" style={{ color: "#FFFFFF" }}>
               Still have a question?
             </h2>
-            <p className="mb-6" style={{ color: "#8F9CAE" }}>
+            <p className="mb-6" style={{ color: "#F8F8F8", opacity: 0.85 }}>
               Can't find what you're looking for? We're just a message away!
             </p>
             {whatsapp ? (

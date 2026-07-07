@@ -85,7 +85,7 @@ export const EmptyState = ({ icon, title, description, action }: EmptyStateProps
   <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
     {icon && <div className="text-4xl mb-2" style={{ opacity: 0.5 }}>{icon}</div>}
     <p className="font-black text-lg" style={{ color: "#FFFFFF", letterSpacing: "-0.03em" }}>{title}</p>
-    {description && <p className="text-sm max-w-sm" style={{ color: "#8F9CAE" }}>{description}</p>}
+    {description && <p className="text-sm max-w-sm" style={{ color: "#F8F8F8" }}>{description}</p>}
     {action && <div className="mt-4">{action}</div>}
   </div>
 );

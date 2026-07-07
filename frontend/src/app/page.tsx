@@ -72,14 +72,14 @@ function BlogSection() {
   const [modal, setModal] = useState<number | null>(null);
   const post = modal !== null ? BLOG_POSTS[modal] : null;
   return (
-    <section className="py-24 px-6" style={{ background: "#0C1E3E" }}>
+    <section className="py-24 px-6" style={{ background: "#0C1E39" }}>
       <div className="mx-auto max-w-7xl">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
           <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Health Tips & Insights</p>
-          <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
+          <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#F8F8F8", letterSpacing: "-0.04em" }}>
             From Our Blog
           </h2>
-          <p style={{ color: "#8F9CAE" }}>Science-backed articles to fuel your health journey</p>
+          <p style={{ color: "#F8F8F8" }}>Science-backed articles to fuel your health journey</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -87,13 +87,14 @@ function BlogSection() {
             <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }} viewport={{ once: true }}
               className="zcard flex flex-col cursor-pointer"
+              style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}
               onClick={() => setModal(i)}>
               <div className="text-4xl mb-4">{post.emoji}</div>
               <span style={{ fontSize: "10px", fontWeight: 900, color: "var(--or)", textTransform: "uppercase", letterSpacing: "1px" }}>{post.tag}</span>
-              <h3 className="font-black mt-2 mb-3 leading-snug" style={{ color: "#627d98", fontSize: "15px", letterSpacing: "-0.03em" }}>{post.title}</h3>
-              <p className="text-sm leading-relaxed line-clamp-3 flex-1" style={{ color: "#8F9CAE" }}>{post.body}</p>
-              <div className="flex items-center justify-between mt-4 pt-3" style={{ borderTop: "1px solid #1E2D4A" }}>
-                <span style={{ fontSize: "10px", color: "#627d98" }}>{post.date}</span>
+              <h3 className="font-black mt-2 mb-3 leading-snug" style={{ color: "#0C1E39", fontSize: "15px", letterSpacing: "-0.03em" }}>{post.title}</h3>
+              <p className="text-sm leading-relaxed line-clamp-3 flex-1" style={{ color: "#4A5568" }}>{post.body}</p>
+              <div className="flex items-center justify-between mt-4 pt-3" style={{ borderTop: "1px solid rgba(12, 30, 57, 0.08)" }}>
+                <span style={{ fontSize: "10px", color: "#6B7280" }}>{post.date}</span>
                 <span style={{ fontSize: "11px", color: "var(--or)", fontWeight: 700 }} className="flex items-center gap-1">
                   Read more <ChevronRight size={12} />
                 </span>
@@ -110,17 +111,18 @@ function BlogSection() {
           onClick={() => setModal(null)}>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="zcard max-w-lg w-full p-8 relative"
+            style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 20px 50px rgba(12, 30, 57, 0.15)", borderRadius: "24px" }}
             onClick={e => e.stopPropagation()}>
             <button onClick={() => setModal(null)}
               className="absolute top-4 right-4 h-8 w-8 rounded-full flex items-center justify-center text-lg font-bold transition-colors"
-              style={{ background: "#1E2D4A", color: "#8F9CAE" }}>
+              style={{ background: "#0C1E39", color: "#FFFFFF" }}>
               ✕
             </button>
             <div className="text-4xl mb-3">{post.emoji}</div>
             <span style={{ fontSize: "10px", fontWeight: 900, color: "var(--or)", textTransform: "uppercase", letterSpacing: "1px" }}>{post.tag}</span>
-            <h3 className="text-xl font-black mt-2 mb-4 leading-snug" style={{ color: "#627d98", letterSpacing: "-0.03em" }}>{post.title}</h3>
-            <p className="text-sm leading-relaxed" style={{ color: "#8F9CAE" }}>{post.body}</p>
-            <p style={{ fontSize: "10px", color: "#627d98", marginTop: "24px" }}>{post.date}</p>
+            <h3 className="text-xl font-black mt-2 mb-4 leading-snug" style={{ color: "#0C1E39", letterSpacing: "-0.03em" }}>{post.title}</h3>
+            <p className="text-sm leading-relaxed" style={{ color: "#4A5568" }}>{post.body}</p>
+            <p style={{ fontSize: "10px", color: "#6B7280", marginTop: "24px" }}>{post.date}</p>
           </motion.div>
         </div>
       )}
@@ -164,101 +166,136 @@ export default function HomePage() {
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="relative min-h-screen flex items-center justify-center pt-28 px-6">
+      <section className="relative min-h-screen flex items-center pt-28 pb-16 px-6 md:px-12 lg:px-20 overflow-hidden">
         {/* Background glows */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full" style={{ background: "rgba(255,92,0,0.06)" }} />
-          <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full" style={{ background: "rgba(255,184,0,0.04)" }} />
+          <div className="absolute top-1/4 right-10 h-[600px] w-[600px] rounded-full filter blur-[120px] opacity-25" style={{ background: "radial-gradient(circle, var(--or) 0%, transparent 70%)" }} />
+          <div className="absolute bottom-10 left-10 h-[400px] w-[400px] rounded-full filter blur-[100px] opacity-10" style={{ background: "radial-gradient(circle, var(--lm) 0%, transparent 70%)" }} />
         </div>
-        <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <motion.div {...fadeUp(0.0)} className="mb-4">
-            <span className="inline-block zbadge zbadge-or" style={{ fontSize: "10px", letterSpacing: "1px", marginBottom: "16px" }}>
-              🔥 PERFORMANCE NUTRITION
-            </span>
-          </motion.div>
-          <motion.h1 {...fadeUp(0.05)} className="text-3xl sm:text-5xl md:text-7xl font-black leading-[1.05] mb-4 whitespace-pre-line" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
-            {s(settings, "hero_title")}
-          </motion.h1>
 
-          {s(settings, "hero_tagline") && (
-            <motion.p {...fadeUp(0.12)} className="text-lg font-bold mb-4" style={{ color: "var(--or)" }}>
-              {s(settings, "hero_tagline")}
+        <div className="relative z-10 mx-auto max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Left Column: Bold Text Content */}
+          <div className="lg:col-span-7 flex flex-col items-start text-left">
+            <motion.div {...fadeUp(0.0)} className="mb-6">
+              <span 
+                className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider px-4 py-2 rounded-full" 
+                style={{ 
+                  background: "rgba(255, 92, 0, 0.12)", 
+                  color: "var(--or)",
+                  border: "1px solid rgba(255, 92, 0, 0.25)",
+                  boxShadow: "0 0 16px rgba(255, 92, 0, 0.15)"
+                }}
+              >
+                ⚡ ELECTROLYTE EFFERVESCENT TABLET
+              </span>
+            </motion.div>
+
+            <motion.h1 
+              {...fadeUp(0.05)} 
+              className="text-4xl sm:text-6xl md:text-7xl font-black leading-[1.05] mb-6 text-white" 
+              style={{ letterSpacing: "-0.03em" }}
+            >
+              Hydration <br />
+              <span style={{ color: "var(--wh)" }}>Support.</span> <br />
+              <span className="gradient-text">Electrolyte <br />Balance.</span>
+            </motion.h1>
+
+            <motion.p 
+              {...fadeUp(0.12)} 
+              className="text-base sm:text-lg leading-relaxed mb-10 max-w-xl text-left" 
+              style={{ color: "#F8F8F8", opacity: 0.8 }}
+            >
+             Enjoy refreshing orange-flavoured electrolyte effervescent tablets with essential electrolytes and vitamins. Fast dissolving and convenient for everyday hydration support with a great-tasting fizz.
             </motion.p>
-          )}
 
-          <motion.p {...fadeUp(0.18)} className="mx-auto max-w-2xl text-lg leading-relaxed mb-10" style={{ color: "#8F9CAE" }}>
-            {s(settings, "hero_subtext")}
-          </motion.p>
-
-          <motion.div {...fadeUp(0.3)} className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-stretch max-w-md mx-auto sm:max-w-none">
-            <Link href="/products" className="w-full sm:w-auto">
-              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                className="zbtn-or w-full flex items-center justify-center gap-2"
-                style={{ padding: "14px 28px", fontSize: "13px", borderRadius: "7px" }}>
-                Choose Your Power <ArrowRight size={16} />
-              </motion.button>
-            </Link>
-            <Link href="/login" className="w-full sm:w-auto">
-              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                className="zbtn-out w-full flex items-center justify-center gap-2"
-                style={{ padding: "14px 28px", fontSize: "13px" }}>
-                Sign In <ChevronRight size={16} />
-              </motion.button>
-            </Link>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div {...fadeUp(0.4)} className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
-            {stats.map(([val, label]) => (
-              <div key={label} className="text-center">
-                <div className="text-2xl font-black" style={{ color: "var(--or)", letterSpacing: "-0.04em" }}>{val}</div>
-                <div className="text-xs mt-1" style={{ color: "#8F9CAE" }}>{label}</div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-
-      {/* ── Why is Our Product Special? ── */}
-      <section className="py-20 px-6" style={{ background: "var(--dk)" }}>
-        <div className="mx-auto max-w-7xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
-              Why is Our Product <span style={{ color: "var(--or)" }}>Special?</span>
-            </h2>
-            <p style={{ color: "#8F9CAE" }}>Zero-Compromise Health Boosters. Crafted for Perfection.</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
-            {[
-              { icon: FlaskConical, title: "Scientific Formula", desc: "A fusion of science and taste." },
-              { icon: Activity,     title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
-              { icon: Zap,          title: "Instant Absorption", desc: "Rocket-like speed, instant action." },
-              { icon: Tag,          title: "Pocket Friendly",    desc: "It even fits in your jeans pocket." },
-              { icon: Citrus,       title: "Best Flavour",       desc: "Absolutely fresh, as if straight from the garden." },
-            ].map((f, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}
-                className="zcard text-center">
-                <div className="h-14 w-14 mx-auto rounded-2xl flex items-center justify-center mb-4"
-                  style={{ background: "rgba(255,92,0,0.1)" }}>
-                  <f.icon size={24} style={{ color: "var(--or)" }} />
-                </div>
-                <h3 className="font-black mb-2" style={{ color: "#627d98", fontSize: "14px", letterSpacing: "-0.03em" }}>{f.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#8F9CAE" }}>{f.desc}</p>
-              </motion.div>
-            ))}
+            <motion.div {...fadeUp(0.18)} className="flex flex-wrap gap-4 w-full sm:w-auto">
+              <Link href="/products" className="w-full sm:w-auto">
+                <motion.button 
+                  whileHover={{ scale: 1.03 }} 
+                  whileTap={{ scale: 0.97 }}
+                  className="zbtn-or flex items-center justify-center gap-2 w-full"
+                  style={{ padding: "16px 36px", fontSize: "14px", borderRadius: "30px", boxShadow: "0 8px 24px rgba(255, 92, 0, 0.25)" }}
+                >
+                  Shop 15 Tablets Pack →
+                </motion.button>
+              </Link>
+            </motion.div>
           </div>
+
+          {/* Right Column: Premium Mockup display */}
+          <div className="lg:col-span-5 flex justify-center items-center relative">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.25, duration: 0.5 }}
+              className="w-full max-w-[420px] aspect-[4/5] rounded-[2.5rem] p-10 flex flex-col items-center justify-center overflow-hidden border-2 border-[#0C1E39]"
+              style={{ 
+                background: "radial-gradient(circle at 50% 50%, rgba(12, 30, 57, 0.8) 0%, rgba(5, 17, 36, 0.9) 100%)",
+                boxShadow: "0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)"
+              }}
+            >
+              {/* Product mockup card inner plate */}
+              <div 
+                className="w-full flex-1 rounded-3xl p-8 flex flex-col items-center justify-between text-center relative border border-white/5"
+                style={{ 
+                  background: "#051124",
+                  boxShadow: "0 16px 32px rgba(0,0,0,0.3)"
+                }}
+              >
+                {/* badge label */}
+                <span 
+                  className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full"
+                  style={{ background: "var(--or)", color: "var(--wh)" }}
+                >
+                  HEALTH SUPPLEMENT
+                </span>
+
+                {/* center visual (mockup citrus illustration) */}
+                <div className="my-6 relative flex flex-col items-center">
+                  <div className="text-6xl animate-bounce" style={{ filter: "drop-shadow(0 8px 16px rgba(255,184,0,0.3))" }}>🍊</div>
+                  <div className="text-4xl mt-2 select-none">⚡</div>
+                </div>
+
+                {/* branding info */}
+                <div>
+                  <h3 className="text-2xl font-black text-white leading-tight">zupwell</h3>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] mt-1" style={{ color: "var(--lm)" }}>ELECTROLYTE</p>
+                  <p className="text-[9px] mt-2 font-bold uppercase tracking-wider" style={{ color: "#ff5c00" }}>ORANGE FLAVOUR • 15 TABLETS</p>
+                </div>
+
+                {/* price tag button */}
+                <div 
+                  className="w-full py-3.5 rounded-2xl font-black text-base transition-transform cursor-pointer"
+                  style={{ background: "var(--lm)", color: "var(--dk)" }}
+                >
+                  ₹299.00
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
         </div>
       </section>
+
 
       {/* ── Certificate logos — infinite scroll marquee ── */}
-      <section className="py-10 overflow-hidden" style={{ background: "#0C1E3E", borderTop: "1.5px solid #1E2D4A", borderBottom: "1.5px solid #1E2D4A" }}>
-        <p className="text-center mb-6" style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "#627d98", textTransform: "uppercase" }}>
+      <section className="py-10 overflow-hidden" style={{ background: "#FFFFFF", borderTop: "1.5px solid #EAEAEA", borderBottom: "1.5px solid #EAEAEA" }}>
+        <p className="text-center mb-6" style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "#0C1E39", opacity: 0.85, textTransform: "uppercase" }}>
           Certified & Compliant
         </p>
-        <div className="relative">
-          <div className="flex gap-12 animate-marquee whitespace-nowrap" style={{ animationDuration: "9s" }}>
-            {[...certEntries, ...certEntries, ...certEntries].map(({ key, label }, idx) =>
+        <div className="relative flex overflow-x-hidden">
+          <div className="flex gap-16 animate-marquee whitespace-nowrap shrink-0 pr-16" style={{ animationDuration: "25s" }}>
+            {certEntries.map(({ key, label }, idx) =>
+              s(settings, key) ? (
+                <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
+              ) : (
+                <CertLogo key={idx} label={label} className="h-14 opacity-70 hover:opacity-100 transition-opacity" />
+              )
+            )}
+          </div>
+          <div className="flex gap-16 animate-marquee whitespace-nowrap shrink-0 pr-16" style={{ animationDuration: "25s" }} aria-hidden="true">
+            {certEntries.map(({ key, label }, idx) =>
               s(settings, key) ? (
                 <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
               ) : (
@@ -271,14 +308,14 @@ export default function HomePage() {
 
       {/* ── Founder's Message ── */}
       {s(settings, "founder_message") && (
-        <section className="py-24 px-6" style={{ background: "var(--dk)" }}>
+        <section className="pt-24 pb-12 px-6" style={{ background: "var(--gy)" }}>
           <div className="mx-auto max-w-4xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <div className="overflow-hidden" style={{ borderRadius: "10px", border: "1.5px solid #1E2D4A" }}>
+              <div className="overflow-hidden" style={{ borderRadius: "20px", border: "1.5px solid #EAEAEA", boxShadow: "0 10px 30px rgba(0,0,0,0.03)" }}>
                 <div className="flex flex-col md:flex-row">
 
                   {/* Left: Photo panel */}
-                  <div className="relative md:w-56 shrink-0 flex flex-col" style={{ background: "#0C1E3E" }}>
+                  <div className="relative md:w-56 shrink-0 flex flex-col" style={{ background: "#0C1E39" }}>
                     {/* Orange left accent stripe */}
                     <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l" style={{ background: "linear-gradient(180deg, var(--or) 0%, #FFB800 100%)" }} />
                     {/* Photo */}
@@ -297,25 +334,25 @@ export default function HomePage() {
                       )}
                     </div>
                     {/* Name plate */}
-                    <div className="px-5 py-4" style={{ borderTop: "1px solid #1E2D4A", background: "#0C1E3E" }}>
+                    <div className="px-5 py-4" style={{ borderTop: "1px solid #051124", background: "#0C1E39" }}>
                       <p className="font-black text-sm leading-tight" style={{ color: "#FFFFFF" }}>{s(settings, "founder_name")}</p>
                       <p className="text-xs font-bold mt-0.5" style={{ color: "var(--or)" }}>{s(settings, "founder_title")}</p>
                     </div>
                   </div>
 
                   {/* Right: Quote panel */}
-                  <div className="flex-1 flex flex-col justify-center px-8 py-10 relative" style={{ background: "#0C1E3E" }}>
+                  <div className="flex-1 flex flex-col justify-center px-8 py-10 relative" style={{ background: "#FFFFFF" }}>
                     {/* Big decorative quote marks */}
-                    <div className="absolute top-6 left-6 text-7xl font-black leading-none select-none" style={{ color: "var(--or)", opacity: 0.12 }}>"</div>
-                    <div className="absolute bottom-4 right-8 text-7xl font-black leading-none select-none rotate-180" style={{ color: "var(--or)", opacity: 0.12 }}>"</div>
+                    <div className="absolute top-6 left-6 text-7xl font-black leading-none select-none" style={{ color: "var(--or)", opacity: 0.10 }}>"</div>
+                    <div className="absolute bottom-4 right-8 text-7xl font-black leading-none select-none rotate-180" style={{ color: "var(--or)", opacity: 0.10 }}>"</div>
 
                     <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "16px" }}>Founder's Message</p>
 
-                    <p className="text-lg leading-relaxed font-medium italic relative z-10" style={{ color: "#8F9CAE" }}>
+                    <p className="text-lg leading-relaxed font-medium italic relative z-10 text-[#0C1E39]">
                       "{s(settings, "founder_message")}"
                     </p>
 
-                    <div className="mt-8 pt-5 flex items-center justify-between flex-wrap gap-3" style={{ borderTop: "1px solid #1E2D4A" }}>
+                    <div className="mt-8 pt-5 flex items-center justify-between flex-wrap gap-3" style={{ borderTop: "1px solid #EAEAEA" }}>
                     </div>
                   </div>
 
@@ -327,14 +364,14 @@ export default function HomePage() {
       )}
 
       {/* ── Customer Reviews ── */}
-      <section className="py-24 px-6" style={{ background: "#0C1E3E" }}>
+      <section className="pt-12 pb-24 px-6" style={{ background: "var(--gy)" }}>
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-4">
             <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Real People, Real Results</p>
-            <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
+            <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
               What Our Customers Say
             </h2>
-            <p style={{ color: "#8F9CAE" }}>Join thousands of happy customers across India</p>
+            <p style={{ color: "#4A5568", opacity: 0.8 }}>Join thousands of happy customers across India</p>
           </motion.div>
           {reviews.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
@@ -345,30 +382,30 @@ export default function HomePage() {
                   <div className="flex items-start justify-between">
                     <div className="flex gap-0.5">
                       {Array.from({ length: 5 }).map((_, j) => (
-                        <Star key={j} size={14} style={{ fill: j < review.rating ? "var(--or)" : "#1E2D4A", color: j < review.rating ? "var(--or)" : "#1E2D4A" }} />
+                        <Star key={j} size={14} style={{ fill: j < review.rating ? "#FFB800" : "#EAEAEA", color: j < review.rating ? "#FFB800" : "#EAEAEA" }} />
                       ))}
                     </div>
-                    <Quote size={20} style={{ color: "rgba(255,92,0,0.2)" }} />
+                    <Quote size={20} style={{ color: "rgba(255, 92, 0, 0.2)" }} />
                   </div>
-                  {review.title && <p className="font-black" style={{ color: "#627d98", letterSpacing: "-0.02em" }}>{review.title}</p>}
-                  <p className="text-sm leading-relaxed flex-1" style={{ color: "#8F9CAE" }}>"{review.body}"</p>
-                  <div className="flex items-center justify-between pt-3 mt-auto" style={{ borderTop: "1px solid #1E2D4A" }}>
+                  {review.title && <p className="font-black" style={{ color: "#0C1E39", letterSpacing: "-0.02em" }}>{review.title}</p>}
+                  <p className="text-sm leading-relaxed flex-1" style={{ color: "#4A5568", opacity: 0.8 }}>"{review.body}"</p>
+                  <div className="flex items-center justify-between pt-3 mt-auto" style={{ borderTop: "1px solid #EAEAEA" }}>
                     <div className="flex items-center gap-2">
                       <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-black text-white"
-                        style={{ background: "rgba(255,92,0,0.2)", color: "var(--or)" }}>
+                        style={{ background: "#0C1E39", color: "#FFFFFF" }}>
                         {review.user?.name?.charAt(0)?.toUpperCase() || "?"}
                       </div>
-                      <span className="text-sm font-bold" style={{ color: "#FFFFFF" }}>{review.user?.name || "Customer"}</span>
+                      <span className="text-sm font-bold" style={{ color: "#0C1E39" }}>{review.user?.name || "Customer"}</span>
                     </div>
                     {review.product?.name && (
-                      <span className="text-xs truncate max-w-[120px]" style={{ color: "#8F9CAE" }}>{review.product.name}</span>
+                      <span className="text-xs truncate max-w-[120px]" style={{ color: "#6B7280" }}>{review.product.name}</span>
                     )}
                   </div>
                 </motion.div>
               ))}
             </div>
           ) : (
-            <div className="text-center mt-12 py-16" style={{ color: "#627d98" }}>
+            <div className="text-center mt-12 py-16" style={{ color: "#0C1E39" }}>
               <Star size={40} className="mx-auto mb-4 opacity-20" />
               <p className="text-sm font-medium">Customer reviews coming soon!</p>
             </div>
@@ -380,29 +417,33 @@ export default function HomePage() {
       <BlogSection />
 
       {/* ── CTA ── */}
-      <section className="py-24 px-6" style={{ background: "var(--dk)" }}>
+      <section className="py-24 px-6" style={{ background: "var(--gy)" }}>
         <div className="mx-auto max-w-4xl">
           <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
             className="p-12 text-center"
-            style={{ background: "#0C1E3E", borderRadius: "10px", border: "1.5px solid #1E2D4A" }}>
-            <h2 className="text-3xl md:text-4xl font-black mb-4" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
+            style={{ 
+              background: "linear-gradient(135deg, #0C1E39 0%, #051124 100%)", 
+              borderRadius: "20px", 
+              border: "1.5px solid #0C1E39" 
+            }}>
+            <h2 className="text-3xl md:text-4xl font-black mb-4" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
               Join the <span style={{ color: "var(--or)" }}>Zupwell Gang</span>
             </h2>
-            <p className="mb-8 max-w-lg mx-auto" style={{ color: "#8F9CAE" }}>
+            <p className="mb-8 max-w-lg mx-auto" style={{ color: "#F8F8F8", opacity: 0.8 }}>
               Create a free account to access exclusive pricing, personalised recommendations, and your complete order history.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/login">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                   className="zbtn-or"
-                  style={{ padding: "14px 28px", fontSize: "13px" }}>
+                  style={{ padding: "14px 36px", fontSize: "13px", borderRadius: "30px" }}>
                   Sign In
                 </motion.button>
               </Link>
               <Link href="/products">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                   className="zbtn-out"
-                  style={{ padding: "14px 28px", fontSize: "13px" }}>
+                  style={{ padding: "14px 36px", fontSize: "13px", borderRadius: "30px" }}>
                   Upgrade Your Water
                 </motion.button>
               </Link>

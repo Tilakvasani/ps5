@@ -5,15 +5,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: {
-          orange: "#FF4500",
-          lime:   "#C8FF00",
-          black:  "#0A0A0A",
-          white:  "#FFFFFF",
-          cream:  "#FFF5F0",
-          gray:   "#F8F8F8",
-          muted:  "#888888",
-          border: "#0A0A0A",
+        background: '#051124',
+        foreground: '#FFFFFF',
+        card: '#0C1E39',
+        border: '#0C1E39',
+        orange: {
+          500: '#FF5C00',
         },
       },
       fontFamily: {

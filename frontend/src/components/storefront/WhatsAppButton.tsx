@@ -36,9 +36,9 @@ export default function WhatsAppButton() {
             exit={{ opacity: 0, x: 10, scale: 0.9 }}
             className="text-xs font-semibold px-3 py-2 rounded-xl whitespace-nowrap mr-1"
             style={{
-              background: "#0C1E3E",
+              background: "#0C1E39",
               color: "#FFFFFF",
-              border: "1.5px solid #1E2D4A",
+              border: "1.5px solid #0C1E39",
               boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
             }}
           >

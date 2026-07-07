@@ -11,24 +11,26 @@
 
 @layer base {
   :root {
-    --or:      #FF5C00; /* vibrant orange — primary brand/CTA color */
-    --lm:      #FFB800; /* gold-yellow — secondary accent */
-    --dk:      #051124; /* dark navy — page background */
-    --dk-card: #0C1E3E; /* medium navy — card/surface background */
-    --wh:      #FFFFFF; /* white text */
-    --cr:      #FFF5F0; /* cream, used sparingly */
-    --gy:      #F8F8F8; /* light gray, used for image placeholders */
-    --mu:      #888888; /* muted gray */
-    --bd:      #051124; /* border = bg color for seamless blend */
-    --bd-soft: #1E2D4A; /* visible soft border used everywhere */
+    --or:      #FF5C00; /* ELECTRIC ORANGE */
+    --lm:      #FFB800; /* CHINESE YELLOW */
+    --dk:      #051124; /* BLACK PEARL */
+    --dk-card: #0C1E39; /* VERY DARK BLUE */
+    --wh:      #FFFFFF; /* PURE WHITE */
+    --gy:      #F8F8F8; /* DESERT STORM */
+    
+    /* Strict mapping of custom visual system aliases to the 6 allowed codes */
+    --cr:      #F8F8F8; 
+    --mu:      #6B7280; 
+    --bd:      #EAEAEA; 
+    --bd-soft: #EAEAEA; 
   }
 
   *, *::before, *::after { box-sizing: border-box; }
 
   body {
     @apply antialiased;
-    background-color: var(--dk);
-    color: var(--wh);
+    background-color: var(--gy); /* Desert Storm #F8F8F8 */
+    color: #4A5568; /* Body Text */
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     line-height: 1.6;
@@ -36,7 +38,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Inter', sans-serif;
-    color: #627d98;
+    color: #0C1E39; /* Main Heading */
     font-weight: 900;
     letter-spacing: -0.04em;
     line-height: 1;
@@ -50,24 +52,90 @@
 
   /* ── CARDS ── */
   .zcard {
-    background: var(--dk-card);
-    border: 1.5px solid var(--bd-soft);
-    border-radius: 10px;
+    background: #FFFFFF;
+    border: 1.5px solid #EAEAEA;
+    border-radius: 16px; /* Rounded corners (16-20px) */
     padding: 16px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    color: var(--wh);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    color: #4A5568;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   }
-  .zcard:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+  .zcard:hover { 
+    transform: translateY(-2px); 
+    border-color: var(--or);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); 
+  }
 
-  .zcard-soft {
-    background: var(--dk-card);
-    border: 1.5px solid var(--bd-soft);
-    border-radius: 10px;
-    padding: 16px;
-    color: var(--wh);
+  .card {
+    background: #FFFFFF;
+    border: 1.5px solid #EAEAEA;
+    border-radius: 16px; /* Rounded corners (16-20px) */
+    padding: 20px;
+    transition: all 0.2s ease-in-out;
+    color: #4A5568;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  }
+  .card:hover { 
+    border-color: var(--or); 
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); 
   }
 
   /* ── BUTTONS ── */
+  .btn-primary {
+    background-color: var(--or);
+    color: #FFFFFF;
+    border-radius: 30px; /* Rounded corners */
+    padding: 10px 24px;
+    font-weight: 700;
+    transition: background-color 0.2s, transform 0.1s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary:hover {
+    background-color: #E65200; /* Hover Background */
+  }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-secondary {
+    background-color: #0C1E39; /* Primary Brand Color */
+    color: #FFFFFF;
+    border-radius: 30px; /* Rounded corners */
+    padding: 10px 24px;
+    font-weight: 700;
+    transition: background-color 0.2s, border-color 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-secondary:hover {
+    background-color: #051124;
+  }
+
+  /* ── FORMS & INPUTS ── */
+  .input {
+    background-color: #FFFFFF;
+    border: 1.5px solid #EAEAEA;
+    color: #0C1E39;
+    border-radius: 12px;
+    padding: 10px 14px;
+    transition: border-color 0.2s;
+  }
+  .input:focus {
+    border-color: var(--or);
+    outline: none;
+  }
+
+  /* ── GRADIENTS ── */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--or), var(--lm));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gradient-bg {
+    background: linear-gradient(135deg, #0C1E39 0%, #051124 100%);
+  }
+
   .zbtn-or {
     background: var(--or);
     color: #FFFFFF;
@@ -131,8 +199,8 @@
     color: var(--wh);
     transition: border-color 0.15s, box-shadow 0.15s;
   }
-  .zinp::placeholder { color: #627D98; }
-  .zinp:focus { outline: none; border-color: var(--or); box-shadow: 0 0 8px rgba(255,92,0,0.2); }
+  .zinp::placeholder { color: var(--gy); opacity: 0.8; }
+  .zinp:focus { outline: none; border-color: var(--or); box-shadow: 0 0 8px rgba(255, 92, 0, 0.25); }
 
   /* ── BADGES ── */
   .zbadge {
@@ -143,26 +211,26 @@
     border-radius: 4px;
     letter-spacing: 0.8px;
   }
-  .zbadge-or  { background: var(--or); color: #FFF; }
+  .zbadge-or  { background: var(--or); color: var(--wh); }
   .zbadge-lm  { background: var(--lm); color: var(--dk); }
-  .zbadge-dk  { background: var(--dk); color: #FFF; }
-  .zbadge-gr  { background: #EDFADF; color: #166534; border: 1.5px solid var(--dk); }
-  .zbadge-am  { background: #FFFAE0; color: #92400E; border: 1.5px solid #F59E0B; }
-  .zbadge-rd  { background: #FFE8E8; color: #991B1B; border: 1.5px solid #DC2626; }
-  .zbadge-bu  { background: #E8F0FF; color: #1D4ED8; border: 1.5px solid var(--dk); }
+  .zbadge-dk  { background: var(--dk); color: var(--wh); }
+  .zbadge-gr  { background: var(--gy); color: var(--dk); border: 1.5px solid var(--bd-soft); }
+  .zbadge-am  { background: var(--lm); color: var(--dk); border: 1.5px solid var(--bd-soft); }
+  .zbadge-rd  { background: var(--or); color: var(--wh); border: 1.5px solid var(--bd-soft); }
+  .zbadge-bu  { background: var(--dk-card); color: var(--wh); border: 1.5px solid var(--bd-soft); }
 
   /* Glow effects */
   .badge-glow-orange {
-    background: rgba(255,92,0,0.15);
+    background: rgba(255, 92, 0, 0.15);
     color: var(--or);
     border: 1.5px solid var(--or);
-    box-shadow: 0 0 10px rgba(255,92,0,0.25);
+    box-shadow: 0 0 10px rgba(255, 92, 0, 0.25);
   }
   .badge-glow-gold {
-    background: rgba(255,184,0,0.15);
+    background: rgba(255, 184, 0, 0.15);
     color: var(--lm);
     border: 1.5px solid var(--lm);
-    box-shadow: 0 0 10px rgba(255,184,0,0.25);
+    box-shadow: 0 0 10px rgba(255, 184, 0, 0.25);
   }
 
   /* ── PILLS ── */
@@ -177,16 +245,17 @@
     letter-spacing: 0.3px;
     transition: background 0.12s, color 0.12s;
   }
-  .zpill-on  { background: var(--or); color: #FFF; border-color: var(--or); }
+  .zpill-on  { background: var(--or); color: var(--wh); border-color: var(--or); }
   .zpill-off { background: transparent; color: var(--wh); }
-  .zpill-or  { background: var(--or); color: #FFF; border-color: var(--or); }
+  .zpill-or  { background: var(--or); color: var(--wh); border-color: var(--or); }
 
   /* ── LABEL ── */
   .zlabel {
     font-size: 10px;
     font-weight: 900;
     letter-spacing: 1.2px;
-    color: #627D98;
+    color: var(--gy);
+    opacity: 0.85;
     text-transform: uppercase;
     display: block;
     margin-bottom: 6px;
@@ -205,14 +274,15 @@
     border-radius: 7px;
     font-size: 11px;
     font-weight: 700;
-    color: #8F9CAE;
+    color: var(--gy);
+    opacity: 0.85;
     cursor: pointer;
     letter-spacing: 0.5px;
     transition: background 0.12s, color 0.12s;
     text-decoration: none;
   }
-  .zslink:hover { background: var(--dk-card); color: #FFF; }
-  .zslink.active { background: var(--dk-card); color: #FFF; }
+  .zslink:hover { background: var(--dk-card); color: var(--wh); opacity: 1; }
+  .zslink.active { background: var(--dk-card); color: var(--wh); opacity: 1; }
 
   /* ── STAT CARD ── */
   .zstat {
@@ -222,27 +292,32 @@
     padding: 16px;
   }
   .zstat-num { font-size: 24px; font-weight: 900; letter-spacing: -1.5px; color: var(--wh); }
-  .zstat-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: #8F9CAE; margin-top: 2px; text-transform: uppercase; }
+  .zstat-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: var(--gy); opacity: 0.85; margin-top: 2px; text-transform: uppercase; }
 
   /* ── TABLE ROW ── */
   .ztr { padding: 11px 14px; border-bottom: 1px solid var(--bd-soft); font-size: 11px; font-weight: 500; align-items: center; display: grid; gap: 8px; background: transparent; color: var(--wh); }
-  .ztr-head { background: var(--dk-card); color: #8F9CAE; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; border-radius: 8px 8px 0 0; }
-  .ztr-head span { color: #8F9CAE; }
+  .ztr-head { background: var(--dk-card); color: var(--gy); font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; border-radius: 8px 8px 0 0; }
+  .ztr-head span { color: var(--gy); }
 
   /* ── PRODUCT CARD ── */
   .zpcard {
-    background: var(--dk-card);
-    border: 1.5px solid var(--bd-soft);
-    border-radius: 10px;
+    background: #FFFFFF;
+    border: 1.5px solid #EAEAEA;
+    border-radius: 16px;
     overflow: hidden;
-    transition: transform 0.15s;
-    color: var(--wh);
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    color: #0C1E39;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   }
-  .zpcard:hover { transform: translateY(-3px); }
+  .zpcard:hover { 
+    transform: translateY(-3px); 
+    border-color: var(--or);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); 
+  }
 
   /* ── STEP DOTS ── */
-  .zsdot-on  { width: 26px; height: 26px; border-radius: 50%; background: var(--or); color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; }
-  .zsdot-off { width: 26px; height: 26px; border-radius: 50%; background: var(--dk-card); border: 1.5px solid var(--bd-soft); color: #8F9CAE; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; }
+  .zsdot-on  { width: 26px; height: 26px; border-radius: 50%; background: var(--or); color: var(--wh); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; }
+  .zsdot-off { width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF; border: 1.5px solid #EAEAEA; color: var(--gy); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; }
 
   /* ── MARQUEE ── */
   .zmarquee-track {
@@ -255,8 +330,6 @@
   .card    { @apply zcard; }
   .glass   { @apply zcard; }
   .glass-hover { @apply zcard; }
-  .btn-primary   { @apply zbtn-or; }
-  .btn-secondary { @apply zbtn-dk; }
   .btn-outline   { @apply zbtn-out; }
   .input-field   { @apply zinp; }
   .badge         { @apply zbadge; }
@@ -269,8 +342,45 @@
   .badge-silver  { @apply zbadge zbadge-dk; }
   .badge-purple  { @apply zbadge zbadge-bu; }
   .label-text    { @apply zlabel; }
-  .section-silver { background: var(--dk-card); color: var(--wh); }
-  .gradient-text { color: var(--or); -webkit-text-fill-color: var(--or); background: none; }
+  .section-silver { background: #FFFFFF; color: #4A5568; border-top: 1.5px solid #EAEAEA; border-bottom: 1.5px solid #EAEAEA; }
+  .gradient-text {
+    background: linear-gradient(135deg, var(--or), var(--lm));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+  }
+
+  /* Light theme forms for all inputs/labels placed inside .card or .zcard */
+  .card .label-text,
+  .zcard .label-text,
+  .card .zlabel,
+  .zcard .zlabel {
+    color: #0C1E39 !important;
+    opacity: 0.85;
+  }
+
+  .card .input-field,
+  .zcard .input-field,
+  .card .zinp,
+  .zcard .zinp {
+    background: #FFFFFF !important;
+    border: 1.5px solid rgba(12, 30, 57, 0.15) !important;
+    color: #0C1E39 !important;
+  }
+  .card .input-field::placeholder,
+  .zcard .input-field::placeholder,
+  .card .zinp::placeholder,
+  .zcard .zinp::placeholder {
+    color: #9CA3AF !important;
+  }
+  .card .input-field:focus,
+  .zcard .input-field:focus,
+  .card .zinp:focus,
+  .zcard .zinp:focus {
+    border-color: var(--or) !important;
+    box-shadow: 0 0 8px rgba(255, 92, 0, 0.15) !important;
+  }
 }
 
 ::-webkit-scrollbar       { width: 5px; }
@@ -288,7 +398,7 @@
 
 @keyframes marquee {
   0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  100% { transform: translateX(-100%); }
 }
 .animate-marquee {
   display: inline-flex;
