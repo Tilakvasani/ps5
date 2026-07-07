@@ -313,6 +313,29 @@ router.put("/products/:id", sanitizeBody, authAdmin, upload.array("images", 10),
   }
 });
 
+// DELETE product image by ID
+router.delete("/products/images/:imageId", authAdmin, async (req, res) => {
+  try {
+    const imageId = Number(req.params.imageId);
+    const img = await prisma.productImage.findUnique({ where: { id: imageId } });
+    if (!img) return res.status(404).json({ error: "Image not found" });
+
+    if (img.isPrimary) {
+      const nextImg = await prisma.productImage.findFirst({
+        where: { productId: img.productId, id: { not: imageId } }
+      });
+      if (nextImg) {
+        await prisma.productImage.update({ where: { id: nextImg.id }, data: { isPrimary: true } });
+      }
+    }
+
+    await prisma.productImage.delete({ where: { id: imageId } });
+    res.json({ message: "Image deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to delete image" });
+  }
+});
+
 // SOFT DELETE — sets isActive: false, does NOT remove from database
 // This preserves order history, invoices and all related data
 router.delete("/products/:id", authAdmin, async (req, res) => {
@@ -634,6 +657,16 @@ router.put("/settings", authAdmin, async (req, res) => {
     res.json({ message: "Settings updated" });
   } catch (err) {
     res.status(500).json({ error: err.message || "Failed to update settings" });
+  }
+});
+
+// Upload setting image (logo, founder photo, etc.) to Cloudinary
+router.post("/settings/upload", authAdmin, upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    res.json({ url: req.file.path });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to upload setting image" });
   }
 });
 
