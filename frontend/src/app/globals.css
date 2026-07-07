@@ -20,17 +20,17 @@
     
     /* Strict mapping of custom visual system aliases to the 6 allowed codes */
     --cr:      #F8F8F8; 
-    --mu:      #F8F8F8; 
-    --bd:      #051124; 
-    --bd-soft: #0C1E39; 
+    --mu:      #6B7280; 
+    --bd:      #EAEAEA; 
+    --bd-soft: #EAEAEA; 
   }
 
   *, *::before, *::after { box-sizing: border-box; }
 
   body {
     @apply antialiased;
-    background-color: var(--dk);
-    color: var(--wh);
+    background-color: var(--gy); /* Desert Storm #F8F8F8 */
+    color: #4A5568; /* Body Text */
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     line-height: 1.6;
@@ -38,7 +38,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Inter', sans-serif;
-    color: var(--wh);
+    color: #0C1E39; /* Main Heading */
     font-weight: 900;
     letter-spacing: -0.04em;
     line-height: 1;
@@ -52,62 +52,70 @@
 
   /* ── CARDS ── */
   .zcard {
-    background: var(--dk-card);
-    border: 1.5px solid var(--bd-soft);
-    border-radius: 10px;
+    background: #FFFFFF;
+    border: 1.5px solid #EAEAEA;
+    border-radius: 16px; /* Rounded corners (16-20px) */
     padding: 16px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    color: var(--wh);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    color: #4A5568;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   }
-  .zcard:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+  .zcard:hover { 
+    transform: translateY(-2px); 
+    border-color: var(--or);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); 
+  }
 
   .card {
-    background: var(--dk-card);
-    border: 1.5px solid var(--bd-soft);
-    border-radius: 10px;
+    background: #FFFFFF;
+    border: 1.5px solid #EAEAEA;
+    border-radius: 16px; /* Rounded corners (16-20px) */
     padding: 20px;
     transition: all 0.2s ease-in-out;
+    color: #4A5568;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   }
-  .card:hover { border-color: var(--or); }
+  .card:hover { 
+    border-color: var(--or); 
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); 
+  }
 
   /* ── BUTTONS ── */
   .btn-primary {
     background-color: var(--or);
-    color: var(--wh);
-    border-radius: 8px;
-    padding: 10px 20px;
+    color: #FFFFFF;
+    border-radius: 30px; /* Rounded corners */
+    padding: 10px 24px;
     font-weight: 700;
     transition: background-color 0.2s, transform 0.1s;
     border: none;
     cursor: pointer;
   }
   .btn-primary:hover {
-    background-color: var(--lm);
-    color: var(--dk);
+    background-color: #E65200; /* Hover Background */
   }
   .btn-primary:active { transform: scale(0.98); }
 
   .btn-secondary {
-    background-color: transparent;
-    color: var(--wh);
-    border: 1.5px solid var(--bd-soft);
-    border-radius: 8px;
-    padding: 10px 20px;
+    background-color: #0C1E39; /* Primary Brand Color */
+    color: #FFFFFF;
+    border-radius: 30px; /* Rounded corners */
+    padding: 10px 24px;
     font-weight: 700;
     transition: background-color 0.2s, border-color 0.2s;
+    border: none;
     cursor: pointer;
   }
   .btn-secondary:hover {
-    background-color: var(--dk-card);
-    border-color: var(--or);
+    background-color: #051124;
   }
 
   /* ── FORMS & INPUTS ── */
   .input {
-    background-color: var(--dk);
-    border: 1.5px solid var(--bd-soft);
-    color: var(--wh);
-    border-radius: 8px;
+    background-color: #FFFFFF;
+    border: 1.5px solid #EAEAEA;
+    color: #0C1E39;
+    border-radius: 12px;
     padding: 10px 14px;
     transition: border-color 0.2s;
   }
@@ -125,7 +133,7 @@
   }
 
   .gradient-bg {
-    background: linear-gradient(135deg, var(--dk) 0%, var(--dk-card) 100%);
+    background: linear-gradient(135deg, #0C1E39 0%, #051124 100%);
   }
 
   .zbtn-or {
@@ -293,18 +301,23 @@
 
   /* ── PRODUCT CARD ── */
   .zpcard {
-    background: var(--dk-card);
-    border: 1.5px solid var(--bd-soft);
-    border-radius: 10px;
+    background: #FFFFFF;
+    border: 1.5px solid #EAEAEA;
+    border-radius: 16px;
     overflow: hidden;
-    transition: transform 0.15s;
-    color: var(--wh);
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    color: #0C1E39;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   }
-  .zpcard:hover { transform: translateY(-3px); }
+  .zpcard:hover { 
+    transform: translateY(-3px); 
+    border-color: var(--or);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); 
+  }
 
   /* ── STEP DOTS ── */
   .zsdot-on  { width: 26px; height: 26px; border-radius: 50%; background: var(--or); color: var(--wh); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; }
-  .zsdot-off { width: 26px; height: 26px; border-radius: 50%; background: var(--dk-card); border: 1.5px solid var(--bd-soft); color: var(--gy); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; }
+  .zsdot-off { width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF; border: 1.5px solid #EAEAEA; color: var(--gy); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; }
 
   /* ── MARQUEE ── */
   .zmarquee-track {
@@ -317,8 +330,6 @@
   .card    { @apply zcard; }
   .glass   { @apply zcard; }
   .glass-hover { @apply zcard; }
-  .btn-primary   { @apply zbtn-or; }
-  .btn-secondary { @apply zbtn-dk; }
   .btn-outline   { @apply zbtn-out; }
   .input-field   { @apply zinp; }
   .badge         { @apply zbadge; }
@@ -331,8 +342,14 @@
   .badge-silver  { @apply zbadge zbadge-dk; }
   .badge-purple  { @apply zbadge zbadge-bu; }
   .label-text    { @apply zlabel; }
-  .section-silver { background: var(--dk-card); color: var(--wh); }
-  .gradient-text { color: var(--or); -webkit-text-fill-color: var(--or); background: none; }
+  .section-silver { background: #FFFFFF; color: #4A5568; border-top: 1.5px solid #EAEAEA; border-bottom: 1.5px solid #EAEAEA; }
+  .gradient-text {
+    background: linear-gradient(135deg, var(--or), var(--lm));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+  }
 }
 
 ::-webkit-scrollbar       { width: 5px; }

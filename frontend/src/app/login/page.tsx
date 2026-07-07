@@ -90,7 +90,7 @@ function LoginForm() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center mb-4">
             <span className="text-4xl font-black" style={{ color: '#FFFFFF', fontWeight: 900, letterSpacing: '-1.5px' }}>
-              Zupwell<sup style={{ fontSize: "16px", fontWeight: 700, color: '#F8F8F8', marginLeft: "2.5px", letterSpacing: "1px", verticalAlign: "super" }}>TM</sup>
+              Zupwell<sup style={{ fontSize: "16px", fontWeight: 700, color: '#FF5C00', marginLeft: "2.5px", letterSpacing: "1px", verticalAlign: "super" }}>TM</sup>
             </span>
           </Link>
           <h1 className="text-3xl font-black" style={{ color: '#FFFFFF' }}>Welcome back</h1>

@@ -33,9 +33,9 @@ const StatCard = ({ title, value, sub, icon: Icon, change, color, href }: any) =
       </div>
       <ChangeBadge pct={change} />
     </div>
-    <p className="text-2xl font-black" style={{ color: '#627d98' }}>{value}</p>
-    <p className="text-sm mt-0.5" style={{ color: '#8F9CAE' }}>{title}</p>
-    {sub && <p className="text-xs mt-1" style={{ color: '#8F9CAE' }}>{sub}</p>}
+    <p className="text-2xl font-black" style={{ color: '#F8F8F8' }}>{value}</p>
+    <p className="text-sm mt-0.5" style={{ color: '#F8F8F8' }}>{title}</p>
+    {sub && <p className="text-xs mt-1" style={{ color: '#F8F8F8' }}>{sub}</p>}
     {href && <Link href={href} className="text-xs hover:underline mt-2 block" style={{ color: 'var(--or)' }}>View →</Link>}
   </motion.div>
 );
@@ -43,8 +43,8 @@ const StatCard = ({ title, value, sub, icon: Icon, change, color, href }: any) =
 const ChartTip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl p-3 text-sm shadow-sm" style={{ background: '#0C1E3E', border: '1.5px solid #1E2D4A', color: '#FFFFFF' }}>
-      <p className="mb-2 font-semibold" style={{ color: '#8F9CAE' }}>{label}</p>
+    <div className="rounded-xl p-3 text-sm shadow-sm" style={{ background: '#0C1E39', border: '1.5px solid #0C1E39', color: '#FFFFFF' }}>
+      <p className="mb-2 font-semibold" style={{ color: '#F8F8F8' }}>{label}</p>
       {payload.map((p: any) => (
         <p key={p.name} style={{ color: p.color }} className="font-bold">
           {p.name === "profit" ? "Profit" : "Revenue"}: ₹{fmt(p.value)}
@@ -91,8 +91,8 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-black" style={{ color: '#627d98' }}>Dashboard</h1>
-          <p className="text-sm mt-1" style={{ color: '#8F9CAE' }}>
+          <h1 className="text-3xl font-black" style={{ color: '#F8F8F8' }}>Dashboard</h1>
+          <p className="text-sm mt-1" style={{ color: '#F8F8F8' }}>
             {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </p>
         </div>
@@ -152,21 +152,21 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <TrendingUp size={16} style={{ color: 'var(--or)' }} />
-            <h2 className="font-bold" style={{ color: '#627d98' }}>Revenue &amp; Profit</h2>
+            <h2 className="font-bold" style={{ color: '#F8F8F8' }}>Revenue &amp; Profit</h2>
           </div>
-          <div className="flex items-center gap-1 rounded-lg p-1" style={{ background: '#1E2D4A' }}>
+          <div className="flex items-center gap-1 rounded-lg p-1" style={{ background: '#0C1E39' }}>
             {[7, 30, 90].map(d => (
               <button key={d} onClick={() => setChartDays(d)}
                 className="text-xs px-3 py-1.5 rounded-md font-semibold transition-all"
                 style={chartDays === d
-                  ? { background: '#0C1E3E', color: 'var(--or)', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }
-                  : { color: '#8F9CAE' }}>
+                  ? { background: '#0C1E39', color: 'var(--or)', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }
+                  : { color: '#F8F8F8' }}>
                 {d}d
               </button>
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-4 mb-4 text-xs" style={{ color: '#8F9CAE' }}>
+        <div className="flex items-center gap-4 mb-4 text-xs" style={{ color: '#F8F8F8' }}>
           <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 rounded" style={{ background: '#FF5C00' }} />Revenue</span>
           <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-emerald-500 rounded" />Profit</span>
         </div>
@@ -183,8 +183,8 @@ export default function AdminDashboard() {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-            <XAxis dataKey="date" tick={{ fill: "#8F9CAE", fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "#8F9CAE", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
+            <XAxis dataKey="date" tick={{ fill: "#F8F8F8", fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "#F8F8F8", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
             <Tooltip content={<ChartTip />} />
             <Area type="monotone" dataKey="revenue" name="revenue" stroke="#FF5C00" fill="url(#revGrad)" strokeWidth={2} dot={false} />
             <Area type="monotone" dataKey="profit"  name="profit"  stroke="#10B981" fill="url(#profGrad)" strokeWidth={2} dot={false} />
@@ -195,31 +195,31 @@ export default function AdminDashboard() {
       {/* Order Pipeline + Payment Split */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card">
-          <h2 className="font-bold mb-4" style={{ color: '#627d98' }}>Order Pipeline</h2>
+          <h2 className="font-bold mb-4" style={{ color: '#F8F8F8' }}>Order Pipeline</h2>
           {statusData.length > 0 ? (
             <div className="space-y-2">
               {statusData.map(([name, value]: any) => {
                 const pct = statusTotal > 0 ? Math.round((value / statusTotal) * 100) : 0;
                 return (
                   <Link key={name} href={`/admin/orders?status=${name}`}>
-                    <div className="flex items-center gap-3 rounded-lg p-2 -mx-2 transition-all cursor-pointer hover:bg-[#1E2D4A]">
+                    <div className="flex items-center gap-3 rounded-lg p-2 -mx-2 transition-all cursor-pointer hover:bg-[#0C1E39]">
                       <span className={`badge ${STATUS_BADGE[name] || "badge-info"} w-24 text-center shrink-0`}>{name}</span>
-                      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: '#1E2D4A' }}>
+                      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: '#0C1E39' }}>
                         <div className="h-full rounded-full transition-all duration-500"
-                          style={{ width: `${pct}%`, backgroundColor: STATUS_COLORS[name] || "#8F9CAE" }} />
+                          style={{ width: `${pct}%`, backgroundColor: STATUS_COLORS[name] || "#F8F8F8" }} />
                       </div>
                       <span className="text-sm font-bold w-6 text-right" style={{ color: '#FFFFFF' }}>{value}</span>
-                      <span className="text-xs w-8 text-right" style={{ color: '#8F9CAE' }}>{pct}%</span>
+                      <span className="text-xs w-8 text-right" style={{ color: '#F8F8F8' }}>{pct}%</span>
                     </div>
                   </Link>
                 );
               })}
             </div>
-          ) : <p className="text-sm py-4" style={{ color: '#8F9CAE' }}>No orders yet</p>}
+          ) : <p className="text-sm py-4" style={{ color: '#F8F8F8' }}>No orders yet</p>}
         </div>
 
         <div className="card">
-          <h2 className="font-bold mb-4" style={{ color: '#627d98' }}>Payment Methods</h2>
+          <h2 className="font-bold mb-4" style={{ color: '#F8F8F8' }}>Payment Methods</h2>
           {stats?.paymentSplit?.length > 0 ? (
             <div className="space-y-4">
               {stats.paymentSplit.map((p: any) => (
@@ -235,12 +235,12 @@ export default function AdminDashboard() {
                       <span className="text-sm font-semibold" style={{ color: '#FFFFFF' }}>{p.method === "razorpay" ? "Razorpay" : "Cash on Delivery"}</span>
                       <span className="text-sm font-bold" style={{ color: 'var(--or)' }}>₹{fmt(p.revenue)}</span>
                     </div>
-                    <p className="text-xs" style={{ color: '#8F9CAE' }}>{p.count} order{p.count !== 1 ? "s" : ""}</p>
+                    <p className="text-xs" style={{ color: '#F8F8F8' }}>{p.count} order{p.count !== 1 ? "s" : ""}</p>
                   </div>
                 </div>
               ))}
             </div>
-          ) : <p className="text-sm py-4" style={{ color: '#8F9CAE' }}>No payment data yet</p>}
+          ) : <p className="text-sm py-4" style={{ color: '#F8F8F8' }}>No payment data yet</p>}
         </div>
       </div>
 
@@ -248,21 +248,21 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold" style={{ color: '#627d98' }}>Top Products</h2>
+            <h2 className="font-bold" style={{ color: '#F8F8F8' }}>Top Products</h2>
             <Link href="/admin/products" className="text-xs hover:underline" style={{ color: 'var(--or)' }}>View all →</Link>
           </div>
           <div className="space-y-4">
             {topProducts.slice(0, 6).map((p: any, i: number) => (
               <div key={p.id} className="flex items-center gap-3">
-                <span className="text-xs font-bold w-5 shrink-0" style={{ color: '#627d98' }}>#{i + 1}</span>
+                <span className="text-xs font-bold w-5 shrink-0" style={{ color: '#F8F8F8' }}>#{i + 1}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate" style={{ color: '#FFFFFF' }}>{p.name}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: '#1E2D4A' }}>
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: '#0C1E39' }}>
                       <div className="h-full rounded-full"
                         style={{ width: `${Math.round((p.totalRevenue / maxRevenue) * 100)}%`, background: 'var(--or)' }} />
                     </div>
-                    <span className="text-xs shrink-0" style={{ color: '#8F9CAE' }}>{p.totalSold} sold</span>
+                    <span className="text-xs shrink-0" style={{ color: '#F8F8F8' }}>{p.totalSold} sold</span>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
@@ -271,13 +271,13 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
-            {topProducts.length === 0 && <p className="text-sm" style={{ color: '#8F9CAE' }}>No data yet</p>}
+            {topProducts.length === 0 && <p className="text-sm" style={{ color: '#F8F8F8' }}>No data yet</p>}
           </div>
         </div>
 
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold" style={{ color: '#627d98' }}>Top Customers</h2>
+            <h2 className="font-bold" style={{ color: '#F8F8F8' }}>Top Customers</h2>
             <Link href="/admin/users" className="text-xs hover:underline" style={{ color: 'var(--or)' }}>View all →</Link>
           </div>
           <div className="space-y-3">
@@ -289,14 +289,14 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate" style={{ color: '#FFFFFF' }}>{c.name || "—"}</p>
-                  <p className="text-xs truncate" style={{ color: '#8F9CAE' }}>{c.email}</p>
+                  <p className="text-xs truncate" style={{ color: '#F8F8F8' }}>{c.email}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-sm font-bold" style={{ color: '#FFFFFF' }}>₹{fmt(c.totalSpent)}</p>
-                  <p className="text-xs" style={{ color: '#8F9CAE' }}>{c.orderCount} order{c.orderCount !== 1 ? "s" : ""}</p>
+                  <p className="text-xs" style={{ color: '#F8F8F8' }}>{c.orderCount} order{c.orderCount !== 1 ? "s" : ""}</p>
                 </div>
               </div>
-            )) : <p className="text-sm py-4" style={{ color: '#8F9CAE' }}>No customer data yet</p>}
+            )) : <p className="text-sm py-4" style={{ color: '#F8F8F8' }}>No customer data yet</p>}
           </div>
         </div>
       </div>
@@ -304,26 +304,26 @@ export default function AdminDashboard() {
       {/* Recent Orders */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold" style={{ color: '#627d98' }}>Recent Orders</h2>
+          <h2 className="font-bold" style={{ color: '#F8F8F8' }}>Recent Orders</h2>
           <Link href="/admin/orders" className="text-sm hover:underline" style={{ color: 'var(--or)' }}>View all →</Link>
         </div>
         {stats?.recentOrders?.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left" style={{ color: '#8F9CAE', borderBottom: '1px solid #1E2D4A' }}>
+                <tr className="text-left" style={{ color: '#F8F8F8', borderBottom: '1px solid #0C1E39' }}>
                   {["Order #", "Customer", "Amount", "Payment", "Status", "Date"].map(h => (
                     <th key={h} className="pb-3 font-semibold pr-4 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1E2D4A]">
+              <tbody className="divide-y divide-[#0C1E39]">
                 {stats.recentOrders.map((o: any) => (
                   <tr key={o.id} className="transition-colors" style={{ cursor: 'pointer' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#1E2D4A')}
+                    onMouseEnter={e => (e.currentTarget.style.background = '#0C1E39')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td className="py-3 pr-4 font-mono font-semibold text-xs" style={{ color: '#FFFFFF' }}>{o.orderNumber}</td>
-                    <td className="py-3 pr-4" style={{ color: '#8F9CAE' }}>{o.user?.name || "—"}</td>
+                    <td className="py-3 pr-4" style={{ color: '#F8F8F8' }}>{o.user?.name || "—"}</td>
                     <td className="py-3 pr-4 font-bold" style={{ color: '#FFFFFF' }}>₹{fmt(Number(o.totalAmount))}</td>
                     <td className="py-3 pr-4">
                       <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
@@ -336,7 +336,7 @@ export default function AdminDashboard() {
                     <td className="py-3 pr-4">
                       <span className={`badge ${STATUS_BADGE[o.status] || "badge-info"}`}>{o.status}</span>
                     </td>
-                    <td className="py-3 text-xs whitespace-nowrap" style={{ color: '#8F9CAE' }}>
+                    <td className="py-3 text-xs whitespace-nowrap" style={{ color: '#F8F8F8' }}>
                       {new Date(o.createdAt).toLocaleDateString("en-IN")}
                     </td>
                   </tr>
@@ -344,7 +344,7 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-        ) : <p className="text-sm py-4" style={{ color: '#8F9CAE' }}>No orders yet</p>}
+        ) : <p className="text-sm py-4" style={{ color: '#F8F8F8' }}>No orders yet</p>}
       </div>
 
     </div>

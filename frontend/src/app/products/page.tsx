@@ -26,7 +26,7 @@ export default function ProductsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen flex flex-col justify-between" style={{ background: "var(--dk)" }}>
+    <main className="min-h-screen flex flex-col justify-between" style={{ background: "var(--gy)" }}>
       <div>
         <Navbar />
 
@@ -35,10 +35,10 @@ export default function ProductsPage() {
             <span className="inline-block zbadge zbadge-or mb-4" style={{ fontSize: "10px", letterSpacing: "1px" }}>
               ⚡ FUEL YOUR HUSTLE
             </span>
-            <h1 className="text-4xl md:text-6xl font-black mb-3" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
+            <h1 className="text-4xl md:text-6xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
               Shop <span style={{ color: "var(--or)" }}>Product</span>
             </h1>
-            <p className="text-sm max-w-lg mx-auto" style={{ color: "#F8F8F8", fontWeight: 500 }}>
+            <p className="text-sm max-w-lg mx-auto" style={{ color: "#4A5568", fontWeight: 500 }}>
               Performance-driven nutrition.
             </p>
           </div>
@@ -49,11 +49,11 @@ export default function ProductsPage() {
             </div>
           ) : error ? (
             <div className="text-center py-20">
-              <p style={{ color: "#F8F8F8" }}>Failed to load products. Please check back later.</p>
+              <p style={{ color: "#4A5568" }}>Failed to load products. Please check back later.</p>
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-20">
-              <p style={{ color: "#F8F8F8" }}>No products available right now.</p>
+              <p style={{ color: "#4A5568" }}>No products available right now.</p>
             </div>
           ) : (
             <motion.div

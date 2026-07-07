@@ -80,7 +80,7 @@ export default function ProductForm({ productId }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Info */}
         <div className="card md:col-span-2">
-          <h2 className="font-bold mb-4" style={{ color: '#627d98' }}>Basic Information</h2>
+          <h2 className="font-bold mb-4" style={{ color: '#F8F8F8' }}>Basic Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="label-text">Product Name *</label>
@@ -112,7 +112,7 @@ export default function ProductForm({ productId }: Props) {
 
         {/* Pricing */}
         <div className="card">
-          <h2 className="font-bold mb-4" style={{ color: '#627d98' }}>Pricing &amp; GST</h2>
+          <h2 className="font-bold mb-4" style={{ color: '#F8F8F8' }}>Pricing &amp; GST</h2>
           <div className="space-y-3">
             <div>
               <label className="label-text">HSN Code</label>
@@ -138,21 +138,21 @@ export default function ProductForm({ productId }: Props) {
 
         {/* Flags */}
         <div className="card">
-          <h2 className="font-bold mb-4" style={{ color: '#627d98' }}>Visibility</h2>
+          <h2 className="font-bold mb-4" style={{ color: '#F8F8F8' }}>Visibility</h2>
           <div className="space-y-4">
             {[["isActive", "Active (visible on store)"], ["isFeatured", "Featured on homepage"]].map(([k, label]) => (
               <label key={k} className="flex items-center justify-between cursor-pointer">
-                <span className="text-sm" style={{ color: '#8F9CAE' }}>{label}</span>
+                <span className="text-sm" style={{ color: '#F8F8F8' }}>{label}</span>
                 <button type="button" onClick={() => setForm(f => ({ ...f, [k]: !(f as any)[k] }))}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${(form as any)[k] ? "bg-[#FF5C00]" : "bg-[#1E2D4A]"}`}>
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${(form as any)[k] ? "bg-[#FF5C00]" : "bg-[#0C1E39]"}`}>
                   <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${(form as any)[k] ? "translate-x-6" : "translate-x-1"}`} />
                 </button>
               </label>
             ))}
           </div>
 
-          <div className="border-t mt-4 pt-4" style={{ borderColor: '#1E2D4A' }}>
-            <h3 className="text-sm font-bold mb-3" style={{ color: '#627d98' }}>Short Description</h3>
+          <div className="border-t mt-4 pt-4" style={{ borderColor: '#0C1E39' }}>
+            <h3 className="text-sm font-bold mb-3" style={{ color: '#F8F8F8' }}>Short Description</h3>
             <textarea value={form.shortDescription} onChange={update("shortDescription")} rows={3}
               className="input-field resize-none text-sm" placeholder="Brief one-liner shown on product card" />
           </div>
@@ -160,17 +160,17 @@ export default function ProductForm({ productId }: Props) {
 
         {/* Description */}
         <div className="card md:col-span-2">
-          <h2 className="font-bold mb-4" style={{ color: '#627d98' }}>Description</h2>
+          <h2 className="font-bold mb-4" style={{ color: '#F8F8F8' }}>Description</h2>
           <textarea value={form.description} onChange={update("description")} rows={6}
             className="input-field resize-y text-sm" placeholder="Full product description (HTML supported)" />
         </div>
 
         {/* Images */}
         <div className="card md:col-span-2">
-          <h2 className="font-bold mb-4" style={{ color: '#627d98' }}>Product Images</h2>
+          <h2 className="font-bold mb-4" style={{ color: '#F8F8F8' }}>Product Images</h2>
           <div className="flex flex-wrap gap-3 mb-3">
             {existingImages.map(img => (
-              <div key={img.id} className="relative h-20 w-20 rounded-xl overflow-hidden" style={{ border: '1.5px solid #1E2D4A' }}>
+              <div key={img.id} className="relative h-20 w-20 rounded-xl overflow-hidden" style={{ border: '1.5px solid #0C1E39' }}>
                 <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
                 {img.isPrimary && <span className="absolute bottom-0 left-0 right-0 text-[9px] text-white text-center py-0.5" style={{ background: 'rgba(255,92,0,0.85)' }}>Primary</span>}
                 <button type="button" onClick={async () => {
@@ -184,7 +184,7 @@ export default function ProductForm({ productId }: Props) {
                     }
                   }
                 }}
-                  className="absolute top-1 right-1 h-5 w-5 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors" style={{ background: '#0C1E3E', color: '#8F9CAE' }}>
+                  className="absolute top-1 right-1 h-5 w-5 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors" style={{ background: '#0C1E39', color: '#F8F8F8' }}>
                   <X size={10} />
                 </button>
               </div>
@@ -193,14 +193,14 @@ export default function ProductForm({ productId }: Props) {
               <div key={i} className="relative h-20 w-20 rounded-xl overflow-hidden" style={{ border: '1.5px solid rgba(255,92,0,0.35)' }}>
                 <img src={URL.createObjectURL(img)} alt="" className="w-full h-full object-cover" />
                 <button type="button" onClick={() => setImages(imgs => imgs.filter((_, j) => j !== i))}
-                  className="absolute top-1 right-1 h-5 w-5 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors" style={{ background: '#0C1E3E', color: '#8F9CAE' }}>
+                  className="absolute top-1 right-1 h-5 w-5 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors" style={{ background: '#0C1E39', color: '#F8F8F8' }}>
                   <X size={10} />
                 </button>
               </div>
             ))}
             <label className="h-20 w-20 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors" style={{ border: '2px dashed #FF5C00', background: 'rgba(255,92,0,0.05)' }}>
               <Upload size={18} className="mb-1" style={{ color: '#FF5C00' }} />
-              <span className="text-[10px]" style={{ color: '#8F9CAE' }}>Upload</span>
+              <span className="text-[10px]" style={{ color: '#F8F8F8' }}>Upload</span>
               <input type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" />
             </label>
           </div>
@@ -209,13 +209,13 @@ export default function ProductForm({ productId }: Props) {
         {/* Variants */}
         <div className="card md:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold" style={{ color: '#627d98' }}>Variants (optional)</h2>
+            <h2 className="font-bold" style={{ color: '#F8F8F8' }}>Variants (optional)</h2>
             <button type="button" onClick={() => setVariants(v => [...v, { variantName: "", sku: "", price: "" }])}
               className="flex items-center gap-1.5 text-sm transition-opacity hover:opacity-80" style={{ color: 'var(--or, #FF5C00)' }}>
               <Plus size={14} /> Add Variant
             </button>
           </div>
-          {variants.length === 0 && <p className="text-sm" style={{ color: '#8F9CAE' }}>No variants — single SKU product.</p>}
+          {variants.length === 0 && <p className="text-sm" style={{ color: '#F8F8F8' }}>No variants — single SKU product.</p>}
           {variants.map((v, i) => (
             <div key={i} className="grid grid-cols-3 gap-3 mb-3">
               <input value={v.variantName} onChange={e => setVariants(vs => vs.map((x, j) => j === i ? { ...x, variantName: e.target.value } : x))}
@@ -234,7 +234,7 @@ export default function ProductForm({ productId }: Props) {
 
         {/* SEO */}
         <div className="card md:col-span-2">
-          <h2 className="font-bold mb-4" style={{ color: '#627d98' }}>SEO (optional)</h2>
+          <h2 className="font-bold mb-4" style={{ color: '#F8F8F8' }}>SEO (optional)</h2>
           <div className="space-y-3">
             <div>
               <label className="label-text">Meta Title</label>
@@ -251,7 +251,7 @@ export default function ProductForm({ productId }: Props) {
 
       <div className="flex gap-3">
         <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="btn-primary px-8 py-3 disabled:opacity-50">
-          {loading ? <span className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#1E2D4A', borderTopColor: 'transparent' }} />{productId ? "Updating..." : "Creating..."}</span> : productId ? "Update Product" : "Create Product"}
+          {loading ? <span className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#0C1E39', borderTopColor: 'transparent' }} />{productId ? "Updating..." : "Creating..."}</span> : productId ? "Update Product" : "Create Product"}
         </motion.button>
         <button type="button" onClick={() => router.push("/admin/products")} className="btn-outline px-6 py-3">Cancel</button>
       </div>

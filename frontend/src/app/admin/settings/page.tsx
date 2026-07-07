@@ -279,16 +279,16 @@ export default function AdminSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-black mb-2" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>Settings</h1>
-      <p className="text-sm mb-6" style={{ color: "#8F9CAE" }}>All changes here reflect live on the website. No code changes needed.</p>
+      <h1 className="text-3xl font-black mb-2" style={{ color: "#F8F8F8", letterSpacing: "-0.04em" }}>Settings</h1>
+      <p className="text-sm mb-6" style={{ color: "#F8F8F8" }}>All changes here reflect live on the website. No code changes needed.</p>
       <form onSubmit={handleSave}>
         <div className="space-y-6 max-w-3xl">
           {SETTING_GROUPS.map(group => (
             <div key={group.label} className="zcard">
-              <div className="mb-4 pb-3 border-b" style={{ borderColor: "#1E2D4A" }}>
-                <h2 className="font-bold" style={{ color: "#627d98" }}>{group.label}</h2>
+              <div className="mb-4 pb-3 border-b" style={{ borderColor: "#0C1E39" }}>
+                <h2 className="font-bold" style={{ color: "#F8F8F8" }}>{group.label}</h2>
                 {(group as any).desc && (
-                  <p className="text-xs mt-1" style={{ color: "#8F9CAE" }}>{(group as any).desc}</p>
+                  <p className="text-xs mt-1" style={{ color: "#F8F8F8" }}>{(group as any).desc}</p>
                 )}
               </div>
               <div className="space-y-3">
@@ -306,13 +306,13 @@ export default function AdminSettingsPage() {
                     ) : type === "image" ? (
                       <div className="flex flex-col sm:flex-row gap-3 mt-1.5">
                         {settings[key] ? (
-                          <div className="relative h-20 w-36 shrink-0 rounded-xl overflow-hidden border bg-white/5" style={{ borderColor: "#1E2D4A" }}>
+                          <div className="relative h-20 w-36 shrink-0 rounded-xl overflow-hidden border bg-white/5" style={{ borderColor: "#0C1E39" }}>
                             <img src={settings[key]} alt="" className="w-full h-full object-contain" />
                             <button
                               type="button"
                               onClick={() => setSettings(s => ({ ...s, [key]: "" }))}
                               className="absolute top-1 right-1 h-6 w-6 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors"
-                              style={{ background: "#0C1E3E", color: "#8F9CAE" }}
+                              style={{ background: "#0C1E39", color: "#F8F8F8" }}
                             >
                               <X size={12} />
                             </button>
@@ -320,7 +320,7 @@ export default function AdminSettingsPage() {
                         ) : (
                           <label className="h-20 w-36 shrink-0 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors border-2 border-dashed border-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10">
                             <Upload size={18} className="mb-1" style={{ color: '#FF5C00' }} />
-                            <span className="text-[10px]" style={{ color: '#8F9CAE' }}>Upload File</span>
+                            <span className="text-[10px]" style={{ color: '#F8F8F8' }}>Upload File</span>
                             <input
                               type="file"
                               accept="image/*"

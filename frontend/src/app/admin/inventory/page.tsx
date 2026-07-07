@@ -48,8 +48,8 @@ export default function AdminInventoryPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black" style={{ color: "#627d98" }}>Inventory</h1>
-          <p className="text-sm mt-1" style={{ color: "#8F9CAE" }}>{inventory.length} SKUs tracked</p>
+          <h1 className="text-3xl font-black" style={{ color: "#F8F8F8" }}>Inventory</h1>
+          <p className="text-sm mt-1" style={{ color: "#F8F8F8" }}>{inventory.length} SKUs tracked</p>
         </div>
       </div>
 
@@ -62,7 +62,7 @@ export default function AdminInventoryPage() {
 
       <div className="flex gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#8F9CAE" }} />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#F8F8F8" }} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or SKU..." className="input-field pl-9 text-sm" />
         </div>
         <button onClick={fetchInventory} className="btn-outline p-2.5"><RefreshCw size={16} /></button>
@@ -72,38 +72,38 @@ export default function AdminInventoryPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left" style={{ borderBottom: "1.5px solid #1E2D4A", background: "#0C1E3E", color: "#8F9CAE" }}>
+              <tr className="text-left" style={{ borderBottom: "1.5px solid #0C1E39", background: "#0C1E39", color: "#F8F8F8" }}>
                 {["Product", "SKU / Variant", "In Stock", "Reserved", "Available", "Low Stock At", "Action"].map(h => (
                   <th key={h} className="px-4 py-3 font-semibold whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1E2D4A]">
+            <tbody className="divide-y divide-[#0C1E39]">
               {loading ? Array.from({ length: 10 }).map((_, i) => (
-                <tr key={i}><td colSpan={7} className="px-4 py-3"><div className="h-4 rounded animate-pulse" style={{ background: "#1E2D4A" }} /></td></tr>
+                <tr key={i}><td colSpan={7} className="px-4 py-3"><div className="h-4 rounded animate-pulse" style={{ background: "#0C1E39" }} /></td></tr>
               )) : filtered.map(item => {
                 const available = item.qtyInStock - item.reservedQty;
                 const isLow = item.qtyInStock <= item.lowStockThreshold;
                 return (
                   <tr key={item.id} className="transition-colors"
                     style={{ background: isLow ? "rgba(234,179,8,0.05)" : "transparent" }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "#1E2D4A")}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#0C1E39")}
                     onMouseLeave={e => (e.currentTarget.style.background = isLow ? "rgba(234,179,8,0.05)" : "transparent")}>
                     <td className="px-4 py-3">
                       <p className="font-semibold line-clamp-1 max-w-[180px]" style={{ color: "#FFFFFF" }}>{item.product?.name}</p>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs" style={{ color: "#8F9CAE" }}>
+                    <td className="px-4 py-3 font-mono text-xs" style={{ color: "#F8F8F8" }}>
                       {item.variant ? item.variant.sku : item.product?.sku}
-                      {item.variant && <p style={{ color: "#8F9CAE" }}>{item.variant.variantName}</p>}
+                      {item.variant && <p style={{ color: "#F8F8F8" }}>{item.variant.variantName}</p>}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`font-bold text-lg ${isLow ? "text-yellow-400" : ""}`} style={!isLow ? { color: "#FFFFFF" } : {}}>{item.qtyInStock}</span>
                     </td>
-                    <td className="px-4 py-3" style={{ color: "#8F9CAE" }}>{item.reservedQty}</td>
+                    <td className="px-4 py-3" style={{ color: "#F8F8F8" }}>{item.reservedQty}</td>
                     <td className="px-4 py-3">
                       <span className={`badge ${available > 0 ? "badge-success" : "badge-danger"}`}>{available}</span>
                     </td>
-                    <td className="px-4 py-3" style={{ color: "#8F9CAE" }}>{item.lowStockThreshold}</td>
+                    <td className="px-4 py-3" style={{ color: "#F8F8F8" }}>{item.lowStockThreshold}</td>
                     <td className="px-4 py-3">
                       <button onClick={() => setMovementModal(item)}
                         className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
@@ -125,9 +125,9 @@ export default function AdminInventoryPage() {
       {movementModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(5,17,36,0.85)" }}>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md p-6 rounded-xl" style={{ background: "#0C1E3E", border: "1.5px solid #1E2D4A" }}>
+            className="w-full max-w-md p-6 rounded-xl" style={{ background: "#0C1E39", border: "1.5px solid #0C1E39" }}>
             <h2 className="font-bold mb-1" style={{ color: "#FFFFFF" }}>Adjust Stock</h2>
-            <p className="text-sm mb-5" style={{ color: "#8F9CAE" }}>{movementModal.product?.name}{movementModal.variant ? ` — ${movementModal.variant.variantName}` : ""}</p>
+            <p className="text-sm mb-5" style={{ color: "#F8F8F8" }}>{movementModal.product?.name}{movementModal.variant ? ` — ${movementModal.variant.variantName}` : ""}</p>
             <div className="space-y-4">
               <div>
                 <label className="label-text">Movement Type</label>

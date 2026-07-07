@@ -72,14 +72,14 @@ function BlogSection() {
   const [modal, setModal] = useState<number | null>(null);
   const post = modal !== null ? BLOG_POSTS[modal] : null;
   return (
-    <section className="py-24 px-6" style={{ background: "#0C1E3E" }}>
+    <section className="py-24 px-6" style={{ background: "#0C1E39" }}>
       <div className="mx-auto max-w-7xl">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
           <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Health Tips & Insights</p>
-          <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>
+          <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#F8F8F8", letterSpacing: "-0.04em" }}>
             From Our Blog
           </h2>
-          <p style={{ color: "#8F9CAE" }}>Science-backed articles to fuel your health journey</p>
+          <p style={{ color: "#F8F8F8" }}>Science-backed articles to fuel your health journey</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -87,13 +87,14 @@ function BlogSection() {
             <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }} viewport={{ once: true }}
               className="zcard flex flex-col cursor-pointer"
+              style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}
               onClick={() => setModal(i)}>
               <div className="text-4xl mb-4">{post.emoji}</div>
               <span style={{ fontSize: "10px", fontWeight: 900, color: "var(--or)", textTransform: "uppercase", letterSpacing: "1px" }}>{post.tag}</span>
-              <h3 className="font-black mt-2 mb-3 leading-snug" style={{ color: "#627d98", fontSize: "15px", letterSpacing: "-0.03em" }}>{post.title}</h3>
-              <p className="text-sm leading-relaxed line-clamp-3 flex-1" style={{ color: "#8F9CAE" }}>{post.body}</p>
-              <div className="flex items-center justify-between mt-4 pt-3" style={{ borderTop: "1px solid #1E2D4A" }}>
-                <span style={{ fontSize: "10px", color: "#627d98" }}>{post.date}</span>
+              <h3 className="font-black mt-2 mb-3 leading-snug" style={{ color: "#0C1E39", fontSize: "15px", letterSpacing: "-0.03em" }}>{post.title}</h3>
+              <p className="text-sm leading-relaxed line-clamp-3 flex-1" style={{ color: "#4A5568" }}>{post.body}</p>
+              <div className="flex items-center justify-between mt-4 pt-3" style={{ borderTop: "1px solid rgba(12, 30, 57, 0.08)" }}>
+                <span style={{ fontSize: "10px", color: "#6B7280" }}>{post.date}</span>
                 <span style={{ fontSize: "11px", color: "var(--or)", fontWeight: 700 }} className="flex items-center gap-1">
                   Read more <ChevronRight size={12} />
                 </span>
@@ -110,17 +111,18 @@ function BlogSection() {
           onClick={() => setModal(null)}>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="zcard max-w-lg w-full p-8 relative"
+            style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 20px 50px rgba(12, 30, 57, 0.15)", borderRadius: "24px" }}
             onClick={e => e.stopPropagation()}>
             <button onClick={() => setModal(null)}
               className="absolute top-4 right-4 h-8 w-8 rounded-full flex items-center justify-center text-lg font-bold transition-colors"
-              style={{ background: "#1E2D4A", color: "#8F9CAE" }}>
+              style={{ background: "#0C1E39", color: "#FFFFFF" }}>
               ✕
             </button>
             <div className="text-4xl mb-3">{post.emoji}</div>
             <span style={{ fontSize: "10px", fontWeight: 900, color: "var(--or)", textTransform: "uppercase", letterSpacing: "1px" }}>{post.tag}</span>
-            <h3 className="text-xl font-black mt-2 mb-4 leading-snug" style={{ color: "#627d98", letterSpacing: "-0.03em" }}>{post.title}</h3>
-            <p className="text-sm leading-relaxed" style={{ color: "#8F9CAE" }}>{post.body}</p>
-            <p style={{ fontSize: "10px", color: "#627d98", marginTop: "24px" }}>{post.date}</p>
+            <h3 className="text-xl font-black mt-2 mb-4 leading-snug" style={{ color: "#0C1E39", letterSpacing: "-0.03em" }}>{post.title}</h3>
+            <p className="text-sm leading-relaxed" style={{ color: "#4A5568" }}>{post.body}</p>
+            <p style={{ fontSize: "10px", color: "#6B7280", marginTop: "24px" }}>{post.date}</p>
           </motion.div>
         </div>
       )}
@@ -287,40 +289,9 @@ export default function HomePage() {
       </section>
 
 
-      {/* ── Why is Our Product Special? ── */}
-      <section className="py-20 px-6" style={{ background: "var(--dk)" }}>
-        <div className="mx-auto max-w-7xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
-              Why is Our Product <span style={{ color: "var(--or)" }}>Special?</span>
-            </h2>
-            <p style={{ color: "#F8F8F8", opacity: 0.85 }}>Zero-Compromise Health Boosters. Crafted for Perfection.</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
-            {[
-              { icon: FlaskConical, title: "Scientific Formula", desc: "A fusion of science and taste." },
-              { icon: Activity,     title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
-              { icon: Zap,          title: "Instant Absorption", desc: "Rocket-like speed, instant action." },
-              { icon: Tag,          title: "Pocket Friendly",    desc: "It even fits in your jeans pocket." },
-              { icon: Citrus,       title: "Best Flavour",       desc: "Absolutely fresh, as if straight from the garden." },
-            ].map((f, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}
-                className="zcard text-center">
-                <div className="h-14 w-14 mx-auto rounded-2xl flex items-center justify-center mb-4"
-                  style={{ background: "rgba(255, 92, 0, 0.1)" }}>
-                  <f.icon size={24} style={{ color: "var(--or)" }} />
-                </div>
-                <h3 className="font-black mb-2" style={{ color: "#FFFFFF", fontSize: "14px", letterSpacing: "-0.03em" }}>{f.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.8 }}>{f.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── Certificate logos — infinite scroll marquee ── */}
-      <section className="py-10 overflow-hidden" style={{ background: "#0C1E39", borderTop: "1.5px solid #0C1E39", borderBottom: "1.5px solid #0C1E39" }}>
-        <p className="text-center mb-6" style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "#F8F8F8", opacity: 0.85, textTransform: "uppercase" }}>
+      <section className="py-10 overflow-hidden" style={{ background: "#FFFFFF", borderTop: "1.5px solid #EAEAEA", borderBottom: "1.5px solid #EAEAEA" }}>
+        <p className="text-center mb-6" style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "#0C1E39", opacity: 0.85, textTransform: "uppercase" }}>
           Certified & Compliant
         </p>
         <div className="relative">
@@ -338,10 +309,10 @@ export default function HomePage() {
 
       {/* ── Founder's Message ── */}
       {s(settings, "founder_message") && (
-        <section className="py-24 px-6" style={{ background: "var(--dk)" }}>
+        <section className="py-24 px-6" style={{ background: "var(--gy)" }}>
           <div className="mx-auto max-w-4xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <div className="overflow-hidden" style={{ borderRadius: "10px", border: "1.5px solid #0C1E39" }}>
+              <div className="overflow-hidden" style={{ borderRadius: "20px", border: "1.5px solid #EAEAEA", boxShadow: "0 10px 30px rgba(0,0,0,0.03)" }}>
                 <div className="flex flex-col md:flex-row">
 
                   {/* Left: Photo panel */}
@@ -364,25 +335,25 @@ export default function HomePage() {
                       )}
                     </div>
                     {/* Name plate */}
-                    <div className="px-5 py-4" style={{ borderTop: "1px solid #0C1E39", background: "#0C1E39" }}>
+                    <div className="px-5 py-4" style={{ borderTop: "1px solid #051124", background: "#0C1E39" }}>
                       <p className="font-black text-sm leading-tight" style={{ color: "#FFFFFF" }}>{s(settings, "founder_name")}</p>
                       <p className="text-xs font-bold mt-0.5" style={{ color: "var(--or)" }}>{s(settings, "founder_title")}</p>
                     </div>
                   </div>
 
                   {/* Right: Quote panel */}
-                  <div className="flex-1 flex flex-col justify-center px-8 py-10 relative" style={{ background: "#0C1E39" }}>
+                  <div className="flex-1 flex flex-col justify-center px-8 py-10 relative" style={{ background: "#FFFFFF" }}>
                     {/* Big decorative quote marks */}
-                    <div className="absolute top-6 left-6 text-7xl font-black leading-none select-none" style={{ color: "var(--or)", opacity: 0.12 }}>"</div>
-                    <div className="absolute bottom-4 right-8 text-7xl font-black leading-none select-none rotate-180" style={{ color: "var(--or)", opacity: 0.12 }}>"</div>
+                    <div className="absolute top-6 left-6 text-7xl font-black leading-none select-none" style={{ color: "var(--or)", opacity: 0.10 }}>"</div>
+                    <div className="absolute bottom-4 right-8 text-7xl font-black leading-none select-none rotate-180" style={{ color: "var(--or)", opacity: 0.10 }}>"</div>
 
                     <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "16px" }}>Founder's Message</p>
 
-                    <p className="text-lg leading-relaxed font-medium italic relative z-10" style={{ color: "#F8F8F8", opacity: 0.85 }}>
+                    <p className="text-lg leading-relaxed font-medium italic relative z-10 text-[#0C1E39]">
                       "{s(settings, "founder_message")}"
                     </p>
 
-                    <div className="mt-8 pt-5 flex items-center justify-between flex-wrap gap-3" style={{ borderTop: "1px solid #0C1E39" }}>
+                    <div className="mt-8 pt-5 flex items-center justify-between flex-wrap gap-3" style={{ borderTop: "1px solid #EAEAEA" }}>
                     </div>
                   </div>
 
@@ -394,14 +365,14 @@ export default function HomePage() {
       )}
 
       {/* ── Customer Reviews ── */}
-      <section className="py-24 px-6" style={{ background: "#0C1E39" }}>
+      <section className="py-24 px-6" style={{ background: "var(--gy)" }}>
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-4">
             <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Real People, Real Results</p>
-            <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
+            <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
               What Our Customers Say
             </h2>
-            <p style={{ color: "#F8F8F8", opacity: 0.8 }}>Join thousands of happy customers across India</p>
+            <p style={{ color: "#4A5568", opacity: 0.8 }}>Join thousands of happy customers across India</p>
           </motion.div>
           {reviews.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
@@ -412,30 +383,30 @@ export default function HomePage() {
                   <div className="flex items-start justify-between">
                     <div className="flex gap-0.5">
                       {Array.from({ length: 5 }).map((_, j) => (
-                        <Star key={j} size={14} style={{ fill: j < review.rating ? "var(--or)" : "#051124", color: j < review.rating ? "var(--or)" : "#051124" }} />
+                        <Star key={j} size={14} style={{ fill: j < review.rating ? "#FFB800" : "#EAEAEA", color: j < review.rating ? "#FFB800" : "#EAEAEA" }} />
                       ))}
                     </div>
                     <Quote size={20} style={{ color: "rgba(255, 92, 0, 0.2)" }} />
                   </div>
-                  {review.title && <p className="font-black" style={{ color: "#FFFFFF", letterSpacing: "-0.02em" }}>{review.title}</p>}
-                  <p className="text-sm leading-relaxed flex-1" style={{ color: "#F8F8F8", opacity: 0.8 }}>"{review.body}"</p>
-                  <div className="flex items-center justify-between pt-3 mt-auto" style={{ borderTop: "1px solid #051124" }}>
+                  {review.title && <p className="font-black" style={{ color: "#0C1E39", letterSpacing: "-0.02em" }}>{review.title}</p>}
+                  <p className="text-sm leading-relaxed flex-1" style={{ color: "#4A5568", opacity: 0.8 }}>"{review.body}"</p>
+                  <div className="flex items-center justify-between pt-3 mt-auto" style={{ borderTop: "1px solid #EAEAEA" }}>
                     <div className="flex items-center gap-2">
                       <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-black text-white"
-                        style={{ background: "rgba(255, 92, 0, 0.2)", color: "var(--or)" }}>
+                        style={{ background: "#0C1E39", color: "#FFFFFF" }}>
                         {review.user?.name?.charAt(0)?.toUpperCase() || "?"}
                       </div>
-                      <span className="text-sm font-bold" style={{ color: "#FFFFFF" }}>{review.user?.name || "Customer"}</span>
+                      <span className="text-sm font-bold" style={{ color: "#0C1E39" }}>{review.user?.name || "Customer"}</span>
                     </div>
                     {review.product?.name && (
-                      <span className="text-xs truncate max-w-[120px]" style={{ color: "#F8F8F8", opacity: 0.85 }}>{review.product.name}</span>
+                      <span className="text-xs truncate max-w-[120px]" style={{ color: "#6B7280" }}>{review.product.name}</span>
                     )}
                   </div>
                 </motion.div>
               ))}
             </div>
           ) : (
-            <div className="text-center mt-12 py-16" style={{ color: "#FFFFFF" }}>
+            <div className="text-center mt-12 py-16" style={{ color: "#0C1E39" }}>
               <Star size={40} className="mx-auto mb-4 opacity-20" />
               <p className="text-sm font-medium">Customer reviews coming soon!</p>
             </div>
@@ -447,11 +418,15 @@ export default function HomePage() {
       <BlogSection />
 
       {/* ── CTA ── */}
-      <section className="py-24 px-6" style={{ background: "var(--dk)" }}>
+      <section className="py-24 px-6" style={{ background: "var(--gy)" }}>
         <div className="mx-auto max-w-4xl">
           <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
             className="p-12 text-center"
-            style={{ background: "#0C1E39", borderRadius: "10px", border: "1.5px solid #0C1E39" }}>
+            style={{ 
+              background: "linear-gradient(135deg, #0C1E39 0%, #051124 100%)", 
+              borderRadius: "20px", 
+              border: "1.5px solid #0C1E39" 
+            }}>
             <h2 className="text-3xl md:text-4xl font-black mb-4" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
               Join the <span style={{ color: "var(--or)" }}>Zupwell Gang</span>
             </h2>
@@ -462,14 +437,14 @@ export default function HomePage() {
               <Link href="/login">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                   className="zbtn-or"
-                  style={{ padding: "14px 28px", fontSize: "13px" }}>
+                  style={{ padding: "14px 36px", fontSize: "13px", borderRadius: "30px" }}>
                   Sign In
                 </motion.button>
               </Link>
               <Link href="/products">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                   className="zbtn-out"
-                  style={{ padding: "14px 28px", fontSize: "13px" }}>
+                  style={{ padding: "14px 36px", fontSize: "13px", borderRadius: "30px" }}>
                   Upgrade Your Water
                 </motion.button>
               </Link>

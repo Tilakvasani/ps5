@@ -70,8 +70,8 @@ export function CertLogo({ label, className }: CertLogoProps) {
     <div
       className="inline-flex items-center gap-1.5 shrink-0 rounded-lg px-3 py-1.5 h-8"
       style={{
-        background: "#0C1E3E",
-        border: "1.5px solid #1E2D4A",
+        background: "#0C1E39",
+        border: "1.5px solid #0C1E39",
       }}
     >
       <span style={{ fontSize: "11px", fontWeight: 900, color: "#FFFFFF", letterSpacing: "0.5px" }}>{label}</span>

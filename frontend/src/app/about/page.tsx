@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, Eye, Star, ArrowRight, FlaskConical, Droplets, Zap, Sparkles, Target, HeartHandshake } from "lucide-react";
+import { Heart, Eye, Star, ArrowRight, FlaskConical, Droplets, Zap, Sparkles, Target, HeartHandshake, Activity, Tag, Citrus } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { fetchSettings } from "@/lib/useSettings";
@@ -44,14 +44,15 @@ export default function AboutPage() {
   }, []);
 
   const why = [
-    { icon: HeartHandshake, title: "Daily Wellness Support", desc: "Helps support hydration, immunity, and overall well-being so you can perform at your best every day." },
-    { icon: Zap,            title: "Fast Performance",       desc: "Quick-dissolving, fast-absorbing formula built for modern, active lifestyles." },
-    { icon: FlaskConical,   title: "Science-Backed Formula", desc: "Powered by clinically researched ingredients for trusted daily nutrition." },
-    { icon: Sparkles,       title: "Clean & Pure",           desc: "No unnecessary fillers — only quality ingredients your body needs." },
+    { icon: FlaskConical, title: "Scientific Formula", desc: "A fusion of science and taste." },
+    { icon: Activity,     title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
+    { icon: Zap,          title: "Instant Absorption", desc: "Rocket-like speed, instant action." },
+    { icon: Tag,          title: "Pocket Friendly",    desc: "It even fits in your jeans pocket." },
+    { icon: Citrus,       title: "Best Flavour",       desc: "Absolutely fresh, as if straight from the garden." },
   ];
 
   return (
-    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--dk)" }}>
+    <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--gy)" }}>
       <Navbar />
 
       {/* ── Hero ── */}
@@ -62,8 +63,8 @@ export default function AboutPage() {
           style={{
             background: `
               radial-gradient(circle at 10% 20%, rgba(255, 79, 0, 0.12) 0%, transparent 40%),
-              radial-gradient(circle at 90% 80%, rgba(30, 45, 74, 0.5) 0%, transparent 50%),
-              linear-gradient(180deg, #051124 0%, #0C1E3E 100%)
+              radial-gradient(circle at 90% 80%, rgba(12, 30, 57, 0.5) 0%, transparent 50%),
+              linear-gradient(180deg, #051124 0%, #0C1E39 100%)
             `,
           }}
         />
@@ -71,7 +72,7 @@ export default function AboutPage() {
         <div 
           className="absolute inset-0 opacity-10 pointer-events-none"
           style={{
-            backgroundImage: "radial-gradient(rgba(255, 79, 0, 0.12) 1.5px, transparent 1.5px), linear-gradient(to right, rgba(30, 45, 74, 0.2) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(rgba(255, 79, 0, 0.12) 1.5px, transparent 1.5px), linear-gradient(to right, rgba(12, 30, 57, 0.2) 1px, transparent 1px)",
             backgroundSize: "30px 30px, 60px 60px"
           }}
         />
@@ -101,10 +102,10 @@ export default function AboutPage() {
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <motion.div {...fadeUp(0)}>
             <span className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: "var(--or)" }}>Our Story</span>
-            <h2 className="text-3xl md:text-4xl font-black mb-6 leading-tight" style={{ color: "#FFFFFF" }}>
+            <h2 className="text-3xl md:text-4xl font-black mb-6 leading-tight" style={{ color: "#0C1E39" }}>
               Born to solve a <span className="gradient-text">real problem</span>
             </h2>
-            <p className="leading-relaxed text-lg" style={{ color: "#F8F8F8", opacity: 0.85 }}>
+            <p className="leading-relaxed text-lg" style={{ color: "#4A5568", opacity: 0.85 }}>
               {s(settings, "about_brand_story")}
             </p>
           </motion.div>
@@ -116,9 +117,9 @@ export default function AboutPage() {
               { val: s(settings, "hero_stat3_value") || "100%", label: s(settings, "hero_stat3_label") || "Authentic" },
               { val: "3-5",  label: "Days Delivery" },
             ].map(({ val, label }) => (
-              <div key={label} className="card text-center py-8" style={{ background: "#0C1E39", border: "1.5px solid #0C1E39" }}>
+              <div key={label} className="card text-center py-8" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
                 <p className="text-3xl font-black gradient-text">{val}</p>
-                <p className="text-sm mt-1" style={{ color: "#F8F8F8", opacity: 0.75 }}>{label}</p>
+                <p className="text-sm mt-1" style={{ color: "#4A5568", opacity: 0.75 }}>{label}</p>
               </div>
             ))}
           </motion.div>
@@ -126,65 +127,63 @@ export default function AboutPage() {
       </section>
 
       {/* ── Mission & Vision ── */}
-      <section className="py-20 px-6" style={{ background: "#0C1E39" }}>
+      <section className="py-20 px-6" style={{ background: "var(--gy)" }}>
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8">
-          <motion.div {...fadeUp(0)} className="card border-l-4 rounded-l-none" style={{ borderLeftColor: "var(--or)", background: "#051124", border: "1.5px solid #0C1E39" }}>
+          <motion.div {...fadeUp(0)} className="card border-l-4 rounded-l-none" style={{ borderLeftColor: "var(--or)", background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
             <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-4" style={{ background: "rgba(255,92,0,0.12)" }}>
               <Target size={20} style={{ color: "var(--or)" }} />
             </div>
-            <h3 className="text-xl font-black mb-3" style={{ color: "#FFFFFF" }}>Our Mission</h3>
-            <p className="leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.8 }}>{s(settings, "about_mission")}</p>
+            <h3 className="text-xl font-black mb-3" style={{ color: "#0C1E39" }}>Our Mission</h3>
+            <p className="leading-relaxed" style={{ color: "#4A5568", opacity: 0.8 }}>{s(settings, "about_mission")}</p>
           </motion.div>
-          <motion.div {...fadeUp(0.1)} className="card border-l-4 rounded-l-none" style={{ borderLeftColor: "var(--or)", background: "#051124", border: "1.5px solid #0C1E39" }}>
+          <motion.div {...fadeUp(0.1)} className="card border-l-4 rounded-l-none" style={{ borderLeftColor: "var(--or)", background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
             <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-4" style={{ background: "rgba(255,92,0,0.12)" }}>
               <Eye size={20} style={{ color: "var(--or)" }} />
             </div>
-            <h3 className="text-xl font-black mb-3" style={{ color: "#FFFFFF" }}>Our Vision</h3>
-            <p className="leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.8 }}>{s(settings, "about_vision")}</p>
+            <h3 className="text-xl font-black mb-3" style={{ color: "#0C1E39" }}>Our Vision</h3>
+            <p className="leading-relaxed" style={{ color: "#4A5568", opacity: 0.8 }}>{s(settings, "about_vision")}</p>
           </motion.div>
         </div>
       </section>
 
-      {/* ── Why Choose Zupwell ── */}
+      {/* ── Why is Our Product Special? ── */}
       <section className="py-20 px-6">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-7xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: "#FFFFFF" }}>
-              Why Choose <span className="gradient-text">Zupwell?</span>
+            <h2 className="text-3xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
+              Why is Our Product <span style={{ color: "var(--or)" }}>Special?</span>
             </h2>
-            <p style={{ color: "#F8F8F8", opacity: 0.8 }}>Four reasons our customers never look back</p>
+            <p style={{ color: "#4A5568", opacity: 0.85 }}>Zero-Compromise Health Boosters. Crafted for Perfection.</p>
           </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {why.map((w, i) => (
-              <motion.div key={i} {...fadeUp(i * 0.1)} className="card text-center group transition-all"
-                style={{ borderColor: "rgba(255,92,0,0.15)", background: "#0C1E39" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+            {why.map((f, i) => (
+              <motion.div key={i} {...fadeUp(i * 0.1)} className="zcard text-center"
+                style={{ borderColor: "rgba(12, 30, 57, 0.08)", background: "#FFFFFF" }}>
                 <div className="h-14 w-14 mx-auto rounded-2xl flex items-center justify-center mb-4 transition-all"
-                  style={{ background: "rgba(255,92,0,0.10)" }}>
-                  <w.icon size={24} style={{ color: "var(--or)" }} />
+                  style={{ background: "rgba(255, 92, 0, 0.1)" }}>
+                  <f.icon size={24} style={{ color: "var(--or)" }} />
                 </div>
-                <h3 className="font-bold mb-2 text-lg" style={{ color: "#FFFFFF" }}>{w.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.8 }}>{w.desc}</p>
+                <h3 className="font-black mb-2" style={{ color: "#0C1E39", fontSize: "14px", letterSpacing: "-0.03em" }}>{f.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#4A5568", opacity: 0.8 }}>{f.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      
-
       {/* ── Future of Zupwell ── */}
       {s(settings, "about_future") && (
-        <section className="py-20 px-6">
+        <section className="py-20 px-6" style={{ background: "var(--gy)" }}>
           <div className="mx-auto max-w-4xl">
             <motion.div {...fadeUp(0)} className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-black" style={{ color: "#FFFFFF" }}>
+              <h2 className="text-3xl md:text-4xl font-black" style={{ color: "#0C1E39" }}>
                 The Future of <span className="gradient-text">Zupwell</span>
               </h2>
             </motion.div>
             <motion.div {...fadeUp(0.1)}
               className="card"
-              style={{ border: "1.5px solid rgba(255,92,0,0.2)", background: "#0C1E39" }}>
-              <p className="leading-relaxed text-lg mb-6" style={{ color: "#F8F8F8", opacity: 0.85 }}>
+              style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#FFFFFF" }}>
+              <p className="leading-relaxed text-lg mb-6" style={{ color: "#4A5568", opacity: 0.85 }}>
                 {s(settings, "about_future")}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -193,7 +192,7 @@ export default function AboutPage() {
                   "Energy and focus formulations",
                   "Specialized recovery blends",
                 ].map((item) => (
-                  <div key={item} className="flex items-start gap-2 text-sm" style={{ color: "#F8F8F8", opacity: 0.8 }}>
+                  <div key={item} className="flex items-start gap-2 text-sm" style={{ color: "#4A5568", opacity: 0.8 }}>
                     <span className="mt-0.5 shrink-0" style={{ color: "var(--or)" }}>→</span>
                     {item}
                   </div>
@@ -205,7 +204,7 @@ export default function AboutPage() {
       )}
 
       {/* ── CTA ── */}
-      <section className="py-16 px-6" style={{ background: "#0C1E39" }}>
+      <section className="py-16 px-6" style={{ background: "linear-gradient(135deg, #0C1E39 0%, #051124 100%)" }}>
         <div className="mx-auto max-w-2xl text-center">
           <motion.div {...fadeUp(0)}>
             <h2 className="text-2xl font-black mb-4" style={{ color: "#FFFFFF" }}>
@@ -214,13 +213,15 @@ export default function AboutPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-stretch max-w-sm mx-auto sm:max-w-none">
               <Link href="/products" className="w-full sm:w-auto">
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                  className="btn-primary w-full flex items-center justify-center gap-2 px-8 py-3 text-sm font-bold">
+                  className="btn-primary w-full flex items-center justify-center gap-2 px-8 py-3 text-sm font-bold"
+                  style={{ borderRadius: "30px" }}>
                   Upgrade Now <ArrowRight size={16} />
                 </motion.button>
               </Link>
               <Link href="/contact" className="w-full sm:w-auto">
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                  className="btn-primary w-full flex items-center justify-center gap-2 px-8 py-3 text-sm font-bold">
+                  className="zbtn-out w-full flex items-center justify-center gap-2 px-8 py-3 text-sm font-bold"
+                  style={{ borderRadius: "30px", border: "1.5px solid #FFFFFF", color: "#FFFFFF" }}>
                   Contact Us
                 </motion.button>
               </Link>

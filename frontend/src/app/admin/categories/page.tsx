@@ -37,40 +37,40 @@ export default function AdminCategoriesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-black" style={{ color: "#627d98", letterSpacing: "-0.04em" }}>Categories</h1>
+        <h1 className="text-3xl font-black" style={{ color: "#F8F8F8", letterSpacing: "-0.04em" }}>Categories</h1>
         <button onClick={openNew} className="zbtn-or flex items-center gap-2"><Plus size={16} /> Add Category</button>
       </div>
 
       <div className="zcard p-0 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b" style={{ borderColor: "#1E2D4A", color: "#8F9CAE", background: "#0C1E3E" }}>
+            <tr className="border-b" style={{ borderColor: "#0C1E39", color: "#F8F8F8", background: "#0C1E39" }}>
               {["Name", "Parent", "Products", "Status", "Actions"].map(h => <th key={h} className="px-4 py-3 font-semibold text-left">{h}</th>)}
             </tr>
           </thead>
-          <tbody className="divide-y" style={{ borderColor: "#1E2D4A" }}>
-            {loading ? Array.from({ length: 6 }).map((_, i) => <tr key={i}><td colSpan={5} className="px-4 py-3"><div className="h-4 rounded animate-pulse" style={{ background: "#1E2D4A" }} /></td></tr>)
+          <tbody className="divide-y" style={{ borderColor: "#0C1E39" }}>
+            {loading ? Array.from({ length: 6 }).map((_, i) => <tr key={i}><td colSpan={5} className="px-4 py-3"><div className="h-4 rounded animate-pulse" style={{ background: "#0C1E39" }} /></td></tr>)
               : roots.map(cat => (
               <>
-                <tr key={cat.id} className="transition-colors font-semibold" style={{ color: "#FFFFFF" }} onMouseEnter={e => e.currentTarget.style.background = "#1E2D4A"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                <tr key={cat.id} className="transition-colors font-semibold" style={{ color: "#FFFFFF" }} onMouseEnter={e => e.currentTarget.style.background = "#0C1E39"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                   <td className="px-4 py-3" style={{ color: "#FFFFFF" }}>{cat.name}</td>
-                  <td className="px-4 py-3" style={{ color: "#8F9CAE" }}>—</td>
-                  <td className="px-4 py-3" style={{ color: "#8F9CAE" }}>{cat._count?.products ?? 0}</td>
+                  <td className="px-4 py-3" style={{ color: "#F8F8F8" }}>—</td>
+                  <td className="px-4 py-3" style={{ color: "#F8F8F8" }}>{cat._count?.products ?? 0}</td>
                   <td className="px-4 py-3"><span className={`zbadge ${cat.isActive ? "zbadge-gr" : "zbadge-rd"}`}>{cat.isActive ? "Active" : "Inactive"}</span></td>
                   <td className="px-4 py-3 flex gap-1">
-                    <button onClick={() => openEdit(cat)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "#8F9CAE" }} onMouseEnter={e => { e.currentTarget.style.color = "var(--or)"; e.currentTarget.style.background = "#0C1E3E"; }} onMouseLeave={e => { e.currentTarget.style.color = "#8F9CAE"; e.currentTarget.style.background = "transparent"; }}><Edit3 size={14} /></button>
-                    <button onClick={() => handleDelete(cat.id)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "#8F9CAE" }} onMouseEnter={e => { e.currentTarget.style.color = "#EF4444"; e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"; }} onMouseLeave={e => { e.currentTarget.style.color = "#8F9CAE"; e.currentTarget.style.background = "transparent"; }}><Trash2 size={14} /></button>
+                    <button onClick={() => openEdit(cat)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "#F8F8F8" }} onMouseEnter={e => { e.currentTarget.style.color = "var(--or)"; e.currentTarget.style.background = "#0C1E39"; }} onMouseLeave={e => { e.currentTarget.style.color = "#F8F8F8"; e.currentTarget.style.background = "transparent"; }}><Edit3 size={14} /></button>
+                    <button onClick={() => handleDelete(cat.id)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "#F8F8F8" }} onMouseEnter={e => { e.currentTarget.style.color = "#EF4444"; e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"; }} onMouseLeave={e => { e.currentTarget.style.color = "#F8F8F8"; e.currentTarget.style.background = "transparent"; }}><Trash2 size={14} /></button>
                   </td>
                 </tr>
                 {children(cat.id).map(child => (
-                  <tr key={child.id} className="transition-colors" style={{ color: "#FFFFFF" }} onMouseEnter={e => e.currentTarget.style.background = "#1E2D4A"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  <tr key={child.id} className="transition-colors" style={{ color: "#FFFFFF" }} onMouseEnter={e => e.currentTarget.style.background = "#0C1E39"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                     <td className="px-4 py-3 pl-10" style={{ color: "#FFFFFF" }}>↳ {child.name}</td>
-                    <td className="px-4 py-3" style={{ color: "#8F9CAE" }}>{cat.name}</td>
-                    <td className="px-4 py-3" style={{ color: "#8F9CAE" }}>{child._count?.products ?? 0}</td>
+                    <td className="px-4 py-3" style={{ color: "#F8F8F8" }}>{cat.name}</td>
+                    <td className="px-4 py-3" style={{ color: "#F8F8F8" }}>{child._count?.products ?? 0}</td>
                     <td className="px-4 py-3"><span className={`zbadge ${child.isActive ? "zbadge-gr" : "zbadge-rd"}`}>{child.isActive ? "Active" : "Inactive"}</span></td>
                     <td className="px-4 py-3 flex gap-1">
-                      <button onClick={() => openEdit(child)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "#8F9CAE" }} onMouseEnter={e => { e.currentTarget.style.color = "var(--or)"; e.currentTarget.style.background = "#0C1E3E"; }} onMouseLeave={e => { e.currentTarget.style.color = "#8F9CAE"; e.currentTarget.style.background = "transparent"; }}><Edit3 size={14} /></button>
-                      <button onClick={() => handleDelete(child.id)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "#8F9CAE" }} onMouseEnter={e => { e.currentTarget.style.color = "#EF4444"; e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"; }} onMouseLeave={e => { e.currentTarget.style.color = "#8F9CAE"; e.currentTarget.style.background = "transparent"; }}><Trash2 size={14} /></button>
+                      <button onClick={() => openEdit(child)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "#F8F8F8" }} onMouseEnter={e => { e.currentTarget.style.color = "var(--or)"; e.currentTarget.style.background = "#0C1E39"; }} onMouseLeave={e => { e.currentTarget.style.color = "#F8F8F8"; e.currentTarget.style.background = "transparent"; }}><Edit3 size={14} /></button>
+                      <button onClick={() => handleDelete(child.id)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "#F8F8F8" }} onMouseEnter={e => { e.currentTarget.style.color = "#EF4444"; e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"; }} onMouseLeave={e => { e.currentTarget.style.color = "#F8F8F8"; e.currentTarget.style.background = "transparent"; }}><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 ))}
@@ -82,8 +82,8 @@ export default function AdminCategoriesPage() {
 
       {modal !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(5, 17, 36, 0.7)" }}>
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md zcard p-6" style={{ background: "#0C1E3E", border: "1.5px solid #1E2D4A" }}>
-            <h2 className="font-bold mb-5" style={{ color: "#627d98" }}>{modal?.id ? "Edit" : "New"} Category</h2>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md zcard p-6" style={{ background: "#0C1E39", border: "1.5px solid #0C1E39" }}>
+            <h2 className="font-bold mb-5" style={{ color: "#F8F8F8" }}>{modal?.id ? "Edit" : "New"} Category</h2>
             <div className="space-y-4">
               <div><label className="zlabel">Name *</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="zinp" /></div>
               <div><label className="zlabel">Description</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="zinp resize-none" rows={2} /></div>
@@ -94,10 +94,10 @@ export default function AdminCategoriesPage() {
                 </select>
               </div>
               <label className="flex items-center gap-3 cursor-pointer">
-                <span className="text-sm" style={{ color: "#8F9CAE" }}>Active</span>
+                <span className="text-sm" style={{ color: "#F8F8F8" }}>Active</span>
                 <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-[var(--or)]" : "bg-[#051124]"}`}
-                  style={{ border: "1.5px solid #1E2D4A" }}>
+                  style={{ border: "1.5px solid #0C1E39" }}>
                   <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${form.isActive ? "translate-x-6" : "translate-x-1"}`} />
                 </button>
               </label>

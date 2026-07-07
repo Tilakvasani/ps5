@@ -41,7 +41,7 @@ function CallbackHandler() {
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="h-10 w-10 rounded-full border-4 animate-spin" style={{ borderColor: "rgba(255, 92, 0, 0.2)", borderTopColor: "var(--or)" }} />
-      <p className="font-semibold text-sm" style={{ color: "#8F9CAE" }}>Signing you in with Google...</p>
+      <p className="font-semibold text-sm" style={{ color: "#F8F8F8" }}>Signing you in with Google...</p>
     </div>
   );
 }
@@ -52,7 +52,7 @@ export default function AuthCallbackPage() {
       <Suspense fallback={
         <div className="flex flex-col items-center gap-4">
           <div className="h-10 w-10 rounded-full border-4 animate-spin" style={{ borderColor: "rgba(255, 92, 0, 0.2)", borderTopColor: "var(--or)" }} />
-          <p className="font-semibold text-sm" style={{ color: "#8F9CAE" }}>Loading...</p>
+          <p className="font-semibold text-sm" style={{ color: "#F8F8F8" }}>Loading...</p>
         </div>
       }>
         <CallbackHandler />
