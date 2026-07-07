@@ -95,35 +95,44 @@ export default function RegisterPage() {
           {/* ✅ Google Sign Up Button */}
           <button
             onClick={handleGoogleSignUp}
-            className="zbtn-out w-full justify-center flex items-center gap-3 text-sm font-semibold mb-6" style={{ borderRadius: '8px', padding: '11px' }}
+            className="zbtn-out w-full justify-center flex items-center gap-3 text-sm font-semibold mb-6" 
+            style={{ borderRadius: '8px', padding: '11px', color: '#0C1E39', borderColor: 'rgba(12, 30, 57, 0.12)' }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(12, 30, 57, 0.05)';
+              e.currentTarget.style.color = '#0C1E39';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#0C1E39';
+            }}
           >
             <GoogleIcon /> Continue with Google
           </button>
 
           <div className="mb-6 flex items-center gap-3">
-            <div className="h-px flex-1" style={{ background: '#0C1E39' }} />
-            <span className="text-xs uppercase tracking-wide" style={{ color: '#F8F8F8' }}>or with email</span>
-            <div className="h-px flex-1" style={{ background: '#0C1E39' }} />
+            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
+            <span className="text-xs uppercase tracking-wide" style={{ color: '#0C1E39', opacity: 0.6 }}>or with email</span>
+            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block mb-1.5" style={{ color: '#F8F8F8', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px' }}>Full Name</label>
+              <label className="block mb-1.5" style={{ color: '#0C1E39', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px', opacity: 0.8 }}>Full Name</label>
               <input type="text" value={form.name} onChange={update("name")} required minLength={2}
                 className="input-field" placeholder="Your full name" />
             </div>
             <div>
-              <label className="block mb-1.5" style={{ color: '#F8F8F8', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px' }}>Email</label>
+              <label className="block mb-1.5" style={{ color: '#0C1E39', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px', opacity: 0.8 }}>Email</label>
               <input type="email" value={form.email} onChange={update("email")} required
                 className="input-field" placeholder="you@company.com" />
             </div>
             <div>
-              <label className="block mb-1.5" style={{ color: '#F8F8F8', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px' }}>Phone</label>
+              <label className="block mb-1.5" style={{ color: '#0C1E39', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px', opacity: 0.8 }}>Phone</label>
               <input type="tel" value={form.phone} onChange={update("phone")} required
                 className="input-field" placeholder="+91 9999999999" />
             </div>
             <div>
-              <label className="block mb-1.5" style={{ color: '#F8F8F8', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px' }}>Password</label>
+              <label className="block mb-1.5" style={{ color: '#0C1E39', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px', opacity: 0.8 }}>Password</label>
               <div className="relative">
                 <input
                   type={showPass ? "text" : "password"}
@@ -136,9 +145,9 @@ export default function RegisterPage() {
                 />
                 <button type="button" onClick={() => setShowPass(!showPass)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: '#F8F8F8' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#F8F8F8')}>
+                  style={{ color: '#0C1E39' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--or)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#0C1E39')}>
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -189,19 +198,19 @@ export default function RegisterPage() {
             </motion.button>
           </form>
 
-          <p className="text-center text-xs mt-4" style={{ color: '#F8F8F8' }}>
+          <p className="text-center text-xs mt-4" style={{ color: '#0C1E39', opacity: 0.8 }}>
             By creating an account you agree to our{" "}
             <Link href="/terms-of-service" style={{ color: 'var(--or)' }}>Terms</Link> and{" "}
             <Link href="/privacy-policy" style={{ color: 'var(--or)' }}>Privacy Policy</Link>
           </p>
 
           <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1" style={{ background: '#0C1E39' }} />
-            <span className="text-xs uppercase tracking-wide" style={{ color: '#F8F8F8' }}>or</span>
-            <div className="h-px flex-1" style={{ background: '#0C1E39' }} />
+            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
+            <span className="text-xs uppercase tracking-wide" style={{ color: '#0C1E39', opacity: 0.6 }}>or</span>
+            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
           </div>
 
-          <p className="text-center text-sm" style={{ color: '#F8F8F8' }}>
+          <p className="text-center text-sm" style={{ color: '#0C1E39', opacity: 0.8 }}>
             Already have an account?{" "}
             <Link href="/login" className="font-semibold" style={{ color: 'var(--or)' }}>Sign in</Link>
           </p>

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, Eye, Star, ArrowRight, FlaskConical, Droplets, Zap, Sparkles, Target, HeartHandshake, Activity, Tag, Citrus } from "lucide-react";
+import { Heart, Eye, Star, ArrowRight, FlaskConical, Droplets, Zap, Sparkles, Target, HeartHandshake, Activity, Tag, Citrus, Shield, Leaf } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { fetchSettings } from "@/lib/useSettings";
@@ -98,7 +98,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── Brand Story ── */}
-      <section className="py-20 px-6">
+      <section className="pt-20 pb-10 px-6">
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <motion.div {...fadeUp(0)}>
             <span className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: "var(--or)" }}>Our Story</span>
@@ -115,7 +115,7 @@ export default function AboutPage() {
               { val: s(settings, "hero_stat1_value") || "200+", label: s(settings, "hero_stat1_label") || "Products" },
               { val: s(settings, "hero_stat2_value") || "50K+", label: s(settings, "hero_stat2_label") || "Customers" },
               { val: s(settings, "hero_stat3_value") || "100%", label: s(settings, "hero_stat3_label") || "Authentic" },
-              { val: "3-5",  label: "Days Delivery" },
+              { val: "5-7",  label: "Days Delivery" },
             ].map(({ val, label }) => (
               <div key={label} className="card text-center py-8" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
                 <p className="text-3xl font-black gradient-text">{val}</p>
@@ -127,7 +127,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── Mission & Vision ── */}
-      <section className="py-20 px-6" style={{ background: "var(--gy)" }}>
+      <section className="pt-10 pb-10 px-6" style={{ background: "var(--gy)" }}>
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8">
           <motion.div {...fadeUp(0)} className="card border-l-4 rounded-l-none" style={{ borderLeftColor: "var(--or)", background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
             <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-4" style={{ background: "rgba(255,92,0,0.12)" }}>
@@ -146,8 +146,40 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* ── Why Choose Zupwell ── */}
+      <section className="pt-10 pb-10 px-6">
+        <div className="mx-auto max-w-6xl">
+          <motion.div {...fadeUp(0)} className="text-center mb-12">
+            <h2 className="text-3xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
+              Why Choose <span style={{ color: "var(--or)" }}>Zupwell?</span>
+            </h2>
+            <p style={{ color: "#4A5568", opacity: 0.85 }}>Our Core Pillars and Commitments to You.</p>
+          </motion.div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: Heart,        title: "Daily Wellness Support",  desc: "Helps support hydration, immunity, and overall well-being so you can perform at your best every day." },
+              { icon: Zap,          title: "Fast Performance",       desc: "Quick-dissolving, fast-absorbing formula built for modern, active lifestyles." },
+              { icon: FlaskConical, title: "Science-Backed Formula",  desc: "Powered by clinically researched ingredients for trusted daily nutrition." },
+              { icon: Leaf,         title: "Clean & Pure",           desc: "No unnecessary fillers or artificial junk—only quality ingredients your body needs." },
+            ].map((pillar, i) => (
+              <div key={i} className="card p-8 rounded-2xl flex flex-col justify-between" 
+                style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+                <div>
+                  <div className="h-12 w-12 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(255,92,0,0.12)" }}>
+                    <pillar.icon size={22} style={{ color: "var(--or)" }} />
+                  </div>
+                  <h3 className="text-base font-black mb-3 leading-snug" style={{ color: "#0C1E39" }}>{pillar.title}</h3>
+                </div>
+                <p className="text-xs leading-relaxed text-[#4A5568]">{pillar.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Why is Our Product Special? ── */}
-      <section className="py-20 px-6">
+      <section className="pt-10 pb-10 px-6">
         <div className="mx-auto max-w-7xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
@@ -173,7 +205,7 @@ export default function AboutPage() {
 
       {/* ── Future of Zupwell ── */}
       {s(settings, "about_future") && (
-        <section className="py-20 px-6" style={{ background: "var(--gy)" }}>
+        <section className="pt-10 pb-20 px-6" style={{ background: "var(--gy)" }}>
           <div className="mx-auto max-w-4xl">
             <motion.div {...fadeUp(0)} className="text-center mb-8">
               <h2 className="text-3xl md:text-4xl font-black" style={{ color: "#0C1E39" }}>

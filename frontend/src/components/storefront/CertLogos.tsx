@@ -26,7 +26,7 @@ export function GmpLogo({ className = "h-12" }: { className?: string }) {
 export function IsoLogo({ className = "h-12" }: { className?: string }) {
   return (
     <img
-      src="/iso.svg"
+      src="/iso.png"
       alt="ISO 9001:2015 Certified"
       className={`${className} object-contain inline-block shrink-0`}
     />
@@ -36,7 +36,7 @@ export function IsoLogo({ className = "h-12" }: { className?: string }) {
 export function HaccpLogo({ className = "h-12" }: { className?: string }) {
   return (
     <img
-      src="/haccp.svg"
+      src="/haccp.png"
       alt="HACCP Certified"
       className={`${className} object-contain inline-block shrink-0`}
     />

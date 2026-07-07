@@ -89,13 +89,13 @@ export default function ContactPage() {
             <span style={{ color: "var(--or)" }}>We've Got Answers!</span>
           </motion.h1>
           <motion.p {...fadeUp(0.2)} className="text-lg" style={{ color: "#F8F8F8", opacity: 0.85 }}>
-            Reach out to us anytime — we're always happy to help.
+            Reach out to us 9 AM to 6 PM — we're always happy to help.
           </motion.p>
         </div>
       </section>
 
       {/* ── Contact Cards ── */}
-      <section className="py-16 px-6">
+      <section className="pt-16 pb-8 px-6">
         <div className="mx-auto max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-6 justify-center">
 
           {/* WhatsApp */}
@@ -142,7 +142,7 @@ export default function ContactPage() {
       </section>
 
       {/* ── Distributor Inquiry Form ── */}
-      <section className="py-16 px-6" style={{ background: "var(--gy)" }}>
+      <section className="pt-8 pb-16 px-6" style={{ background: "var(--gy)" }}>
         <div className="mx-auto max-w-3xl">
           <motion.div {...fadeUp(0)} className="text-center mb-10">
             <span className="inline-block zbadge zbadge-or mb-3">

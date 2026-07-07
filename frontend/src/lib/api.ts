@@ -34,6 +34,14 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     const msg = err.response?.data?.error || err.message || "Something went wrong";
+    if (err.response?.status === 401) {
+      if (typeof window !== "undefined") {
+        if (window.location.pathname.startsWith("/admin") && window.location.pathname !== "/admin/login") {
+          localStorage.removeItem("zupwell-admin");
+          window.location.href = "/admin/login";
+        }
+      }
+    }
     return Promise.reject(new Error(msg));
   }
 );

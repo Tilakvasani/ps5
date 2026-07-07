@@ -196,9 +196,9 @@ export default function HomePage() {
               className="text-4xl sm:text-6xl md:text-7xl font-black leading-[1.05] mb-6 text-white" 
               style={{ letterSpacing: "-0.03em" }}
             >
-              Instant <br />
-              <span style={{ color: "var(--wh)" }}>Hydration.</span> <br />
-              <span className="gradient-text">Unstoppable <br />Stamina.</span>
+              Hydration <br />
+              <span style={{ color: "var(--wh)" }}>Support.</span> <br />
+              <span className="gradient-text">Electrolyte <br />Balance.</span>
             </motion.h1>
 
             <motion.p 
@@ -206,7 +206,7 @@ export default function HomePage() {
               className="text-base sm:text-lg leading-relaxed mb-10 max-w-xl text-left" 
               style={{ color: "#F8F8F8", opacity: 0.8 }}
             >
-              Give your water an instant upgrade with Zupwell Orange Flavour effervescent tablets. Fast dissolving, refreshing taste, and clinically designed to beat fatigue.
+             Enjoy refreshing orange-flavoured electrolyte effervescent tablets with essential electrolytes and vitamins. Fast dissolving and convenient for everyday hydration support with a great-tasting fizz.
             </motion.p>
 
             <motion.div {...fadeUp(0.18)} className="flex flex-wrap gap-4 w-full sm:w-auto">
@@ -218,16 +218,6 @@ export default function HomePage() {
                   style={{ padding: "16px 36px", fontSize: "14px", borderRadius: "30px", boxShadow: "0 8px 24px rgba(255, 92, 0, 0.25)" }}
                 >
                   Shop 15 Tablets Pack →
-                </motion.button>
-              </Link>
-              <Link href="/products" className="w-full sm:w-auto">
-                <motion.button 
-                  whileHover={{ scale: 1.03 }} 
-                  whileTap={{ scale: 0.97 }}
-                  className="zbtn-out flex items-center justify-center gap-2 w-full"
-                  style={{ padding: "16px 36px", fontSize: "14px", borderRadius: "30px" }}
-                >
-                  Explore Flavours
                 </motion.button>
               </Link>
             </motion.div>
@@ -271,7 +261,7 @@ export default function HomePage() {
                 <div>
                   <h3 className="text-2xl font-black text-white leading-tight">zupwell</h3>
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] mt-1" style={{ color: "var(--lm)" }}>ELECTROLYTE</p>
-                  <p className="text-[9px] mt-2 opacity-60" style={{ color: "#F8F8F8" }}>ORANGE FLAVOUR • 15 TABLETS</p>
+                  <p className="text-[9px] mt-2 font-bold uppercase tracking-wider" style={{ color: "#ff5c00" }}>ORANGE FLAVOUR • 15 TABLETS</p>
                 </div>
 
                 {/* price tag button */}
@@ -294,9 +284,18 @@ export default function HomePage() {
         <p className="text-center mb-6" style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "#0C1E39", opacity: 0.85, textTransform: "uppercase" }}>
           Certified & Compliant
         </p>
-        <div className="relative">
-          <div className="flex gap-12 animate-marquee whitespace-nowrap" style={{ animationDuration: "9s" }}>
-            {[...certEntries, ...certEntries, ...certEntries].map(({ key, label }, idx) =>
+        <div className="relative flex overflow-x-hidden">
+          <div className="flex gap-16 animate-marquee whitespace-nowrap shrink-0 pr-16" style={{ animationDuration: "25s" }}>
+            {certEntries.map(({ key, label }, idx) =>
+              s(settings, key) ? (
+                <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
+              ) : (
+                <CertLogo key={idx} label={label} className="h-14 opacity-70 hover:opacity-100 transition-opacity" />
+              )
+            )}
+          </div>
+          <div className="flex gap-16 animate-marquee whitespace-nowrap shrink-0 pr-16" style={{ animationDuration: "25s" }} aria-hidden="true">
+            {certEntries.map(({ key, label }, idx) =>
               s(settings, key) ? (
                 <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
               ) : (
@@ -309,7 +308,7 @@ export default function HomePage() {
 
       {/* ── Founder's Message ── */}
       {s(settings, "founder_message") && (
-        <section className="py-24 px-6" style={{ background: "var(--gy)" }}>
+        <section className="pt-24 pb-12 px-6" style={{ background: "var(--gy)" }}>
           <div className="mx-auto max-w-4xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
               <div className="overflow-hidden" style={{ borderRadius: "20px", border: "1.5px solid #EAEAEA", boxShadow: "0 10px 30px rgba(0,0,0,0.03)" }}>
@@ -365,7 +364,7 @@ export default function HomePage() {
       )}
 
       {/* ── Customer Reviews ── */}
-      <section className="py-24 px-6" style={{ background: "var(--gy)" }}>
+      <section className="pt-12 pb-24 px-6" style={{ background: "var(--gy)" }}>
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-4">
             <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Real People, Real Results</p>

@@ -327,7 +327,7 @@ export default function SciencePage() {
       </section>
 
       {/* ── CLEAN LABEL ── */}
-      <section className="py-24 px-6 mx-auto max-w-7xl">
+      <section className="pt-24 pb-12 px-6 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div {...fadeUp(0)}>
             <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "var(--or)" }}>
@@ -393,7 +393,7 @@ export default function SciencePage() {
       </section>
 
       {/* ── CTA STRIP ── */}
-      <section className="py-20 px-6 mx-auto max-w-7xl">
+      <section className="pt-10 pb-20 px-6 mx-auto max-w-7xl">
         <motion.div
           {...fadeUp(0)}
           className="relative rounded-3xl p-12 text-center overflow-hidden"

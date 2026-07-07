@@ -62,6 +62,7 @@ const FALLBACK_REVIEWS = [
 const DELIVERY_PERKS = [
   { icon: RotateCcw, label: "Easy 48 hours return"               },
   { icon: Shield,    label: "100% authentic & safe"              },
+  { icon: Truck,     label: "Order Now | Est. Delivery: 5–7 Days" },
 ];
 
 export default function ProductDetailPage({ params }: { params: { slug: string } }) {
@@ -78,12 +79,23 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
   const [stickyVisible, setStickyVisible] = useState(false);
+  const [selectedFlavor, setSelectedFlavor] = useState("Orange");
+  const [selectedPack, setSelectedPack] = useState(1);
   const { addToCart, token } = useStore();
   const { cgstRate, sgstRate } = useSettings();
 
   useEffect(() => {
     productsApi.get(params.slug)
-      .then((d) => { setProduct(d); if (d.variants?.length) setSelectedVariant(d.variants[0]); })
+      .then((d) => { 
+        setProduct(d); 
+        if (d.variants?.length) setSelectedVariant(d.variants[0]);
+        if (d.flavors) {
+          const flvs = d.flavors.split(",").map((s: string) => s.trim()).filter(Boolean);
+          if (flvs.length) setSelectedFlavor(flvs[0]);
+        } else {
+          setSelectedFlavor("Orange");
+        }
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [params.slug]);
@@ -108,7 +120,8 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     </main>
   );
 
-  const price        = selectedVariant ? Number(selectedVariant.price) : Number(product.sellingPrice);
+  const unitPrice    = selectedVariant ? Number(selectedVariant.price) : Number(product.sellingPrice);
+  const price        = unitPrice * selectedPack;
   const cgst         = price * qty * cgstRate;
   const sgst         = price * qty * sgstRate;
   const rawTotal     = price * qty + cgst + sgst;
@@ -118,8 +131,24 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const nutritionalFacts = product.nutritionalFacts || null;
 
   const handleAddToCart = () => {
-    addToCart({ productId: product.id, variantId: selectedVariant?.id, name: product.name, sku: product.sku, price, qty, imageUrl: primaryImage, unit: product.unit });
+    addToCart({ 
+      productId: product.id, 
+      variantId: selectedVariant?.id, 
+      name: `${product.name} (Pack of ${selectedPack}) - ${selectedFlavor}`, 
+      sku: product.sku, 
+      price, 
+      qty, 
+      imageUrl: primaryImage, 
+      unit: product.unit 
+    });
     toast.success("Added to cart! 🛒");
+  };
+
+  const handleShare = () => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard! 🔗");
+    }
   };
 
   const handleScrollToReviews = () => {
@@ -170,7 +199,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} onClick={handleAddToCart}
                   className="btn-primary flex items-center gap-2 py-2 px-5 text-sm"
                   style={{ color: "#ffffff" }}>
-                  <ShoppingCart size={14}/> Claim Your Energy · ₹{total}
+                  <ShoppingCart size={14}/> Add To Cart · ₹{total}
                 </motion.button>
               </div>
             </div>
@@ -230,7 +259,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   <div className="h-6 flex items-center justify-center">
                     <CertLogo label={b.logoLabel} className="h-5 object-contain" />
                   </div>
-                  <span className="text-[9px] font-semibold leading-tight mt-0.5" style={{ color: "#F8F8F8" }}>{b.label}</span>
+                  <span className="text-[9px] font-semibold leading-tight mt-0.5" style={{ color: C.blue }}>{b.label}</span>
                 </div>
               ))}
             </div>
@@ -241,9 +270,21 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             {product.brand && (
               <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: C.mintHex, letterSpacing: "0.15em" }}>{product.brand}</p>
             )}
-            <h1 className="text-3xl md:text-4xl font-bold mb-3 leading-tight" style={{ color: C.blue, letterSpacing: "-0.03em" }}>
-              {product.name}
-            </h1>
+            <div className="flex justify-between items-start gap-4 mb-3">
+              <h1 className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: C.blue, letterSpacing: "-0.03em" }}>
+                {product.name}
+              </h1>
+              <button onClick={handleShare} className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold hover:opacity-85 transition-opacity shrink-0" style={{ borderColor: C.border, color: C.blue, background: C.surface }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+                Share
+              </button>
+            </div>
 
             <div className="flex items-center gap-2 mb-5">
               <button 
@@ -267,24 +308,55 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             </div>
 
             {/* Variants */}
-            {product.variants?.length > 0 && (
-              <div className="mb-6">
-                <p className="text-sm font-semibold mb-2" style={{ color: C.blue }}>Select Variant</p>
-                <div className="flex flex-wrap gap-2">
-                  {product.variants.map((v: any) => (
-                    <button key={v.id} onClick={() => setSelectedVariant(v)}
-                      className="px-4 py-2 rounded-xl text-sm font-semibold transition-colors duration-150"
-                      style={{
-                        border: `1.5px solid ${selectedVariant?.id===v.id ? C.mintHex : C.border}`,
-                        background: selectedVariant?.id===v.id ? "rgba(255,92,0,0.15)" : C.surface,
-                        color: selectedVariant?.id===v.id ? C.mintHex : C.mid,
-                      }}>
-                      {v.variantName}
-                    </button>
-                  ))}
+            {/* Flavors */}
+            {(() => {
+              const flavors = product.flavors 
+                ? product.flavors.split(",").map((s: string) => s.trim()).filter(Boolean) 
+                : ["Orange"];
+              return (
+                <div className="mb-6">
+                  <p className="text-sm font-semibold mb-2" style={{ color: C.blue }}>Flavor: {selectedFlavor}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {flavors.map((f: string) => (
+                      <button key={f} onClick={() => setSelectedFlavor(f)}
+                        className="px-4 py-2 rounded-xl text-sm font-semibold transition-colors duration-150"
+                        style={{
+                          border: `1.5px solid ${selectedFlavor===f ? C.mintHex : C.border}`,
+                          background: selectedFlavor===f ? "rgba(255,92,0,0.15)" : C.surface,
+                          color: selectedFlavor===f ? C.mintHex : C.mid,
+                        }}>
+                        {f}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+              );
+            })()}
+
+            {/* Packs */}
+            <div className="mb-6">
+              <p className="text-sm font-semibold mb-2" style={{ color: C.blue }}>Packs: Pack Of {selectedPack}</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { pack: 1, label: "Pack Of 1", sub: "15 Tablets" },
+                  { pack: 2, label: "Pack Of 2", sub: "30 Tablets" },
+                  { pack: 3, label: "Pack Of 3", sub: "45 Tablets" },
+                  { pack: 4, label: "Pack Of 4", sub: "60 Tablets" }
+                ].map((item) => (
+                  <button key={item.pack} onClick={() => setSelectedPack(item.pack)}
+                    className="flex flex-col items-center justify-center p-3 rounded-xl transition-colors duration-150 text-center"
+                    style={{
+                      border: `1.5px solid ${selectedPack===item.pack ? C.mintHex : C.border}`,
+                      background: selectedPack===item.pack ? "rgba(255,92,0,0.15)" : C.surface,
+                      color: selectedPack===item.pack ? C.mintHex : C.blue,
+                      minHeight: "72px"
+                    }}>
+                    <span className="text-xs font-bold leading-tight">{item.label}</span>
+                    <span className="text-[10px] opacity-75 mt-0.5">{item.sub}</span>
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
 
             {/* Price card — dark surface */}
             <div className="rounded-2xl p-5 mb-5" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
@@ -322,7 +394,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} onClick={handleAddToCart}
                 className="btn-primary flex-1 flex items-center justify-center gap-2 py-3.5 text-base"
                 style={{ color: "#ffffff" }}>
-                <ShoppingCart size={18}/> Claim Your Energy
+                <ShoppingCart size={18}/> Add To Cart
               </motion.button>
             </div>
 

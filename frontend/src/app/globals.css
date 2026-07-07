@@ -350,6 +350,37 @@
     background-clip: text;
     display: inline-block;
   }
+
+  /* Light theme forms for all inputs/labels placed inside .card or .zcard */
+  .card .label-text,
+  .zcard .label-text,
+  .card .zlabel,
+  .zcard .zlabel {
+    color: #0C1E39 !important;
+    opacity: 0.85;
+  }
+
+  .card .input-field,
+  .zcard .input-field,
+  .card .zinp,
+  .zcard .zinp {
+    background: #FFFFFF !important;
+    border: 1.5px solid rgba(12, 30, 57, 0.15) !important;
+    color: #0C1E39 !important;
+  }
+  .card .input-field::placeholder,
+  .zcard .input-field::placeholder,
+  .card .zinp::placeholder,
+  .zcard .zinp::placeholder {
+    color: #9CA3AF !important;
+  }
+  .card .input-field:focus,
+  .zcard .input-field:focus,
+  .card .zinp:focus,
+  .zcard .zinp:focus {
+    border-color: var(--or) !important;
+    box-shadow: 0 0 8px rgba(255, 92, 0, 0.15) !important;
+  }
 }
 
 ::-webkit-scrollbar       { width: 5px; }
@@ -367,7 +398,7 @@
 
 @keyframes marquee {
   0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  100% { transform: translateX(-100%); }
 }
 .animate-marquee {
   display: inline-flex;

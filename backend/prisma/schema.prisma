@@ -103,6 +103,7 @@ model Product {
   isFeatured       Boolean          @default(false) @map("is_featured")
   metaTitle        String?          @map("meta_title") @db.VarChar(160)
   metaDescription  String?          @map("meta_description") @db.VarChar(300)
+  flavors          String?          @db.VarChar(255)
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
   category         Category?        @relation(fields: [categoryId], references: [id])

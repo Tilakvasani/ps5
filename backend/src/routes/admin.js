@@ -253,7 +253,7 @@ router.get("/products", validatePagination, authAdmin, async (req, res) => {
 
 router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), async (req, res) => {
   try {
-    const { name, sku, hsnCode = "3919", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants } = req.body;
+    const { name, sku, hsnCode = "3919", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants, flavors } = req.body;
     const slug = slugify(name, { lower: true, strict: true });
     const product = await prisma.$transaction(async tx => {
       const p = await tx.product.create({
@@ -261,7 +261,7 @@ router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), as
           name, slug, sku, hsnCode, brand, unit,
           categoryId: categoryId ? Number(categoryId) : null,
           basePrice: parseFloat(basePrice), sellingPrice: parseFloat(sellingPrice), discountPercent: parseFloat(discountPercent),
-          description, shortDescription, metaTitle, metaDescription,
+          description, shortDescription, metaTitle, metaDescription, flavors,
           isActive: isActive === "true" || isActive === true,
           isFeatured: isFeatured === "true" || isFeatured === true,
         },
@@ -291,7 +291,7 @@ router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), as
 router.put("/products/:id", sanitizeBody, authAdmin, upload.array("images", 10), async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, ...rest } = req.body;
+    const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, flavors, ...rest } = req.body;
     const data = { ...rest };
     if (name)             { data.name = name; data.slug = slugify(name, { lower: true, strict: true }); }
     if (isActive !== undefined) data.isActive = isActive === "true" || isActive === true;
@@ -300,6 +300,7 @@ router.put("/products/:id", sanitizeBody, authAdmin, upload.array("images", 10),
     if (sellingPrice)     data.sellingPrice = parseFloat(sellingPrice);
     if (discountPercent !== undefined) data.discountPercent = parseFloat(discountPercent);
     if (categoryId)       data.categoryId = Number(categoryId);
+    if (flavors !== undefined) data.flavors = flavors;
 
     const product = await prisma.product.update({ where: { id }, data });
     if (req.files?.length) {

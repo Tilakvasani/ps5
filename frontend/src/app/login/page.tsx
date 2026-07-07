@@ -67,11 +67,6 @@ function LoginForm() {
     window.location.href = `${API_URL}/api/auth/google`;
   };
 
-  const handleFacebookLogin = () => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com";
-    window.location.href = `${API_URL}/api/auth/facebook`;
-  };
-
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center pt-14 pb-12 px-6" style={{ background: 'var(--dk)' }}>
       <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium transition-colors"
@@ -101,38 +96,43 @@ function LoginForm() {
           {/* Social Login Buttons */}
           <div className="space-y-3 mb-6">
             <button onClick={handleGoogleLogin}
-              className="zbtn-out w-full justify-center flex items-center gap-3 text-sm font-semibold" style={{ borderRadius: '8px', padding: '11px' }}>
+              className="zbtn-out w-full justify-center flex items-center gap-3 text-sm font-semibold" 
+              style={{ borderRadius: '8px', padding: '11px', color: '#0C1E39', borderColor: 'rgba(12, 30, 57, 0.12)' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(12, 30, 57, 0.05)';
+                e.currentTarget.style.color = '#0C1E39';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#0C1E39';
+              }}>
               <GoogleIcon /> Continue with Google
-            </button>
-            <button onClick={handleFacebookLogin}
-              className="zbtn-out w-full justify-center flex items-center gap-3 text-sm font-semibold" style={{ borderRadius: '8px', padding: '11px' }}>
-              <FacebookIcon /> Continue with Facebook
             </button>
           </div>
 
           <div className="my-5 flex items-center gap-3">
-            <div className="h-px flex-1" style={{ background: '#0C1E39' }} />
-            <span className="text-xs uppercase tracking-wide" style={{ color: '#F8F8F8' }}>or with email</span>
-            <div className="h-px flex-1" style={{ background: '#0C1E39' }} />
+            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
+            <span className="text-xs uppercase tracking-wide" style={{ color: '#0C1E39', opacity: 0.6 }}>or with email</span>
+            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block mb-1.5" style={{ color: '#F8F8F8', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px' }}>Email</label>
+              <label className="block mb-1.5" style={{ color: '#0C1E39', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px', opacity: 0.8 }}>Email</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
                 className="input-field" placeholder="you@company.com" autoComplete="email" />
             </div>
             <div>
-              <label className="block mb-1.5" style={{ color: '#F8F8F8', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px' }}>Password</label>
+              <label className="block mb-1.5" style={{ color: '#0C1E39', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px', opacity: 0.8 }}>Password</label>
               <div className="relative">
                 <input type={showPass ? "text" : "password"} value={password}
                   onChange={e => setPassword(e.target.value)} required
                   className="input-field pr-10" placeholder="••••••••" autoComplete="current-password" />
                 <button type="button" onClick={() => setShowPass(!showPass)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: '#F8F8F8' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#F8F8F8')}>
+                  style={{ color: '#0C1E39' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--or)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#0C1E39')}>
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -155,12 +155,12 @@ function LoginForm() {
           </form>
 
           <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1" style={{ background: '#0C1E39' }} />
-            <span className="text-xs uppercase tracking-wide" style={{ color: '#F8F8F8' }}>or</span>
-            <div className="h-px flex-1" style={{ background: '#0C1E39' }} />
+            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
+            <span className="text-xs uppercase tracking-wide" style={{ color: '#0C1E39', opacity: 0.6 }}>or</span>
+            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
           </div>
 
-          <p className="text-center text-sm" style={{ color: '#F8F8F8' }}>
+          <p className="text-center text-sm" style={{ color: '#0C1E39', opacity: 0.8 }}>
             Don&apos;t have an account?{" "}
             <Link href="/register" className="font-semibold" style={{ color: 'var(--or)' }}>Create one free</Link>
           </p>

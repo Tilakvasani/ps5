@@ -10,6 +10,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const fmt  = (n: number) => Math.round(n).toLocaleString("en-IN");
 const fmtK = (n: number) => n >= 1000 ? `₹${(n / 1000).toFixed(1)}k` : `₹${Math.round(n)}`;
@@ -18,7 +19,7 @@ function ChangeBadge({ pct }: { pct?: number }) {
   if (pct === undefined || pct === null) return null;
   const up = pct >= 0;
   return (
-    <span className={`flex items-center gap-0.5 text-xs font-semibold ${up ? "text-emerald-500" : "text-red-400"}`}>
+    <span className={`flex items-center gap-0.5 text-xs font-semibold ${up ? "text-emerald-600" : "text-red-500"}`}>
       {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}{Math.abs(pct)}%
     </span>
   );
@@ -26,16 +27,17 @@ function ChangeBadge({ pct }: { pct?: number }) {
 
 const StatCard = ({ title, value, sub, icon: Icon, change, color, href }: any) => (
   <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-    className="card hover:shadow-sm transition-all">
+    className="card hover:shadow-sm transition-all"
+    style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
     <div className="flex items-start justify-between mb-3">
       <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${color}`}>
         <Icon size={18} className="text-white" />
       </div>
       <ChangeBadge pct={change} />
     </div>
-    <p className="text-2xl font-black" style={{ color: '#F8F8F8' }}>{value}</p>
-    <p className="text-sm mt-0.5" style={{ color: '#F8F8F8' }}>{title}</p>
-    {sub && <p className="text-xs mt-1" style={{ color: '#F8F8F8' }}>{sub}</p>}
+    <p className="text-2xl font-black" style={{ color: '#0C1E39' }}>{value}</p>
+    <p className="text-sm mt-0.5" style={{ color: '#4A5568' }}>{title}</p>
+    {sub && <p className="text-xs mt-1" style={{ color: '#6B7280' }}>{sub}</p>}
     {href && <Link href={href} className="text-xs hover:underline mt-2 block" style={{ color: 'var(--or)' }}>View →</Link>}
   </motion.div>
 );
@@ -73,12 +75,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     Promise.all([adminApi.dashboard(), adminApi.revenueChart(30), adminApi.topProducts()])
       .then(([s, r, t]) => { setStats(s); setRevenue(r); setTopProducts(t); })
-      .catch(() => {})
+      .catch((err: any) => { toast.error(err.message || "Failed to load dashboard data"); })
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    adminApi.revenueChart(chartDays).then(setRevenue).catch(() => {});
+    adminApi.revenueChart(chartDays).then(setRevenue).catch((err: any) => { toast.error(err.message || "Failed to load chart data"); });
   }, [chartDays]);
 
   const statusData  = stats ? Object.entries(stats.statusBreakdown || {}) : [];
@@ -91,14 +93,14 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-black" style={{ color: '#F8F8F8' }}>Dashboard</h1>
+          <h1 className="text-3xl font-black" style={{ color: '#FFFFFF' }}>Dashboard</h1>
           <p className="text-sm mt-1" style={{ color: '#F8F8F8' }}>
             {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/admin/orders?status=pending">
-            <button className="btn-outline text-sm px-4 py-2 flex items-center gap-2">
+            <button className="btn-outline text-sm px-4 py-2 flex items-center gap-2" style={{ border: "1.5px solid rgba(255,255,255,0.15)", color: "#FFFFFF" }}>
               <Clock size={14} /> Pending
               {stats?.statusBreakdown?.pending > 0 && (
                 <span className="text-white text-xs rounded-full px-1.5 py-0.5 font-bold leading-none" style={{ background: 'var(--or)' }}>
@@ -148,25 +150,25 @@ export default function AdminDashboard() {
       </div>
 
       {/* Revenue + Profit Chart */}
-      <div className="card">
+      <div className="card" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <TrendingUp size={16} style={{ color: 'var(--or)' }} />
-            <h2 className="font-bold" style={{ color: '#F8F8F8' }}>Revenue &amp; Profit</h2>
+            <h2 className="font-bold" style={{ color: '#0C1E39' }}>Revenue &amp; Profit</h2>
           </div>
-          <div className="flex items-center gap-1 rounded-lg p-1" style={{ background: '#0C1E39' }}>
+          <div className="flex items-center gap-1 rounded-lg p-1" style={{ background: '#F8F8F8', border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
             {[7, 30, 90].map(d => (
               <button key={d} onClick={() => setChartDays(d)}
                 className="text-xs px-3 py-1.5 rounded-md font-semibold transition-all"
                 style={chartDays === d
-                  ? { background: '#0C1E39', color: 'var(--or)', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }
-                  : { color: '#F8F8F8' }}>
+                  ? { background: '#0C1E39', color: '#FFFFFF', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
+                  : { color: '#6B7280' }}>
                 {d}d
               </button>
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-4 mb-4 text-xs" style={{ color: '#F8F8F8' }}>
+        <div className="flex items-center gap-4 mb-4 text-xs" style={{ color: '#4A5568' }}>
           <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 rounded" style={{ background: '#FF5C00' }} />Revenue</span>
           <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5 bg-emerald-500 rounded" />Profit</span>
         </div>
@@ -182,9 +184,9 @@ export default function AdminDashboard() {
                 <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-            <XAxis dataKey="date" tick={{ fill: "#F8F8F8", fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "#F8F8F8", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(12, 30, 57, 0.08)" />
+            <XAxis dataKey="date" tick={{ fill: "#6B7280", fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "#6B7280", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
             <Tooltip content={<ChartTip />} />
             <Area type="monotone" dataKey="revenue" name="revenue" stroke="#FF5C00" fill="url(#revGrad)" strokeWidth={2} dot={false} />
             <Area type="monotone" dataKey="profit"  name="profit"  stroke="#10B981" fill="url(#profGrad)" strokeWidth={2} dot={false} />
@@ -194,149 +196,149 @@ export default function AdminDashboard() {
 
       {/* Order Pipeline + Payment Split */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card">
-          <h2 className="font-bold mb-4" style={{ color: '#F8F8F8' }}>Order Pipeline</h2>
+        <div className="card" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+          <h2 className="font-bold mb-4" style={{ color: '#0C1E39' }}>Order Pipeline</h2>
           {statusData.length > 0 ? (
             <div className="space-y-2">
               {statusData.map(([name, value]: any) => {
                 const pct = statusTotal > 0 ? Math.round((value / statusTotal) * 100) : 0;
                 return (
                   <Link key={name} href={`/admin/orders?status=${name}`}>
-                    <div className="flex items-center gap-3 rounded-lg p-2 -mx-2 transition-all cursor-pointer hover:bg-[#0C1E39]">
+                    <div className="flex items-center gap-3 rounded-lg p-2 -mx-2 transition-all cursor-pointer hover:bg-[#F8F8F8]">
                       <span className={`badge ${STATUS_BADGE[name] || "badge-info"} w-24 text-center shrink-0`}>{name}</span>
-                      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: '#0C1E39' }}>
+                      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: '#F8F8F8', border: "1px solid rgba(12, 30, 57, 0.08)" }}>
                         <div className="h-full rounded-full transition-all duration-500"
-                          style={{ width: `${pct}%`, backgroundColor: STATUS_COLORS[name] || "#F8F8F8" }} />
+                          style={{ width: `${pct}%`, backgroundColor: STATUS_COLORS[name] || "#FF5C00" }} />
                       </div>
-                      <span className="text-sm font-bold w-6 text-right" style={{ color: '#FFFFFF' }}>{value}</span>
-                      <span className="text-xs w-8 text-right" style={{ color: '#F8F8F8' }}>{pct}%</span>
+                      <span className="text-sm font-bold w-6 text-right" style={{ color: '#0C1E39' }}>{value}</span>
+                      <span className="text-xs w-8 text-right" style={{ color: '#6B7280' }}>{pct}%</span>
                     </div>
                   </Link>
                 );
               })}
             </div>
-          ) : <p className="text-sm py-4" style={{ color: '#F8F8F8' }}>No orders yet</p>}
+          ) : <p className="text-sm py-4" style={{ color: '#6B7280' }}>No orders yet</p>}
         </div>
 
-        <div className="card">
-          <h2 className="font-bold mb-4" style={{ color: '#F8F8F8' }}>Payment Methods</h2>
+        <div className="card" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+          <h2 className="font-bold mb-4" style={{ color: '#0C1E39' }}>Payment Methods</h2>
           {stats?.paymentSplit?.length > 0 ? (
             <div className="space-y-4">
               {stats.paymentSplit.map((p: any) => (
                 <div key={p.method} className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-lg flex items-center justify-center text-sm font-bold shrink-0"
                     style={p.method === "razorpay"
-                      ? { background: 'rgba(29,78,216,0.15)', color: '#60A5FA' }
-                      : { background: 'rgba(16,185,129,0.15)', color: '#34D399' }}>
+                      ? { background: 'rgba(29,78,216,0.08)', color: '#1D4ED8' }
+                      : { background: 'rgba(16,185,129,0.08)', color: '#059669' }}>
                     {p.method === "razorpay" ? "R" : "C"}
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-semibold" style={{ color: '#FFFFFF' }}>{p.method === "razorpay" ? "Razorpay" : "Cash on Delivery"}</span>
+                      <span className="text-sm font-semibold" style={{ color: '#0C1E39' }}>{p.method === "razorpay" ? "Razorpay" : "Cash on Delivery"}</span>
                       <span className="text-sm font-bold" style={{ color: 'var(--or)' }}>₹{fmt(p.revenue)}</span>
                     </div>
-                    <p className="text-xs" style={{ color: '#F8F8F8' }}>{p.count} order{p.count !== 1 ? "s" : ""}</p>
+                    <p className="text-xs" style={{ color: '#6B7280' }}>{p.count} order{p.count !== 1 ? "s" : ""}</p>
                   </div>
                 </div>
               ))}
             </div>
-          ) : <p className="text-sm py-4" style={{ color: '#F8F8F8' }}>No payment data yet</p>}
+          ) : <p className="text-sm py-4" style={{ color: '#6B7280' }}>No payment data yet</p>}
         </div>
       </div>
 
       {/* Top Products + Top Customers */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="card">
+        <div className="card" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold" style={{ color: '#F8F8F8' }}>Top Products</h2>
+            <h2 className="font-bold" style={{ color: '#0C1E39' }}>Top Products</h2>
             <Link href="/admin/products" className="text-xs hover:underline" style={{ color: 'var(--or)' }}>View all →</Link>
           </div>
           <div className="space-y-4">
             {topProducts.slice(0, 6).map((p: any, i: number) => (
               <div key={p.id} className="flex items-center gap-3">
-                <span className="text-xs font-bold w-5 shrink-0" style={{ color: '#F8F8F8' }}>#{i + 1}</span>
+                <span className="text-xs font-bold w-5 shrink-0" style={{ color: '#6B7280' }}>#{i + 1}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: '#FFFFFF' }}>{p.name}</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: '#0C1E39' }}>{p.name}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: '#0C1E39' }}>
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: '#F8F8F8' }}>
                       <div className="h-full rounded-full"
                         style={{ width: `${Math.round((p.totalRevenue / maxRevenue) * 100)}%`, background: 'var(--or)' }} />
                     </div>
-                    <span className="text-xs shrink-0" style={{ color: '#F8F8F8' }}>{p.totalSold} sold</span>
+                    <span className="text-xs shrink-0" style={{ color: '#6B7280' }}>{p.totalSold} sold</span>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-sm font-bold" style={{ color: 'var(--or)' }}>₹{fmt(p.totalRevenue)}</p>
-                  <p className="text-xs text-emerald-500 font-semibold">+₹{fmt(p.totalProfit)} · {p.marginPct}%</p>
+                  <p className="text-xs text-emerald-600 font-semibold">+₹{fmt(p.totalProfit)} · {p.marginPct}%</p>
                 </div>
               </div>
             ))}
-            {topProducts.length === 0 && <p className="text-sm" style={{ color: '#F8F8F8' }}>No data yet</p>}
+            {topProducts.length === 0 && <p className="text-sm" style={{ color: '#6B7280' }}>No data yet</p>}
           </div>
         </div>
 
-        <div className="card">
+        <div className="card" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold" style={{ color: '#F8F8F8' }}>Top Customers</h2>
+            <h2 className="font-bold" style={{ color: '#0C1E39' }}>Top Customers</h2>
             <Link href="/admin/users" className="text-xs hover:underline" style={{ color: 'var(--or)' }}>View all →</Link>
           </div>
           <div className="space-y-3">
             {stats?.topCustomers?.length > 0 ? stats.topCustomers.map((c: any) => (
               <div key={c.id} className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                  style={{ background: 'rgba(255,92,0,0.15)', color: 'var(--or)' }}>
+                  style={{ background: 'rgba(255,92,0,0.08)', color: 'var(--or)' }}>
                   {c.name?.charAt(0)?.toUpperCase() || "?"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: '#FFFFFF' }}>{c.name || "—"}</p>
-                  <p className="text-xs truncate" style={{ color: '#F8F8F8' }}>{c.email}</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: '#0C1E39' }}>{c.name || "—"}</p>
+                  <p className="text-xs truncate" style={{ color: '#6B7280' }}>{c.email}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-bold" style={{ color: '#FFFFFF' }}>₹{fmt(c.totalSpent)}</p>
-                  <p className="text-xs" style={{ color: '#F8F8F8' }}>{c.orderCount} order{c.orderCount !== 1 ? "s" : ""}</p>
+                  <p className="text-sm font-bold" style={{ color: '#0C1E39' }}>₹{fmt(c.totalSpent)}</p>
+                  <p className="text-xs" style={{ color: '#6B7280' }}>{c.orderCount} order{c.orderCount !== 1 ? "s" : ""}</p>
                 </div>
               </div>
-            )) : <p className="text-sm py-4" style={{ color: '#F8F8F8' }}>No customer data yet</p>}
+            )) : <p className="text-sm py-4" style={{ color: '#6B7280' }}>No customer data yet</p>}
           </div>
         </div>
       </div>
 
       {/* Recent Orders */}
-      <div className="card">
+      <div className="card" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold" style={{ color: '#F8F8F8' }}>Recent Orders</h2>
+          <h2 className="font-bold" style={{ color: '#0C1E39' }}>Recent Orders</h2>
           <Link href="/admin/orders" className="text-sm hover:underline" style={{ color: 'var(--or)' }}>View all →</Link>
         </div>
         {stats?.recentOrders?.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left" style={{ color: '#F8F8F8', borderBottom: '1px solid #0C1E39' }}>
+                <tr className="text-left" style={{ color: '#0C1E39', borderBottom: '1.5px solid rgba(12, 30, 57, 0.08)' }}>
                   {["Order #", "Customer", "Amount", "Payment", "Status", "Date"].map(h => (
                     <th key={h} className="pb-3 font-semibold pr-4 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#0C1E39]">
+              <tbody className="divide-y divide-[rgba(12,30,57,0.08)]">
                 {stats.recentOrders.map((o: any) => (
                   <tr key={o.id} className="transition-colors" style={{ cursor: 'pointer' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#0C1E39')}
+                    onMouseEnter={e => (e.currentTarget.style.background = '#F8F8F8')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                    <td className="py-3 pr-4 font-mono font-semibold text-xs" style={{ color: '#FFFFFF' }}>{o.orderNumber}</td>
-                    <td className="py-3 pr-4" style={{ color: '#F8F8F8' }}>{o.user?.name || "—"}</td>
-                    <td className="py-3 pr-4 font-bold" style={{ color: '#FFFFFF' }}>₹{fmt(Number(o.totalAmount))}</td>
+                    <td className="py-3 pr-4 font-mono font-semibold text-xs" style={{ color: '#0C1E39' }}>{o.orderNumber}</td>
+                    <td className="py-3 pr-4" style={{ color: '#4A5568' }}>{o.user?.name || "—"}</td>
+                    <td className="py-3 pr-4 font-bold" style={{ color: '#0C1E39' }}>₹{fmt(Number(o.totalAmount))}</td>
                     <td className="py-3 pr-4">
                       <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
                         style={o.paymentMethod === "razorpay"
-                          ? { background: 'rgba(29,78,216,0.15)', color: '#60A5FA' }
-                          : { background: 'rgba(16,185,129,0.15)', color: '#34D399' }}>
+                          ? { background: 'rgba(29,78,216,0.08)', color: '#1D4ED8' }
+                          : { background: 'rgba(16,185,129,0.08)', color: '#059669' }}>
                         {o.paymentMethod === "razorpay" ? "Online" : "COD"}
                       </span>
                     </td>
                     <td className="py-3 pr-4">
                       <span className={`badge ${STATUS_BADGE[o.status] || "badge-info"}`}>{o.status}</span>
                     </td>
-                    <td className="py-3 text-xs whitespace-nowrap" style={{ color: '#F8F8F8' }}>
+                    <td className="py-3 text-xs whitespace-nowrap" style={{ color: '#6B7280' }}>
                       {new Date(o.createdAt).toLocaleDateString("en-IN")}
                     </td>
                   </tr>
@@ -344,7 +346,7 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-        ) : <p className="text-sm py-4" style={{ color: '#F8F8F8' }}>No orders yet</p>}
+        ) : <p className="text-sm py-4" style={{ color: '#6B7280' }}>No orders yet</p>}
       </div>
 
     </div>
