@@ -14,22 +14,43 @@ const razorpay = new Razorpay({
 // POST /api/payments/create-razorpay-order
 router.post("/create-razorpay-order", authUser, async (req, res) => {
   const { orderId } = req.body;
+  if (!orderId) return res.status(400).json({ error: "Order ID is required" });
+
   const order = await prisma.order.findFirst({ where: { id: Number(orderId), userId: req.user.id } });
   if (!order) return res.status(404).json({ error: "Order not found" });
 
-  const rzpOrder = await razorpay.orders.create({
-    amount:   Math.round(Number(order.totalAmount) * 100), // paise
-    currency: "INR",
-    receipt:  order.orderNumber,
-  });
+  const amountPaise = Math.round(Number(order.totalAmount) * 100);
+  if (amountPaise < 100) {
+    return res.status(400).json({ error: "Amount must be at least 100 paise (1 INR)" });
+  }
 
-  await prisma.order.update({ where: { id: order.id }, data: { razorpayOrderId: rzpOrder.id } });
-  res.json({ razorpayOrderId: rzpOrder.id, amount: rzpOrder.amount, currency: rzpOrder.currency });
+  try {
+    const rzpOrder = await razorpay.orders.create({
+      amount:   amountPaise, // paise
+      currency: "INR",
+      receipt:  order.orderNumber,
+    });
+
+    await prisma.order.update({ where: { id: order.id }, data: { razorpayOrderId: rzpOrder.id } });
+    res.json({
+      razorpayOrderId: rzpOrder.id,
+      amount: rzpOrder.amount,
+      currency: rzpOrder.currency,
+      keyId: process.env.RAZORPAY_KEY_ID
+    });
+  } catch (err) {
+    console.error("Razorpay Order Creation Error:", err);
+    res.status(500).json({ error: "Razorpay API error: " + err.message });
+  }
 });
 
 // POST /api/payments/verify
 router.post("/verify", authUser, async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+
+  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderId) {
+    return res.status(400).json({ error: "Missing required verification fields" });
+  }
 
   // Verify Razorpay signature
   const expectedSig = crypto
@@ -66,50 +87,55 @@ router.post("/verify", authUser, async (req, res) => {
   const rawTotal    = (subtotal - discount) + cgstAmount + sgstAmount + shipping;
   const totalAmount = Math.round(rawTotal);
 
-  await prisma.$transaction(async (tx) => {
-    // Mark order as paid
-    await tx.order.update({
-      where: { id: order.id },
-      data:  { paymentStatus: "paid", status: "confirmed", razorpayPaymentId: razorpay_payment_id, cgstAmount, sgstAmount, totalAmount },
-    });
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Mark order as paid
+      await tx.order.update({
+        where: { id: order.id },
+        data:  { paymentStatus: "paid", status: "confirmed", razorpayPaymentId: razorpay_payment_id, cgstAmount, sgstAmount, totalAmount },
+      });
 
-    // FIX: Deduct stock now — only after payment confirmed
-    for (const item of order.items) {
-      const inv = await tx.inventory.findFirst({ where: { productId: item.productId, variantId: item.variantId } });
-      if (inv) {
-        if (inv.qtyInStock < item.qty) throw new Error(`Stock insufficient for product ${item.productId}`);
-        await tx.inventory.update({ where: { id: inv.id }, data: { qtyInStock: { decrement: item.qty } } });
+      // FIX: Deduct stock now — only after payment confirmed
+      for (const item of order.items) {
+        const inv = await tx.inventory.findFirst({ where: { productId: item.productId, variantId: item.variantId } });
+        if (inv) {
+          if (inv.qtyInStock < item.qty) throw new Error(`Stock insufficient for product ${item.productId}`);
+          await tx.inventory.update({ where: { id: inv.id }, data: { qtyInStock: { decrement: item.qty } } });
+        }
       }
-    }
 
-    // FIX: Increment coupon usage now — only after payment confirmed
-    if (order.couponCode) {
-      const coupon = await tx.coupon.findFirst({ where: { code: order.couponCode } });
-      if (coupon) {
-        await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+      // FIX: Increment coupon usage now — only after payment confirmed
+      if (order.couponCode) {
+        const coupon = await tx.coupon.findFirst({ where: { code: order.couponCode } });
+        if (coupon) {
+          await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+        }
       }
-    }
 
-    // Create GST invoice
-    const invoiceNumber = await generateInvoiceNumber();
-    await tx.invoice.create({
-      data: {
-        invoiceNumber, orderId: order.id, userId: req.user.id,
-        status: "issued",
-        subtotal:       order.subtotal,
-        discountAmount: order.discountAmount,
-        cgstRate: 2.5, sgstRate: 2.5, igstRate: 0,
-        cgstAmount, sgstAmount, igstAmount: 0,
-        totalAmount,
-        sellerName:    settings.site_name    || "Zupwell",
-        sellerAddress: settings.site_address || "A-102, Adarsh Lifestyle, Ahmedabad, Gujarat 382350",
-        sellerGstin:   settings.site_gstin   || "24XXXXXXXXXXXXX",
-        buyerName:    order.address?.fullName || req.user.name,
-        buyerAddress: order.address ? `${order.address.addressLine1}, ${order.address.city}, ${order.address.state} - ${order.address.pincode}` : "",
-        buyerGstin:   order.address?.gstin || null,
-      },
+      // Create GST invoice
+      const invoiceNumber = await generateInvoiceNumber();
+      await tx.invoice.create({
+        data: {
+          invoiceNumber, orderId: order.id, userId: req.user.id,
+          status: "issued",
+          subtotal:       order.subtotal,
+          discountAmount: order.discountAmount,
+          cgstRate: 2.5, sgstRate: 2.5, igstRate: 0,
+          cgstAmount, sgstAmount, igstAmount: 0,
+          totalAmount,
+          sellerName:    settings.site_name    || "Zupwell",
+          sellerAddress: settings.site_address || "A-102, Adarsh Lifestyle, Ahmedabad, Gujarat 382350",
+          sellerGstin:   settings.site_gstin   || "24XXXXXXXXXXXXX",
+          buyerName:    order.address?.fullName || req.user.name,
+          buyerAddress: order.address ? `${order.address.addressLine1}, ${order.address.city}, ${order.address.state} - ${order.address.pincode}` : "",
+          buyerGstin:   order.address?.gstin || null,
+        },
+      });
     });
-  });
+  } catch (err) {
+    console.error("Payment transaction error:", err);
+    return res.status(400).json({ error: err.message || "Failed to process payment details" });
+  }
 
   res.json({ message: "Payment verified and invoice generated" });
 

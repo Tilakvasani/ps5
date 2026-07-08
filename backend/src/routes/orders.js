@@ -52,18 +52,23 @@ router.post("/", authUser, async (req, res) => {
     }
   }
 
+  // Fetch store settings
+  const settingRows = await prisma.setting.findMany();
+  const cfg = {};
+  settingRows.forEach(r => { cfg[r.key] = r.value; });
+
   // GST (5% = 2.5% CGST + 2.5% SGST for intra-state Gujarat)
   const taxableAmount = subtotal - discountAmount;
   const cgstRate = 2.5, sgstRate = 2.5;
   const cgstAmount = +(taxableAmount * cgstRate / 100).toFixed(2);
   const sgstAmount = +(taxableAmount * sgstRate / 100).toFixed(2);
-  const shippingCharge = subtotal > 500 ? 0 : 50;
-  const totalAmount = taxableAmount + cgstAmount + sgstAmount + shippingCharge;
 
-  // Fetch store settings for seller info
-  const settingRows = await prisma.setting.findMany();
-  const cfg = {};
-  settingRows.forEach(r => { cfg[r.key] = r.value; });
+  // Dynamic shipping calculation (Free for prepaid Razorpay)
+  const freeThreshold = parseFloat(cfg.free_shipping_threshold || "500");
+  const defaultCharge = parseFloat(cfg.default_shipping_charge || "50");
+  const shippingCharge = paymentMethod === "razorpay" ? 0 : (subtotal >= freeThreshold ? 0 : defaultCharge);
+
+  const totalAmount = taxableAmount + cgstAmount + sgstAmount + shippingCharge;
 
   const orderNumber = await generateOrderNumber();
 
@@ -185,6 +190,28 @@ router.delete("/:id/cancel", authUser, async (req, res) => {
   });
 
   res.json({ message: "Order cancelled" });
+});
+
+// GET /api/orders/track/:orderNumber - public tracking status
+router.get("/track/:orderNumber", async (req, res) => {
+  try {
+    const order = await prisma.order.findUnique({
+      where: { orderNumber: req.params.orderNumber },
+      select: {
+        orderNumber: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        shippingCharge: true,
+        paymentMethod: true,
+        paymentStatus: true,
+      }
+    });
+    if (!order) return res.status(404).json({ error: "Order not found" });
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch order status" });
+  }
 });
 
 // GET /api/orders/:orderNumber

@@ -127,6 +127,35 @@ async function main() {
   });
   console.log("✅ Coupons seeded");
 
+  // ── Sample Reviews ────────────────────────────────
+  console.log("🌱 Seeding sample reviews...");
+  const sampleReviews = [
+    { name: "Rohan Mehta", email: "rohan@gmail.com", rating: 5, title: "Great energy boost", body: "Dissolves fast and tastes great. I feel more hydrated after workouts." },
+    { name: "Priya Sharma", email: "priya@gmail.com", rating: 5, title: "Perfect for summer", body: "Keeps me going through Ahmedabad heat. No sugar crash, just steady energy." },
+    { name: "Arjun Patel", email: "arjun@gmail.com", rating: 4, title: "Good taste, works well", body: "Orange flavour is refreshing and not too sweet. Repeat customer now." },
+    { name: "Sneha Iyer", email: "sneha@gmail.com", rating: 5, title: "Helped with fatigue", body: "Used it during a work trip and it really helped with tiredness and cramps." },
+    { name: "Vikram Nair", email: "vikram@gmail.com", rating: 4, title: "Solid daily supplement", body: "Easy to carry the tube around. Fizzes up nicely in cold water." },
+    { name: "Ananya Reddy", email: "ananya@gmail.com", rating: 5, title: "My gym essential now", body: "Take it post workout every day. Noticeably less soreness the next day." }
+  ];
+
+  const dbProduct = await prisma.product.findFirst({ where: { sku: "ZW-ELEC-ORG-15" } });
+  if (dbProduct) {
+    const userPass = await bcrypt.hash("User@123", 10);
+    for (const r of sampleReviews) {
+      const user = await prisma.user.upsert({
+        where: { email: r.email },
+        update: {},
+        create: { name: r.name, email: r.email, passwordHash: userPass, isActive: true, isVerified: true }
+      });
+      await prisma.review.upsert({
+        where: { productId_userId: { productId: dbProduct.id, userId: user.id } },
+        update: { rating: r.rating, title: r.title, body: r.body, isApproved: true },
+        create: { productId: dbProduct.id, userId: user.id, rating: r.rating, title: r.title, body: r.body, isApproved: true }
+      });
+    }
+    console.log("✅ Sample reviews seeded");
+  }
+
   console.log("\n🎉 Seed complete!");
   console.log("   Admin email:    admin@zupwell.in");
   console.log("   Admin password: Admin@123");

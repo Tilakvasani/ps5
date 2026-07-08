@@ -22,6 +22,8 @@ const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://ps5-hhvf.vercel.app";
 const BACKEND_URL  = process.env.BACKEND_URL  || "https://ps5-ufm2.onrender.com";
 
+const FacebookStrategy = require("passport-facebook").Strategy;
+
 passport.use(new GoogleStrategy({
   clientID:     process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -34,12 +36,10 @@ passport.use(new GoogleStrategy({
 
     if (!email) return done(new Error("No email returned from Google"));
 
-    // ✅ FIXED: upsert replaces find + create/update
-    // This is atomic — no race condition when 1000 users login at once
     const user = await prisma.user.upsert({
       where: { email },
       update: {
-        googleId: profile.id, // link Google if account already exists
+        googleId: profile.id,
       },
       create: {
         name,
@@ -55,6 +55,38 @@ passport.use(new GoogleStrategy({
 
   } catch (err) {
     console.error("❌ GOOGLE AUTH ERROR:", err);
+    return done(err);
+  }
+}));
+
+passport.use(new FacebookStrategy({
+  clientID:     process.env.FACEBOOK_APP_ID || "mock-fb-app-id",
+  clientSecret: process.env.FACEBOOK_APP_SECRET || "mock-fb-app-secret",
+  callbackURL: `${BACKEND_URL}/api/auth/facebook/callback`,
+  profileFields: ["id", "displayName", "emails"],
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    const email = profile.emails?.[0]?.value || `${profile.id}@facebook.com`;
+    const name  = profile.displayName || `Facebook User`;
+
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {
+        facebookId: profile.id,
+      },
+      create: {
+        name,
+        email,
+        passwordHash: await bcrypt.hash(Math.random().toString(36), 12),
+        facebookId: profile.id,
+        isActive: true,
+      },
+    });
+
+    console.log("✅ Facebook login success:", email);
+    return done(null, user);
+  } catch (err) {
+    console.error("❌ FACEBOOK AUTH ERROR:", err);
     return done(err);
   }
 }));
@@ -80,6 +112,29 @@ router.get("/google/callback", (req, res, next) => {
 
     const token = signAccess({ id: user.id, role: "user" });
     console.log("✅ Google login success, redirecting to frontend");
+    res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}&name=${encodeURIComponent(user.name)}`);
+  })(req, res, next);
+});
+
+// ── Facebook OAuth Routes ─────────────────────────────
+router.get("/facebook",
+  passport.authenticate("facebook", { scope: ["email"], session: false })
+);
+
+router.get("/facebook/callback", (req, res, next) => {
+  passport.authenticate("facebook", { session: false }, (err, user) => {
+    if (err) {
+      console.error("❌ FACEBOOK CALLBACK ERROR:", err.message);
+      return res.redirect(`${FRONTEND_URL}/login?error=facebook_failed`);
+    }
+
+    if (!user) {
+      console.error("❌ FACEBOOK CALLBACK: No user returned");
+      return res.redirect(`${FRONTEND_URL}/login?error=facebook_failed`);
+    }
+
+    const token = signAccess({ id: user.id, role: "user" });
+    console.log("✅ Facebook login success, redirecting to frontend");
     res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}&name=${encodeURIComponent(user.name)}`);
   })(req, res, next);
 });

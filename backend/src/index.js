@@ -1,10 +1,10 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 require("express-async-errors");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const path = require("path");
 const { startCleanupJobs } = require("./utils/cleanupJobs");
 
 const app = express();
@@ -244,6 +244,7 @@ app.listen(PORT, async () => {
     const defaultSettings = [
       { key: "site_name",        value: "Zupwell",                    group: "general" },
       { key: "site_email",       value: "info@zupwell.com",           group: "general" },
+      { key: "razorpay_key_id",  value: "rzp_test_TAzKpeWz0fQgqu",    group: "general" },
       { key: "site_phone",       value: "+91 6355466208",             group: "general" },
       { key: "site_address",     value: "A-102 Adarsh Lifestyle, New India Colony, Ahmedabad, Gujarat - 382350", group: "general" },
       { key: "site_gstin",       value: "24XXXXXXXXXXXXX",            group: "general" },
@@ -301,6 +302,25 @@ app.listen(PORT, async () => {
       { key: "gst_rate",                 value: "2.5",  group: "orders" },
       { key: "default_shipping_charge", value: "50",  group: "orders" },
       { key: "order_prefix",            value: "ZW",  group: "orders" },
+
+      // Shop Page Settings
+      { key: "shop_badge",              value: "⚡ FUEL YOUR HUSTLE",        group: "shop" },
+      { key: "shop_title",              value: "Shop Product",               group: "shop" },
+      { key: "shop_subtext",            value: "Performance-driven nutrition.", group: "shop" },
+
+      // Certifications Page Settings
+      { key: "cert_fssai_title",        value: "Food Safety and Standards Authority of India", group: "certifications" },
+      { key: "cert_fssai_desc",         value: "Licensed under FSSAI regulations. This ensures our manufacturing practices, ingredient safety, and packaging standards comply fully with national food safety guidelines.", group: "certifications" },
+      { key: "cert_fssai_file",         value: "/fssai.png", group: "certifications" },
+      { key: "cert_gmp_title",          value: "Good Manufacturing Practices", group: "certifications" },
+      { key: "cert_gmp_desc",           value: "WHO-GMP compliant manufacturing processes. This guarantees that all products are consistently produced and controlled according to international quality standards.", group: "certifications" },
+      { key: "cert_gmp_file",           value: "/gmp.png", group: "certifications" },
+      { key: "cert_iso_title",          value: "ISO 9001:2015 Certification", group: "certifications" },
+      { key: "cert_iso_desc",           value: "ISO 9001:2015 Certified facility. We adhere to rigorous quality management system (QMS) protocols, ensuring safety, reliability, and continuous improvement across all stages of production.", group: "certifications" },
+      { key: "cert_iso_file",           value: "/iso.png", group: "certifications" },
+      { key: "cert_haccp_title",         value: "Hazard Analysis Critical Control Point", group: "certifications" },
+      { key: "cert_haccp_desc",          value: "HACCP Certified system. A systematic preventive approach to food safety from biological, chemical, and physical hazards in production processes.", group: "certifications" },
+      { key: "cert_haccp_file",          value: "/haccp.png", group: "certifications" },
 
       // Science Page Settings
       { key: "science_hero_badge", value: "Science & Quality", group: "science" },
@@ -368,6 +388,31 @@ app.listen(PORT, async () => {
       { key: "about_why_subtitle", value: "Three reasons our customers never look back", group: "about" },
       { key: "about_future_title", value: "The Future of Zupwell", group: "about" },
       { key: "about_cta_title", value: "Ready to fuel your hustle?", group: "about" },
+      { key: "about_punchline",         value: "We don't just sell supplements; we fuel your hustle.", group: "about" },
+      { key: "about_description",       value: "Zupwell was born with the aim of maintaining health and strength in the modern lifestyle. We create health supplements that are easy to take and effective through the fusion of science and taste. Quality is our mantra.", group: "about" },
+      { key: "about_why_special_json", value: "[{\"title\":\"Scientific Formula\",\"desc\":\"A fusion of science and taste.\"},{\"title\":\"Less Sugar\",\"desc\":\"There is sweetness, but no guilt.\"},{\"title\":\"Instant Absorption\",\"desc\":\"Rocket-like speed, instant action.\"},{\"title\":\"Pocket Friendly\",\"desc\":\"It even fits in your jeans pocket.\"},{\"title\":\"Best Flavour\",\"desc\":\"Absolutely fresh, as if straight from the garden.\"}]", group: "about" },
+      { key: "about_pillars_json", value: "[{\"title\":\"Daily Wellness Support\",\"desc\":\"Helps support hydration, immunity, and overall well-being so you can perform at your best every day.\"},{\"title\":\"Fast Performance\",\"desc\":\"Quick-dissolving, fast-absorbing formula built for modern, active lifestyles.\"},{\"title\":\"Science-Backed Formula\",\"desc\":\"Powered by clinically researched ingredients for trusted daily nutrition.\"},{\"title\":\"Clean & Pure\",\"desc\":\"No unnecessary fillers or artificial junk—only quality ingredients your body needs.\"}]", group: "about" },
+      { key: "about_future_pipeline_json", value: "[\"Daily multivitamins & immune boosters\",\"Energy and focus formulations\",\"Specialized recovery blends\"]", group: "about" },
+
+      // Contact Page Settings
+      { key: "contact_hero_badge",      value: "Contact Us", group: "contact" },
+      { key: "contact_hero_title",      value: "Got Questions?\nWe've Got Answers!", group: "contact" },
+      { key: "contact_hero_subtext",    value: "Reach out to us 9 AM to 6 PM — we're always happy to help.", group: "contact" },
+      { key: "contact_form_badge",      value: "Grow with Zupwell", group: "contact" },
+      { key: "contact_form_title",      value: "Distributor Inquiry", group: "contact" },
+      { key: "contact_form_subtext",    value: "Interested in partnering with us? Fill in your details and let's do business!", group: "contact" },
+      { key: "contact_form_footer",     value: "We typically respond within 24 hours on business days.", group: "contact" },
+
+      // Home Page Sections
+      { key: "home_blog_title",         value: "From Our Blog", group: "home" },
+      { key: "home_blog_subtext",       value: "Science-backed articles to fuel your health journey", group: "home" },
+      { key: "home_cta_title",          value: "Join the Zupwell Gang", group: "home" },
+      { key: "home_cta_subtext",        value: "Create a free account to access exclusive pricing, personalised recommendations, and your complete order history.", group: "home" },
+
+      // Certifications Page Settings
+      { key: "cert_page_title",         value: "Our Certifications Reflecting Quality You Can Trust", group: "certifications" },
+      { key: "cert_page_subtitle",      value: "Backed by FSSAI & Government Certifications for Uncompromised Quality and Safety.", group: "certifications" },
+      { key: "certifications_list_json", value: "[{\"label\":\"Trade Mark\",\"title\":\"Certificate of Registration of Trade Mark\",\"desc\":\"Our brand name and logo are registered trademarks under the Trade Marks Act, 1999, representing our authentic identity and quality promise.\",\"fileUrl\":\"/assets/trademark.png\"},{\"label\":\"IEC Code\",\"title\":\"Importer Exporter Code\",\"desc\":\"Issued by the Director General of Foreign Trade (DGFT), Ministry of Commerce and Industry, Government of India, enabling global sourcing and operations.\",\"fileUrl\":\"/assets/iec.png\"},{\"label\":\"FSSAI\",\"title\":\"Food Safety and Standards Authority of India Central License\",\"desc\":\"Central License under FSS Act, 2006, ensuring our manufacturing, storage, and distribution practices adhere to strict national hygiene and safety standards.\",\"fileUrl\":\"/fssai.png\"},{\"label\":\"GST\",\"title\":\"Goods and Services Tax Registration Certificate\",\"desc\":\"Government of India registration certificate confirming compliancy and active tax status for transparent and regulated operations.\",\"fileUrl\":\"/assets/gst.png\"}]", group: "certifications" },
 
       // Legal Policies Settings
       { key: "policy_privacy_badge", value: "Legal", group: "legal" },
