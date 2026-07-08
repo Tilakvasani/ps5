@@ -33,6 +33,10 @@ const SETTING_GROUPS = [
       { key: "hero_stat2_label",  label: "Stat 2 Label (e.g. Happy Customers)", type: "text" },
       { key: "hero_stat3_value",  label: "Stat 3 Value (e.g. 100%)", type: "text" },
       { key: "hero_stat3_label",  label: "Stat 3 Label (e.g. Authentic)", type: "text" },
+      { key: "home_blog_title",   label: "Blog Section Title", type: "text" },
+      { key: "home_blog_subtext", label: "Blog Section Subtext", type: "textarea" },
+      { key: "home_cta_title",    label: "Bottom CTA Section Title", type: "text" },
+      { key: "home_cta_subtext",  label: "Bottom CTA Section Subtext", type: "textarea" },
     ],
   },
   {
@@ -91,6 +95,9 @@ const SETTING_GROUPS = [
       { key: "about_why_subtitle", label: "Why Section Subtitle", type: "text" },
       { key: "about_future_title", label: "Future Section Title", type: "text" },
       { key: "about_cta_title",    label: "CTA Section Title", type: "text" },
+      { key: "about_why_special_json", label: "Product Special Features (JSON list of {title, desc})", type: "json" },
+      { key: "about_pillars_json", label: "Core Pillars List (JSON list of {title, desc})", type: "json" },
+      { key: "about_future_pipeline_json", label: "Future Pipeline Products (JSON list of strings)", type: "json" },
     ],
   },
   {
@@ -244,6 +251,70 @@ const SETTING_GROUPS = [
       { key: "smtp_from", label: "From Email",    type: "email" },
     ],
   },
+  {
+    label: "Shop Page Settings",
+    desc: "Controls the badge, title, and subtext shown on the Shop page",
+    keys: [
+      { key: "shop_badge",   label: "Shop Badge Text", type: "text" },
+      { key: "shop_title",   label: "Shop Title Text", type: "text" },
+      { key: "shop_subtext", label: "Shop Subtext / Tagline", type: "textarea" },
+    ],
+  },
+  {
+    label: "Certifications Settings",
+    desc: "Update official certificate details and document upload paths shown on the Certifications page",
+    keys: [
+      { key: "cert_page_title",    label: "Certifications Page Title", type: "text" },
+      { key: "cert_page_subtitle", label: "Certifications Page Subtitle", type: "textarea" },
+      { key: "certifications_list_json", label: "Manage Certificates List", type: "certifications_list" },
+    ],
+  },
+  {
+    label: "Science & Quality Page Settings",
+    desc: "Content and titles for the Science & Quality page",
+    keys: [
+      { key: "science_hero_badge", label: "Hero Badge", type: "text" },
+      { key: "science_hero_title", label: "Hero Title", type: "text" },
+      { key: "science_hero_subtext", label: "Hero Subtext", type: "textarea" },
+      { key: "science_process_badge", label: "Process Badge", type: "text" },
+      { key: "science_process_title", label: "Process Title", type: "textarea" },
+      { key: "science_process1_title", label: "Process 1 — Sourcing Title", type: "text" },
+      { key: "science_process1_desc", label: "Process 1 — Sourcing Description", type: "textarea" },
+      { key: "science_process2_title", label: "Process 2 — Technology Title", type: "text" },
+      { key: "science_process2_desc", label: "Process 2 — Technology Description", type: "textarea" },
+      { key: "science_cert_badge", label: "Quality/Safety Badge", type: "text" },
+      { key: "science_cert_title", label: "Quality/Safety Title", type: "text" },
+      { key: "science_cert_desc", label: "Quality/Safety Description", type: "textarea" },
+      { key: "science_cert1_title", label: "Certificate 1 — GMP/ISO Title", type: "text" },
+      { key: "science_cert1_desc", label: "Certificate 1 — GMP/ISO Description", type: "textarea" },
+      { key: "science_cert2_title", label: "Certificate 2 — FSSAI Title", type: "text" },
+      { key: "science_cert2_desc", label: "Certificate 2 — FSSAI Description", type: "textarea" },
+      { key: "science_cert3_title", label: "Certificate 3 — Lab Tested Title", type: "text" },
+      { key: "science_cert3_desc", label: "Certificate 3 — Lab Tested Description", type: "textarea" },
+      { key: "science_clean_badge", label: "Clean Label Badge", type: "text" },
+      { key: "science_clean_title", label: "Clean Label Title", type: "text" },
+      { key: "science_clean_desc", label: "Clean Label Description", type: "textarea" },
+      { key: "science_clean1_label", label: "Clean Feature 1 — Title", type: "text" },
+      { key: "science_clean1_sub", label: "Clean Feature 1 — Description", type: "textarea" },
+      { key: "science_clean2_label", label: "Clean Feature 2 — Title", type: "text" },
+      { key: "science_clean2_sub", label: "Clean Feature 2 — Description", type: "textarea" },
+      { key: "science_clean3_label", label: "Clean Feature 3 — Title", type: "text" },
+      { key: "science_clean3_sub", label: "Clean Feature 3 — Description", type: "textarea" },
+      { key: "science_tube_title", label: "Tube Mockup Card Title", type: "textarea" },
+      { key: "science_tube_desc", label: "Tube Mockup Card Description", type: "textarea" },
+      { key: "science_tube_f1_title", label: "Tube Feature 1 — Title", type: "text" },
+      { key: "science_tube_f1_desc", label: "Tube Feature 1 — Description", type: "text" },
+      { key: "science_tube_f2_title", label: "Tube Feature 2 — Title", type: "text" },
+      { key: "science_tube_f2_desc", label: "Tube Feature 2 — Description", type: "text" },
+      { key: "science_tube_f3_title", label: "Tube Feature 3 — Title", type: "text" },
+      { key: "science_tube_f3_desc", label: "Tube Feature 3 — Description", type: "text" },
+      { key: "science_tube_f4_title", label: "Tube Feature 4 — Title", type: "text" },
+      { key: "science_tube_f4_desc", label: "Tube Feature 4 — Description", type: "text" },
+      { key: "science_cta_title", label: "CTA strip Title", type: "text" },
+      { key: "science_cta_subtext", label: "CTA strip Subtext", type: "textarea" },
+      { key: "science_cta_btn", label: "CTA Button Text", type: "text" },
+    ],
+  },
 ];
 
 export default function AdminSettingsPage() {
@@ -295,7 +366,153 @@ export default function AdminSettingsPage() {
                 {group.keys.map(({ key, label, type }) => (
                   <div key={key}>
                     <label className="zlabel flex mb-1" style={{ color: "#0C1E39" }}>{label}</label>
-                    {type === "textarea" || type === "json" ? (
+                    {type === "certifications_list" ? (
+                      <div className="space-y-4 p-4 rounded-xl border bg-gray-50/50" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+                        {(() => {
+                          let list: any[] = [];
+                          try {
+                            list = JSON.parse(settings[key] || "[]");
+                          } catch (e) {}
+                          
+                          const updateList = (newList: any[]) => {
+                            setSettings(s => ({ ...s, [key]: JSON.stringify(newList, null, 2) }));
+                          };
+
+                          return (
+                            <div className="space-y-4">
+                              {list.map((item, idx) => (
+                                <div key={idx} className="p-4 rounded-xl border relative space-y-3 bg-[#F8F8F8]" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const filtered = list.filter((_, i) => i !== idx);
+                                      updateList(filtered);
+                                    }}
+                                    className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-rose-500/10 text-rose-500 transition-colors"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                      <label className="text-xs font-bold mb-1 block">Badge/Label</label>
+                                      <input
+                                        type="text"
+                                        value={item.label || ""}
+                                        onChange={e => {
+                                          const copy = [...list];
+                                          copy[idx] = { ...copy[idx], label: e.target.value };
+                                          updateList(copy);
+                                        }}
+                                        className="zinp text-xs py-1.5 px-3"
+                                        style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
+                                        placeholder="e.g. FSSAI"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs font-bold mb-1 block">Official Title</label>
+                                      <input
+                                        type="text"
+                                        value={item.title || ""}
+                                        onChange={e => {
+                                          const copy = [...list];
+                                          copy[idx] = { ...copy[idx], title: e.target.value };
+                                          updateList(copy);
+                                        }}
+                                        className="zinp text-xs py-1.5 px-3"
+                                        style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
+                                        placeholder="e.g. Food Safety License"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-xs font-bold mb-1 block">Description</label>
+                                    <textarea
+                                      value={item.desc || ""}
+                                      onChange={e => {
+                                        const copy = [...list];
+                                        copy[idx] = { ...copy[idx], desc: e.target.value };
+                                        updateList(copy);
+                                      }}
+                                      className="zinp text-xs py-1.5 px-3 h-14 resize-none"
+                                      style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
+                                      placeholder="e.g. Licensed under FSSAI regulations..."
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-xs font-bold mb-1 block">Certificate Document / Image File</label>
+                                    <div className="flex flex-col sm:flex-row gap-2 mt-1">
+                                      {item.fileUrl ? (
+                                        <div className="relative h-14 w-24 shrink-0 rounded-lg overflow-hidden border bg-white" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+                                          <img src={item.fileUrl} alt="" className="w-full h-full object-contain" />
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const copy = [...list];
+                                              copy[idx] = { ...copy[idx], fileUrl: "" };
+                                              updateList(copy);
+                                            }}
+                                            className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full flex items-center justify-center bg-[#0C1E39] text-white hover:bg-rose-500 transition-colors"
+                                          >
+                                            <X size={10} />
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <label className="h-14 w-24 shrink-0 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors border border-dashed border-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10">
+                                          <Upload size={14} className="mb-0.5" style={{ color: '#FF5C00' }} />
+                                          <span className="text-[9px]" style={{ color: '#0C1E39', fontWeight: 600 }}>Upload File</span>
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={async (e) => {
+                                              if (e.target.files && e.target.files[0]) {
+                                                const fd = new FormData();
+                                                fd.append("file", e.target.files[0]);
+                                                const toastId = toast.loading("Uploading certificate...");
+                                                try {
+                                                  const res = await adminApi.uploadSettingImage(fd);
+                                                  const copy = [...list];
+                                                  copy[idx] = { ...copy[idx], fileUrl: res.url };
+                                                  updateList(copy);
+                                                  toast.success("Uploaded successfully!", { id: toastId });
+                                                } catch (err: any) {
+                                                  toast.error(err.message || "Upload failed", { id: toastId });
+                                                }
+                                              }
+                                            }}
+                                            className="hidden"
+                                          />
+                                        </label>
+                                      )}
+                                      <input
+                                        type="text"
+                                        value={item.fileUrl || ""}
+                                        onChange={e => {
+                                          const copy = [...list];
+                                          copy[idx] = { ...copy[idx], fileUrl: e.target.value };
+                                          updateList(copy);
+                                        }}
+                                        className="zinp text-xs py-1.5 px-3 flex-1"
+                                        style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
+                                        placeholder="Or paste certificate document path/URL here"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  updateList([...list, { label: "", title: "", desc: "", fileUrl: "" }]);
+                                }}
+                                className="w-full border border-dashed py-2.5 rounded-xl text-xs font-bold text-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10 transition-colors"
+                              >
+                                + Add Certificate Card
+                              </button>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ) : type === "textarea" || type === "json" ? (
                       <textarea
                         value={settings[key] || ""}
                         onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}

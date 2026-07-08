@@ -67,6 +67,11 @@ function LoginForm() {
     window.location.href = `${API_URL}/api/auth/google`;
   };
 
+  const handleFacebookLogin = () => {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com";
+    window.location.href = `${API_URL}/api/auth/facebook`;
+  };
+
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center pt-14 pb-12 px-6" style={{ background: 'var(--dk)' }}>
       <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium transition-colors"
@@ -107,6 +112,19 @@ function LoginForm() {
                 e.currentTarget.style.color = '#0C1E39';
               }}>
               <GoogleIcon /> Continue with Google
+            </button>
+            <button onClick={handleFacebookLogin}
+              className="zbtn-out w-full justify-center flex items-center gap-3 text-sm font-semibold" 
+              style={{ borderRadius: '8px', padding: '11px', color: '#0C1E39', borderColor: 'rgba(12, 30, 57, 0.12)' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(12, 30, 57, 0.05)';
+                e.currentTarget.style.color = '#0C1E39';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#0C1E39';
+              }}>
+              <FacebookIcon /> Continue with Facebook
             </button>
           </div>
 

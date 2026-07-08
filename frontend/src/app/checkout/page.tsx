@@ -50,7 +50,7 @@ export default function CheckoutPage() {
   const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
   const cgst     = subtotal * cgstRate;
   const sgst     = subtotal * sgstRate;
-  const shipping = calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
+  const shipping = paymentMethod === "razorpay" ? 0 : calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
   const rawTotal = subtotal + cgst + sgst + shipping;
   const total    = Math.round(rawTotal);
   const roundOffDiff = total - rawTotal;
@@ -103,8 +103,21 @@ export default function CheckoutPage() {
       if (paymentMethod === "razorpay") {
         await loadRazorpay();
         const rzp = await paymentsApi.createRazorpayOrder(order.id);
+        
+        const key = rzp.keyId || settingsRaw["razorpay_key_id"] || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+        if (!key) {
+          toast.error("Razorpay Key ID is missing. Please set it in your environment variables or settings.");
+          setLoading(false);
+          return;
+        }
+        if (!rzp.razorpayOrderId) {
+          toast.error("Failed to initialize payment order with Razorpay.");
+          setLoading(false);
+          return;
+        }
+
         const options = {
-          key: settingsRaw["razorpay_key_id"] || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          key,
           amount: rzp.amount,
           currency: "INR",
           name: siteName || process.env.NEXT_PUBLIC_SITE_NAME || "Zupwell",
@@ -234,10 +247,21 @@ export default function CheckoutPage() {
                       background: paymentMethod === val ? "rgba(255,92,0,0.08)" : "transparent",
                     }}>
                       <input type="radio" name="payment" checked={paymentMethod === val as any} onChange={() => setPaymentMethod(val as any)} className="mt-1 accent-[#FF5C00]" />
-                      <div>
-                        <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#0C1E39" }}>{icon} {label}</span>
-                        {val === "razorpay" && <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 2 }}>Secure payments powered by Razorpay</p>}
-                        {val === "cod" && <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 2 }}>Pay when your order arrives</p>}
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#0C1E39" }}>{icon} {label}</span>
+                          {val === "razorpay" ? (
+                            <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">FREE SHIPPING</span>
+                          ) : (
+                            subtotal >= freeShippingThreshold ? (
+                              <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">FREE SHIPPING</span>
+                            ) : (
+                              <span className="text-xs font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">+₹{defaultShippingCharge} Shipping</span>
+                            )
+                          )}
+                        </div>
+                        {val === "razorpay" && <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 2 }}>Secure payments powered by Razorpay. Save on shipping!</p>}
+                        {val === "cod" && <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 2 }}>Pay when your order arrives. Get free shipping by paying online!</p>}
                       </div>
                     </label>
                   ))}
@@ -320,8 +344,18 @@ export default function CheckoutPage() {
                 <span>Shipping</span>
                 <span>{shipping === 0 ? <span className="text-emerald-500 font-semibold">FREE</span> : `₹${shipping}`}</span>
               </div>
-              {shipping > 0 && (
-                <p style={{ fontSize: "0.75rem", color: "#6B7280" }}>Free shipping on orders above ₹{freeShippingThreshold}</p>
+              {paymentMethod === "razorpay" ? (
+                <p style={{ fontSize: "0.75rem", color: "#10B981", fontWeight: 600 }}>Prepaid Promo: Free Shipping applied!</p>
+              ) : (
+                shipping > 0 ? (
+                  <p style={{ fontSize: "0.75rem", color: "#EF4444", fontWeight: 500 }}>
+                    COD Order: Shipping charge of ₹{shipping} applies. (Pay online for FREE shipping!)
+                  </p>
+                ) : (
+                  <p style={{ fontSize: "0.75rem", color: "#10B981", fontWeight: 600 }}>
+                    COD Order: Free shipping applied (above ₹{freeShippingThreshold})!
+                  </p>
+                )
               )}
               {roundOffDiff !== 0 && (
                 <div className="flex justify-between text-xs italic" style={{ color: "#6B7280" }}><span>Round Off</span><span>{roundOffDiff > 0 ? "+" : ""}₹{roundOffDiff.toFixed(2)}</span></div>

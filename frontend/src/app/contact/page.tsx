@@ -82,14 +82,26 @@ export default function ContactPage() {
         <div className="pointer-events-none absolute -top-40 -left-40 h-[400px] w-[400px] rounded-full" style={{ background: "rgba(255,92,0,0.06)" }} />
         <div className="relative mx-auto max-w-3xl text-center">
           <motion.span {...fadeUp(0)} className="inline-block zbadge zbadge-or mb-4">
-            Contact Us
+            {s(settings, "contact_hero_badge") || "Contact Us"}
           </motion.span>
           <motion.h1 {...fadeUp(0.1)} className="text-3xl sm:text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
-            Got Questions?<br />
-            <span style={{ color: "var(--or)" }}>We've Got Answers!</span>
+            {s(settings, "contact_hero_title") ? (
+              s(settings, "contact_hero_title").split("\n").map((line, idx) => (
+                <span key={idx}>
+                  {line.toLowerCase().includes("answers") ? (
+                    <span style={{ color: "var(--or)" }}>{line}</span>
+                  ) : (
+                    line
+                  )}
+                  {idx < s(settings, "contact_hero_title").split("\n").length - 1 && <br />}
+                </span>
+              ))
+            ) : (
+              <>Got Questions?<br /><span style={{ color: "var(--or)" }}>We've Got Answers!</span></>
+            )}
           </motion.h1>
           <motion.p {...fadeUp(0.2)} className="text-lg" style={{ color: "#F8F8F8", opacity: 0.85 }}>
-            Reach out to us 9 AM to 6 PM — we're always happy to help.
+            {s(settings, "contact_hero_subtext") || "Reach out to us 9 AM to 6 PM — we're always happy to help."}
           </motion.p>
         </div>
       </section>
@@ -146,13 +158,23 @@ export default function ContactPage() {
         <div className="mx-auto max-w-3xl">
           <motion.div {...fadeUp(0)} className="text-center mb-10">
             <span className="inline-block zbadge zbadge-or mb-3">
-              Grow with Zupwell
+              {s(settings, "contact_form_badge") || "Grow with Zupwell"}
             </span>
             <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
-              Distributor <span style={{ color: "var(--or)" }}>Inquiry</span>
+              {s(settings, "contact_form_title") ? (
+                s(settings, "contact_form_title").split(" ").map((w, idx) => (
+                  idx === s(settings, "contact_form_title").split(" ").length - 1 ? (
+                    <span key={idx} style={{ color: "var(--or)" }}>{w} </span>
+                  ) : (
+                    w + " "
+                  )
+                ))
+              ) : (
+                <>Distributor <span style={{ color: "var(--or)" }}>Inquiry</span></>
+              )}
             </h2>
             <p style={{ color: "#F8F8F8", opacity: 0.85 }}>
-              Interested in partnering with us? Fill in your details and let's do business!
+              {s(settings, "contact_form_subtext") || "Interested in partnering with us? Fill in your details and let's do business!"}
             </p>
           </motion.div>
 
@@ -228,7 +250,7 @@ export default function ContactPage() {
             </motion.button>
 
             <p className="text-xs text-center" style={{ color: "#A0AEC0" }}>
-              We typically respond within 24 hours on business days.
+              {s(settings, "contact_form_footer") || "We typically respond within 24 hours on business days."}
             </p>
           </motion.form>
         </div>

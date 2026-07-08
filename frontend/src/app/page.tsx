@@ -6,7 +6,7 @@ import { ArrowRight, Zap, Shield, Truck, Award, Star, ChevronRight, CheckCircle,
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { CertLogo } from "@/components/storefront/CertLogos";
-import { publicApi } from "@/lib/api";
+import { publicApi, productsApi } from "@/lib/api";
 import { getSettingsCache, fetchSettings } from "@/lib/useSettings";
 import { fadeUp } from "@/lib/utils";
 
@@ -68,7 +68,7 @@ const BLOG_POSTS = [
   },
 ];
 
-function BlogSection() {
+function BlogSection({ reviews, settings }: { reviews: any[], settings: Record<string, string> }) {
   const [modal, setModal] = useState<number | null>(null);
   const post = modal !== null ? BLOG_POSTS[modal] : null;
   return (
@@ -77,9 +77,9 @@ function BlogSection() {
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
           <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Health Tips & Insights</p>
           <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#F8F8F8", letterSpacing: "-0.04em" }}>
-            From Our Blog
+            {settings["home_blog_title"] || "From Our Blog"}
           </h2>
-          <p style={{ color: "#F8F8F8" }}>Science-backed articles to fuel your health journey</p>
+          <p style={{ color: "#F8F8F8" }}>{settings["home_blog_subtext"] || "Science-backed articles to fuel your health journey"}</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -126,6 +126,8 @@ function BlogSection() {
           </motion.div>
         </div>
       )}
+
+
     </section>
   );
 }
@@ -133,12 +135,18 @@ function BlogSection() {
 export default function HomePage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [reviews, setReviews] = useState<any[]>([]);
+  const [featuredProduct, setFeaturedProduct] = useState<any>(null);
 
   useEffect(() => {
     const cached = getSettingsCache();
     if (Object.keys(cached).length > 0) setSettings(cached);
     fetchSettings().then(setSettings).catch(() => {});
     publicApi.getReviews().then(setReviews).catch(() => {});
+    productsApi.list({ page: 1, perPage: 1 })
+      .then(data => {
+        if (data?.products?.length) setFeaturedProduct(data.products[0]);
+      })
+      .catch(() => {});
   }, []);
 
   const features = [1, 2, 3, 4].map(n => ({
@@ -225,54 +233,70 @@ export default function HomePage() {
 
           {/* Right Column: Premium Mockup display */}
           <div className="lg:col-span-5 flex justify-center items-center relative">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.25, duration: 0.5 }}
-              className="w-full max-w-[420px] aspect-[4/5] rounded-[2.5rem] p-10 flex flex-col items-center justify-center overflow-hidden border-2 border-[#0C1E39]"
-              style={{ 
-                background: "radial-gradient(circle at 50% 50%, rgba(12, 30, 57, 0.8) 0%, rgba(5, 17, 36, 0.9) 100%)",
-                boxShadow: "0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)"
-              }}
-            >
-              {/* Product mockup card inner plate */}
-              <div 
-                className="w-full flex-1 rounded-3xl p-8 flex flex-col items-center justify-between text-center relative border border-white/5"
+            <Link href={featuredProduct ? `/products/${featuredProduct.slug}` : "/products"} className="w-full max-w-[420px] aspect-[4/5] block">
+              <motion.div 
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="w-full h-full rounded-[2.5rem] p-10 flex flex-col items-center justify-center overflow-hidden border-2 border-[#0C1E39] cursor-pointer"
                 style={{ 
-                  background: "#051124",
-                  boxShadow: "0 16px 32px rgba(0,0,0,0.3)"
+                  background: "radial-gradient(circle at 50% 50%, rgba(12, 30, 57, 0.8) 0%, rgba(5, 17, 36, 0.9) 100%)",
+                  boxShadow: "0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)"
                 }}
               >
-                {/* badge label */}
-                <span 
-                  className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full"
-                  style={{ background: "var(--or)", color: "var(--wh)" }}
-                >
-                  HEALTH SUPPLEMENT
-                </span>
-
-                {/* center visual (mockup citrus illustration) */}
-                <div className="my-6 relative flex flex-col items-center">
-                  <div className="text-6xl animate-bounce" style={{ filter: "drop-shadow(0 8px 16px rgba(255,184,0,0.3))" }}>🍊</div>
-                  <div className="text-4xl mt-2 select-none">⚡</div>
-                </div>
-
-                {/* branding info */}
-                <div>
-                  <h3 className="text-2xl font-black text-white leading-tight">zupwell</h3>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] mt-1" style={{ color: "var(--lm)" }}>ELECTROLYTE</p>
-                  <p className="text-[9px] mt-2 font-bold uppercase tracking-wider" style={{ color: "#ff5c00" }}>ORANGE FLAVOUR • 15 TABLETS</p>
-                </div>
-
-                {/* price tag button */}
+                {/* Product mockup card inner plate */}
                 <div 
-                  className="w-full py-3.5 rounded-2xl font-black text-base transition-transform cursor-pointer"
-                  style={{ background: "var(--lm)", color: "var(--dk)" }}
+                  className="w-full flex-1 rounded-3xl p-8 flex flex-col items-center justify-between text-center relative border border-white/5"
+                  style={{ 
+                    background: "#051124",
+                    boxShadow: "0 16px 32px rgba(0,0,0,0.3)"
+                  }}
                 >
-                  ₹299.00
+                  {/* badge label */}
+                  <span 
+                    className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full"
+                    style={{ background: "var(--or)", color: "var(--wh)" }}
+                  >
+                    HEALTH SUPPLEMENT
+                  </span>
+
+                  {/* center visual (mockup citrus illustration) */}
+                  <div className="my-4 relative flex flex-col items-center w-full h-40 justify-center">
+                    {featuredProduct?.images?.[0]?.imageUrl ? (
+                      <img 
+                        src={featuredProduct.images[0].imageUrl} 
+                        alt={featuredProduct.name}
+                        className="h-full object-contain rounded-lg"
+                      />
+                    ) : (
+                      <>
+                        <div className="text-6xl animate-bounce" style={{ filter: "drop-shadow(0 8px 16px rgba(255,184,0,0.3))" }}>🍊</div>
+                        <div className="text-4xl mt-2 select-none">⚡</div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* branding info */}
+                  <div>
+                    <h3 className="text-xl font-black text-white leading-tight">
+                      {featuredProduct?.name || "zupwell"}
+                    </h3>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] mt-1" style={{ color: "var(--lm)" }}>
+                      {featuredProduct?.brand || "ELECTROLYTE"}
+                    </p>
+                    <p className="text-[9px] mt-2 font-bold uppercase tracking-wider" style={{ color: "#ff5c00" }}>
+                      ORANGE FLAVOUR • 15 TABLETS
+                    </p>
+                  </div>
+
+                  {/* price tag button */}
+                  <div 
+                    className="w-full py-3.5 rounded-2xl font-black text-base transition-transform"
+                    style={{ background: "var(--lm)", color: "var(--dk)" }}
+                  >
+                    ₹{featuredProduct ? Math.round(Number(featuredProduct.sellingPrice) * 1.05) : "149"}.00
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </Link>
           </div>
 
         </div>
@@ -414,7 +438,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Blog Section ── */}
-      <BlogSection />
+      <BlogSection reviews={reviews} settings={settings} />
 
       {/* ── CTA ── */}
       <section className="py-24 px-6" style={{ background: "var(--gy)" }}>
@@ -427,10 +451,20 @@ export default function HomePage() {
               border: "1.5px solid #0C1E39" 
             }}>
             <h2 className="text-3xl md:text-4xl font-black mb-4" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
-              Join the <span style={{ color: "var(--or)" }}>Zupwell Gang</span>
+              {settings["home_cta_title"] ? (
+                settings["home_cta_title"].split(" ").map((w, idx) => (
+                  idx === settings["home_cta_title"].split(" ").length - 1 ? (
+                    <span key={idx} style={{ color: "var(--or)" }}>{w} </span>
+                  ) : (
+                    w + " "
+                  )
+                ))
+              ) : (
+                <>Join the <span style={{ color: "var(--or)" }}>Zupwell Gang</span></>
+              )}
             </h2>
             <p className="mb-8 max-w-lg mx-auto" style={{ color: "#F8F8F8", opacity: 0.8 }}>
-              Create a free account to access exclusive pricing, personalised recommendations, and your complete order history.
+              {settings["home_cta_subtext"] || "Create a free account to access exclusive pricing, personalised recommendations, and your complete order history."}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/login">

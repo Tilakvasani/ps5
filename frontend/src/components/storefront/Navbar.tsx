@@ -63,6 +63,7 @@ export default function Navbar() {
     ["SHOP",        "/products"],
     ["SCIENCE",     "/science"],
     ["ABOUT",       "/about"],
+    ["TRACK ORDER", "/track-order"],
     ["FAQs",        "/faqs"],
     ["CONTACT",     "/contact"],
   ];

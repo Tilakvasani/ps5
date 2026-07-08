@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Heart, Eye, Star, ArrowRight, FlaskConical, Droplets, Zap, Sparkles, Target, HeartHandshake, Activity, Tag, Citrus, Shield, Leaf } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { fetchSettings } from "@/lib/useSettings";
+import { fetchSettings, useSettings } from "@/lib/useSettings";
 import Link from "next/link";
 import { fadeUp } from "@/lib/utils";
 
@@ -43,13 +43,60 @@ export default function AboutPage() {
     return () => window.removeEventListener("storage", onBust);
   }, []);
 
-  const why = [
+  const { raw: settingsRaw } = fetchSettings ? useSettings() : { raw: {} };
+
+  // Parse dynamic JSON settings or fallback
+  let whyItems = [
     { icon: FlaskConical, title: "Scientific Formula", desc: "A fusion of science and taste." },
     { icon: Activity,     title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
     { icon: Zap,          title: "Instant Absorption", desc: "Rocket-like speed, instant action." },
     { icon: Tag,          title: "Pocket Friendly",    desc: "It even fits in your jeans pocket." },
     { icon: Citrus,       title: "Best Flavour",       desc: "Absolutely fresh, as if straight from the garden." },
   ];
+  try {
+    const parsed = JSON.parse(s(settings, "about_why_special_json"));
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      whyItems = parsed.map((item: any, idx: number) => {
+        const titleLower = item.title?.toLowerCase() || "";
+        let Icon = FlaskConical;
+        if (titleLower.includes("science") || titleLower.includes("scientific")) Icon = FlaskConical;
+        else if (titleLower.includes("sugar")) Icon = Activity;
+        else if (titleLower.includes("absorb") || titleLower.includes("instant")) Icon = Zap;
+        else if (titleLower.includes("pocket") || titleLower.includes("price") || titleLower.includes("friendly")) Icon = Tag;
+        else if (titleLower.includes("flavour") || titleLower.includes("taste")) Icon = Citrus;
+        else {
+          const defaults = [FlaskConical, Activity, Zap, Tag, Citrus];
+          Icon = defaults[idx % defaults.length];
+        }
+        return { icon: Icon, title: item.title, desc: item.desc };
+      });
+    }
+  } catch (e) {}
+
+  let pillarItems = [
+    { icon: Heart,        title: "Daily Wellness Support",  desc: "Helps support hydration, immunity, and overall well-being so you can perform at your best every day." },
+    { icon: Zap,          title: "Fast Performance",       desc: "Quick-dissolving, fast-absorbing formula built for modern, active lifestyles." },
+    { icon: FlaskConical, title: "Science-Backed Formula",  desc: "Powered by clinically researched ingredients for trusted daily nutrition." },
+    { icon: Leaf,         title: "Clean & Pure",           desc: "No unnecessary fillers or artificial junk—only quality ingredients your body needs." },
+  ];
+  try {
+    const parsed = JSON.parse(s(settings, "about_pillars_json"));
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      pillarItems = parsed.map((item: any, idx: number) => {
+        const titleLower = item.title?.toLowerCase() || "";
+        let Icon = Heart;
+        if (titleLower.includes("wellness") || titleLower.includes("daily")) Icon = Heart;
+        else if (titleLower.includes("fast") || titleLower.includes("performance") || titleLower.includes("speed")) Icon = Zap;
+        else if (titleLower.includes("science") || titleLower.includes("clinical")) Icon = FlaskConical;
+        else if (titleLower.includes("clean") || titleLower.includes("pure") || titleLower.includes("nature")) Icon = Leaf;
+        else {
+          const defaults = [Heart, Zap, FlaskConical, Leaf];
+          Icon = defaults[idx % defaults.length];
+        }
+        return { icon: Icon, title: item.title, desc: item.desc };
+      });
+    }
+  } catch (e) {}
 
   return (
     <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--gy)" }}>
@@ -78,9 +125,21 @@ export default function AboutPage() {
       <section className="pt-20 pb-10 px-6">
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <motion.div {...fadeUp(0)}>
-            <span className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: "var(--or)" }}>Our Story</span>
+            <span className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: "var(--or)" }}>
+              {s(settings, "about_story_badge") || "Our Story"}
+            </span>
             <h2 className="text-3xl md:text-4xl font-black mb-6 leading-tight" style={{ color: "#0C1E39" }}>
-              Born to solve a <span className="gradient-text">real problem</span>
+              {s(settings, "about_story_title") ? (
+                s(settings, "about_story_title").split(" ").map((w, idx) => (
+                  idx === s(settings, "about_story_title").split(" ").length - 1 ? (
+                    <span key={idx} className="gradient-text">{w} </span>
+                  ) : (
+                    w + " "
+                  )
+                ))
+              ) : (
+                <>Born to solve a <span className="gradient-text">real problem</span></>
+              )}
             </h2>
             <p className="leading-relaxed text-lg" style={{ color: "#4A5568", opacity: 0.85 }}>
               {s(settings, "about_brand_story")}
@@ -128,18 +187,23 @@ export default function AboutPage() {
         <div className="mx-auto max-w-6xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
-              Why Choose <span style={{ color: "var(--or)" }}>Zupwell?</span>
+              {s(settings, "about_why_title") ? (
+                s(settings, "about_why_title").split(" ").map((w, idx) => (
+                  idx === s(settings, "about_why_title").split(" ").length - 1 ? (
+                    <span key={idx} style={{ color: "var(--or)" }}>{w} </span>
+                  ) : (
+                    w + " "
+                  )
+                ))
+              ) : (
+                <>Why Choose <span style={{ color: "var(--or)" }}>Zupwell?</span></>
+              )}
             </h2>
-            <p style={{ color: "#4A5568", opacity: 0.85 }}>Our Core Pillars and Commitments to You.</p>
+            <p style={{ color: "#4A5568", opacity: 0.85 }}>{s(settings, "about_why_subtitle") || "Our Core Pillars and Commitments to You."}</p>
           </motion.div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Heart,        title: "Daily Wellness Support",  desc: "Helps support hydration, immunity, and overall well-being so you can perform at your best every day." },
-              { icon: Zap,          title: "Fast Performance",       desc: "Quick-dissolving, fast-absorbing formula built for modern, active lifestyles." },
-              { icon: FlaskConical, title: "Science-Backed Formula",  desc: "Powered by clinically researched ingredients for trusted daily nutrition." },
-              { icon: Leaf,         title: "Clean & Pure",           desc: "No unnecessary fillers or artificial junk—only quality ingredients your body needs." },
-            ].map((pillar, i) => (
+            {pillarItems.map((pillar, i) => (
               <div key={i} className="card p-8 rounded-2xl flex flex-col justify-between" 
                 style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
                 <div>
@@ -165,7 +229,7 @@ export default function AboutPage() {
             <p style={{ color: "#4A5568", opacity: 0.85 }}>Zero-Compromise Health Boosters. Crafted for Perfection.</p>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-            {why.map((f, i) => (
+            {whyItems.map((f, i) => (
               <motion.div key={i} {...fadeUp(i * 0.1)} className="zcard text-center"
                 style={{ borderColor: "rgba(12, 30, 57, 0.08)", background: "#FFFFFF" }}>
                 <div className="h-14 w-14 mx-auto rounded-2xl flex items-center justify-center mb-4 transition-all"
@@ -186,7 +250,17 @@ export default function AboutPage() {
           <div className="mx-auto max-w-4xl">
             <motion.div {...fadeUp(0)} className="text-center mb-8">
               <h2 className="text-3xl md:text-4xl font-black" style={{ color: "#0C1E39" }}>
-                The Future of <span className="gradient-text">Zupwell</span>
+                {s(settings, "about_future_title") ? (
+                  s(settings, "about_future_title").split(" ").map((w, idx) => (
+                    idx === s(settings, "about_future_title").split(" ").length - 1 ? (
+                      <span key={idx} className="gradient-text">{w} </span>
+                    ) : (
+                      w + " "
+                    )
+                  ))
+                ) : (
+                  <>The Future of <span className="gradient-text">Zupwell</span></>
+                )}
               </h2>
             </motion.div>
             <motion.div {...fadeUp(0.1)}
@@ -196,16 +270,23 @@ export default function AboutPage() {
                 {s(settings, "about_future")}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                {[
-                  "Daily multivitamins & immune boosters",
-                  "Energy and focus formulations",
-                  "Specialized recovery blends",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-2 text-sm" style={{ color: "#4A5568", opacity: 0.8 }}>
-                    <span className="mt-0.5 shrink-0" style={{ color: "var(--or)" }}>→</span>
-                    {item}
-                  </div>
-                ))}
+                {(() => {
+                  let pipeline = [
+                    "Daily multivitamins & immune boosters",
+                    "Energy and focus formulations",
+                    "Specialized recovery blends",
+                  ];
+                  try {
+                    const parsed = JSON.parse(s(settings, "about_future_pipeline_json"));
+                    if (Array.isArray(parsed) && parsed.length > 0) pipeline = parsed;
+                  } catch (e) {}
+                  return pipeline.map((item) => (
+                    <div key={item} className="flex items-start gap-2 text-sm" style={{ color: "#4A5568", opacity: 0.8 }}>
+                      <span className="mt-0.5 shrink-0" style={{ color: "var(--or)" }}>→</span>
+                      {item}
+                    </div>
+                  ));
+                })()}
               </div>
             </motion.div>
           </div>
@@ -217,7 +298,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-2xl text-center">
           <motion.div {...fadeUp(0)}>
             <h2 className="text-2xl font-black mb-4" style={{ color: "#FFFFFF" }}>
-              Ready to fuel your hustle?
+              {s(settings, "about_cta_title") || "Ready to fuel your hustle?"}
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-stretch max-w-sm mx-auto sm:max-w-none">
               <Link href="/products" className="w-full sm:w-auto">

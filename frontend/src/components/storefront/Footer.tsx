@@ -119,7 +119,7 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <span style={colHeadStyle}>Quick Links</span>
-            {[["Home","/"],["Shop / Products","/products"],["Science / Quality","/science"],["Certifications","/certifications"],["About Us","/about"],["FAQs","/faqs"],["Contact Us","/contact"]].map(([l, h]) => (
+            {[["Home","/"],["Shop / Products","/products"],["Science / Quality","/science"],["Certifications","/certifications"],["Track Order","/track-order"],["About Us","/about"],["FAQs","/faqs"],["Contact Us","/contact"]].map(([l, h]) => (
               <Link
                 key={l}
                 href={h}
@@ -190,9 +190,9 @@ export default function Footer() {
           {certEntries.map(({ key, label }) => {
             const val = s[key];
             return val ? (
-              <img key={key} src={val} alt={label} className="h-10 object-contain opacity-60 hover:opacity-100 transition-opacity" />
+              <img key={key} src={val} alt={label} className="h-10 object-contain opacity-100 transition-opacity" />
             ) : (
-              <CertLogo key={key} label={label} className="h-10 opacity-60 hover:opacity-100 transition-opacity" />
+              <CertLogo key={key} label={label} className="h-10 opacity-100 transition-opacity" />
             );
           })}
         </div>
@@ -201,12 +201,22 @@ export default function Footer() {
         <div
           className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4"
         >
-          <p style={{ fontSize: "11px", color: "#6B7280" }}>
-            © {new Date().getFullYear()} {name}. All rights reserved.
-          </p>
-          <p style={{ fontSize: "10px", color: "#6B7280" }}>
-            This product is a health supplement and not for medicinal use.
-          </p>
+          <div className="flex flex-col gap-1 text-center md:text-left">
+            <p style={{ fontSize: "11px", color: "#6B7280" }}>
+              © {new Date().getFullYear()} {name}. All rights reserved.
+            </p>
+            <p style={{ fontSize: "10px", color: "#6B7280" }}>
+              This product is a health supplement and not for medicinal use.
+            </p>
+          </div>
+          
+          {/* RazorPay Payment Gateway Symbol */}
+          <div className="flex items-center gap-2 opacity-90 hover:opacity-100 transition-opacity">
+            <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Secured by</span>
+            <div style={{ background: '#FFFFFF', padding: '4px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', height: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <img src="/razorpay.png" alt="Razorpay" className="h-4 w-auto object-contain" />
+            </div>
+          </div>
         </div>
       </div>
     </footer>

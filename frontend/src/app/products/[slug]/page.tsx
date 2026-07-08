@@ -226,11 +226,11 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
           {/* ── Images ── */}
           <div>
-            <div className="relative rounded-3xl overflow-hidden aspect-square mb-4 shadow-sm"
+            <div className="relative rounded-3xl overflow-hidden aspect-square mb-4 shadow-sm flex items-center justify-center p-6"
               style={{ background: C.altBg, border: `1.5px solid ${C.border}` }}>
               {images[activeImage]?.imageUrl ? (
                 <img src={images[activeImage].imageUrl} alt={product.name}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.03]"/>
+                  className="max-w-full max-h-full object-contain transition-transform duration-500 hover:scale-[1.03]"/>
               ) : (
                 <div className="w-full h-full flex items-center justify-center" style={{ color: C.border }}><Package size={80}/></div>
               )}
@@ -242,9 +242,9 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               <div className="flex gap-3 overflow-x-auto pb-1">
                 {images.map((img: any, i: number) => (
                   <button key={i} onClick={() => setActiveImage(i)}
-                    className="flex-shrink-0 h-20 w-20 rounded-xl overflow-hidden transition-all"
+                    className="flex-shrink-0 h-20 w-20 rounded-xl overflow-hidden transition-all flex items-center justify-center p-2"
                     style={{ border: `2px solid ${activeImage===i ? C.mintHex : C.border}` }}>
-                    {img.imageUrl ? <img src={img.imageUrl} alt="" className="w-full h-full object-cover"/> : <div className="w-full h-full" style={{ background: C.surface }}/>}
+                    {img.imageUrl ? <img src={img.imageUrl} alt="" className="max-w-full max-h-full object-contain"/> : <div className="w-full h-full" style={{ background: C.surface }}/>}
                   </button>
                 ))}
               </div>

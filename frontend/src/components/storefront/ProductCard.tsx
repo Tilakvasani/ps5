@@ -46,7 +46,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="zpcard group">
         {/* Image */}
         <div
-          className="relative overflow-hidden"
+          className="relative overflow-hidden flex items-center justify-center p-4"
           style={{
             aspectRatio: "1/1",
             background: "#F8F8F8",
@@ -57,7 +57,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <img
               src={primaryImage}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div
