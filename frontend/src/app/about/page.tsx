@@ -56,30 +56,7 @@ export default function AboutPage() {
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        {/* futuristic background mesh */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `
-              radial-gradient(circle at 10% 20%, rgba(255, 79, 0, 0.12) 0%, transparent 40%),
-              radial-gradient(circle at 90% 80%, rgba(12, 30, 57, 0.5) 0%, transparent 50%),
-              linear-gradient(180deg, #051124 0%, #0C1E39 100%)
-            `,
-          }}
-        />
-        {/* abstract vector nodes overlay */}
-        <div 
-          className="absolute inset-0 opacity-10 pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(rgba(255, 79, 0, 0.12) 1.5px, transparent 1.5px), linear-gradient(to right, rgba(12, 30, 57, 0.2) 1px, transparent 1px)",
-            backgroundSize: "30px 30px, 60px 60px"
-          }}
-        />
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute top-10 right-10 h-[400px] w-[400px] rounded-full border border-dashed opacity-20 animate-spin-slow" style={{ borderColor: "#FF4F00" }} />
-          <div className="absolute -bottom-20 left-20 h-[300px] w-[300px] rounded-full border border-[#FF4F00] opacity-10" />
-        </div>
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden" style={{ background: "linear-gradient(180deg, #051124 0%, #0C1E39 100%)" }}>
         <div className="relative mx-auto max-w-4xl text-center">
           <motion.span {...fadeUp(0)}
             className="inline-block text-xs font-semibold uppercase tracking-widest mb-4"

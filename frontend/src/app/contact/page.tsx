@@ -142,81 +142,81 @@ export default function ContactPage() {
       </section>
 
       {/* ── Distributor Inquiry Form ── */}
-      <section className="pt-8 pb-16 px-6" style={{ background: "var(--gy)" }}>
+      <section className="pt-8 pb-16 px-6" style={{ background: "#0c1e39" }}>
         <div className="mx-auto max-w-3xl">
           <motion.div {...fadeUp(0)} className="text-center mb-10">
             <span className="inline-block zbadge zbadge-or mb-3">
               Grow with Zupwell
             </span>
-            <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
+            <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
               Distributor <span style={{ color: "var(--or)" }}>Inquiry</span>
             </h2>
-            <p style={{ color: "#4A5568" }}>
+            <p style={{ color: "#F8F8F8", opacity: 0.85 }}>
               Interested in partnering with us? Fill in your details and let's do business!
             </p>
           </motion.div>
 
-          <motion.form {...fadeUp(0.1)} onSubmit={handleSubmit} className="zcard space-y-5" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+          <motion.form {...fadeUp(0.1)} onSubmit={handleSubmit} className="space-y-5" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.08)", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)" }}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Full Name */}
               <div>
-                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                   <User size={13} style={{ color: "var(--or)" }} /> Full Name *
                 </label>
                 <input type="text" value={form.fullName} required
                   onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
-                  className="zinp text-sm" placeholder="Your full name" />
+                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your full name" />
               </div>
 
               {/* Firm Name */}
               <div>
-                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                   <Building size={13} style={{ color: "var(--or)" }} /> Firm Name
                 </label>
                 <input type="text" value={form.firmName}
                   onChange={e => setForm(f => ({ ...f, firmName: e.target.value }))}
-                  className="zinp text-sm" placeholder="Your firm / company name" />
+                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your firm / company name" />
               </div>
 
               {/* City */}
               <div>
-                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                   <MapPin size={13} style={{ color: "var(--or)" }} /> City *
                 </label>
                 <input type="text" value={form.city} required
                   onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-                  className="zinp text-sm" placeholder="Your city" />
+                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your city" />
               </div>
 
               {/* State */}
               <div>
-                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                   <MapPin size={13} style={{ color: "var(--or)" }} /> State
                 </label>
                 <input type="text" value={form.state}
                   onChange={e => setForm(f => ({ ...f, state: e.target.value }))}
-                  className="zinp text-sm" placeholder="Your state" />
+                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your state" />
               </div>
             </div>
 
             {/* Experience */}
             <div>
-              <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+              <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                 <Briefcase size={13} style={{ color: "var(--or)" }} /> Experience in Distribution
               </label>
               <input type="text" value={form.experience}
                 onChange={e => setForm(f => ({ ...f, experience: e.target.value }))}
-                className="zinp text-sm" placeholder="e.g. 3 years in FMCG, new to distribution, etc." />
+                className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="e.g. 3 years in FMCG, new to distribution, etc." />
             </div>
 
             {/* Message */}
             <div>
-              <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+              <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                 <FileText size={13} style={{ color: "var(--or)" }} /> Message *
               </label>
               <textarea value={form.message} required rows={4}
                 onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                className="zinp text-sm resize-none"
+                className="zinp text-sm resize-none" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }}
                 placeholder="Tell us about your distribution network, area of operation, and what you're looking for..." />
             </div>
 
@@ -227,7 +227,7 @@ export default function ContactPage() {
               {sending ? "Sending..." : "Send Inquiry"}
             </motion.button>
 
-            <p className="text-xs text-center" style={{ color: "#6B7280" }}>
+            <p className="text-xs text-center" style={{ color: "#A0AEC0" }}>
               We typically respond within 24 hours on business days.
             </p>
           </motion.form>

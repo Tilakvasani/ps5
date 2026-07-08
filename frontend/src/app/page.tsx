@@ -280,7 +280,7 @@ export default function HomePage() {
 
 
       {/* ── Certificate logos — infinite scroll marquee ── */}
-      <section className="py-10 overflow-hidden" style={{ background: "#FFFFFF", borderTop: "1.5px solid #EAEAEA", borderBottom: "1.5px solid #EAEAEA" }}>
+      <section className="pt-10 pb-5 overflow-hidden" style={{ background: "#FFFFFF", borderTop: "1.5px solid #EAEAEA", borderBottom: "1.5px solid #EAEAEA" }}>
         <p className="text-center mb-6" style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "#0C1E39", opacity: 0.85, textTransform: "uppercase" }}>
           Certified & Compliant
         </p>
@@ -308,7 +308,7 @@ export default function HomePage() {
 
       {/* ── Founder's Message ── */}
       {s(settings, "founder_message") && (
-        <section className="pt-24 pb-12 px-6" style={{ background: "var(--gy)" }}>
+        <section className="pt-12 pb-12 px-6" style={{ background: "var(--gy)" }}>
           <div className="mx-auto max-w-4xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
               <div className="overflow-hidden" style={{ borderRadius: "20px", border: "1.5px solid #EAEAEA", boxShadow: "0 10px 30px rgba(0,0,0,0.03)" }}>
@@ -364,7 +364,7 @@ export default function HomePage() {
       )}
 
       {/* ── Customer Reviews ── */}
-      <section className="pt-12 pb-24 px-6" style={{ background: "var(--gy)" }}>
+      <section className="pt-6 pb-24 px-6" style={{ background: "var(--gy)" }}>
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-4">
             <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Real People, Real Results</p>

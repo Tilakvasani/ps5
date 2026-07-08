@@ -321,9 +321,9 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                       <button key={f} onClick={() => setSelectedFlavor(f)}
                         className="px-4 py-2 rounded-xl text-sm font-semibold transition-colors duration-150"
                         style={{
-                          border: `1.5px solid ${selectedFlavor===f ? C.mintHex : C.border}`,
-                          background: selectedFlavor===f ? "rgba(255,92,0,0.15)" : C.surface,
-                          color: selectedFlavor===f ? C.mintHex : C.mid,
+                          border: `1.5px solid ${selectedFlavor===f ? "#ff5c00" : C.border}`,
+                          background: selectedFlavor===f ? "#ff5c00" : C.surface,
+                          color: selectedFlavor===f ? "#ffffff" : C.mid,
                         }}>
                         {f}
                       </button>
@@ -346,9 +346,9 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   <button key={item.pack} onClick={() => setSelectedPack(item.pack)}
                     className="flex flex-col items-center justify-center p-3 rounded-xl transition-colors duration-150 text-center"
                     style={{
-                      border: `1.5px solid ${selectedPack===item.pack ? C.mintHex : C.border}`,
-                      background: selectedPack===item.pack ? "rgba(255,92,0,0.15)" : C.surface,
-                      color: selectedPack===item.pack ? C.mintHex : C.blue,
+                      border: `1.5px solid ${selectedPack===item.pack ? "#ffb800" : C.border}`,
+                      background: selectedPack===item.pack ? "#ffb800" : C.surface,
+                      color: selectedPack===item.pack ? "#051124" : C.blue,
                       minHeight: "72px"
                     }}>
                     <span className="text-xs font-bold leading-tight">{item.label}</span>
@@ -359,17 +359,17 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             </div>
 
             {/* Price card — dark surface */}
-            <div className="rounded-2xl p-5 mb-5" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
+            <div className="rounded-2xl p-5 mb-5" style={{ background: "#0c1e39", border: `1.5px solid ${C.border}`, color: "#ffffff" }}>
               <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-4xl font-bold" style={{ color: C.blue, letterSpacing: "-0.04em" }}>
-                  <span className="text-lg font-bold text-[#F8F8F8] mr-1.5 uppercase" style={{ verticalAlign: "middle", color: C.blue }}>mrp:</span>
+                <span className="text-4xl font-bold" style={{ color: "#ffffff", letterSpacing: "-0.04em" }}>
+                  <span className="text-lg font-bold mr-1.5 uppercase" style={{ verticalAlign: "middle", color: "#ffffff" }}>mrp:</span>
                   ₹{Math.round(price * (1 + cgstRate + sgstRate))}
                 </span>
               </div>
-              <p className="text-xs mt-1.5" style={{ color: C.light }}>includes all taxes</p>
+              <p className="text-xs mt-1.5" style={{ color: "#f8f8f8", opacity: 0.8 }}>includes all taxes</p>
               {qty > 1 && (
-                <div className="text-sm mt-3 pt-3" style={{ color: C.mid, borderTop: `1.5px solid ${C.border}` }}>
-                  <div className="flex justify-between font-bold text-base" style={{ color: C.blue }}>
+                <div className="text-sm mt-3 pt-3" style={{ color: "#f8f8f8", borderTop: `1.5px solid rgba(255, 255, 255, 0.1)` }}>
+                  <div className="flex justify-between font-bold text-base" style={{ color: "#ffffff" }}>
                     <span>Total Price (×{qty})</span><span>₹{total}</span>
                   </div>
                 </div>
@@ -429,14 +429,14 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               : tab.label;
             
             return (
-              <div key={tab.id} id={`accordion-${tab.id}`} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${C.border}`, background: C.surface }}>
+              <div key={tab.id} id={`accordion-${tab.id}`} className="rounded-2xl overflow-hidden" style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)", background: "#0c1e39" }}>
                 <button
                   onClick={() => setActiveTab(isOpen ? "" : tab.id)}
                   className="w-full px-6 py-5 flex items-center justify-between text-base font-bold transition-all text-left"
-                  style={{ color: isOpen ? C.mintHex : C.blue }}
+                  style={{ color: "#ffffff" }}
                 >
                   <span>{label}</span>
-                  <span className="transition-transform duration-200" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", color: C.mintHex }}>
+                  <span className="transition-transform duration-200" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", color: "#ffffff" }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -452,38 +452,38 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                       transition={{ duration: 0.2 }}
                       style={{ overflow: "hidden" }}
                     >
-                      <div className="p-6 md:p-8" style={{ background: C.altBg, borderTop: `1.5px solid ${C.border}` }}>
+                      <div className="p-6 md:p-8" style={{ background: "#0c1e39", borderTop: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
                         {tab.id === "desc" && (
-                          <div className="text-sm leading-relaxed" style={{ color: C.mid }}>
+                          <div className="text-sm leading-relaxed" style={{ color: "#f8f8f8", opacity: 0.85 }}>
                             <div dangerouslySetInnerHTML={{__html: sanitizeHtml(product.description || product.shortDescription || "No description available.")}}/>
                           </div>
                         )}
 
                         {tab.id === "howto" && (
                           <div>
-                            <h3 className="font-bold text-2xl mb-8" style={{ color: C.blue }}>
-                              How to Use — <span style={{ color: C.mintHex }}>The Simple Way</span>
+                            <h3 className="font-bold text-2xl mb-8" style={{ color: "#ffffff" }}>
+                              How to Use — <span style={{ color: "#ff5c00" }}>The Simple Way</span>
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
                               {HOW_TO_USE.map((step,i) => (
                                 <div key={i}
                                   className="flex flex-col items-center text-center p-7 rounded-2xl"
-                                  style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
+                                  style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
                                   <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-5"
                                     style={{ background: "rgba(255,92,0,0.1)" }}>
-                                    <step.icon size={22} style={{ color: C.mintHex }}/>
+                                    <step.icon size={22} style={{ color: "#ff5c00" }}/>
                                   </div>
-                                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: C.mintHex, letterSpacing:"0.15em" }}>
+                                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#ff5c00", letterSpacing: "0.15em" }}>
                                     Step {step.step}
                                   </div>
-                                  <h4 className="font-bold text-lg mb-2" style={{ color: C.blue }}>{step.title}</h4>
-                                  <p className="text-sm" style={{ color: C.mid }}>{step.desc}</p>
+                                  <h4 className="font-bold text-lg mb-2" style={{ color: "#ffffff" }}>{step.title}</h4>
+                                  <p className="text-sm" style={{ color: "#f8f8f8", opacity: 0.85 }}>{step.desc}</p>
                                 </div>
                               ))}
                             </div>
-                            <div className="p-4 rounded-2xl" style={{ background: "rgba(255,92,0,0.08)", border: "1.5px solid rgba(255,92,0,0.2)" }}>
-                              <p className="text-sm" style={{ color: C.blue }}>
-                                <span className="font-bold" style={{ color: C.mintHex }}>Pro tip:</span> Use cold water for best fizz. One tablet per 200 ml glass. Take daily for best results.
+                            <div className="p-4 rounded-2xl" style={{ background: "rgba(255,92,0,0.1)", border: "1.5px solid rgba(255,92,0,0.25)" }}>
+                              <p className="text-sm" style={{ color: "#ffffff" }}>
+                                <span className="font-bold" style={{ color: "#ffb800" }}>Pro tip:</span> Use cold water for best fizz. One tablet per 200 ml glass. Take daily for best results.
                               </p>
                             </div>
                           </div>
@@ -491,26 +491,26 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
                         {tab.id === "nutrition" && (
                           <div>
-                            <h3 className="font-bold text-2xl mb-8" style={{ color: C.blue }}>Nutritional Facts</h3>
-                            <div className="max-w-sm rounded-2xl overflow-hidden" style={{ border: `2px solid ${C.border}` }}>
-                              <div className="p-5" style={{ background: C.surface }}>
-                                <p className="text-xl font-bold" style={{ color: C.blue }}>Nutrition Facts</p>
-                                <p className="text-xs mt-1" style={{ color: C.mid }}>Per tablet (approx. values)</p>
+                            <h3 className="font-bold text-2xl mb-8" style={{ color: "#ffffff" }}>Nutritional Facts</h3>
+                            <div className="max-w-sm rounded-2xl overflow-hidden" style={{ border: "2px solid rgba(255, 255, 255, 0.1)" }}>
+                              <div className="p-5" style={{ background: "#051124" }}>
+                                <p className="text-xl font-bold" style={{ color: "#ffffff" }}>Nutrition Facts</p>
+                                <p className="text-xs mt-1" style={{ color: "#f8f8f8", opacity: 0.7 }}>Per tablet (approx. values)</p>
                               </div>
-                              <div className="divide-y" style={{ background: C.altBg, borderColor: C.border }}>
+                              <div className="divide-y" style={{ background: "#0c1e39", borderColor: "rgba(255, 255, 255, 0.1)" }}>
                                 {(nutritionalFacts?Object.entries(nutritionalFacts):[
                                   ["Energy","20 kcal"],["Carbohydrates","5g"],["Sugars","<1g"],
                                   ["Sodium","300mg"],["Potassium","200mg"],["Magnesium","100mg"],
                                   ["Vitamin C","100mg"],["Vitamin B6","1.4mg"],["Zinc","5mg"]
                                 ]).map(([k,v]) => (
-                                  <div key={k as string} className="flex justify-between px-5 py-3 text-sm" style={{ borderBottom: `1px solid ${C.border}` }}>
-                                    <span style={{ color: C.mid }}>{k as string}</span>
-                                    <span className="font-semibold" style={{ color: C.blue }}>{v as string}</span>
+                                  <div key={k as string} className="flex justify-between px-5 py-3 text-sm" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}>
+                                    <span style={{ color: "#f8f8f8", opacity: 0.85 }}>{k as string}</span>
+                                    <span className="font-semibold" style={{ color: "#ffffff" }}>{v as string}</span>
                                   </div>
                                 ))}
                               </div>
-                              <div className="px-5 py-3" style={{ background: C.surface, borderTop: `1px solid ${C.border}` }}>
-                                <p className="text-[10px]" style={{ color: C.light }}>* Approximate values. Actual values may vary by variant.</p>
+                              <div className="px-5 py-3" style={{ background: "#051124", borderTop: "1px solid rgba(255, 255, 255, 0.1)" }}>
+                                <p className="text-[10px]" style={{ color: "#f8f8f8", opacity: 0.6 }}>* Approximate values. Actual values may vary by variant.</p>
                               </div>
                             </div>
                           </div>
@@ -518,12 +518,12 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
                         {tab.id === "specs" && (
                           <div>
-                            <h3 className="font-bold text-2xl mb-6" style={{ color: C.blue }}>Specifications</h3>
-                            <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${C.border}` }}>
+                            <h3 className="font-bold text-2xl mb-6" style={{ color: "#ffffff" }}>Specifications</h3>
+                            <div className="rounded-2xl overflow-hidden" style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
                               {[["Brand",product.brand||"—"],["Category",product.category?.name||"—"]].map(([k,v],i,arr) => (
-                                <div key={k} className="flex text-sm" style={{ background: i%2===0 ? C.altBg : C.surface, borderBottom: i<arr.length-1?`1px solid ${C.border}`:"none" }}>
-                                  <div className="w-1/3 px-5 py-4 font-semibold" style={{ color: C.mid }}>{k}</div>
-                                  <div className="flex-1 px-5 py-4" style={{ color: C.blue }}>{v}</div>
+                                <div key={k} className="flex text-sm" style={{ background: i%2===0 ? "#0c1e39" : "#051124", borderBottom: i<arr.length-1?"1px solid rgba(255, 255, 255, 0.1)":"none" }}>
+                                  <div className="w-1/3 px-5 py-4 font-semibold" style={{ color: "#f8f8f8", opacity: 0.85 }}>{k}</div>
+                                  <div className="flex-1 px-5 py-4" style={{ color: "#ffffff" }}>{v}</div>
                                 </div>
                               ))}
                             </div>
@@ -533,54 +533,54 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                         {tab.id === "reviews" && (
                           <div className="space-y-8">
                             <div>
-                              <h3 className="font-bold text-2xl mb-6" style={{ color: C.blue }}>Customer Reviews</h3>
+                              <h3 className="font-bold text-2xl mb-6" style={{ color: "#ffffff" }}>Customer Reviews</h3>
                               {product.reviews?.length ? (
                                 <div className="space-y-4">
                                   {product.reviews.map((r: any) => (
-                                    <div key={r.id} className="p-5 rounded-2xl" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
+                                    <div key={r.id} className="p-5 rounded-2xl" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: C.border} : {}}/>)}</div>
-                                        <span className="font-semibold text-sm" style={{ color: C.blue }}>{r.user?.name}</span>
+                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: "rgba(255, 255, 255, 0.2)"} : {}}/>)}</div>
+                                        <span className="font-semibold text-sm" style={{ color: "#ffffff" }}>{r.user?.name}</span>
                                       </div>
-                                      {r.title && <p className="font-medium mb-1" style={{ color: C.blue }}>{r.title}</p>}
-                                      <p className="text-sm" style={{ color: C.mid }}>{r.body}</p>
+                                      {r.title && <p className="font-medium mb-1" style={{ color: "#ffffff" }}>{r.title}</p>}
+                                      <p className="text-sm" style={{ color: "#f8f8f8", opacity: 0.85 }}>{r.body}</p>
                                     </div>
                                   ))}
                                 </div>
                               ) : (
                                 <div className="space-y-4">
                                   {FALLBACK_REVIEWS.map((r) => (
-                                    <div key={r.id} className="p-5 rounded-2xl" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
+                                    <div key={r.id} className="p-5 rounded-2xl" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: C.border} : {}}/>)}</div>
-                                        <span className="font-semibold text-sm" style={{ color: C.blue }}>{r.name}</span>
+                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: "rgba(255, 255, 255, 0.2)"} : {}}/>)}</div>
+                                        <span className="font-semibold text-sm" style={{ color: "#ffffff" }}>{r.name}</span>
                                       </div>
-                                      <p className="font-medium mb-1" style={{ color: C.blue }}>{r.title}</p>
-                                      <p className="text-sm" style={{ color: C.mid }}>{r.body}</p>
+                                      <p className="font-medium mb-1" style={{ color: "#ffffff" }}>{r.title}</p>
+                                      <p className="text-sm" style={{ color: "#f8f8f8", opacity: 0.85 }}>{r.body}</p>
                                     </div>
                                   ))}
                                 </div>
                               )}
                             </div>
 
-                            <div className="rounded-3xl p-6" style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
-                              <h3 className="font-bold text-xl mb-5" style={{ color: C.blue }}>Write a Review</h3>
+                            <div className="rounded-3xl p-6" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
+                              <h3 className="font-bold text-xl mb-5" style={{ color: "#ffffff" }}>Write a Review</h3>
 
                               {!token ? (
                                 <div className="text-center py-6">
-                                  <p className="text-sm mb-3" style={{ color: C.mid }}>Please sign in to leave a review</p>
+                                  <p className="text-sm mb-3" style={{ color: "#f8f8f8", opacity: 0.85 }}>Please sign in to leave a review</p>
                                   <a href="/login" className="inline-block px-6 py-2.5 rounded-xl text-white text-sm font-semibold" style={{ background: C.mint }}>Sign In</a>
                                 </div>
                               ) : reviewSuccess ? (
                                 <div className="text-center py-6">
                                   <CheckCircle size={40} className="mx-auto mb-3" style={{ color: C.mintHex }} />
-                                  <p className="font-bold" style={{ color: C.blue }}>Thank you for your review!</p>
-                                  <p className="text-sm mt-1" style={{ color: C.mid }}>It will appear after approval.</p>
+                                  <p className="font-bold" style={{ color: "#ffffff" }}>Thank you for your review!</p>
+                                  <p className="text-sm mt-1" style={{ color: "#f8f8f8", opacity: 0.85 }}>It will appear after approval.</p>
                                 </div>
                               ) : (
                                 <div className="space-y-4">
                                   <div>
-                                    <label className="text-sm font-semibold block mb-2" style={{ color: C.blue }}>Your Rating</label>
+                                    <label className="text-sm font-semibold block mb-2" style={{ color: "#ffffff" }}>Your Rating</label>
                                     <div className="flex gap-1">
                                       {Array.from({length:5}).map((_,i) => (
                                         <button key={i} type="button"
@@ -589,26 +589,26 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                           onClick={() => setReviewRating(i+1)}>
                                           <Star size={28}
                                             className={(reviewHover || reviewRating) > i ? "fill-yellow-400 text-yellow-400" : ""}
-                                            style={(reviewHover || reviewRating) > i ? {} : {color: C.border}} />
+                                            style={(reviewHover || reviewRating) > i ? {} : {color: "rgba(255, 255, 255, 0.2)"}} />
                                         </button>
                                       ))}
                                     </div>
                                   </div>
 
                                   <div>
-                                    <label className="text-sm font-semibold block mb-1" style={{ color: C.blue }}>Review Title <span className="font-normal opacity-60">(optional)</span></label>
+                                    <label className="text-sm font-semibold block mb-1" style={{ color: "#ffffff" }}>Review Title <span className="font-normal opacity-60">(optional)</span></label>
                                     <input value={reviewTitle} onChange={e => setReviewTitle(e.target.value)}
                                       placeholder="e.g. Great product!"
                                       className="w-full px-4 py-2.5 rounded-xl text-sm outline-none"
-                                      style={{ border: `1.5px solid ${C.border}`, background: C.altBg, color: C.blue }} />
+                                      style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)", background: "#0c1e39", color: "#ffffff" }} />
                                   </div>
 
                                   <div>
-                                    <label className="text-sm font-semibold block mb-1" style={{ color: C.blue }}>Your Review</label>
+                                    <label className="text-sm font-semibold block mb-1" style={{ color: "#ffffff" }}>Your Review</label>
                                     <textarea value={reviewBody} onChange={e => setReviewBody(e.target.value)}
                                       rows={4} placeholder="Share your experience with this product..."
                                       className="w-full px-4 py-2.5 rounded-xl text-sm outline-none resize-none"
-                                      style={{ border: `1.5px solid ${C.border}`, background: C.altBg, color: C.blue }} />
+                                      style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)", background: "#0c1e39", color: "#ffffff" }} />
                                   </div>
 
                                   <button

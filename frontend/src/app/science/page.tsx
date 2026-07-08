@@ -145,37 +145,7 @@ export default function SciencePage() {
       <Navbar />
 
       {/* ── HERO ── */}
-      <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-        {/* futuristic background mesh */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `
-              radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.15) 0%, transparent 45%),
-              radial-gradient(circle at 80% 70%, rgba(12, 30, 57, 0.6) 0%, transparent 50%),
-              linear-gradient(180deg, rgba(5, 17, 36, 0.8) 0%, #051124 100%)
-            `,
-          }}
-        />
-        {/* cybernetic grid lines overlay */}
-        <div 
-          className="absolute inset-0 opacity-15 pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(rgba(255, 92, 0, 0.15) 1px, transparent 1px), linear-gradient(to right, rgba(255, 92, 0, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 92, 0, 0.05) 1px, transparent 1px)",
-            backgroundSize: "40px 40px, 40px 40px, 40px 40px",
-            backgroundPosition: "center center"
-          }}
-        />
-        {/* floating accent rings */}
-        <div
-          className="absolute top-24 right-20 w-64 h-64 rounded-full opacity-20 pointer-events-none animate-pulse"
-          style={{ border: "2px solid #FF5C00", transform: "rotate(20deg)" }}
-        />
-        <div
-          className="absolute -bottom-10 -left-16 w-96 h-96 rounded-full opacity-10 pointer-events-none"
-          style={{ border: "3px dashed #FF5C00" }}
-        />
-
+      <section className="relative pt-32 pb-24 px-6 overflow-hidden" style={{ background: "linear-gradient(180deg, #051124 0%, #0C1E39 100%)" }}>
         <div className="relative mx-auto max-w-4xl text-center">
           <motion.div {...fadeUp(0)}>
             <span
@@ -201,7 +171,7 @@ export default function SciencePage() {
       </section>
 
       {/* ── LAB SHOWCASE GALLERY ── */}
-      <section className="py-12 px-6 mx-auto max-w-7xl">
+      <section className="pt-12 pb-6 px-6 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <motion.div 
             {...fadeUp(0.1)} 
@@ -236,7 +206,7 @@ export default function SciencePage() {
       </section>
 
       {/* ── MANUFACTURING EXCELLENCE ── */}
-      <section className="py-20 px-6 mx-auto max-w-7xl">
+      <section className="pt-10 pb-20 px-6 mx-auto max-w-7xl">
         <motion.div {...fadeUp(0)} className="mb-14">
           <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "var(--or)" }}>
             {s(settings, "science_process_badge")}
