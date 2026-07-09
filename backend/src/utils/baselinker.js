@@ -83,6 +83,7 @@ async function addOrder(order, user) {
   const parameters = {
     // ── Status & date ────────────────────────────────────────────────
     order_status_id: statusId,
+    custom_source_id: 1701,
     date_add:        Math.floor(new Date(order.createdAt).getTime() / 1000),
 
     // ── Currency & payment ───────────────────────────────────────────

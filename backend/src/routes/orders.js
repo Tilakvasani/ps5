@@ -57,9 +57,11 @@ router.post("/", authUser, async (req, res) => {
   const cfg = {};
   settingRows.forEach(r => { cfg[r.key] = r.value; });
 
-  // GST (5% = 2.5% CGST + 2.5% SGST for intra-state Gujarat)
+  // GST (split equally as CGST + SGST)
+  const gstPct = parseFloat(cfg.gst_rate || "5.0");
+  const cgstRate = gstPct / 2;
+  const sgstRate = gstPct / 2;
   const taxableAmount = subtotal - discountAmount;
-  const cgstRate = 2.5, sgstRate = 2.5;
   const cgstAmount = +(taxableAmount * cgstRate / 100).toFixed(2);
   const sgstAmount = +(taxableAmount * sgstRate / 100).toFixed(2);
 

@@ -253,7 +253,7 @@ router.get("/products", validatePagination, authAdmin, async (req, res) => {
 
 router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), async (req, res) => {
   try {
-    const { name, sku, hsnCode = "3919", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants, flavors } = req.body;
+    const { name, sku, hsnCode = "2106", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants, flavors } = req.body;
     const slug = slugify(name, { lower: true, strict: true });
     const product = await prisma.$transaction(async tx => {
       const p = await tx.product.create({
@@ -337,14 +337,26 @@ router.delete("/products/images/:imageId", authAdmin, async (req, res) => {
   }
 });
 
-// SOFT DELETE — sets isActive: false, does NOT remove from database
-// This preserves order history, invoices and all related data
+// Try hard delete first, fall back to soft deactivate if referenced in orderItems
 router.delete("/products/:id", authAdmin, async (req, res) => {
   try {
-    await prisma.product.update({ where: { id: Number(req.params.id) }, data: { isActive: false } });
-    res.json({ message: "Product deactivated" });
+    const id = Number(req.params.id);
+    await prisma.$transaction(async (tx) => {
+      await tx.stockMovement.deleteMany({ where: { productId: id } });
+      await tx.inventory.deleteMany({ where: { productId: id } });
+      await tx.review.deleteMany({ where: { productId: id } });
+      await tx.productVariant.deleteMany({ where: { productId: id } });
+      await tx.productImage.deleteMany({ where: { productId: id } });
+      await tx.product.delete({ where: { id } });
+    });
+    res.json({ message: "Product deleted completely" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to deactivate product" });
+    try {
+      await prisma.product.update({ where: { id: Number(req.params.id) }, data: { isActive: false } });
+      res.json({ message: "Product is referenced in orders, deactivated instead" });
+    } catch (innerErr) {
+      res.status(500).json({ error: innerErr.message || "Failed to delete product" });
+    }
   }
 });
 
@@ -384,13 +396,19 @@ router.put("/categories/:id", authAdmin, async (req, res) => {
   }
 });
 
-// SOFT DELETE — sets isActive: false, does NOT remove from database
+// Try hard delete first, fall back to soft deactivate if referenced in products
 router.delete("/categories/:id", authAdmin, async (req, res) => {
   try {
-    await prisma.category.update({ where: { id: Number(req.params.id) }, data: { isActive: false } });
-    res.json({ message: "Category deactivated" });
+    const id = Number(req.params.id);
+    await prisma.category.delete({ where: { id } });
+    res.json({ message: "Category deleted completely" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to deactivate category" });
+    try {
+      await prisma.category.update({ where: { id }, data: { isActive: false } });
+      res.json({ message: "Category has product references, deactivated instead" });
+    } catch (innerErr) {
+      res.status(500).json({ error: innerErr.message || "Failed to delete category" });
+    }
   }
 });
 
@@ -598,14 +616,19 @@ router.put("/coupons/:id", authAdmin, async (req, res) => {
   }
 });
 
-// SOFT DELETE — deactivate coupon instead of removing from DB
-// Prevents bugs where orders that used this coupon lose their reference
+// Try hard delete first, fall back to soft deactivate if referenced in orders
 router.delete("/coupons/:id", authAdmin, async (req, res) => {
   try {
-    await prisma.coupon.update({ where: { id: Number(req.params.id) }, data: { isActive: false } });
-    res.json({ message: "Coupon deactivated" });
+    const id = Number(req.params.id);
+    await prisma.coupon.delete({ where: { id } });
+    res.json({ message: "Coupon deleted completely" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to deactivate coupon" });
+    try {
+      await prisma.coupon.update({ where: { id }, data: { isActive: false } });
+      res.json({ message: "Coupon is referenced in orders, deactivated instead" });
+    } catch (innerErr) {
+      res.status(500).json({ error: innerErr.message || "Failed to delete coupon" });
+    }
   }
 });
 
@@ -628,14 +651,13 @@ router.put("/reviews/:id/approve", authAdmin, async (req, res) => {
   }
 });
 
-// SOFT DELETE — hide review (isApproved: false) instead of deleting from DB
-// Prevents broken foreign key references if review is tied to product ratings
+// Hard delete reviews completely from the database
 router.delete("/reviews/:id", authAdmin, async (req, res) => {
   try {
-    await prisma.review.update({ where: { id: Number(req.params.id) }, data: { isApproved: false } });
-    res.json({ message: "Review hidden" });
+    await prisma.review.delete({ where: { id: Number(req.params.id) } });
+    res.json({ message: "Review deleted completely" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to hide review" });
+    res.status(500).json({ error: err.message || "Failed to delete review" });
   }
 });
 

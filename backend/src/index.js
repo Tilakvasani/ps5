@@ -209,7 +209,7 @@ app.use((req, res) => {
             <h1>404</h1>
             <h2>Page not found</h2>
             <p>The page you're looking for doesn't exist.</p>
-            <a href="https://ps5-hhvf.vercel.app">Go to Zupwell ↗</a>
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}">Go to Zupwell ↗</a>
           </div>
         </body>
       </html>
@@ -299,7 +299,7 @@ app.listen(PORT, async () => {
       { key: "about_why3_title",  value: "Consumer Centric", group: "about" },
       { key: "about_why3_desc",   value: "Customer convenience and choice are our top priorities.", group: "about" },
       { key: "free_shipping_threshold", value: "500", group: "orders" },
-      { key: "gst_rate",                 value: "2.5",  group: "orders" },
+      { key: "gst_rate",                 value: "5.0",  group: "orders" },
       { key: "default_shipping_charge", value: "50",  group: "orders" },
       { key: "order_prefix",            value: "ZW",  group: "orders" },
 

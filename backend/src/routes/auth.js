@@ -19,8 +19,8 @@ const isStrongPassword = (pwd) => {
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 // ── Google OAuth Setup ───────────────────────────────
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://ps5-hhvf.vercel.app";
-const BACKEND_URL  = process.env.BACKEND_URL  || "https://ps5-ufm2.onrender.com";
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const BACKEND_URL  = process.env.BACKEND_URL  || "http://localhost:8000";
 
 const FacebookStrategy = require("passport-facebook").Strategy;
 

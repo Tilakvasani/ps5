@@ -263,7 +263,7 @@ export default function HomePage() {
             <Link href={featuredProduct ? `/products/${featuredProduct.slug}` : "/products"} className="w-full max-w-[420px] aspect-[4/5] block">
               <motion.div 
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="w-full h-full rounded-[2.5rem] overflow-hidden border-2 border-[#0C1E39] cursor-pointer relative"
+                className="w-full h-full rounded-2xl overflow-hidden border-2 border-[#0C1E39] cursor-pointer relative"
                 style={{ 
                   backgroundImage: `url(${featuredProduct?.images?.[0]?.imageUrl || ""})`,
                   backgroundSize: "cover",
@@ -301,13 +301,20 @@ export default function HomePage() {
             })}
           </div>
           <div className="flex gap-16 animate-marquee whitespace-nowrap shrink-0 pr-16" style={{ animationDuration: "25s" }} aria-hidden="true">
-            {certEntries.map(({ key, label }, idx) =>
-              s(settings, key) ? (
-                <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
+            {certEntries.map(({ key, label }, idx) => {
+              const isIso = label.toUpperCase().includes("ISO");
+              return s(settings, key) ? (
+                isIso ? (
+                  <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity" style={{ background: "#FFFFFF", width: "56px", height: "56px", padding: "3px" }}>
+                    <img src={s(settings, key)} alt={label} className="w-full h-full object-contain rounded-full" />
+                  </div>
+                ) : (
+                  <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
+                )
               ) : (
                 <CertLogo key={idx} label={label} className="h-14 opacity-70 hover:opacity-100 transition-opacity" />
-              )
-            )}
+              );
+            })}
           </div>
         </div>
       </section>

@@ -94,7 +94,7 @@ model Product {
   description      String?
   shortDescription String?          @map("short_description")
   sku              String           @unique @db.VarChar(60)
-  hsnCode          String           @default("3919") @map("hsn_code") @db.VarChar(10)
+  hsnCode          String           @default("2106") @map("hsn_code") @db.VarChar(10)
   brand            String?          @db.VarChar(100)
   unit             String           @default("NOS") @db.VarChar(20)
   basePrice        Decimal          @map("base_price") @db.Decimal(10, 2)
@@ -232,7 +232,7 @@ model OrderItem {
   variantId Int?            @map("variant_id")
   qty       Int
   unitPrice Decimal         @map("unit_price") @db.Decimal(10, 2)
-  hsnCode   String          @default("3919") @map("hsn_code") @db.VarChar(10)
+  hsnCode   String          @default("2106") @map("hsn_code") @db.VarChar(10)
   order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product         @relation(fields: [productId], references: [id])
   variant   ProductVariant? @relation(fields: [variantId], references: [id])

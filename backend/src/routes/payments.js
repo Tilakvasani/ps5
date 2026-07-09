@@ -6,11 +6,6 @@ const { authUser } = require("../middleware/auth");
 const { generateInvoiceNumber } = require("../utils/orderNumber");
 const baselinker = require("../utils/baselinker");
 
-const razorpay = new Razorpay({
-  key_id:     process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
-
 // POST /api/payments/create-razorpay-order
 router.post("/create-razorpay-order", authUser, async (req, res) => {
   const { orderId } = req.body;
@@ -24,6 +19,23 @@ router.post("/create-razorpay-order", authUser, async (req, res) => {
     return res.status(400).json({ error: "Amount must be at least 100 paise (1 INR)" });
   }
 
+  // Fetch store settings for Razorpay credentials
+  const settingRows = await prisma.setting.findMany();
+  const settings = {};
+  settingRows.forEach(r => { settings[r.key] = r.value; });
+
+  const keyId = settings.razorpay_key_id || process.env.RAZORPAY_KEY_ID;
+  const keySecret = settings.razorpay_key_secret || process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    return res.status(500).json({ error: "Razorpay credentials are not configured" });
+  }
+
+  const razorpay = new Razorpay({
+    key_id: keyId,
+    key_secret: keySecret,
+  });
+
   try {
     const rzpOrder = await razorpay.orders.create({
       amount:   amountPaise, // paise
@@ -36,7 +48,7 @@ router.post("/create-razorpay-order", authUser, async (req, res) => {
       razorpayOrderId: rzpOrder.id,
       amount: rzpOrder.amount,
       currency: rzpOrder.currency,
-      keyId: process.env.RAZORPAY_KEY_ID
+      keyId: keyId
     });
   } catch (err) {
     console.error("Razorpay Order Creation Error:", err);
@@ -52,9 +64,20 @@ router.post("/verify", authUser, async (req, res) => {
     return res.status(400).json({ error: "Missing required verification fields" });
   }
 
+  // Fetch store settings for Razorpay credentials
+  const settingRows = await prisma.setting.findMany();
+  const settings = {};
+  settingRows.forEach(r => { settings[r.key] = r.value; });
+
+  const keySecret = settings.razorpay_key_secret || process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keySecret) {
+    return res.status(500).json({ error: "Razorpay client secret is not configured" });
+  }
+
   // Verify Razorpay signature
   const expectedSig = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .createHmac("sha256", keySecret)
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
     .digest("hex");
 

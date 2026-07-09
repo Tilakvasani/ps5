@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { Search, Package, MapPin, Truck, CheckCircle } from "lucide-react";
+import { Search, Package, MapPin, Truck, CheckCircle, Share2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { API_URL } from "@/lib/api";
@@ -13,17 +13,12 @@ export default function TrackOrderPage() {
   const [order, setOrder] = useState<any>(null);
   const [searched, setSearched] = useState(false);
 
-  const handleTrack = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!orderNumber.trim()) {
-      toast.error("Please enter a valid order number");
-      return;
-    }
+  const autoTrack = async (code: string) => {
     setLoading(true);
     setOrder(null);
     setSearched(false);
     try {
-      const trimmedNum = orderNumber.trim().toUpperCase();
+      const trimmedNum = code.trim().toUpperCase();
       const res = await fetch(`${API_URL}/api/orders/track/${trimmedNum}`);
       if (!res.ok) {
         throw new Error(res.status === 404 ? "Order not found" : "Failed to fetch order");
@@ -35,6 +30,34 @@ export default function TrackOrderPage() {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("order") || params.get("code") || "";
+      if (code) {
+        setOrderNumber(code);
+        autoTrack(code);
+      }
+    }
+  }, []);
+
+  const handleTrack = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!orderNumber.trim()) {
+      toast.error("Please enter a valid order number");
+      return;
+    }
+    await autoTrack(orderNumber);
+  };
+
+  const handleShare = () => {
+    if (typeof window !== "undefined") {
+      const shareUrl = `${window.location.origin}${window.location.pathname}`;
+      navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied to clipboard! 🔗");
     }
   };
 
@@ -77,9 +100,25 @@ export default function TrackOrderPage() {
             <span className="inline-block zbadge mb-4" style={{ background: "#0C1E39", color: "#FFFFFF", fontSize: "10px", letterSpacing: "1.2px" }}>
               SHIPMENT STATUS
             </span>
-            <h1 className="text-4xl md:text-5xl font-black mb-3 text-[#0C1E39]" style={{ letterSpacing: "-0.04em" }}>
-              Track Your <span style={{ color: "var(--or)" }}>Order</span>
-            </h1>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-3">
+              <h1 className="text-4xl md:text-5xl font-black text-[#0C1E39]" style={{ letterSpacing: "-0.04em" }}>
+                Track Your <span style={{ color: "var(--or)" }}>Order</span>
+              </h1>
+              <button 
+                onClick={handleShare} 
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold hover:opacity-85 transition-opacity shrink-0" 
+                style={{ borderColor: "#E2E8F0", color: "#0C1E39", background: "#FFFFFF" }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+                Share
+              </button>
+            </div>
             <p className="text-sm max-w-md mx-auto text-[#4A5568] font-medium">
               Enter your Zupwell Order Number (e.g. ZW1001) below to view delivery updates.
             </p>
