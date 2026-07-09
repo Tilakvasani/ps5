@@ -43,7 +43,6 @@ export default function AboutPage() {
     return () => window.removeEventListener("storage", onBust);
   }, []);
 
-  const { raw: settingsRaw } = fetchSettings ? useSettings() : { raw: {} };
 
   // Parse dynamic JSON settings or fallback
   let whyItems = [

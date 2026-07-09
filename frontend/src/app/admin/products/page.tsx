@@ -29,8 +29,8 @@ export default function AdminProductsPage() {
   const handleDelete = async (id: number, name: string) => {
     if (!confirm(`Delete "${name}"?`)) return;
     try {
-      await adminApi.deleteProduct(id);
-      toast.success("Product deleted");
+      const res = await adminApi.deleteProduct(id);
+      toast.success(res.message || "Product deleted");
       fetchProducts();
     } catch (err: any) { toast.error(err.message); }
   };

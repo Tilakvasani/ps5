@@ -1,10 +1,436 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Save, Upload, X } from "lucide-react";
+import { 
+  Save, Upload, X, Globe, Mail, ShieldAlert, 
+  Award, FileText, Share2, HelpCircle, Key, CreditCard, Lock, Settings 
+} from "lucide-react";
 import { adminApi } from "@/lib/api";
 import { invalidateSettingsCache } from "@/lib/useSettings";
 import toast from "react-hot-toast";
+
+// ── SUB-EDITORS FOR JSON LISTS ─────────────────────────────────────────────
+
+// 1. Editor for Title-Description pair list (special features, pillars)
+function TitleDescListEditor({ 
+  value, 
+  onChange, 
+  placeholderTitle = "Title", 
+  placeholderDesc = "Description" 
+}: { 
+  value: string; 
+  onChange: (val: string) => void; 
+  placeholderTitle?: string; 
+  placeholderDesc?: string; 
+}) {
+  let list: { title: string; desc: string }[] = [];
+  try {
+    list = JSON.parse(value || "[]");
+  } catch (e) {}
+
+  const update = (newList: any[]) => {
+    onChange(JSON.stringify(newList, null, 2));
+  };
+
+  return (
+    <div className="space-y-3 p-4 rounded-xl border bg-gray-50/30" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+      {list.map((item, idx) => (
+        <div key={idx} className="flex gap-3 items-start relative p-4 rounded-xl border bg-white" style={{ borderColor: "rgba(12, 30, 57, 0.06)", boxShadow: "0 2px 8px rgba(12,30,57,0.01)" }}>
+          <div className="flex-1 space-y-2">
+            <input
+              type="text"
+              value={item.title || ""}
+              onChange={e => {
+                const copy = [...list];
+                copy[idx] = { ...copy[idx], title: e.target.value };
+                update(copy);
+              }}
+              placeholder={placeholderTitle}
+              className="zinp text-sm py-1.5 px-3"
+              style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)" }}
+            />
+            <textarea
+              value={item.desc || ""}
+              onChange={e => {
+                const copy = [...list];
+                copy[idx] = { ...copy[idx], desc: e.target.value };
+                update(copy);
+              }}
+              placeholder={placeholderDesc}
+              className="zinp text-sm py-1.5 px-3 h-16 resize-none"
+              style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)" }}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const copy = list.filter((_, i) => i !== idx);
+              update(copy);
+            }}
+            className="p-1.5 rounded-full hover:bg-rose-500/10 text-rose-500 transition-colors"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => update([...list, { title: "", desc: "" }])}
+        className="w-full border border-dashed py-2.5 rounded-xl text-xs font-bold text-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10 transition-colors"
+      >
+        + Add Item
+      </button>
+    </div>
+  );
+}
+
+// 2. Editor for String array list (future pipeline)
+function StringListEditor({ 
+  value, 
+  onChange, 
+  placeholder = "Pipeline Item" 
+}: { 
+  value: string; 
+  onChange: (val: string) => void; 
+  placeholder?: string; 
+}) {
+  let list: string[] = [];
+  try {
+    list = JSON.parse(value || "[]");
+  } catch (e) {}
+
+  const update = (newList: string[]) => {
+    onChange(JSON.stringify(newList, null, 2));
+  };
+
+  return (
+    <div className="space-y-3 p-4 rounded-xl border bg-gray-50/30" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+      {list.map((item, idx) => (
+        <div key={idx} className="flex gap-2 items-center">
+          <input
+            type="text"
+            value={item || ""}
+            onChange={e => {
+              const copy = [...list];
+              copy[idx] = e.target.value;
+              update(copy);
+            }}
+            placeholder={placeholder}
+            className="zinp text-sm py-1.5 px-3 flex-1"
+            style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)" }}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const copy = list.filter((_, i) => i !== idx);
+              update(copy);
+            }}
+            className="p-1.5 rounded-full hover:bg-rose-500/10 text-rose-500 transition-colors shrink-0"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => update([...list, ""])}
+        className="w-full border border-dashed py-2.5 rounded-xl text-xs font-bold text-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10 transition-colors"
+      >
+        + Add Item
+      </button>
+    </div>
+  );
+}
+
+// 3. Editor for structured nested FAQ JSON List
+function FaqsListEditor({ value, onChange }: { value: string; onChange: (val: string) => void }) {
+  let list: { category: string; emoji: string; questions: { q: string; a: string }[] }[] = [];
+  try {
+    list = JSON.parse(value || "[]");
+  } catch (e) {}
+
+  const update = (newList: any[]) => {
+    onChange(JSON.stringify(newList, null, 2));
+  };
+
+  return (
+    <div className="space-y-4 p-4 rounded-xl border bg-gray-50/30" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+      {list.map((cat, catIdx) => (
+        <div key={catIdx} className="p-4 rounded-xl border bg-white relative space-y-3" style={{ borderColor: "rgba(12, 30, 57, 0.08)", boxShadow: "0 4px 12px rgba(12,30,57,0.01)" }}>
+          <button
+            type="button"
+            onClick={() => {
+              const copy = list.filter((_, i) => i !== catIdx);
+              update(copy);
+            }}
+            className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-rose-500/10 text-rose-500 transition-colors"
+          >
+            <X size={14} />
+          </button>
+          
+          <div className="grid grid-cols-3 gap-3">
+            <div className="col-span-2">
+              <label className="text-xs font-bold mb-1 block text-slate-500 uppercase tracking-wider">Category Name</label>
+              <input
+                type="text"
+                value={cat.category || ""}
+                onChange={e => {
+                  const copy = [...list];
+                  copy[catIdx] = { ...copy[catIdx], category: e.target.value };
+                  update(copy);
+                }}
+                placeholder="e.g. Product Related"
+                className="zinp text-xs py-1.5 px-3"
+                style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)" }}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold mb-1 block text-slate-500 uppercase tracking-wider">Emoji</label>
+              <input
+                type="text"
+                value={cat.emoji || ""}
+                onChange={e => {
+                  const copy = [...list];
+                  copy[catIdx] = { ...copy[catIdx], emoji: e.target.value };
+                  update(copy);
+                }}
+                placeholder="e.g. 📦"
+                className="zinp text-xs py-1.5 px-3"
+                style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)" }}
+              />
+            </div>
+          </div>
+
+          <div className="pl-4 border-l-2 border-orange-500/20 space-y-3 mt-4">
+            <label className="text-xs font-bold text-[#0C1E39] uppercase tracking-wide block">Questions & Answers</label>
+            {(cat.questions || []).map((q, qIdx) => (
+              <div key={qIdx} className="p-3 rounded-lg border bg-[#F8F8F8] relative space-y-2" style={{ borderColor: "rgba(12, 30, 57, 0.04)" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const copy = [...list];
+                    copy[catIdx].questions = copy[catIdx].questions.filter((_: any, i: number) => i !== qIdx);
+                    update(copy);
+                  }}
+                  className="absolute top-1 right-1 p-1 rounded-full hover:bg-rose-500/10 text-rose-500 transition-colors"
+                >
+                  <X size={12} />
+                </button>
+                <input
+                  type="text"
+                  value={q.q || ""}
+                  onChange={e => {
+                    const copy = [...list];
+                    copy[catIdx].questions[qIdx] = { ...copy[catIdx].questions[qIdx], q: e.target.value };
+                    update(copy);
+                  }}
+                  placeholder="Question text"
+                  className="zinp text-xs py-1.5 px-3 bg-white"
+                  style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.04)" }}
+                />
+                <textarea
+                  value={q.a || ""}
+                  onChange={e => {
+                    const copy = [...list];
+                    copy[catIdx].questions[qIdx] = { ...copy[catIdx].questions[qIdx], a: e.target.value };
+                    update(copy);
+                  }}
+                  placeholder="Answer text"
+                  className="zinp text-xs py-1.5 px-3 h-16 resize-none bg-white"
+                  style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.04)" }}
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                const copy = [...list];
+                if (!copy[catIdx].questions) copy[catIdx].questions = [];
+                copy[catIdx].questions.push({ q: "", a: "" });
+                update(copy);
+              }}
+              className="border border-dashed py-1.5 px-3 rounded-lg text-[10px] font-bold text-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10 transition-colors"
+            >
+              + Add Question Card
+            </button>
+          </div>
+        </div>
+      ))}
+      
+      <button
+        type="button"
+        onClick={() => {
+          update([...list, { category: "", emoji: "", questions: [] }]);
+        }}
+        className="w-full border border-dashed py-2.5 rounded-xl text-xs font-bold text-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10 transition-colors"
+      >
+        + Add FAQ Category Group
+      </button>
+    </div>
+  );
+}
+
+// 4. Editor for Policy page sections JSON list
+function PolicySectionsEditor({ value, onChange }: { value: string; onChange: (val: string) => void }) {
+  let list: { title: string; body: string | string[] }[] = [];
+  try {
+    list = JSON.parse(value || "[]");
+  } catch (e) {}
+
+  const update = (newList: any[]) => {
+    onChange(JSON.stringify(newList, null, 2));
+  };
+
+  return (
+    <div className="space-y-4 p-4 rounded-xl border bg-gray-50/30" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+      {list.map((sec, idx) => {
+        const isBulletPoints = Array.isArray(sec.body);
+        
+        return (
+          <div key={idx} className="p-4 rounded-xl border bg-white relative space-y-3" style={{ borderColor: "rgba(12, 30, 57, 0.08)", boxShadow: "0 4px 12px rgba(12,30,57,0.01)" }}>
+            <button
+              type="button"
+              onClick={() => {
+                const copy = list.filter((_, i) => i !== idx);
+                update(copy);
+              }}
+              className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-rose-500/10 text-rose-500 transition-colors"
+            >
+              <X size={14} />
+            </button>
+
+            <div>
+              <label className="text-xs font-bold mb-1 block text-slate-500 uppercase tracking-wider">Section Title</label>
+              <input
+                type="text"
+                value={sec.title || ""}
+                onChange={e => {
+                  const copy = [...list];
+                  copy[idx] = { ...copy[idx], title: e.target.value };
+                  update(copy);
+                }}
+                placeholder="e.g. 1. Information We Collect"
+                className="zinp text-xs py-1.5 px-3"
+                style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)" }}
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs font-bold block text-slate-500 uppercase tracking-wider">Section Content</label>
+                <div className="flex gap-1 bg-slate-100 p-0.5 rounded-lg border">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const copy = [...list];
+                      copy[idx] = { ...copy[idx], body: [""] };
+                      update(copy);
+                    }}
+                    className="text-[10px] font-bold px-2.5 py-1 rounded-md transition-all"
+                    style={{
+                      background: isBulletPoints ? "#FFFFFF" : "transparent",
+                      color: isBulletPoints ? "var(--or)" : "#0C1E39",
+                      boxShadow: isBulletPoints ? "0 1px 4px rgba(12,30,57,0.06)" : "none"
+                    }}
+                  >
+                    Bullets
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const copy = [...list];
+                      copy[idx] = { ...copy[idx], body: "" };
+                      update(copy);
+                    }}
+                    className="text-[10px] font-bold px-2.5 py-1 rounded-md transition-all"
+                    style={{
+                      background: !isBulletPoints ? "#FFFFFF" : "transparent",
+                      color: !isBulletPoints ? "var(--or)" : "#0C1E39",
+                      boxShadow: !isBulletPoints ? "0 1px 4px rgba(12,30,57,0.06)" : "none"
+                    }}
+                  >
+                    Paragraph
+                  </button>
+                </div>
+              </div>
+
+              {isBulletPoints ? (
+                <div className="pl-4 border-l-2 border-orange-500/20 space-y-2 mt-2">
+                  {(sec.body as string[]).map((bullet, bulletIdx) => (
+                    <div key={bulletIdx} className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={bullet || ""}
+                        onChange={e => {
+                          const copy = [...list];
+                          const newBullets = [...(copy[idx].body as string[])];
+                          newBullets[bulletIdx] = e.target.value;
+                          copy[idx] = { ...copy[idx], body: newBullets };
+                          update(copy);
+                        }}
+                        placeholder="Bullet list item"
+                        className="zinp text-xs py-1.5 px-3 bg-[#F8F8F8]"
+                        style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.04)" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const copy = [...list];
+                          const newBullets = (copy[idx].body as string[]).filter((_, i) => i !== bulletIdx);
+                          copy[idx] = { ...copy[idx], body: newBullets };
+                          update(copy);
+                        }}
+                        className="p-1.5 rounded-full hover:bg-rose-500/10 text-rose-500 transition-colors shrink-0"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const copy = [...list];
+                      const newBullets = [...(copy[idx].body as string[]), ""];
+                      copy[idx] = { ...copy[idx], body: newBullets };
+                      update(copy);
+                    }}
+                    className="border border-dashed py-1.5 px-3 rounded-lg text-[10px] font-bold text-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10 transition-colors"
+                  >
+                    + Add Bullet Item
+                  </button>
+                </div>
+              ) : (
+                <textarea
+                  value={(sec.body as string) || ""}
+                  onChange={e => {
+                    const copy = [...list];
+                    copy[idx] = { ...copy[idx], body: e.target.value };
+                    update(copy);
+                  }}
+                  placeholder="Type policy section content here..."
+                  className="zinp text-xs py-2 px-3 h-24 resize-y"
+                  style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)" }}
+                />
+              )}
+            </div>
+          </div>
+        );
+      })}
+
+      <button
+        type="button"
+        onClick={() => {
+          update([...list, { title: "", body: "" }]);
+        }}
+        className="w-full border border-dashed py-2.5 rounded-xl text-xs font-bold text-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10 transition-colors"
+      >
+        + Add Policy Section Block
+      </button>
+    </div>
+  );
+}
+
+// ── REDESIGNED SETTINGS METADATA GROUPS ───────────────────────────────────
 
 const SETTING_GROUPS = [
   {
@@ -25,8 +451,8 @@ const SETTING_GROUPS = [
     keys: [
       { key: "hero_title",        label: "Hero Title (English)", type: "text" },
       { key: "hero_tagline",      label: "Hero Tagline (Gujarati/Hindi)", type: "text" },
-      { key: "hero_badge",        label: "Top Badge Text (e.g. Ahmedabad's #1 Health Supplement Store)", type: "text" },
-      { key: "hero_subtext",      label: "Hero Subtext (below headline)", type: "textarea" },
+      { key: "hero_badge",        label: "Top Badge Text", type: "text" },
+      { key: "hero_subtext",      label: "Hero Subtext", type: "textarea" },
       { key: "hero_stat1_value",  label: "Stat 1 Value (e.g. 200+)", type: "text" },
       { key: "hero_stat1_label",  label: "Stat 1 Label (e.g. Products)", type: "text" },
       { key: "hero_stat2_value",  label: "Stat 2 Value (e.g. 50K+)", type: "text" },
@@ -41,7 +467,7 @@ const SETTING_GROUPS = [
   },
   {
     label: "Home Page — Why Zupwell Features",
-    desc: "The 4 feature cards (icon, title, description). Icons are fixed — only text changes.",
+    desc: "The 4 feature cards (icon, title, description). Icons are fixed.",
     keys: [
       { key: "feature1_title", label: "Feature 1 Title", type: "text" },
       { key: "feature1_desc",  label: "Feature 1 Description", type: "textarea" },
@@ -55,7 +481,7 @@ const SETTING_GROUPS = [
   },
   {
     label: "Home Page — Certificate Logos",
-    desc: "Upload or paste image URLs for FSSAI, ISO, GMP, HACCP logos",
+    desc: "Upload or paste image URLs for official logo icons",
     keys: [
       { key: "cert_fssai_logo", label: "FSSAI Logo",  type: "image" },
       { key: "cert_iso_logo",   label: "ISO Logo",    type: "image" },
@@ -75,7 +501,7 @@ const SETTING_GROUPS = [
   },
   {
     label: "About Us Page",
-    desc: "Content for the About Us page sections",
+    desc: "Content and structural data for the About Us page",
     keys: [
       { key: "about_punchline",    label: "Punchline", type: "text" },
       { key: "about_description",  label: "About Zupwell (short paragraph)", type: "textarea" },
@@ -83,21 +509,15 @@ const SETTING_GROUPS = [
       { key: "about_mission",      label: "Our Mission", type: "textarea" },
       { key: "about_vision",       label: "Our Vision", type: "textarea" },
       { key: "about_future",       label: "Future of Zupwell", type: "textarea" },
-      { key: "about_why1_title",   label: "Why Zupwell — Point 1 Title", type: "text" },
-      { key: "about_why1_desc",    label: "Why Zupwell — Point 1 Description", type: "textarea" },
-      { key: "about_why2_title",   label: "Why Zupwell — Point 2 Title", type: "text" },
-      { key: "about_why2_desc",    label: "Why Zupwell — Point 2 Description", type: "textarea" },
-      { key: "about_why3_title",   label: "Why Zupwell — Point 3 Title", type: "text" },
-      { key: "about_why3_desc",    label: "Why Zupwell — Point 3 Description", type: "textarea" },
       { key: "about_story_badge",  label: "Story Section Badge", type: "text" },
       { key: "about_story_title",  label: "Story Section Title", type: "text" },
       { key: "about_why_title",    label: "Why Section Title", type: "text" },
       { key: "about_why_subtitle", label: "Why Section Subtitle", type: "text" },
       { key: "about_future_title", label: "Future Section Title", type: "text" },
       { key: "about_cta_title",    label: "CTA Section Title", type: "text" },
-      { key: "about_why_special_json", label: "Product Special Features (JSON list of {title, desc})", type: "json" },
-      { key: "about_pillars_json", label: "Core Pillars List (JSON list of {title, desc})", type: "json" },
-      { key: "about_future_pipeline_json", label: "Future Pipeline Products (JSON list of strings)", type: "json" },
+      { key: "about_why_special_json", label: "Product Special Features List", type: "special_list" },
+      { key: "about_pillars_json", label: "Core Pillars List", type: "pillars_list" },
+      { key: "about_future_pipeline_json", label: "Future Pipeline Products List", type: "pipeline_list" },
     ],
   },
   {
@@ -150,7 +570,7 @@ const SETTING_GROUPS = [
     label: "Contact Us Page",
     desc: "Content for Contact Us and Distributor Inquiry section",
     keys: [
-      { key: "contact_whatsapp",      label: "WhatsApp Number (with country code, e.g. 919876543210)", type: "text" },
+      { key: "contact_whatsapp",      label: "WhatsApp Number (with country code, e.g. 916355466208)", type: "text" },
       { key: "contact_support_email", label: "Support Email", type: "email" },
       { key: "contact_info_email",    label: "Info Email", type: "email" },
       { key: "contact_instagram",     label: "Instagram URL", type: "text" },
@@ -166,54 +586,54 @@ const SETTING_GROUPS = [
   },
   {
     label: "FAQs Page",
-    desc: "Frequently Asked Questions configuration",
+    desc: "Frequently Asked Questions configurations",
     keys: [
       { key: "faqs_hero_badge", label: "Hero Badge", type: "text" },
       { key: "faqs_hero_title", label: "Hero Title", type: "text" },
       { key: "faqs_hero_subtext", label: "Hero Subtext", type: "textarea" },
       { key: "faqs_footer_title", label: "Footer Title (still have questions?)", type: "text" },
       { key: "faqs_footer_subtext", label: "Footer Subtext", type: "textarea" },
-      { key: "faqs_list_json", label: "FAQs List (JSON Format)", type: "json" },
+      { key: "faqs_list_json", label: "FAQs Nested Accordions List", type: "faqs_list" },
     ],
   },
   {
     label: "Legal Policy Pages",
-    desc: "Content and sections for all 5 legal policies (Privacy, Terms, Refund, Shipping, Disclaimer)",
+    desc: "Configure content for all 5 legal policies",
     keys: [
       // Privacy Policy
       { key: "policy_privacy_badge", label: "Privacy Policy — Badge", type: "text" },
       { key: "policy_privacy_title", label: "Privacy Policy — Title", type: "text" },
       { key: "policy_privacy_subtitle", label: "Privacy Policy — Subtitle", type: "textarea" },
       { key: "policy_privacy_updated", label: "Privacy Policy — Last Updated", type: "text" },
-      { key: "policy_privacy_sections_json", label: "Privacy Policy — Sections (JSON List of {title, body})", type: "json" },
+      { key: "policy_privacy_sections_json", label: "Privacy Policy — Sections List", type: "policy_sections_list" },
 
       // Terms of Service
       { key: "policy_terms_badge", label: "Terms of Service — Badge", type: "text" },
       { key: "policy_terms_title", label: "Terms of Service — Title", type: "text" },
       { key: "policy_terms_subtitle", label: "Terms of Service — Subtitle", type: "textarea" },
       { key: "policy_terms_updated", label: "Terms of Service — Last Updated", type: "text" },
-      { key: "policy_terms_sections_json", label: "Terms of Service — Sections (JSON List of {title, body})", type: "json" },
+      { key: "policy_terms_sections_json", label: "Terms of Service — Sections List", type: "policy_sections_list" },
 
       // Refund Policy
       { key: "policy_refund_badge", label: "Refund Policy — Badge", type: "text" },
       { key: "policy_refund_title", label: "Refund Policy — Title", type: "text" },
       { key: "policy_refund_subtitle", label: "Refund Policy — Subtitle", type: "textarea" },
       { key: "policy_refund_updated", label: "Refund Policy — Last Updated", type: "text" },
-      { key: "policy_refund_sections_json", label: "Refund Policy — Sections (JSON List of {title, body})", type: "json" },
+      { key: "policy_refund_sections_json", label: "Refund Policy — Sections List", type: "policy_sections_list" },
 
       // Shipping Policy
       { key: "policy_shipping_badge", label: "Shipping Policy — Badge", type: "text" },
       { key: "policy_shipping_title", label: "Shipping Policy — Title", type: "text" },
       { key: "policy_shipping_subtitle", label: "Shipping Policy — Subtitle", type: "textarea" },
       { key: "policy_shipping_updated", label: "Shipping Policy — Last Updated", type: "text" },
-      { key: "policy_shipping_sections_json", label: "Shipping Policy — Sections (JSON List of {title, body})", type: "json" },
+      { key: "policy_shipping_sections_json", label: "Shipping Policy — Sections List", type: "policy_sections_list" },
 
       // Legal Disclaimer
       { key: "policy_disclaimer_badge", label: "Legal Disclaimer — Badge", type: "text" },
       { key: "policy_disclaimer_title", label: "Legal Disclaimer — Title", type: "text" },
       { key: "policy_disclaimer_subtitle", label: "Legal Disclaimer — Subtitle", type: "textarea" },
       { key: "policy_disclaimer_updated", label: "Legal Disclaimer — Last Updated", type: "text" },
-      { key: "policy_disclaimer_sections_json", label: "Legal Disclaimer — Sections (JSON List of {title, body})", type: "json" },
+      { key: "policy_disclaimer_sections_json", label: "Legal Disclaimer — Sections List", type: "policy_sections_list" },
     ],
   },
   {
@@ -269,58 +689,22 @@ const SETTING_GROUPS = [
       { key: "certifications_list_json", label: "Manage Certificates List", type: "certifications_list" },
     ],
   },
-  {
-    label: "Science & Quality Page Settings",
-    desc: "Content and titles for the Science & Quality page",
-    keys: [
-      { key: "science_hero_badge", label: "Hero Badge", type: "text" },
-      { key: "science_hero_title", label: "Hero Title", type: "text" },
-      { key: "science_hero_subtext", label: "Hero Subtext", type: "textarea" },
-      { key: "science_process_badge", label: "Process Badge", type: "text" },
-      { key: "science_process_title", label: "Process Title", type: "textarea" },
-      { key: "science_process1_title", label: "Process 1 — Sourcing Title", type: "text" },
-      { key: "science_process1_desc", label: "Process 1 — Sourcing Description", type: "textarea" },
-      { key: "science_process2_title", label: "Process 2 — Technology Title", type: "text" },
-      { key: "science_process2_desc", label: "Process 2 — Technology Description", type: "textarea" },
-      { key: "science_cert_badge", label: "Quality/Safety Badge", type: "text" },
-      { key: "science_cert_title", label: "Quality/Safety Title", type: "text" },
-      { key: "science_cert_desc", label: "Quality/Safety Description", type: "textarea" },
-      { key: "science_cert1_title", label: "Certificate 1 — GMP/ISO Title", type: "text" },
-      { key: "science_cert1_desc", label: "Certificate 1 — GMP/ISO Description", type: "textarea" },
-      { key: "science_cert2_title", label: "Certificate 2 — FSSAI Title", type: "text" },
-      { key: "science_cert2_desc", label: "Certificate 2 — FSSAI Description", type: "textarea" },
-      { key: "science_cert3_title", label: "Certificate 3 — Lab Tested Title", type: "text" },
-      { key: "science_cert3_desc", label: "Certificate 3 — Lab Tested Description", type: "textarea" },
-      { key: "science_clean_badge", label: "Clean Label Badge", type: "text" },
-      { key: "science_clean_title", label: "Clean Label Title", type: "text" },
-      { key: "science_clean_desc", label: "Clean Label Description", type: "textarea" },
-      { key: "science_clean1_label", label: "Clean Feature 1 — Title", type: "text" },
-      { key: "science_clean1_sub", label: "Clean Feature 1 — Description", type: "textarea" },
-      { key: "science_clean2_label", label: "Clean Feature 2 — Title", type: "text" },
-      { key: "science_clean2_sub", label: "Clean Feature 2 — Description", type: "textarea" },
-      { key: "science_clean3_label", label: "Clean Feature 3 — Title", type: "text" },
-      { key: "science_clean3_sub", label: "Clean Feature 3 — Description", type: "textarea" },
-      { key: "science_tube_title", label: "Tube Mockup Card Title", type: "textarea" },
-      { key: "science_tube_desc", label: "Tube Mockup Card Description", type: "textarea" },
-      { key: "science_tube_f1_title", label: "Tube Feature 1 — Title", type: "text" },
-      { key: "science_tube_f1_desc", label: "Tube Feature 1 — Description", type: "text" },
-      { key: "science_tube_f2_title", label: "Tube Feature 2 — Title", type: "text" },
-      { key: "science_tube_f2_desc", label: "Tube Feature 2 — Description", type: "text" },
-      { key: "science_tube_f3_title", label: "Tube Feature 3 — Title", type: "text" },
-      { key: "science_tube_f3_desc", label: "Tube Feature 3 — Description", type: "text" },
-      { key: "science_tube_f4_title", label: "Tube Feature 4 — Title", type: "text" },
-      { key: "science_tube_f4_desc", label: "Tube Feature 4 — Description", type: "text" },
-      { key: "science_cta_title", label: "CTA strip Title", type: "text" },
-      { key: "science_cta_subtext", label: "CTA strip Subtext", type: "textarea" },
-      { key: "science_cta_btn", label: "CTA Button Text", type: "text" },
-    ],
-  },
+];
+
+const TABS = [
+  { id: "general", label: "General & Orders", desc: "Store information, social links, and order fees", icon: Globe, groups: ["Store Information", "Social Media", "Order Settings"] },
+  { id: "payments", label: "Payment & SMTP", desc: "Razorpay keys and SMTP mail servers configuration", icon: CreditCard, groups: ["Razorpay", "Email (SMTP)"] },
+  { id: "home", label: "Home Page Details", desc: "Hero, stats, features, and certifications logos", icon: Settings, groups: ["Home Page — Hero Section", "Home Page — Why Zupwell Features", "Home Page — Certificate Logos", "Home Page — Founder's Message"] },
+  { id: "storefront", label: "Storefront Pages", desc: "Configuration for Shop, Science & Certifications", icon: Award, groups: ["Shop Page Settings", "Certifications Settings", "Science Page"] },
+  { id: "inner", label: "Inner Page Content", desc: "Editable lists for About Us details and FAQs page", icon: HelpCircle, groups: ["About Us Page", "FAQs Page"] },
+  { id: "legal", label: "Legal Policies", desc: "Manage detailed sections for all 5 legal policies", icon: FileText, groups: ["Legal Policy Pages"] },
 ];
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [loading, setLoading]   = useState(true);
   const [saving, setSaving]     = useState(false);
+  const [activeTab, setActiveTab] = useState("general");
 
   useEffect(() => {
     adminApi.getSettings().then((data: any[]) => {
@@ -343,256 +727,333 @@ export default function AdminSettingsPage() {
   };
 
   if (loading) return (
-    <div className="flex justify-center py-20">
-      <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)", borderTopColor: "transparent" }} />
+    <div className="flex justify-center py-32">
+      <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin animate-duration-700" style={{ borderColor: "var(--or)", borderTopColor: "transparent" }} />
     </div>
   );
 
-  return (
-    <div>
-      <h1 className="text-3xl font-black mb-2" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>Settings</h1>
-      <p className="text-sm mb-6" style={{ color: "#4A5568" }}>All changes here reflect live on the website. No code changes needed.</p>
-      <form onSubmit={handleSave}>
-        <div className="space-y-6 max-w-3xl">
-          {SETTING_GROUPS.map(group => (
-            <div key={group.label} className="zcard" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
-              <div className="mb-4 pb-3 border-b" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
-                <h2 className="font-bold text-lg" style={{ color: "#0C1E39" }}>{group.label}</h2>
-                {(group as any).desc && (
-                  <p className="text-xs mt-1" style={{ color: "#4A5568" }}>{(group as any).desc}</p>
-                )}
-              </div>
-              <div className="space-y-3">
-                {group.keys.map(({ key, label, type }) => (
-                  <div key={key}>
-                    <label className="zlabel flex mb-1" style={{ color: "#0C1E39" }}>{label}</label>
-                    {type === "certifications_list" ? (
-                      <div className="space-y-4 p-4 rounded-xl border bg-gray-50/50" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
-                        {(() => {
-                          let list: any[] = [];
-                          try {
-                            list = JSON.parse(settings[key] || "[]");
-                          } catch (e) {}
-                          
-                          const updateList = (newList: any[]) => {
-                            setSettings(s => ({ ...s, [key]: JSON.stringify(newList, null, 2) }));
-                          };
+  const activeTabMeta = TABS.find(t => t.id === activeTab) || TABS[0];
+  const activeGroups = SETTING_GROUPS.filter(g => activeTabMeta.groups.includes(g.label));
 
-                          return (
-                            <div className="space-y-4">
-                              {list.map((item, idx) => (
-                                <div key={idx} className="p-4 rounded-xl border relative space-y-3 bg-[#F8F8F8]" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+  return (
+    <div className="min-h-screen">
+      <div className="mb-8 border-b pb-5" style={{ borderColor: "rgba(12,30,57,0.08)" }}>
+        <h1 className="text-3xl font-black text-[#0C1E39] tracking-tight flex items-center gap-2">
+          <span>Settings Dashboard</span>
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">Configure global variables, inner pages content, and API credentials instantly.</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Tab switcher panel on Left */}
+        <aside className="lg:col-span-3 space-y-1">
+          {TABS.map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className="w-full flex items-start gap-3 p-3.5 rounded-xl text-left transition-all duration-300 relative overflow-hidden group"
+                style={{
+                  background: isActive ? "rgba(255, 92, 0, 0.08)" : "transparent",
+                  border: isActive ? "1.5px solid rgba(255, 92, 0, 0.15)" : "1.5px solid transparent",
+                }}
+              >
+                {isActive && (
+                  <span className="absolute top-0 left-0 bottom-0 w-1 bg-[#FF5C00]" />
+                )}
+                <Icon 
+                  size={18} 
+                  className="mt-0.5 shrink-0 transition-transform duration-300 group-hover:scale-110" 
+                  style={{ color: isActive ? "var(--or)" : "#0C1E39" }} 
+                />
+                <div>
+                  <h3 className="font-bold text-xs uppercase tracking-wide" style={{ color: isActive ? "var(--or)" : "#0C1E39" }}>
+                    {tab.label}
+                  </h3>
+                  <p className="text-[10px] text-slate-400 mt-0.5 leading-snug line-clamp-2">
+                    {tab.desc}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </aside>
+
+        {/* Tab Content display on Right */}
+        <div className="lg:col-span-9">
+          <form onSubmit={handleSave}>
+            <div className="space-y-6">
+              
+              {activeGroups.map(group => (
+                <div key={group.label} className="zcard relative" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)", padding: '24px' }}>
+                  <div className="mb-5 pb-3.5 border-b" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+                    <h2 className="font-black text-base text-[#0C1E39]">{group.label}</h2>
+                    {(group as any).desc && (
+                      <p className="text-xs text-slate-400 mt-1">{(group as any).desc}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    {group.keys.map(({ key, label, type }) => (
+                      <div key={key}>
+                        <label className="zlabel flex mb-1.5 font-semibold text-xs text-[#0C1E39] uppercase tracking-wider opacity-85">{label}</label>
+                        
+                        {type === "certifications_list" ? (
+                          <div className="space-y-4 p-4 rounded-xl border bg-gray-50/30" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+                            {(() => {
+                              let list: any[] = [];
+                              try {
+                                list = JSON.parse(settings[key] || "[]");
+                              } catch (e) {}
+                              
+                              const updateList = (newList: any[]) => {
+                                setSettings(s => ({ ...s, [key]: JSON.stringify(newList, null, 2) }));
+                              };
+
+                              return (
+                                <div className="space-y-4">
+                                  {list.map((item, idx) => (
+                                    <div key={idx} className="p-4 rounded-xl border relative space-y-3 bg-[#FFFFFF]" style={{ borderColor: "rgba(12, 30, 57, 0.08)", boxShadow: "0 2px 8px rgba(12,30,57,0.01)" }}>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const filtered = list.filter((_, i) => i !== idx);
+                                          updateList(filtered);
+                                        }}
+                                        className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-rose-500/10 text-rose-500 transition-colors"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                          <label className="text-[10px] uppercase tracking-wider font-bold mb-1 block text-slate-400">Badge/Label</label>
+                                          <input
+                                            type="text"
+                                            value={item.label || ""}
+                                            onChange={e => {
+                                              const copy = [...list];
+                                              copy[idx] = { ...copy[idx], label: e.target.value };
+                                              updateList(copy);
+                                            }}
+                                            className="zinp text-xs py-1.5 px-3"
+                                            style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)", color: "#0C1E39" }}
+                                            placeholder="e.g. FSSAI"
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="text-[10px] uppercase tracking-wider font-bold mb-1 block text-slate-400">Official Title</label>
+                                          <input
+                                            type="text"
+                                            value={item.title || ""}
+                                            onChange={e => {
+                                              const copy = [...list];
+                                              copy[idx] = { ...copy[idx], title: e.target.value };
+                                              updateList(copy);
+                                            }}
+                                            className="zinp text-xs py-1.5 px-3"
+                                            style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)", color: "#0C1E39" }}
+                                            placeholder="e.g. Food Safety License"
+                                          />
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] uppercase tracking-wider font-bold mb-1 block text-slate-400">Description</label>
+                                        <textarea
+                                          value={item.desc || ""}
+                                          onChange={e => {
+                                            const copy = [...list];
+                                            copy[idx] = { ...copy[idx], desc: e.target.value };
+                                            updateList(copy);
+                                          }}
+                                          className="zinp text-xs py-1.5 px-3 h-14 resize-none"
+                                          style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)", color: "#0C1E39" }}
+                                          placeholder="e.g. Licensed under FSSAI regulations..."
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] uppercase tracking-wider font-bold mb-1 block text-slate-400">Certificate Image / PDF Path</label>
+                                        <div className="flex flex-col sm:flex-row gap-2 mt-1">
+                                          {item.fileUrl ? (
+                                            <div className="relative h-14 w-24 shrink-0 rounded-lg overflow-hidden border bg-white" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+                                              <img src={item.fileUrl} alt="" className="w-full h-full object-contain" />
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  const copy = [...list];
+                                                  copy[idx] = { ...copy[idx], fileUrl: "" };
+                                                  updateList(copy);
+                                                }}
+                                                className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full flex items-center justify-center bg-[#0C1E39] text-white hover:bg-rose-500 transition-colors"
+                                              >
+                                                <X size={10} />
+                                              </button>
+                                            </div>
+                                          ) : (
+                                            <label className="h-14 w-24 shrink-0 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors border border-dashed border-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10">
+                                              <Upload size={14} className="mb-0.5" style={{ color: '#FF5C00' }} />
+                                              <span className="text-[9px]" style={{ color: '#0C1E39', fontWeight: 600 }}>Upload</span>
+                                              <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={async (e) => {
+                                                  if (e.target.files && e.target.files[0]) {
+                                                    const fd = new FormData();
+                                                    fd.append("file", e.target.files[0]);
+                                                    const toastId = toast.loading("Uploading certificate...");
+                                                    try {
+                                                      const res = await adminApi.uploadSettingImage(fd);
+                                                      const copy = [...list];
+                                                      copy[idx] = { ...copy[idx], fileUrl: res.url };
+                                                      updateList(copy);
+                                                      toast.success("Uploaded successfully!", { id: toastId });
+                                                    } catch (err: any) {
+                                                      toast.error(err.message || "Upload failed", { id: toastId });
+                                                    }
+                                                  }
+                                                }}
+                                                className="hidden"
+                                              />
+                                            </label>
+                                          )}
+                                          <input
+                                            type="text"
+                                            value={item.fileUrl || ""}
+                                            onChange={e => {
+                                              const copy = [...list];
+                                              copy[idx] = { ...copy[idx], fileUrl: e.target.value };
+                                              updateList(copy);
+                                            }}
+                                            className="zinp text-xs py-1.5 px-3 flex-1"
+                                            style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)", color: "#0C1E39" }}
+                                            placeholder="Or paste file path/URL"
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      const filtered = list.filter((_, i) => i !== idx);
-                                      updateList(filtered);
+                                      updateList([...list, { label: "", title: "", desc: "", fileUrl: "" }]);
                                     }}
-                                    className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-rose-500/10 text-rose-500 transition-colors"
+                                    className="w-full border border-dashed py-2 rounded-xl text-xs font-bold text-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10 transition-colors"
                                   >
-                                    <X size={14} />
+                                    + Add Certificate Card
                                   </button>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                      <label className="text-xs font-bold mb-1 block">Badge/Label</label>
-                                      <input
-                                        type="text"
-                                        value={item.label || ""}
-                                        onChange={e => {
-                                          const copy = [...list];
-                                          copy[idx] = { ...copy[idx], label: e.target.value };
-                                          updateList(copy);
-                                        }}
-                                        className="zinp text-xs py-1.5 px-3"
-                                        style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
-                                        placeholder="e.g. FSSAI"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="text-xs font-bold mb-1 block">Official Title</label>
-                                      <input
-                                        type="text"
-                                        value={item.title || ""}
-                                        onChange={e => {
-                                          const copy = [...list];
-                                          copy[idx] = { ...copy[idx], title: e.target.value };
-                                          updateList(copy);
-                                        }}
-                                        className="zinp text-xs py-1.5 px-3"
-                                        style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
-                                        placeholder="e.g. Food Safety License"
-                                      />
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label className="text-xs font-bold mb-1 block">Description</label>
-                                    <textarea
-                                      value={item.desc || ""}
-                                      onChange={e => {
-                                        const copy = [...list];
-                                        copy[idx] = { ...copy[idx], desc: e.target.value };
-                                        updateList(copy);
-                                      }}
-                                      className="zinp text-xs py-1.5 px-3 h-14 resize-none"
-                                      style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
-                                      placeholder="e.g. Licensed under FSSAI regulations..."
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="text-xs font-bold mb-1 block">Certificate Document / Image File</label>
-                                    <div className="flex flex-col sm:flex-row gap-2 mt-1">
-                                      {item.fileUrl ? (
-                                        <div className="relative h-14 w-24 shrink-0 rounded-lg overflow-hidden border bg-white" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
-                                          <img src={item.fileUrl} alt="" className="w-full h-full object-contain" />
-                                          <button
-                                            type="button"
-                                            onClick={() => {
-                                              const copy = [...list];
-                                              copy[idx] = { ...copy[idx], fileUrl: "" };
-                                              updateList(copy);
-                                            }}
-                                            className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full flex items-center justify-center bg-[#0C1E39] text-white hover:bg-rose-500 transition-colors"
-                                          >
-                                            <X size={10} />
-                                          </button>
-                                        </div>
-                                      ) : (
-                                        <label className="h-14 w-24 shrink-0 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors border border-dashed border-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10">
-                                          <Upload size={14} className="mb-0.5" style={{ color: '#FF5C00' }} />
-                                          <span className="text-[9px]" style={{ color: '#0C1E39', fontWeight: 600 }}>Upload File</span>
-                                          <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={async (e) => {
-                                              if (e.target.files && e.target.files[0]) {
-                                                const fd = new FormData();
-                                                fd.append("file", e.target.files[0]);
-                                                const toastId = toast.loading("Uploading certificate...");
-                                                try {
-                                                  const res = await adminApi.uploadSettingImage(fd);
-                                                  const copy = [...list];
-                                                  copy[idx] = { ...copy[idx], fileUrl: res.url };
-                                                  updateList(copy);
-                                                  toast.success("Uploaded successfully!", { id: toastId });
-                                                } catch (err: any) {
-                                                  toast.error(err.message || "Upload failed", { id: toastId });
-                                                }
-                                              }
-                                            }}
-                                            className="hidden"
-                                          />
-                                        </label>
-                                      )}
-                                      <input
-                                        type="text"
-                                        value={item.fileUrl || ""}
-                                        onChange={e => {
-                                          const copy = [...list];
-                                          copy[idx] = { ...copy[idx], fileUrl: e.target.value };
-                                          updateList(copy);
-                                        }}
-                                        className="zinp text-xs py-1.5 px-3 flex-1"
-                                        style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
-                                        placeholder="Or paste certificate document path/URL here"
-                                      />
-                                    </div>
-                                  </div>
                                 </div>
-                              ))}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  updateList([...list, { label: "", title: "", desc: "", fileUrl: "" }]);
-                                }}
-                                className="w-full border border-dashed py-2.5 rounded-xl text-xs font-bold text-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10 transition-colors"
-                              >
-                                + Add Certificate Card
-                              </button>
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    ) : type === "textarea" || type === "json" ? (
-                      <textarea
-                        value={settings[key] || ""}
-                        onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
-                        className={`zinp text-sm ${type === "json" ? "font-mono h-40 resize-y" : "resize-none h-20"}`}
-                        style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
-                        rows={type === "json" ? 8 : 3}
-                        placeholder={type === "json" ? '[{"title": "...", "body": "..."}]' : ""}
-                      />
-                    ) : type === "image" ? (
-                      <div className="flex flex-col sm:flex-row gap-3 mt-1.5">
-                        {settings[key] ? (
-                          <div className="relative h-20 w-36 shrink-0 rounded-xl overflow-hidden border bg-white/5" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
-                            <img src={settings[key]} alt="" className="w-full h-full object-contain" />
-                            <button
-                              type="button"
-                              onClick={() => setSettings(s => ({ ...s, [key]: "" }))}
-                              className="absolute top-1 right-1 h-6 w-6 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors"
-                              style={{ background: "#0C1E39", color: "#FFFFFF" }}
-                            >
-                              <X size={12} />
-                            </button>
+                              );
+                            })()}
+                          </div>
+                        ) : type === "special_list" || type === "pillars_list" ? (
+                          <TitleDescListEditor 
+                            value={settings[key] || ""} 
+                            onChange={(val) => setSettings(s => ({ ...s, [key]: val }))} 
+                          />
+                        ) : type === "pipeline_list" ? (
+                          <StringListEditor 
+                            value={settings[key] || ""} 
+                            onChange={(val) => setSettings(s => ({ ...s, [key]: val }))} 
+                          />
+                        ) : type === "faqs_list" ? (
+                          <FaqsListEditor 
+                            value={settings[key] || ""} 
+                            onChange={(val) => setSettings(s => ({ ...s, [key]: val }))} 
+                          />
+                        ) : type === "policy_sections_list" ? (
+                          <PolicySectionsEditor 
+                            value={settings[key] || ""} 
+                            onChange={(val) => setSettings(s => ({ ...s, [key]: val }))} 
+                          />
+                        ) : type === "textarea" ? (
+                          <textarea
+                            value={settings[key] || ""}
+                            onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
+                            className="zinp text-sm resize-none h-24"
+                            style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)", color: "#0C1E39" }}
+                          />
+                        ) : type === "image" ? (
+                          <div className="flex flex-col sm:flex-row gap-3 mt-1.5">
+                            {settings[key] ? (
+                              <div className="relative h-20 w-36 shrink-0 rounded-xl overflow-hidden border bg-white/5" style={{ borderColor: "rgba(12, 30, 57, 0.08)" }}>
+                                <img src={settings[key]} alt="" className="w-full h-full object-contain" />
+                                <button
+                                  type="button"
+                                  onClick={() => setSettings(s => ({ ...s, [key]: "" }))}
+                                  className="absolute top-1 right-1 h-6 w-6 rounded-full flex items-center justify-center hover:bg-rose-600 transition-colors"
+                                  style={{ background: "#0C1E39", color: "#FFFFFF" }}
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            ) : (
+                              <label className="h-20 w-36 shrink-0 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors border-2 border-dashed border-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10">
+                                <Upload size={18} className="mb-1" style={{ color: '#FF5C00' }} />
+                                <span className="text-[10px]" style={{ color: '#0C1E39', fontWeight: 600 }}>Upload File</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={async (e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                      const file = e.target.files[0];
+                                      const fd = new FormData();
+                                      fd.append("file", file);
+                                      const toastId = toast.loading("Uploading image...");
+                                      try {
+                                        const res = await adminApi.uploadSettingImage(fd);
+                                        setSettings(s => ({ ...s, [key]: res.url }));
+                                        toast.success("Uploaded successfully!", { id: toastId });
+                                      } catch (err: any) {
+                                        toast.error(err.message || "Upload failed", { id: toastId });
+                                      }
+                                    }
+                                  }}
+                                  className="hidden"
+                                />
+                              </label>
+                            )}
+                            <input
+                              type="text"
+                              value={settings[key] || ""}
+                              onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
+                              className="zinp text-sm flex-1"
+                              style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)", color: "#0C1E39" }}
+                              placeholder="Or paste direct image URL here"
+                            />
                           </div>
                         ) : (
-                          <label className="h-20 w-36 shrink-0 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors border-2 border-dashed border-[#FF5C00] bg-orange-500/5 hover:bg-orange-500/10">
-                            <Upload size={18} className="mb-1" style={{ color: '#FF5C00' }} />
-                            <span className="text-[10px]" style={{ color: '#0C1E39', fontWeight: 600 }}>Upload File</span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={async (e) => {
-                                if (e.target.files && e.target.files[0]) {
-                                  const file = e.target.files[0];
-                                  const fd = new FormData();
-                                  fd.append("file", file);
-                                  const toastId = toast.loading("Uploading image...");
-                                  try {
-                                    const res = await adminApi.uploadSettingImage(fd);
-                                    setSettings(s => ({ ...s, [key]: res.url }));
-                                    toast.success("Uploaded successfully!", { id: toastId });
-                                  } catch (err: any) {
-                                    toast.error(err.message || "Upload failed", { id: toastId });
-                                  }
-                                }
-                              }}
-                              className="hidden"
-                            />
-                          </label>
+                          <input
+                            type={type === "number" ? "number" : type === "password" ? "password" : type === "email" ? "email" : "text"}
+                            value={settings[key] || ""}
+                            onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
+                            className="zinp text-sm"
+                            style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.06)", color: "#0C1E39" }}
+                          />
                         )}
-                        <input
-                          type="text"
-                          value={settings[key] || ""}
-                          onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
-                          className="zinp text-sm flex-1"
-                          style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
-                          placeholder="Or paste direct image URL here"
-                        />
                       </div>
-                    ) : (
-                      <input
-                        type={type === "number" ? "number" : type === "password" ? "password" : type === "email" ? "email" : "text"}
-                        value={settings[key] || ""}
-                        onChange={e => setSettings(s => ({ ...s, [key]: e.target.value }))}
-                        className="zinp text-sm"
-                        style={{ background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}
-                      />
-                    )}
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
+                </div>
+              ))}
 
-          <motion.button type="submit" disabled={saving}
-            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            className="zbtn-or flex items-center gap-2 px-8 py-3 disabled:opacity-50">
-            <Save size={16} /> {saving ? "Saving..." : "Save All Settings"}
-          </motion.button>
+              <div className="pt-2">
+                <motion.button type="submit" disabled={saving}
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="zbtn-or flex items-center gap-2 px-8 py-3 disabled:opacity-50"
+                  style={{ boxShadow: "0 8px 24px rgba(255,92,0,0.15)" }}>
+                  <Save size={16} /> {saving ? "Saving changes..." : "Save Active Tab Settings"}
+                </motion.button>
+              </div>
+
+            </div>
+          </form>
         </div>
-      </form>
+
+      </div>
     </div>
   );
 }
-

@@ -100,23 +100,40 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function FAQsPage() {
+  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [faqsList, setFaqsList] = useState<any[]>(FAQS);
   const [whatsapp, setWhatsapp] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
+  const loadSettings = (s: Record<string, string>) => {
+    setSettings(s);
+    setWhatsapp(s.contact_whatsapp || "");
+    if (s.faqs_list_json) {
+      try {
+        const list = JSON.parse(s.faqs_list_json);
+        if (Array.isArray(list) && list.length > 0) {
+          setFaqsList(list);
+        }
+      } catch (e) {
+        console.error("Failed to parse faqs_list_json:", e);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchSettings()
-      .then(s => setWhatsapp(s.contact_whatsapp || ""))
+      .then(loadSettings)
       .catch(() => {});
     const onBust = (e: StorageEvent) => {
       if (e.key === "zupwell-settings-bust")
-        fetchSettings().then(s => setWhatsapp(s.contact_whatsapp || "")).catch(() => {});
+        fetchSettings().then(loadSettings).catch(() => {});
     };
     window.addEventListener("storage", onBust);
     return () => window.removeEventListener("storage", onBust);
   }, []);
 
-  const categories = ["All", ...FAQS.map(f => f.category)];
-  const filtered = activeCategory === "All" ? FAQS : FAQS.filter(f => f.category === activeCategory);
+  const categories = ["All", ...faqsList.map(f => f.category)];
+  const filtered = activeCategory === "All" ? faqsList : faqsList.filter(f => f.category === activeCategory);
 
   return (
     <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--gy)" }}>
@@ -128,15 +145,21 @@ export default function FAQsPage() {
         <div className="relative mx-auto max-w-3xl text-center">
           <motion.span initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             className="inline-block zbadge zbadge-or mb-4">
-            FAQs
+            {settings.faqs_hero_badge || "FAQs"}
           </motion.span>
           <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             className="text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
-            Got <span style={{ color: "var(--or)" }}>Questions?</span>
+            {settings.faqs_hero_title ? (
+              settings.faqs_hero_title.includes("Questions?") ? (
+                <>Got <span style={{ color: "var(--or)" }}>Questions?</span></>
+              ) : settings.faqs_hero_title
+            ) : (
+              <>Got <span style={{ color: "var(--or)" }}>Questions?</span></>
+            )}
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
             className="text-lg" style={{ color: "#F8F8F8", opacity: 0.85 }}>
-            Everything you need to know about Zupwell and our products.
+            {settings.faqs_hero_subtext || "Everything you need to know about Zupwell and our products."}
           </motion.p>
         </div>
       </section>
@@ -188,10 +211,10 @@ export default function FAQsPage() {
               <MessageCircle size={28} style={{ color: "var(--or)" }} />
             </div>
             <h2 className="text-2xl font-black mb-2" style={{ color: "#FFFFFF" }}>
-              Still have a question?
+              {settings.faqs_footer_title || "Still have a question?"}
             </h2>
             <p className="mb-6" style={{ color: "#F8F8F8", opacity: 0.85 }}>
-              Can't find what you're looking for? We're just a message away!
+              {settings.faqs_footer_subtext || "Can't find what you're looking for? We're just a message away!"}
             </p>
             {whatsapp ? (
               <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer">

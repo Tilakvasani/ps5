@@ -5,8 +5,7 @@ import Footer from "@/components/storefront/Footer";
 import { Search, Package, MapPin, Truck, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com";
+import { API_URL } from "@/lib/api";
 
 export default function TrackOrderPage() {
   const [orderNumber, setOrderNumber] = useState("");

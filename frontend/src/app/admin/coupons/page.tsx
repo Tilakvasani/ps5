@@ -30,7 +30,11 @@ export default function AdminCouponsPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm("Delete coupon?")) return;
-    try { await adminApi.deleteCoupon(id); toast.success("Deleted"); fetch(); } catch (err: any) { toast.error(err.message); }
+    try {
+      const res = await adminApi.deleteCoupon(id);
+      toast.success(res.message || "Deleted");
+      fetch();
+    } catch (err: any) { toast.error(err.message); }
   };
 
   return (

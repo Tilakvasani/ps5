@@ -75,7 +75,7 @@ export default function ProductForm({ productId }: Props) {
     }
   };
 
-  const UNITS = ["NOS", "PCS", "BOX", "ROLL", "KG", "MTR", "SET", "PACK"];
+  const UNITS = ["TUBE", "BOTTLE", "JAR", "STRIP", "BOX", "PACK", "NOS", "PCS", "KG"];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
@@ -119,7 +119,6 @@ export default function ProductForm({ productId }: Props) {
             <div>
               <label className="label-text">HSN Code</label>
               <select value={form.hsnCode} onChange={update("hsnCode")} className="input-field">
-                <option value="3919">3919 — Adhesive Tapes (18% GST)</option>
                 {gstRates.map(g => <option key={g.hsnCode} value={g.hsnCode}>{g.hsnCode} — {g.description}</option>)}
               </select>
             </div>

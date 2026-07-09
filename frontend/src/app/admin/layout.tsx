@@ -44,7 +44,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const handleLogout = useAdminLogout();
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "var(--dk)" }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--gy)" }}>
       {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -66,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo */}
         <div className="flex items-center gap-2 px-5 py-4" style={{ borderBottom: "1.5px solid #0C1E39" }}>
           <span style={{ fontSize: "18px", fontWeight: 900, letterSpacing: "-1.5px", color: "#FFFFFF" }}>
-            zupwell<span style={{ color: "var(--or)" }}>•</span>
+            zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "var(--or)", marginLeft: "2px", verticalAlign: "super" }}>TM</sup>
           </span>
           <span
             className="ml-auto text-xs rounded px-1.5 py-0.5"
@@ -130,9 +130,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Topbar */}
         <header
           className="flex items-center gap-4 px-6 py-3 flex-shrink-0"
-          style={{ background: "#0C1E39", borderBottom: "1.5px solid #0C1E39" }}
+          style={{ background: "#FFFFFF", borderBottom: "1.5px solid rgba(12, 30, 57, 0.08)" }}
         >
-          <button className="lg:hidden" style={{ color: "#F8F8F8" }} onClick={() => setSidebarOpen(true)}>
+          <button className="lg:hidden" style={{ color: "#0C1E39" }} onClick={() => setSidebarOpen(true)}>
             <Menu size={20} />
           </button>
           <div className="flex-1" />
@@ -140,14 +140,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             href="/"
             target="_blank"
             className="transition-colors rounded-lg px-3 py-1.5"
-            style={{ fontSize: "11px", fontWeight: 700, color: "#F8F8F8", border: "1px solid #0C1E39" }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#FFFFFF")}
-            onMouseLeave={e => (e.currentTarget.style.color = "#F8F8F8")}
+            style={{ fontSize: "11px", fontWeight: 700, color: "#0C1E39", border: "1px solid rgba(12, 30, 57, 0.15)" }}
+            onMouseEnter={e => {
+              e.currentTarget.style.color = "var(--or)";
+              e.currentTarget.style.borderColor = "var(--or)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.color = "#0C1E39";
+              e.currentTarget.style.borderColor = "rgba(12, 30, 57, 0.15)";
+            }}
           >
             View Store ↗
           </Link>
           <Link href="/admin/notifications">
-            <div className="relative p-2 cursor-pointer" style={{ color: "#F8F8F8" }}>
+            <div className="relative p-2 cursor-pointer" style={{ color: "#0C1E39" }}>
               <Bell size={17} />
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full" style={{ background: "var(--or)" }} />
             </div>
@@ -155,7 +161,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6" style={{ background: "var(--dk)" }}>
+        <main className="flex-1 overflow-y-auto p-6" style={{ background: "var(--gy)" }}>
           {children}
         </main>
       </div>

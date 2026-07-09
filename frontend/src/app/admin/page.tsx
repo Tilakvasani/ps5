@@ -93,14 +93,14 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-black" style={{ color: '#FFFFFF' }}>Dashboard</h1>
-          <p className="text-sm mt-1" style={{ color: '#F8F8F8' }}>
+          <h1 className="text-3xl font-black" style={{ color: '#0C1E39' }}>Dashboard</h1>
+          <p className="text-sm mt-1" style={{ color: '#4A5568' }}>
             {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/admin/orders?status=pending">
-            <button className="btn-outline text-sm px-4 py-2 flex items-center gap-2" style={{ border: "1.5px solid rgba(255,255,255,0.15)", color: "#FFFFFF" }}>
+            <button className="btn-outline text-sm px-4 py-2 flex items-center gap-2" style={{ border: "1.5px solid rgba(12, 30, 57, 0.15)", color: "#0C1E39" }}>
               <Clock size={14} /> Pending
               {stats?.statusBreakdown?.pending > 0 && (
                 <span className="text-white text-xs rounded-full px-1.5 py-0.5 font-bold leading-none" style={{ background: 'var(--or)' }}>

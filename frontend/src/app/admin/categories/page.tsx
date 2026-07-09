@@ -28,7 +28,11 @@ export default function AdminCategoriesPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this category?")) return;
-    try { await adminApi.deleteCategory(id); toast.success("Deleted"); fetch(); } catch (err: any) { toast.error(err.message); }
+    try {
+      const res = await adminApi.deleteCategory(id);
+      toast.success(res.message || "Deleted");
+      fetch();
+    } catch (err: any) { toast.error(err.message); }
   };
 
   const roots = categories.filter(c => !c.parentId);

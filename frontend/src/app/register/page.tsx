@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowLeft, Check, X } from "lucide-react";
-import { authApi } from "@/lib/api";
+import { authApi, API_URL } from "@/lib/api";
 import { GoogleIcon, FacebookIcon } from "@/components/ui";
 import { useStore } from "@/lib/store";
 import { setAuthCookie } from "@/lib/auth-cookie";
@@ -61,7 +61,6 @@ export default function RegisterPage() {
 
   // ── Google Sign Up ───────────────────────────────────
   const handleGoogleSignUp = () => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com";
     window.location.href = `${API_URL}/api/auth/google`;
   };
 

@@ -24,9 +24,9 @@ const CATEGORIES = [
 
 
 const D = {
-  hero_title:       "Give Your Water a\nProfessional Upgrade.",
+  hero_title:       "Hydration\nSupport.\nElectrolyte\nBalance.",
   hero_tagline:     "તમારા સ્વાસ્થ્ય સાથે ચાલો — ઝુપવેલ!",
-  hero_subtext:     "A new and powerful addition to your water. Because plain water isn't enough for your hustle.",
+  hero_subtext:     "Enjoy refreshing orange-flavoured electrolyte effervescent tablets with essential electrolytes and vitamins. Fast dissolving and convenient for everyday hydration support with a great-tasting fizz.",
   hero_stat1_value: "200+",  hero_stat1_label: "Products",
   hero_stat2_value: "50K+",  hero_stat2_label: "Happy Customers",
   hero_stat3_value: "100%",  hero_stat3_label: "Authentic",
@@ -195,7 +195,7 @@ export default function HomePage() {
                   boxShadow: "0 0 16px rgba(255, 92, 0, 0.15)"
                 }}
               >
-                ⚡ ELECTROLYTE EFFERVESCENT TABLET
+                {s(settings, "hero_badge") || "⚡ ELECTROLYTE EFFERVESCENT TABLET"}
               </span>
             </motion.div>
 
@@ -204,9 +204,36 @@ export default function HomePage() {
               className="text-4xl sm:text-6xl md:text-7xl font-black leading-[1.05] mb-6 text-white" 
               style={{ letterSpacing: "-0.03em" }}
             >
-              Hydration <br />
-              <span style={{ color: "var(--wh)" }}>Support.</span> <br />
-              <span className="gradient-text">Electrolyte <br />Balance.</span>
+              {s(settings, "hero_title").split("\n").map((line, idx, arr) => {
+                // If title is stored as a single line (or fails to split by newline), split it at "Electrolyte"
+                if (arr.length === 1) {
+                  const target = "Electrolyte";
+                  const targetIdx = line.indexOf(target);
+                  if (targetIdx !== -1) {
+                    const firstPart = line.substring(0, targetIdx);
+                    const secondPart = line.substring(targetIdx);
+                    return (
+                      <span key={idx}>
+                        {firstPart} <br />
+                        <span style={{ color: "var(--or)" }} className="gradient-text">
+                          {secondPart}
+                        </span>
+                      </span>
+                    );
+                  }
+                }
+                const isHighlight = idx >= 2 || line.toLowerCase().includes("electrolyte") || line.toLowerCase().includes("balance");
+                return (
+                  <span 
+                    key={idx} 
+                    style={isHighlight ? { color: "var(--or)" } : {}}
+                    className={isHighlight ? "gradient-text" : ""}
+                  >
+                    {line}
+                    {idx < arr.length - 1 && <br />}
+                  </span>
+                );
+              })}
             </motion.h1>
 
             <motion.p 
@@ -214,7 +241,7 @@ export default function HomePage() {
               className="text-base sm:text-lg leading-relaxed mb-10 max-w-xl text-left" 
               style={{ color: "#F8F8F8", opacity: 0.8 }}
             >
-             Enjoy refreshing orange-flavoured electrolyte effervescent tablets with essential electrolytes and vitamins. Fast dissolving and convenient for everyday hydration support with a great-tasting fizz.
+              {s(settings, "hero_subtext")}
             </motion.p>
 
             <motion.div {...fadeUp(0.18)} className="flex flex-wrap gap-4 w-full sm:w-auto">
@@ -236,66 +263,14 @@ export default function HomePage() {
             <Link href={featuredProduct ? `/products/${featuredProduct.slug}` : "/products"} className="w-full max-w-[420px] aspect-[4/5] block">
               <motion.div 
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="w-full h-full rounded-[2.5rem] p-10 flex flex-col items-center justify-center overflow-hidden border-2 border-[#0C1E39] cursor-pointer"
+                className="w-full h-full rounded-[2.5rem] overflow-hidden border-2 border-[#0C1E39] cursor-pointer relative"
                 style={{ 
-                  background: "radial-gradient(circle at 50% 50%, rgba(12, 30, 57, 0.8) 0%, rgba(5, 17, 36, 0.9) 100%)",
-                  boxShadow: "0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)"
+                  backgroundImage: `url(${featuredProduct?.images?.[0]?.imageUrl || ""})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  boxShadow: "0 24px 64px rgba(0, 0, 0, 0.4)"
                 }}
-              >
-                {/* Product mockup card inner plate */}
-                <div 
-                  className="w-full flex-1 rounded-3xl p-8 flex flex-col items-center justify-between text-center relative border border-white/5"
-                  style={{ 
-                    background: "#051124",
-                    boxShadow: "0 16px 32px rgba(0,0,0,0.3)"
-                  }}
-                >
-                  {/* badge label */}
-                  <span 
-                    className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full"
-                    style={{ background: "var(--or)", color: "var(--wh)" }}
-                  >
-                    HEALTH SUPPLEMENT
-                  </span>
-
-                  {/* center visual (mockup citrus illustration) */}
-                  <div className="my-4 relative flex flex-col items-center w-full h-40 justify-center">
-                    {featuredProduct?.images?.[0]?.imageUrl ? (
-                      <img 
-                        src={featuredProduct.images[0].imageUrl} 
-                        alt={featuredProduct.name}
-                        className="h-full object-contain rounded-lg"
-                      />
-                    ) : (
-                      <>
-                        <div className="text-6xl animate-bounce" style={{ filter: "drop-shadow(0 8px 16px rgba(255,184,0,0.3))" }}>🍊</div>
-                        <div className="text-4xl mt-2 select-none">⚡</div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* branding info */}
-                  <div>
-                    <h3 className="text-xl font-black text-white leading-tight">
-                      {featuredProduct?.name || "zupwell"}
-                    </h3>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] mt-1" style={{ color: "var(--lm)" }}>
-                      {featuredProduct?.brand || "ELECTROLYTE"}
-                    </p>
-                    <p className="text-[9px] mt-2 font-bold uppercase tracking-wider" style={{ color: "#ff5c00" }}>
-                      ORANGE FLAVOUR • 15 TABLETS
-                    </p>
-                  </div>
-
-                  {/* price tag button */}
-                  <div 
-                    className="w-full py-3.5 rounded-2xl font-black text-base transition-transform"
-                    style={{ background: "var(--lm)", color: "var(--dk)" }}
-                  >
-                    ₹{featuredProduct ? Math.round(Number(featuredProduct.sellingPrice) * 1.05) : "149"}.00
-                  </div>
-                </div>
-              </motion.div>
+              />
             </Link>
           </div>
 
@@ -310,13 +285,20 @@ export default function HomePage() {
         </p>
         <div className="relative flex overflow-x-hidden">
           <div className="flex gap-16 animate-marquee whitespace-nowrap shrink-0 pr-16" style={{ animationDuration: "25s" }}>
-            {certEntries.map(({ key, label }, idx) =>
-              s(settings, key) ? (
-                <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
+            {certEntries.map(({ key, label }, idx) => {
+              const isIso = label.toUpperCase().includes("ISO");
+              return s(settings, key) ? (
+                isIso ? (
+                  <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity" style={{ background: "#FFFFFF", width: "56px", height: "56px", padding: "3px" }}>
+                    <img src={s(settings, key)} alt={label} className="w-full h-full object-contain rounded-full" />
+                  </div>
+                ) : (
+                  <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
+                )
               ) : (
                 <CertLogo key={idx} label={label} className="h-14 opacity-70 hover:opacity-100 transition-opacity" />
-              )
-            )}
+              );
+            })}
           </div>
           <div className="flex gap-16 animate-marquee whitespace-nowrap shrink-0 pr-16" style={{ animationDuration: "25s" }} aria-hidden="true">
             {certEntries.map(({ key, label }, idx) =>

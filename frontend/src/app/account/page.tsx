@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -11,7 +12,6 @@ import { accountApi, ordersApi, invoicesApi } from "@/lib/api";
 import { useLogout } from "@/lib/useAuth";
 import toast from "react-hot-toast";
 
-export const dynamic = "force-dynamic";
 
 const STATUS_BADGE: Record<string, string> = {
   pending: "badge-warning", confirmed: "badge-info", processing: "badge-info",

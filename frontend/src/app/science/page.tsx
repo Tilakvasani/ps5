@@ -20,7 +20,7 @@ const D: Record<string, string> = {
   science_process2_desc: "Our proprietary effervescent formula dissolves completely in water, unlocking fast nutrient absorption. Maximum bioavailability — every single time.",
   science_cert_badge: "Quality & Safety",
   science_cert_title: "Certified & Verified",
-  science_cert_desc: "Every single product is manufactured in state-of-the-art facilities following international safety protocols.",
+  science_cert_subtext: "Every single product is manufactured in state-of-the-art facilities following international safety protocols.",
   science_cert1_title: "GMP & ISO Certified",
   science_cert1_desc: "Manufactured in WHO-GMP and ISO certified facilities. International standards of hygiene and quality — followed without compromise.",
   science_cert2_title: "FSSAI Approved",
@@ -249,7 +249,7 @@ export default function SciencePage() {
               {s(settings, "science_cert_title")}
             </h2>
             <p className="text-white/80 mt-4 text-lg max-w-xl mx-auto">
-              {s(settings, "science_cert_desc")}
+              {s(settings, "science_cert_subtext")}
             </p>
           </motion.div>
 

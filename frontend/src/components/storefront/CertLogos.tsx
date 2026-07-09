@@ -23,13 +23,18 @@ export function GmpLogo({ className = "h-12" }: { className?: string }) {
 
 
 
-export function IsoLogo({ className = "h-12" }: { className?: string }) {
+export function IsoLogo({ className = "h-14" }: { className?: string }) {
   return (
-    <img
-      src="/iso.png"
-      alt="ISO 9001:2015 Certified"
-      className={`${className} object-contain inline-block shrink-0`}
-    />
+    <div
+      className={`${className} inline-flex items-center justify-center shrink-0 rounded-full`}
+      style={{ background: "#FFFFFF", aspectRatio: "1 / 1", padding: "2px" }}
+    >
+      <img
+        src="/iso.png"
+        alt="ISO 9001:2015 Certified"
+        className="w-full h-full object-contain rounded-full"
+      />
+    </div>
   );
 }
 
@@ -59,7 +64,7 @@ export function CertLogo({ label, className }: CertLogoProps) {
   }
 
   if (cleanLabel.includes("ISO")) {
-    return <IsoLogo className={className || "h-11"} />;
+    return <IsoLogo className={className || "h-14"} />;
   }
   if (cleanLabel.includes("HACCP")) {
     return <HaccpLogo className={className || "h-11"} />;

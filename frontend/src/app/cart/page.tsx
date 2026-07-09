@@ -129,8 +129,8 @@ export default function CartPage() {
               <h2 style={{ fontWeight: 700, color: "#0C1E39", marginBottom: 16 }}>Order Summary</h2>
               <div className="space-y-2 text-sm mb-4">
                 <div className="flex justify-between" style={{ color: "#4A5568" }}><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>
-                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>CGST @2.5%</span><span>₹{cgst.toFixed(2)}</span></div>
-                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>SGST @2.5%</span><span>₹{sgst.toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>CGST @{(cgstRate * 100).toFixed(1)}%</span><span>₹{cgst.toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>SGST @{(sgstRate * 100).toFixed(1)}%</span><span>₹{sgst.toFixed(2)}</span></div>
                 <div className="flex justify-between" style={{ color: "#4A5568" }}>
                   <span>Shipping</span>
                   <span>{shipping === 0 ? <span style={{ color: "var(--or)" }}>FREE</span> : `₹${shipping.toFixed(2)}`}</span>

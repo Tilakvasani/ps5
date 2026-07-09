@@ -17,7 +17,11 @@ export default function AdminReviewsPage() {
   };
   const del = async (id: number) => {
     if (!confirm("Delete review?")) return;
-    try { await adminApi.deleteReview(id); toast.success("Deleted"); fetch(); } catch (err: any) { toast.error(err.message); }
+    try {
+      const res = await adminApi.deleteReview(id);
+      toast.success(res.message || "Deleted");
+      fetch();
+    } catch (err: any) { toast.error(err.message); }
   };
 
   const filtered = reviews.filter(r => tab === "all" || (tab === "pending" ? !r.isApproved : r.isApproved));
