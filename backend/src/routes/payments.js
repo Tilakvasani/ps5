@@ -96,11 +96,6 @@ router.post("/verify", authUser, async (req, res) => {
     return res.json({ message: "Payment already verified" });
   }
 
-  // Fetch store settings for seller info
-  const settingRows = await prisma.setting.findMany();
-  const settings = {};
-  settingRows.forEach(r => { settings[r.key] = r.value; });
-
   // Recalculate correct 2.5% GST
   const subtotal    = Number(order.subtotal);
   const discount    = Number(order.discountAmount || 0);
