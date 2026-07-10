@@ -96,11 +96,14 @@ router.post("/verify", authUser, async (req, res) => {
     return res.json({ message: "Payment already verified" });
   }
 
-  // Recalculate correct 2.5% GST
+  // Recalculate correct dynamic GST from settings
+  const gstPct = parseFloat(settings.gst_rate || "5.0");
+  const cgstRateVal = gstPct / 200; // e.g. 0.025 for 5% GST
+  const sgstRateVal = gstPct / 200;
   const subtotal    = Number(order.subtotal);
   const discount    = Number(order.discountAmount || 0);
-  const cgstAmount  = +((subtotal - discount) * 0.025).toFixed(2);
-  const sgstAmount  = +((subtotal - discount) * 0.025).toFixed(2);
+  const cgstAmount  = +((subtotal - discount) * cgstRateVal).toFixed(2);
+  const sgstAmount  = +((subtotal - discount) * sgstRateVal).toFixed(2);
   const shipping    = Number(order.shippingCharge || 0);
   const rawTotal    = (subtotal - discount) + cgstAmount + sgstAmount + shipping;
   const totalAmount = Math.round(rawTotal);
@@ -138,7 +141,7 @@ router.post("/verify", authUser, async (req, res) => {
           status: "issued",
           subtotal:       order.subtotal,
           discountAmount: order.discountAmount,
-          cgstRate: 2.5, sgstRate: 2.5, igstRate: 0,
+          cgstRate: gstPct / 2, sgstRate: gstPct / 2, igstRate: 0,
           cgstAmount, sgstAmount, igstAmount: 0,
           totalAmount,
           sellerName:    settings.site_name    || "Zupwell",

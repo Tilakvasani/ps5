@@ -113,7 +113,7 @@ router.post("/", authUser, async (req, res) => {
         data: {
           invoiceNumber, orderId: newOrder.id, userId: req.user.id,
           status: "issued",
-          subtotal, discountAmount, cgstRate: 2.5, sgstRate: 2.5, igstRate: 0,
+          subtotal, discountAmount, cgstRate, sgstRate, igstRate: 0,
           cgstAmount, sgstAmount, igstAmount: 0,
           totalAmount,
           sellerName:    cfg.site_name    || "Zupwell",
