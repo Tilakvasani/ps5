@@ -18,7 +18,7 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
     include: {
       order: {
         include: {
-          items:   { include: { product: { select: { name: true, hsnCode: true, unit: true } } } },
+          items:   { include: { product: { select: { name: true, hsnCode: true, unit: true } }, variant: true } },
           address: true,
           user:    { select: { name: true, email: true, phone: true } },
         },
@@ -183,22 +183,29 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
 
   let rowY = tableY + 24;
   const items = invoice.order?.items || [];
+  const discountRatio = subtotal > 0 ? ((subtotal - discountAmt) / subtotal) : 1;
+
   items.forEach((item, i) => {
     const rh = 26;
     doc.rect(ML, rowY, CW, rh).fill(i % 2 === 0 ? C.white : C.offWhite);
     doc.rect(ML, rowY + rh - 1, CW, 1).fill(C.grayL);
 
-    const base = Number(item.unitPrice) * item.qty;
-    const itemCgst = base * (cgstRate / 100);
+    const baseRaw = Number(item.unitPrice) * item.qty;
+    const discountedBase = baseRaw * discountRatio;
+    const itemCgst = discountedBase * (cgstRate / 100);
+
+    const displayName = item.variant
+      ? `${item.product?.name || "-"} (${item.variant.variantName})`
+      : (item.product?.name || "-");
 
     const cells = [
-      item.product?.name || "-",
+      displayName,
       item.product?.hsnCode || "-",
       String(item.qty),
       item.product?.unit || "NOS",
       Number(item.unitPrice).toFixed(2),
       itemCgst.toFixed(2),
-      base.toFixed(2),
+      discountedBase.toFixed(2),
     ];
     cells.forEach((val, j) => {
       const rightAlign = j >= 4;

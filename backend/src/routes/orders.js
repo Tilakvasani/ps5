@@ -24,18 +24,26 @@ router.post("/", authUser, async (req, res) => {
     });
     if (!product || !product.isActive) return res.status(400).json({ error: `Product ${item.productId} not found` });
 
-    // FIX: check stock before accepting order
-    const inv = product.inventory.find(i => i.variantId === (item.variantId || null));
-    if (!inv || inv.qtyInStock < item.qty) {
+    // FIX: check stock before accepting order, accounting for pack multiplier
+    const pack = Number(item.pack || 1);
+    const inv = product.inventory.find(i => (i.variantId || null) == (item.variantId || null));
+    if (!inv || inv.qtyInStock < (item.qty * pack)) {
       return res.status(400).json({ error: `Not enough stock for "${product.name}"` });
     }
 
     const unitPrice = item.variantId
-      ? product.variants.find(v => v.id === item.variantId)?.price || product.sellingPrice
+      ? product.variants.find(v => Number(v.id) === Number(item.variantId))?.price || product.sellingPrice
       : product.sellingPrice;
 
-    subtotal += Number(unitPrice) * item.qty;
-    orderItems.push({ productId: item.productId, variantId: item.variantId || null, qty: item.qty, unitPrice, hsnCode: product.hsnCode });
+    const finalUnitPrice = Number(unitPrice);
+    subtotal += finalUnitPrice * pack * item.qty;
+    orderItems.push({ 
+      productId: item.productId, 
+      variantId: item.variantId ? Number(item.variantId) : null, 
+      qty: item.qty * pack, 
+      unitPrice: finalUnitPrice, 
+      hsnCode: product.hsnCode 
+    });
   }
 
   // Coupon
@@ -131,7 +139,7 @@ router.post("/", authUser, async (req, res) => {
   const full = await prisma.order.findUnique({
     where: { id: order.id },
     include: {
-      items:   { include: { product: { select: { name: true, sku: true } } } },
+      items:   { include: { product: { select: { name: true, sku: true } }, variant: true } },
       address: true,
       invoice: true,
     },

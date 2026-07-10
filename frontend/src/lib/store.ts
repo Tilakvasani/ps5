@@ -11,6 +11,7 @@ interface CartItem {
   qty: number;
   imageUrl?: string;
   unit: string;
+  pack?: number;
 }
 
 interface User {

@@ -146,7 +146,13 @@ export default function CartPage() {
               </div>
               <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 4, textAlign: "right" }}>Inclusive of GST</p>
 
-              <Link href={user ? "/checkout" : "/login?next=/checkout"} className="block mt-6">
+              <Link 
+                href={user 
+                  ? `/checkout${couponApplied && coupon ? "?coupon=" + encodeURIComponent(coupon.trim()) : ""}` 
+                  : `/login?next=${encodeURIComponent("/checkout" + (couponApplied && coupon ? "?coupon=" + encodeURIComponent(coupon.trim()) : ""))}`
+                } 
+                className="block mt-6"
+              >
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   className="btn-primary w-full flex items-center justify-center gap-2 py-3">
                   Proceed to Checkout <ArrowRight size={16} />

@@ -42,20 +42,38 @@ export default function CheckoutPage() {
   const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod">("razorpay");
   const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponApplied, setCouponApplied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [newAddr, setNewAddr] = useState({ fullName: "", phone: "", addressLine1: "", city: "Ahmedabad", state: "Gujarat", pincode: "", gstin: "" });
   const [addingAddr, setAddingAddr] = useState(false);
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
-  const cgst     = subtotal * cgstRate;
-  const sgst     = subtotal * sgstRate;
+  const discount = couponApplied ? couponDiscount : 0;
+  const taxable  = Math.max(0, subtotal - discount);
+  const cgst     = taxable * cgstRate;
+  const sgst     = taxable * sgstRate;
   const shipping = paymentMethod === "razorpay" ? 0 : calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
-  const rawTotal = subtotal + cgst + sgst + shipping;
+  const rawTotal = taxable + cgst + sgst + shipping;
   const total    = Math.round(rawTotal);
   const roundOffDiff = total - rawTotal;
   const cgstPct  = (cgstRate * 100).toFixed(1);
   const sgstPct  = (sgstRate * 100).toFixed(1);
+
+  const validateAndApplyCoupon = async (code: string) => {
+    if (!code.trim()) { toast.error("Enter a coupon code"); return; }
+    try {
+      const { cartApi } = await import("@/lib/api");
+      const data = await cartApi.applyCoupon(code.trim());
+      const calculatedDiscount = data.discountAmount || subtotal * (data.discountPercent / 100);
+      setCouponDiscount(calculatedDiscount);
+      setCouponApplied(true);
+      toast.success(`Coupon applied! ${data.discountPercent || 0}% off`);
+    } catch (err: any) {
+      toast.error(err.message || "Invalid coupon code");
+    }
+  };
 
   useEffect(() => {
     if (!user) { router.push("/login"); return; }
@@ -63,6 +81,17 @@ export default function CheckoutPage() {
       .then(setAddresses)
       .catch(() => toast.error("Could not load your addresses. Please refresh."));
   }, [user, router]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("coupon") || "";
+      if (code) {
+        setCouponCode(code);
+        validateAndApplyCoupon(code);
+      }
+    }
+  }, [subtotal]);
 
   if (cart.length === 0) return (
     <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
@@ -93,7 +122,7 @@ export default function CheckoutPage() {
         addressId: selectedAddress,
         paymentMethod,
         couponCode: couponCode || undefined,
-        items: cart.map(i => ({ productId: i.productId, variantId: i.variantId, qty: i.qty })),
+        items: cart.map(i => ({ productId: i.productId, variantId: i.variantId, qty: i.qty, pack: i.pack || 1 })),
         cgstRate,
         sgstRate,
         shippingCharge: shipping,
@@ -267,7 +296,13 @@ export default function CheckoutPage() {
                   ))}
                   <div className="mt-4">
                     <label style={{ fontSize: "0.875rem", fontWeight: 600, color: "#0C1E39", marginBottom: 8, display: "block" }}>Coupon Code (optional)</label>
-                    <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="input text-sm w-full" style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#F8F8F8" }} placeholder="Enter coupon code" />
+                    <div className="flex gap-2">
+                      <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="input text-sm flex-1" style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#F8F8F8" }} placeholder="Enter coupon code" />
+                      <button type="button" onClick={() => validateAndApplyCoupon(couponCode)} className="btn-primary text-sm px-4 py-2 flex-shrink-0" style={{ height: "42px", borderRadius: "10px" }}>Apply</button>
+                    </div>
+                    {couponApplied && (
+                      <p style={{ fontSize: "0.75rem", color: "var(--or)", marginTop: 8 }}>✓ Coupon applied successfully!</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-3">
@@ -344,6 +379,12 @@ export default function CheckoutPage() {
                 <span>Shipping</span>
                 <span>{shipping === 0 ? <span className="text-emerald-500 font-semibold">FREE</span> : `₹${shipping}`}</span>
               </div>
+              {discount > 0 && (
+                <div className="flex justify-between" style={{ color: "var(--or)", fontWeight: 600 }}>
+                  <span>Discount</span>
+                  <span>-₹{discount.toFixed(2)}</span>
+                </div>
+              )}
               {paymentMethod === "razorpay" ? (
                 <p style={{ fontSize: "0.75rem", color: "#10B981", fontWeight: 600 }}>Prepaid Promo: Free Shipping applied!</p>
               ) : (

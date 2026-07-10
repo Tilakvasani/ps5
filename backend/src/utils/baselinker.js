@@ -63,22 +63,29 @@ async function addOrder(order, user) {
   const isCOD    = order.paymentMethod === "cod";
   const statusId = await getFirstStatusId();
 
-  const products = order.items.map((item) => ({
-    storage:      "personal",
-    storage_id:   0,
-    product_id:   "",
-    variant_id:   0,
-    name:         item.product?.name || ("Product #" + item.productId),
-    sku:          item.product?.sku  || ("SKU-" + item.productId),
-    ean:          "",
-    location:     "",
-    warehouse_id: 0,
-    attributes:   "",
-    price_brutto: Number(item.unitPrice),
-    tax_rate:     0,
-    quantity:     item.qty,
-    weight:       0.5,
-  }));
+  const products = order.items.map((item) => {
+    const baseName = item.product?.name || ("Product #" + item.productId);
+    const finalName = item.variant
+      ? `${baseName} (${item.variant.variantName})`
+      : baseName;
+
+    return {
+      storage:      "personal",
+      storage_id:   0,
+      product_id:   "",
+      variant_id:   0,
+      name:         finalName,
+      sku:          item.product?.sku  || ("SKU-" + item.productId),
+      ean:          "",
+      location:     "",
+      warehouse_id: 0,
+      attributes:   "",
+      price_brutto: Number(item.unitPrice),
+      tax_rate:     0,
+      quantity:     item.qty,
+      weight:       0.5,
+    };
+  });
 
   const parameters = {
     // ── Status & date ────────────────────────────────────────────────

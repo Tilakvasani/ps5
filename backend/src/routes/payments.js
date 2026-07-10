@@ -162,7 +162,7 @@ router.post("/verify", authUser, async (req, res) => {
     const fullOrder = await prisma.order.findUnique({
       where: { id: order.id },
       include: {
-        items:   { include: { product: { select: { name: true, sku: true } } } },
+        items:   { include: { product: { select: { name: true, sku: true } }, variant: true } },
         address: true,
       },
     });

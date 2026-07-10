@@ -139,7 +139,8 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       price, 
       qty, 
       imageUrl: primaryImage, 
-      unit: product.unit 
+      unit: product.unit,
+      pack: selectedPack
     });
     toast.success("Added to cart! 🛒");
   };
