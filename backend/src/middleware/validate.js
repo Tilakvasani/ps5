@@ -91,6 +91,10 @@ function validateProductBody(req, res, next) {
 
 /**
  * validateOrderStatus — Ensures only valid status values are accepted.
+ * Statuses are lowercase everywhere else in the app (DB column, frontend
+ * dropdowns, admin routes) — this list previously used UPPERCASE, which
+ * meant every single order-status update was rejected with "Invalid status"
+ * before it ever reached the actual update logic. See audit doc §2.4.
  */
 const VALID_ORDER_STATUSES = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"];
 
@@ -120,4 +124,5 @@ module.exports = {
   validateIdParam,
   stripTags,
   safeId,
+  VALID_ORDER_STATUSES,
 };

@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Plus, Edit3, Trash2 } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
-import { Toggle } from "@/components/ui";
 
 export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState<any[]>([]);
@@ -100,7 +99,9 @@ export default function AdminCouponsPage() {
               <div><label className="zlabel">Description</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="zinp resize-none" rows={2} /></div>
               <label className="flex items-center gap-3 cursor-pointer">
                 <span className="text-sm" style={{ color: "#0C1E39" }}>Active</span>
-                <Toggle checked={form.isActive} onChange={val => setForm(f => ({ ...f, isActive: val }))} />
+                <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-[var(--or)]" : "bg-gray-300"}`} style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
+                  <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${form.isActive ? "translate-x-6" : "translate-x-1"}`} />
+                </button>
               </label>
             </div>
             <div className="flex gap-3 mt-5">

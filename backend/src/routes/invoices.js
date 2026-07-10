@@ -82,8 +82,8 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
   const sgstAmt       = Number(invoice.order?.sgstAmount || 0);
   const taxable       = subtotal - discountAmt;
   // Calculate effective rates to show in table headers
-  const cgstRate      = Number(invoice.cgstRate || 2.5);
-  const sgstRate      = Number(invoice.sgstRate || 2.5);
+  const cgstRate      = taxable > 0 ? +((cgstAmt / taxable) * 100).toFixed(2) : 2.5;
+  const sgstRate      = taxable > 0 ? +((sgstAmt / taxable) * 100).toFixed(2) : 2.5;
   const shippingAmt   = Number(invoice.order?.shippingCharge || 0);
   const rawTotal      = taxable + cgstAmt + sgstAmt + shippingAmt;
   const roundedTotal  = Math.round(rawTotal);

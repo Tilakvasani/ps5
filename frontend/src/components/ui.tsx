@@ -81,40 +81,11 @@ interface EmptyStateProps {
   action?: React.ReactNode;
 }
 
-export const EmptyState = ({ icon, title, description, action }: EmptyStateProps) => {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
-      {icon && <div className="text-4xl mb-2" style={{ opacity: 0.5 }}>{icon}</div>}
-      <p className="font-black text-lg" style={{ color: "#FFFFFF", letterSpacing: "-0.03em" }}>{title}</p>
-      {description && <p className="text-sm max-w-sm" style={{ color: "#F8F8F8" }}>{description}</p>}
-      {action && <div className="mt-4">{action}</div>}
-    </div>
-  );
-};
-
-// ── Toggle Switch ─────────────────────────────────────────────────────────────
-
-interface ToggleProps {
-  checked: boolean;
-  onChange: (val: boolean) => void;
-  className?: string;
-}
-
-export const Toggle = ({ checked, onChange, className = "" }: ToggleProps) => {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? "bg-[var(--or)]" : "bg-gray-300"} ${className}`}
-      style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)" }}
-    >
-      <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${checked ? "translate-x-6" : "translate-x-1"}`} />
-    </button>
-  );
-};
-
-// ── Inline Loading Spinner ────────────────────────────────────────────────────
-
-export const InlineSpinner = ({ className = "" }: { className?: string }) => (
-  <span className={`h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin ${className}`} />
+export const EmptyState = ({ icon, title, description, action }: EmptyStateProps) => (
+  <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
+    {icon && <div className="text-4xl mb-2" style={{ opacity: 0.5 }}>{icon}</div>}
+    <p className="font-black text-lg" style={{ color: "#FFFFFF", letterSpacing: "-0.03em" }}>{title}</p>
+    {description && <p className="text-sm max-w-sm" style={{ color: "#F8F8F8" }}>{description}</p>}
+    {action && <div className="mt-4">{action}</div>}
+  </div>
 );

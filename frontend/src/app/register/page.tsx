@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowLeft, Check, X } from "lucide-react";
 import { authApi, API_URL } from "@/lib/api";
-import { GoogleIcon, FacebookIcon, InlineSpinner } from "@/components/ui";
+import { GoogleIcon, FacebookIcon } from "@/components/ui";
 import { useStore } from "@/lib/store";
 import { setAuthCookie } from "@/lib/auth-cookie";
 import toast from "react-hot-toast";
@@ -189,7 +189,7 @@ export default function RegisterPage() {
             >
               {loading
                 ? <span className="flex items-center justify-center gap-2">
-                    <InlineSpinner />
+                    <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
                     Creating account...
                   </span>
                 : "Create Free Account"

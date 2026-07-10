@@ -18,6 +18,8 @@ export default function CartPage() {
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
   const discount = couponApplied ? couponDiscount : 0;
+  // GST must be calculated on the amount AFTER the coupon discount, same as
+  // the Checkout page — otherwise Cart and Checkout totals disagree.
   const taxable = Math.max(0, subtotal - discount);
   const cgst = taxable * cgstRate;
   const sgst = taxable * sgstRate;
@@ -70,7 +72,7 @@ export default function CartPage() {
           <div className="lg:col-span-2 space-y-4">
             <AnimatePresence>
               {cart.map((item, i) => (
-                <motion.div key={`${item.productId}-${item.variantId}`}
+                <motion.div key={`${item.productId}-${item.variantId}-${item.pack}`}
                   initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ delay: i * 0.05 }}
                   style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 16, display: "flex", gap: 16, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
                   {/* Image */}
@@ -82,14 +84,16 @@ export default function CartPage() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <h3 style={{ fontWeight: 600, color: "#0C1E39", fontSize: "0.875rem", marginBottom: 2 }} className="line-clamp-1">{item.name}</h3>
-                    <p style={{ fontSize: "0.75rem", color: "#6B7280", marginBottom: 12 }}>{item.unit} · {item.sku}</p>
+                    <p style={{ fontSize: "0.75rem", color: "#6B7280", marginBottom: 12 }}>
+                      {item.unit} · {item.sku}{item.pack ? ` · Pack of ${item.pack}` : ""}
+                    </p>
                     <div className="flex items-center justify-between">
                       <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#F8F8F8", padding: 2 }}>
-                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.qty - 1, item.pack)}
+                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.pack, item.qty - 1)}
                           style={{ height: 28, width: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, color: "#0C1E39", transition: "background 0.15s" }}
                           className="hover:bg-[#0C1E39]/10 transition-colors"><Minus size={12} /></button>
                         <span style={{ width: 24, textAlign: "center", fontSize: "0.875rem", fontWeight: 700, color: "#0C1E39" }}>{item.qty}</span>
-                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.qty + 1, item.pack)}
+                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.pack, item.qty + 1)}
                           style={{ height: 28, width: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, color: "#0C1E39", transition: "background 0.15s" }}
                           className="hover:bg-[#0C1E39]/10 transition-colors"><Plus size={12} /></button>
                       </div>

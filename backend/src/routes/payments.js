@@ -5,6 +5,7 @@ const prisma = require("../utils/prisma");
 const { authUser } = require("../middleware/auth");
 const { generateInvoiceNumber } = require("../utils/orderNumber");
 const baselinker = require("../utils/baselinker");
+const { calculateGst } = require("../utils/tax");
 
 // POST /api/payments/create-razorpay-order
 router.post("/create-razorpay-order", authUser, async (req, res) => {
@@ -96,16 +97,16 @@ router.post("/verify", authUser, async (req, res) => {
     return res.json({ message: "Payment already verified" });
   }
 
-  // Recalculate correct dynamic GST from settings
-  const gstPct = parseFloat(settings.gst_rate || "5.0");
-  const cgstRateVal = gstPct / 200; // e.g. 0.025 for 5% GST
-  const sgstRateVal = gstPct / 200;
-  const subtotal    = Number(order.subtotal);
-  const discount    = Number(order.discountAmount || 0);
-  const cgstAmount  = +((subtotal - discount) * cgstRateVal).toFixed(2);
-  const sgstAmount  = +((subtotal - discount) * sgstRateVal).toFixed(2);
-  const shipping    = Number(order.shippingCharge || 0);
-  const rawTotal    = (subtotal - discount) + cgstAmount + sgstAmount + shipping;
+  // Recalculate GST using the store's currently configured rate (NOT a
+  // hardcoded 2.5%/2.5%). This must match what was charged at order-creation
+  // time in orders.js — using a different hardcoded rate here would silently
+  // overwrite the order's totalAmount with a number that doesn't match what
+  // Razorpay actually collected. See audit doc §1.3.
+  const subtotal   = Number(order.subtotal);
+  const discount   = Number(order.discountAmount || 0);
+  const shipping   = Number(order.shippingCharge || 0);
+  const { cgstRate, sgstRate, cgstAmount, sgstAmount, totalAmount: rawTotal } =
+    calculateGst(subtotal, discount, settings.gst_rate, shipping);
   const totalAmount = Math.round(rawTotal);
 
   try {
@@ -141,7 +142,7 @@ router.post("/verify", authUser, async (req, res) => {
           status: "issued",
           subtotal:       order.subtotal,
           discountAmount: order.discountAmount,
-          cgstRate: gstPct / 2, sgstRate: gstPct / 2, igstRate: 0,
+          cgstRate, sgstRate, igstRate: 0,
           cgstAmount, sgstAmount, igstAmount: 0,
           totalAmount,
           sellerName:    settings.site_name    || "Zupwell",

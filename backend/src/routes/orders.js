@@ -3,6 +3,7 @@ const prisma = require("../utils/prisma");
 const { authUser } = require("../middleware/auth");
 const { generateOrderNumber, generateInvoiceNumber } = require("../utils/orderNumber");
 const baselinker = require("../utils/baselinker");
+const { calculateGst } = require("../utils/tax");
 
 // POST /api/orders - create order
 router.post("/", authUser, async (req, res) => {
@@ -65,20 +66,14 @@ router.post("/", authUser, async (req, res) => {
   const cfg = {};
   settingRows.forEach(r => { cfg[r.key] = r.value; });
 
-  // GST (split equally as CGST + SGST)
-  const gstPct = parseFloat(cfg.gst_rate || "5.0");
-  const cgstRate = gstPct / 2;
-  const sgstRate = gstPct / 2;
-  const taxableAmount = subtotal - discountAmount;
-  const cgstAmount = +(taxableAmount * cgstRate / 100).toFixed(2);
-  const sgstAmount = +(taxableAmount * sgstRate / 100).toFixed(2);
-
   // Dynamic shipping calculation (Free for prepaid Razorpay)
   const freeThreshold = parseFloat(cfg.free_shipping_threshold || "500");
   const defaultCharge = parseFloat(cfg.default_shipping_charge || "50");
   const shippingCharge = paymentMethod === "razorpay" ? 0 : (subtotal >= freeThreshold ? 0 : defaultCharge);
 
-  const totalAmount = taxableAmount + cgstAmount + sgstAmount + shippingCharge;
+  // GST (split equally as CGST + SGST) — single shared implementation, see utils/tax.js
+  const { cgstRate, sgstRate, taxableAmount, cgstAmount, sgstAmount, totalAmount } =
+    calculateGst(subtotal, discountAmount, cfg.gst_rate, shippingCharge);
 
   const orderNumber = await generateOrderNumber();
 

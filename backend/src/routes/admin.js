@@ -5,9 +5,7 @@ const prisma = require("../utils/prisma");
 const { signAccess } = require("../utils/jwt");
 const { authAdmin } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
-const { sanitizeBody, validatePagination, validateProductBody, validateOrderStatus, validateIdParam } = require("../middleware/validate");
-
-const VALID_ORDER_STATUSES = ["pending","confirmed","processing","shipped","delivered","cancelled"];
+const { sanitizeBody, validatePagination, validateProductBody, validateOrderStatus, validateIdParam, VALID_ORDER_STATUSES } = require("../middleware/validate");
 
 // ── Admin Auth ────────────────────────────────────────
 router.post("/auth/login", async (req, res) => {
@@ -489,7 +487,7 @@ router.get("/orders/:id", authAdmin, async (req, res) => {
 });
 
 // BUG FIX: Added try/catch + status validation
-router.put("/orders/:id/status", validateOrderStatus, authAdmin, async (req, res) => {
+router.put("/orders/:id/status", authAdmin, validateOrderStatus, async (req, res) => {
   try {
     const { status } = req.body;
     if (!status || !VALID_ORDER_STATUSES.includes(status)) {

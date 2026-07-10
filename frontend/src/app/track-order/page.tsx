@@ -6,7 +6,6 @@ import { Search, Package, MapPin, Truck, CheckCircle, Share2 } from "lucide-reac
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { API_URL } from "@/lib/api";
-import { InlineSpinner } from "@/components/ui";
 
 export default function TrackOrderPage() {
   const [orderNumber, setOrderNumber] = useState("");
@@ -142,7 +141,7 @@ export default function TrackOrderPage() {
                 style={{ height: "46px", width: "46px" }}
               >
                 {loading ? (
-                  <InlineSpinner />
+                  <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                 ) : (
                   <Search size={18} />
                 )}

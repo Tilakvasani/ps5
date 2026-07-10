@@ -10,7 +10,6 @@ import { useStore } from "@/lib/store";
 import { ordersApi, accountApi, paymentsApi } from "@/lib/api";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { InlineSpinner } from "@/components/ui";
 
 const STEPS = ["Address", "Payment", "Review"];
 
@@ -358,7 +357,7 @@ export default function CheckoutPage() {
                     onClick={handlePlaceOrder} disabled={loading || !agreedToTerms}
                     className="btn-primary flex-1 py-3 disabled:opacity-50 disabled:cursor-not-allowed">
                     {loading
-                       ? <span className="flex items-center justify-center gap-2"><InlineSpinner />Placing Order...</span>
+                       ? <span className="flex items-center justify-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Placing Order...</span>
                       : `Place Order · ₹${total.toFixed(0)}`}
                   </motion.button>
                 </div>

@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { 
   Save, Upload, X, Globe, Mail, ShieldAlert, 
-  Award, FileText, Share2, HelpCircle, Key, CreditCard, Lock, Settings 
+  Award, FileText, Share2, HelpCircle, Key, CreditCard, Lock, Settings,
+  ShoppingBag, MessageCircle, FlaskConical, Scale, RotateCcw, Truck, ShieldCheck
 } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import { invalidateSettingsCache } from "@/lib/useSettings";
@@ -450,6 +451,7 @@ const SETTING_GROUPS = [
     desc: "Controls the big headline and tagline on the home page",
     keys: [
       { key: "hero_title",        label: "Hero Title (English)", type: "text" },
+      { key: "hero_tagline",      label: "Hero Tagline (Gujarati/Hindi)", type: "text" },
       { key: "hero_badge",        label: "Top Badge Text", type: "text" },
       { key: "hero_subtext",      label: "Hero Subtext", type: "textarea" },
       { key: "hero_stat1_value",  label: "Stat 1 Value (e.g. 200+)", type: "text" },
@@ -567,7 +569,7 @@ const SETTING_GROUPS = [
   },
   {
     label: "Contact Us Page",
-    desc: "Content for Contact Us and Distributor Inquiry section",
+    desc: "Content for Contact Us and Distributor Inquiry section. (Social links live under General & Orders → Social Media, not here.)",
     keys: [
       { key: "contact_whatsapp",      label: "WhatsApp Number (with country code, e.g. 916355466208)", type: "text" },
       { key: "contact_support_email", label: "Support Email", type: "email" },
@@ -594,43 +596,58 @@ const SETTING_GROUPS = [
     ],
   },
   {
-    label: "Legal Policy Pages",
-    desc: "Configure content for all 5 legal policies",
+    label: "Privacy Policy Page",
+    desc: "Configure content for the Privacy Policy page",
     keys: [
-      // Privacy Policy
-      { key: "policy_privacy_badge", label: "Privacy Policy — Badge", type: "text" },
-      { key: "policy_privacy_title", label: "Privacy Policy — Title", type: "text" },
-      { key: "policy_privacy_subtitle", label: "Privacy Policy — Subtitle", type: "textarea" },
-      { key: "policy_privacy_updated", label: "Privacy Policy — Last Updated", type: "text" },
-      { key: "policy_privacy_sections_json", label: "Privacy Policy — Sections List", type: "policy_sections_list" },
-
-      // Terms of Service
-      { key: "policy_terms_badge", label: "Terms of Service — Badge", type: "text" },
-      { key: "policy_terms_title", label: "Terms of Service — Title", type: "text" },
-      { key: "policy_terms_subtitle", label: "Terms of Service — Subtitle", type: "textarea" },
-      { key: "policy_terms_updated", label: "Terms of Service — Last Updated", type: "text" },
-      { key: "policy_terms_sections_json", label: "Terms of Service — Sections List", type: "policy_sections_list" },
-
-      // Refund Policy
-      { key: "policy_refund_badge", label: "Refund Policy — Badge", type: "text" },
-      { key: "policy_refund_title", label: "Refund Policy — Title", type: "text" },
-      { key: "policy_refund_subtitle", label: "Refund Policy — Subtitle", type: "textarea" },
-      { key: "policy_refund_updated", label: "Refund Policy — Last Updated", type: "text" },
-      { key: "policy_refund_sections_json", label: "Refund Policy — Sections List", type: "policy_sections_list" },
-
-      // Shipping Policy
-      { key: "policy_shipping_badge", label: "Shipping Policy — Badge", type: "text" },
-      { key: "policy_shipping_title", label: "Shipping Policy — Title", type: "text" },
-      { key: "policy_shipping_subtitle", label: "Shipping Policy — Subtitle", type: "textarea" },
-      { key: "policy_shipping_updated", label: "Shipping Policy — Last Updated", type: "text" },
-      { key: "policy_shipping_sections_json", label: "Shipping Policy — Sections List", type: "policy_sections_list" },
-
-      // Legal Disclaimer
-      { key: "policy_disclaimer_badge", label: "Legal Disclaimer — Badge", type: "text" },
-      { key: "policy_disclaimer_title", label: "Legal Disclaimer — Title", type: "text" },
-      { key: "policy_disclaimer_subtitle", label: "Legal Disclaimer — Subtitle", type: "textarea" },
-      { key: "policy_disclaimer_updated", label: "Legal Disclaimer — Last Updated", type: "text" },
-      { key: "policy_disclaimer_sections_json", label: "Legal Disclaimer — Sections List", type: "policy_sections_list" },
+      { key: "policy_privacy_badge", label: "Badge", type: "text" },
+      { key: "policy_privacy_title", label: "Title", type: "text" },
+      { key: "policy_privacy_subtitle", label: "Subtitle", type: "textarea" },
+      { key: "policy_privacy_updated", label: "Last Updated", type: "text" },
+      { key: "policy_privacy_sections_json", label: "Sections List", type: "policy_sections_list" },
+    ],
+  },
+  {
+    label: "Terms of Service Page",
+    desc: "Configure content for the Terms of Service page",
+    keys: [
+      { key: "policy_terms_badge", label: "Badge", type: "text" },
+      { key: "policy_terms_title", label: "Title", type: "text" },
+      { key: "policy_terms_subtitle", label: "Subtitle", type: "textarea" },
+      { key: "policy_terms_updated", label: "Last Updated", type: "text" },
+      { key: "policy_terms_sections_json", label: "Sections List", type: "policy_sections_list" },
+    ],
+  },
+  {
+    label: "Refund Policy Page",
+    desc: "Configure content for the Refund Policy page",
+    keys: [
+      { key: "policy_refund_badge", label: "Badge", type: "text" },
+      { key: "policy_refund_title", label: "Title", type: "text" },
+      { key: "policy_refund_subtitle", label: "Subtitle", type: "textarea" },
+      { key: "policy_refund_updated", label: "Last Updated", type: "text" },
+      { key: "policy_refund_sections_json", label: "Sections List", type: "policy_sections_list" },
+    ],
+  },
+  {
+    label: "Shipping Policy Page",
+    desc: "Configure content for the Shipping Policy page",
+    keys: [
+      { key: "policy_shipping_badge", label: "Badge", type: "text" },
+      { key: "policy_shipping_title", label: "Title", type: "text" },
+      { key: "policy_shipping_subtitle", label: "Subtitle", type: "textarea" },
+      { key: "policy_shipping_updated", label: "Last Updated", type: "text" },
+      { key: "policy_shipping_sections_json", label: "Sections List", type: "policy_sections_list" },
+    ],
+  },
+  {
+    label: "Legal Disclaimer Page",
+    desc: "Configure content for the Legal Disclaimer page",
+    keys: [
+      { key: "policy_disclaimer_badge", label: "Badge", type: "text" },
+      { key: "policy_disclaimer_title", label: "Title", type: "text" },
+      { key: "policy_disclaimer_subtitle", label: "Subtitle", type: "textarea" },
+      { key: "policy_disclaimer_updated", label: "Last Updated", type: "text" },
+      { key: "policy_disclaimer_sections_json", label: "Sections List", type: "policy_sections_list" },
     ],
   },
   {
@@ -638,6 +655,8 @@ const SETTING_GROUPS = [
     keys: [
       { key: "social_instagram", label: "Instagram URL", type: "text" },
       { key: "social_facebook",  label: "Facebook URL",  type: "text" },
+      { key: "social_youtube",   label: "YouTube URL",   type: "text" },
+      { key: "social_linkedin",  label: "LinkedIn URL",  type: "text" },
     ],
   },
   {
@@ -686,13 +705,25 @@ const SETTING_GROUPS = [
   },
 ];
 
+// ── ONE TAB PER PAGE ────────────────────────────────────────────────────
+// General & Orders / Payment & SMTP are the only "global" (non-page)
+// tabs — everything else maps 1:1 to an actual storefront page, so
+// "where do I edit page X" is always obvious: it's the tab called X.
 const TABS = [
-  { id: "general", label: "General & Orders", desc: "Store information, social links, and order fees", icon: Globe, groups: ["Store Information", "Social Media", "Order Settings"] },
-  { id: "payments", label: "Payment & SMTP", desc: "Razorpay keys and SMTP mail servers configuration", icon: CreditCard, groups: ["Razorpay", "Email (SMTP)"] },
-  { id: "home", label: "Home Page Details", desc: "Hero, stats, features, and certifications logos", icon: Settings, groups: ["Home Page — Hero Section", "Home Page — Why Zupwell Features", "Home Page — Certificate Logos", "Home Page — Founder's Message"] },
-  { id: "storefront", label: "Storefront Pages", desc: "Configuration for Shop, Science & Certifications", icon: Award, groups: ["Shop Page Settings", "Certifications Settings", "Science Page"] },
-  { id: "inner", label: "Inner Page Content", desc: "Editable lists for About Us details and FAQs page", icon: HelpCircle, groups: ["About Us Page", "FAQs Page"] },
-  { id: "legal", label: "Legal Policies", desc: "Manage detailed sections for all 5 legal policies", icon: FileText, groups: ["Legal Policy Pages"] },
+  { id: "general",     label: "General & Orders",     desc: "Store information, social links, and order fees",              icon: Globe,        groups: ["Store Information", "Social Media", "Order Settings"] },
+  { id: "payments",    label: "Payment & SMTP",        desc: "Razorpay keys and SMTP mail server credentials",                icon: CreditCard,   groups: ["Razorpay", "Email (SMTP)"] },
+  { id: "home",        label: "Home Page",             desc: "Hero, stats, features, and certification logos",                icon: Settings,     groups: ["Home Page — Hero Section", "Home Page — Why Zupwell Features", "Home Page — Certificate Logos", "Home Page — Founder's Message"] },
+  { id: "about",       label: "About Page",            desc: "Brand story, mission, pillars, and future pipeline",            icon: Award,        groups: ["About Us Page"] },
+  { id: "shop",        label: "Shop / Products Page",  desc: "Badge, title, and subtext shown on the Shop page",              icon: ShoppingBag,  groups: ["Shop Page Settings"] },
+  { id: "science",     label: "Science Page",          desc: "Content for the Science & Quality page sections",               icon: FlaskConical, groups: ["Science Page"] },
+  { id: "certifications", label: "Certifications Page", desc: "Certificate details and document upload paths",                icon: ShieldCheck,  groups: ["Certifications Settings"] },
+  { id: "contact",     label: "Contact Page",          desc: "Contact Us hero and distributor inquiry form copy",             icon: MessageCircle, groups: ["Contact Us Page"] },
+  { id: "faqs",        label: "FAQs Page",             desc: "Frequently Asked Questions accordions",                        icon: HelpCircle,   groups: ["FAQs Page"] },
+  { id: "legal-privacy",    label: "Privacy Policy Page",    desc: "Content sections for the Privacy Policy page",     icon: FileText, groups: ["Privacy Policy Page"] },
+  { id: "legal-terms",      label: "Terms of Service Page",  desc: "Content sections for the Terms of Service page",  icon: Scale,    groups: ["Terms of Service Page"] },
+  { id: "legal-refund",     label: "Refund Policy Page",     desc: "Content sections for the Refund Policy page",     icon: RotateCcw, groups: ["Refund Policy Page"] },
+  { id: "legal-shipping",   label: "Shipping Policy Page",   desc: "Content sections for the Shipping Policy page",   icon: Truck,    groups: ["Shipping Policy Page"] },
+  { id: "legal-disclaimer", label: "Legal Disclaimer Page",  desc: "Content sections for the Legal Disclaimer page",  icon: ShieldAlert, groups: ["Legal Disclaimer Page"] },
 ];
 
 export default function AdminSettingsPage() {

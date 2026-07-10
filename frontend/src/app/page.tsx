@@ -236,6 +236,16 @@ export default function HomePage() {
               })}
             </motion.h1>
 
+            {s(settings, "hero_tagline") && (
+              <motion.p
+                {...fadeUp(0.09)}
+                className="text-sm sm:text-base font-semibold mb-4"
+                style={{ color: "var(--or)" }}
+              >
+                {s(settings, "hero_tagline")}
+              </motion.p>
+            )}
+
             <motion.p 
               {...fadeUp(0.12)} 
               className="text-base sm:text-lg leading-relaxed mb-10 max-w-xl text-left" 
