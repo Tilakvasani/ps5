@@ -34,13 +34,15 @@ export default function Footer() {
     { key: "cert_iso_logo",   label: "ISO" },
     { key: "cert_gmp_logo",   label: "GMP" },
     { key: "cert_haccp_logo", label: "HACCP" },
+    { key: "cert_gst_logo",   label: "GST" },
+    { key: "cert_iec_logo",   label: "IEC" },
+    { key: "cert_msme_logo",  label: "MSME" },
+    { key: "cert_tm_logo",    label: "TM" },
   ];
 
   const socials = [
     { href: s.social_instagram, icon: <InstagramIcon />, label: "Instagram" },
     { href: s.social_facebook,  icon: <FacebookIcon />,  label: "Facebook" },
-    { href: s.social_linkedin,  icon: <LinkedinIcon />,  label: "LinkedIn" },
-    { href: s.social_youtube,   icon: <YoutubeIcon />,   label: "YouTube" },
   ].filter(s => s.href);
 
   const colHeadStyle = {
@@ -192,17 +194,34 @@ export default function Footer() {
           {certEntries.map(({ key, label }) => {
             const val = s[key];
             const isIso = label.toUpperCase().includes("ISO");
+            const isGst = label.toUpperCase().includes("GST");
+            const isIec = label.toUpperCase().includes("IEC");
+            const isMsme = label.toUpperCase().includes("MSME");
+            const isTm = label.toUpperCase().includes("TM");
 
             if (val) {
-              // ISO needs a white circular background to look clean on dark footer
-              if (isIso) {
+              // ISO and MSME need a white circular background to look clean on dark footer
+              if (isIso || isMsme) {
                 return (
                   <div
                     key={key}
                     className="inline-flex items-center justify-center shrink-0 rounded-full"
-                    style={{ background: "#FFFFFF", width: "48px", height: "48px", padding: "3px" }}
+                    style={{ background: "#FFFFFF", width: "40px", height: "40px", padding: "2px" }}
                   >
                     <img src={val} alt={label} className="w-full h-full object-contain rounded-full" />
+                  </div>
+                );
+              }
+              // GST, IEC and TM already have complete circular layouts, so render with CSS scale crop to remove outer margins/checkers
+              if (isGst || isIec || isTm) {
+                const scaleClass = isGst ? "scale-[1.12]" : "scale-[1.08]";
+                return (
+                  <div
+                    key={key}
+                    className="inline-flex items-center justify-center shrink-0 rounded-full overflow-hidden relative"
+                    style={{ background: "#FFFFFF", width: "40px", height: "40px" }}
+                  >
+                    <img src={val} alt={label} className={`w-full h-full object-contain rounded-full ${scaleClass}`} />
                   </div>
                 );
               }
@@ -212,7 +231,7 @@ export default function Footer() {
             }
 
             return (
-              <CertLogo key={key} label={label} className={isIso ? "h-12" : "h-10 opacity-100 transition-opacity"} />
+              <CertLogo key={key} label={label} className="h-10 opacity-100 transition-opacity" />
             );
           })}
         </div>

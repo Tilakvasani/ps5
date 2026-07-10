@@ -451,7 +451,6 @@ const SETTING_GROUPS = [
     desc: "Controls the big headline and tagline on the home page",
     keys: [
       { key: "hero_title",        label: "Hero Title (English)", type: "text" },
-      { key: "hero_tagline",      label: "Hero Tagline (Gujarati/Hindi)", type: "text" },
       { key: "hero_badge",        label: "Top Badge Text", type: "text" },
       { key: "hero_subtext",      label: "Hero Subtext", type: "textarea" },
       { key: "hero_stat1_value",  label: "Stat 1 Value (e.g. 200+)", type: "text" },
@@ -467,20 +466,6 @@ const SETTING_GROUPS = [
     ],
   },
   {
-    label: "Home Page — Why Zupwell Features",
-    desc: "The 4 feature cards (icon, title, description). Icons are fixed.",
-    keys: [
-      { key: "feature1_title", label: "Feature 1 Title", type: "text" },
-      { key: "feature1_desc",  label: "Feature 1 Description", type: "textarea" },
-      { key: "feature2_title", label: "Feature 2 Title", type: "text" },
-      { key: "feature2_desc",  label: "Feature 2 Description", type: "textarea" },
-      { key: "feature3_title", label: "Feature 3 Title", type: "text" },
-      { key: "feature3_desc",  label: "Feature 3 Description", type: "textarea" },
-      { key: "feature4_title", label: "Feature 4 Title", type: "text" },
-      { key: "feature4_desc",  label: "Feature 4 Description", type: "textarea" },
-    ],
-  },
-  {
     label: "Home Page — Certificate Logos",
     desc: "Upload or paste image URLs for official logo icons",
     keys: [
@@ -488,6 +473,10 @@ const SETTING_GROUPS = [
       { key: "cert_iso_logo",   label: "ISO Logo",    type: "image" },
       { key: "cert_gmp_logo",   label: "GMP Logo",    type: "image" },
       { key: "cert_haccp_logo", label: "HACCP Logo",  type: "image" },
+      { key: "cert_gst_logo",   label: "GST Logo",    type: "image" },
+      { key: "cert_iec_logo",   label: "IEC Logo",    type: "image" },
+      { key: "cert_msme_logo",  label: "MSME Logo",   type: "image" },
+      { key: "cert_tm_logo",    label: "TM Logo",     type: "image" },
     ],
   },
   {
@@ -712,7 +701,7 @@ const SETTING_GROUPS = [
 const TABS = [
   { id: "general",     label: "General & Orders",     desc: "Store information, social links, and order fees",              icon: Globe,        groups: ["Store Information", "Social Media", "Order Settings"] },
   { id: "payments",    label: "Payment & SMTP",        desc: "Razorpay keys and SMTP mail server credentials",                icon: CreditCard,   groups: ["Razorpay", "Email (SMTP)"] },
-  { id: "home",        label: "Home Page",             desc: "Hero, stats, features, and certification logos",                icon: Settings,     groups: ["Home Page — Hero Section", "Home Page — Why Zupwell Features", "Home Page — Certificate Logos", "Home Page — Founder's Message"] },
+  { id: "home",        label: "Home Page",             desc: "Hero, stats, features, and certification logos",                icon: Settings,     groups: ["Home Page — Hero Section", "Home Page — Certificate Logos", "Home Page — Founder's Message"] },
   { id: "about",       label: "About Page",            desc: "Brand story, mission, pillars, and future pipeline",            icon: Award,        groups: ["About Us Page"] },
   { id: "shop",        label: "Shop / Products Page",  desc: "Badge, title, and subtext shown on the Shop page",              icon: ShoppingBag,  groups: ["Shop Page Settings"] },
   { id: "science",     label: "Science Page",          desc: "Content for the Science & Quality page sections",               icon: FlaskConical, groups: ["Science Page"] },

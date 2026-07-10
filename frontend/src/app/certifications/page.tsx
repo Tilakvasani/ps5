@@ -9,7 +9,7 @@ import { useSettings } from "@/lib/useSettings";
 export default function CertificationsPage() {
   const { raw: settingsRaw } = useSettings();
   
-  let certs = [];
+  let certs: Array<{ label: string; title: React.ReactNode; desc: React.ReactNode; fileUrl?: string }> = [];
   try {
     const parsed = JSON.parse(settingsRaw["certifications_list_json"] || "");
     if (Array.isArray(parsed) && parsed.length > 0) {
@@ -42,6 +42,34 @@ export default function CertificationsPage() {
         title: settingsRaw["cert_haccp_title"] || "Hazard Analysis Critical Control Point",
         desc: settingsRaw["cert_haccp_desc"] || "HACCP Certified system. A systematic preventive approach to food safety from biological, chemical, and physical hazards in production processes.",
         fileUrl: settingsRaw["cert_haccp_file"] || "/haccp.png",
+      },
+      {
+        label: "GST",
+        title: settingsRaw["cert_gst_title"] || "Goods & Services Tax Registered",
+        desc: settingsRaw["cert_gst_desc"] || "Registered under India's Goods and Services Tax (GST) system. This certifies compliance with national trade regulations and tax standards, enabling seamless nationwide operations.",
+        fileUrl: settingsRaw["cert_gst_file"] || "/gst.png",
+      },
+      {
+        label: "IEC",
+        title: settingsRaw["cert_iec_title"] || "Import Export Code (IEC) Registered",
+        desc: settingsRaw["cert_iec_desc"] || "Registered under India's Directorate General of Foreign Trade (DGFT), Ministry of Commerce. This Import Export Code (IEC) certifies our eligibility to import ingredients and export finished premium supplements internationally.",
+        fileUrl: settingsRaw["cert_iec_file"] || "/iec.png",
+      },
+      {
+        label: "MSME",
+        title: settingsRaw["cert_msme_title"] || "Micro, Small & Medium Enterprises (MSME) Registered",
+        desc: settingsRaw["cert_msme_desc"] || "Registered under Ministry of Micro, Small and Medium Enterprises, Government of India. This certification reflects our validation as an approved manufacturing enterprise in the consumer health sector.",
+        fileUrl: settingsRaw["cert_msme_file"] || "/msme.png",
+      },
+      {
+        label: "TM",
+        title: settingsRaw["cert_tm_title"] || "Trademark Registered",
+        desc: settingsRaw["cert_tm_desc"] || (
+          <>
+            <strong className="font-extrabold text-[#0C1E39]">'Zupwell'</strong> has been officially filed for trademark registration under the Trade Marks Act and has successfully cleared the formalities check stage. The application is now under examination by the Registry.
+          </>
+        ),
+        fileUrl: settingsRaw["cert_tm_file"] || "/tm.png",
       },
     ];
   }

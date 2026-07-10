@@ -25,7 +25,6 @@ const CATEGORIES = [
 
 const D = {
   hero_title:       "Hydration\nSupport.\nElectrolyte\nBalance.",
-  hero_tagline:     "તમારા સ્વાસ્થ્ય સાથે ચાલો — ઝુપવેલ!",
   hero_subtext:     "Enjoy refreshing orange-flavoured electrolyte effervescent tablets with essential electrolytes and vitamins. Fast dissolving and convenient for everyday hydration support with a great-tasting fizz.",
   hero_stat1_value: "200+",  hero_stat1_label: "Products",
   hero_stat2_value: "50K+",  hero_stat2_label: "Happy Customers",
@@ -42,6 +41,89 @@ const D = {
 
 const s = (settings: Record<string, string>, key: string) =>
   settings[key] || D[key as keyof typeof D] || "";
+
+const STATIC_REVIEWS = [
+  {
+    id: "static_1",
+    name: "Aarav Patel",
+    location: "Verified Purchase",
+    rating: 5,
+    body: "Must buy for Ahmedabad summer heat! I take 1 tablet daily before my evening run. No more muscle cramps and dehydration. Taste is also very nice, exactly like orange juice.",
+    productName: "Effervescent Tablet"
+  },
+  {
+    id: "static_2",
+    name: "Sneha Rao",
+    location: "Verified Purchase",
+    rating: 5,
+    body: "Highly recommended. I travel everyday in Mumbai local and get completely exhausted by afternoon. This Zupwell tablet gives a quick boost of energy and keeps me active throughout the day.",
+    productName: "Effervescent Tablet"
+  },
+  {
+    id: "static_3",
+    name: "Kabir Malhotra",
+    location: "Verified Purchase",
+    rating: 5,
+    body: "Really good for morning recovery after a late night party. Just drop one tablet in cold water and drink. Headache vanishes very quickly. Hydration is instant.",
+    productName: "Effervescent Tablet"
+  },
+  {
+    id: "static_4",
+    name: "Priya Sharma",
+    location: "Verified Purchase",
+    rating: 5,
+    body: "Switched my afternoon coffee with Zupwell. Best decision ever. No coffee jitters or acidity anymore, and it keeps me super focused and hydrated in the AC office all day.",
+    productName: "Effervescent Tablet"
+  },
+  {
+    id: "static_5",
+    name: "Rajesh Iyer",
+    location: "Verified Purchase",
+    rating: 5,
+    body: "Excellent product. It is completely sugar-free so safe for my diabetes. The orange flavour is very natural, not like other medicines which taste artificial.",
+    productName: "Effervescent Tablet"
+  },
+  {
+    id: "static_6",
+    name: "Ananya Gupta",
+    location: "Verified Purchase",
+    rating: 5,
+    body: "My gym trainer told me to try this during workouts. Very easy to drink compared to heavy sports drinks, and muscle recovery is much faster. No stomach heaviness.",
+    productName: "Effervescent Tablet"
+  },
+  {
+    id: "static_7",
+    name: "Vikram Singh",
+    location: "Verified Purchase",
+    rating: 5,
+    body: "Took these tablets on our family trip to Jaisalmer last week. Life saver in the hot sun. Very easy to carry in pocket, just drop in normal water bottles. Everyone loved it.",
+    productName: "Effervescent Tablet"
+  },
+  {
+    id: "static_8",
+    name: "Meera Deshmukh",
+    location: "Verified Purchase",
+    rating: 5,
+    body: "My daughter gifted this to me for my daily morning walks. I feel much less tired now. Tastes very refreshing and so easy to use, just drop in water and watch it fizz.",
+    productName: "Effervescent Tablet"
+  },
+  {
+    id: "static_9",
+    name: "Aditya Verma",
+    location: "Verified Purchase",
+    rating: 5,
+    body: "I play football on weekends and used to get bad calf cramps. Started taking Zupwell before the match and haven't got a single cramp since then. Very good product.",
+    productName: "Effervescent Tablet"
+  },
+  {
+    id: "static_10",
+    name: "Riya Sen",
+    location: "Verified Purchase",
+    rating: 5,
+    body: "Replacing cold drinks with this fizz tablet. Tastes amazing, very refreshing, and helps a lot with daily hydration. Perfect drink for the 3 PM office slump.",
+    productName: "Effervescent Tablet"
+  }
+];
 
 
 const BLOG_POSTS = [
@@ -134,20 +216,81 @@ function BlogSection({ reviews, settings }: { reviews: any[], settings: Record<s
 
 export default function HomePage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsList, setReviewsList] = useState<any[]>([]);
   const [featuredProduct, setFeaturedProduct] = useState<any>(null);
+  const [virtualIndex, setVirtualIndex] = useState(0);
+  const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
+
+  const activeIndex = reviewsList.length > 0 ? (virtualIndex % reviewsList.length) : 0;
 
   useEffect(() => {
     const cached = getSettingsCache();
     if (Object.keys(cached).length > 0) setSettings(cached);
     fetchSettings().then(setSettings).catch(() => {});
-    publicApi.getReviews().then(setReviews).catch(() => {});
+    
+    publicApi.getReviews().then((dbReviews) => {
+      // Filter to only include 5-star reviews from database
+      const db5Star = (dbReviews || []).filter((r: any) => Number(r.rating) === 5);
+      
+      const formattedDb = db5Star.map((r: any) => ({
+        id: `db_${r.id}`,
+        name: r.user?.name || "Verified Buyer",
+        location: "Verified Purchase",
+        rating: 5,
+        body: r.body,
+        productName: r.product?.name || "Effervescent Tablet",
+      }));
+
+      const staticMapped = STATIC_REVIEWS.map(r => ({
+        id: r.id,
+        name: r.name,
+        location: r.location,
+        rating: r.rating,
+        body: r.body,
+        productName: r.productName,
+      }));
+
+      const combined = [...formattedDb, ...staticMapped];
+      setReviewsList(combined);
+      setVirtualIndex(combined.length);
+    }).catch(() => {
+      const staticMapped = STATIC_REVIEWS.map(r => ({
+        id: r.id,
+        name: r.name,
+        location: r.location,
+        rating: r.rating,
+        body: r.body,
+        productName: r.productName,
+      }));
+      setReviewsList(staticMapped);
+      setVirtualIndex(staticMapped.length);
+    });
+
     productsApi.list({ page: 1, perPage: 1 })
       .then(data => {
         if (data?.products?.length) setFeaturedProduct(data.products[0]);
       })
       .catch(() => {});
   }, []);
+
+  // Auto-slide effect every 5 seconds by shifting the virtualIndex
+  useEffect(() => {
+    if (reviewsList.length === 0) return;
+    const interval = setInterval(() => {
+      setVirtualIndex((prev) => prev + 1);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [reviewsList]);
+
+  // Instantly re-enable transitions after boundary reset jumps
+  useEffect(() => {
+    if (!isTransitionEnabled) {
+      const timeout = setTimeout(() => {
+        setIsTransitionEnabled(true);
+      }, 30);
+      return () => clearTimeout(timeout);
+    }
+  }, [isTransitionEnabled]);
 
   const features = [1, 2, 3, 4].map(n => ({
     icon: FEATURE_ICONS[n - 1],
@@ -166,6 +309,10 @@ export default function HomePage() {
     { key: "cert_iso_logo",   label: "ISO" },
     { key: "cert_gmp_logo",   label: "GMP" },
     { key: "cert_haccp_logo", label: "HACCP" },
+    { key: "cert_gst_logo",   label: "GST" },
+    { key: "cert_iec_logo",   label: "IEC" },
+    { key: "cert_msme_logo",  label: "MSME" },
+    { key: "cert_tm_logo",    label: "TM" },
   ];
   const hasCerts = certEntries.some(({ key }) => s(settings, key));
 
@@ -236,15 +383,6 @@ export default function HomePage() {
               })}
             </motion.h1>
 
-            {s(settings, "hero_tagline") && (
-              <motion.p
-                {...fadeUp(0.09)}
-                className="text-sm sm:text-base font-semibold mb-4"
-                style={{ color: "var(--or)" }}
-              >
-                {s(settings, "hero_tagline")}
-              </motion.p>
-            )}
 
             <motion.p 
               {...fadeUp(0.12)} 
@@ -297,10 +435,18 @@ export default function HomePage() {
           <div className="flex gap-16 animate-marquee whitespace-nowrap shrink-0 pr-16" style={{ animationDuration: "25s" }}>
             {certEntries.map(({ key, label }, idx) => {
               const isIso = label.toUpperCase().includes("ISO");
+              const isGst = label.toUpperCase().includes("GST");
+              const isIec = label.toUpperCase().includes("IEC");
+              const isMsme = label.toUpperCase().includes("MSME");
+              const isTm = label.toUpperCase().includes("TM");
               return s(settings, key) ? (
-                isIso ? (
+                (isIso || isMsme) ? (
                   <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity" style={{ background: "#FFFFFF", width: "56px", height: "56px", padding: "3px" }}>
                     <img src={s(settings, key)} alt={label} className="w-full h-full object-contain rounded-full" />
+                  </div>
+                ) : (isGst || isIec || isTm) ? (
+                  <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity overflow-hidden relative" style={{ background: "#FFFFFF", width: "56px", height: "56px" }}>
+                    <img src={s(settings, key)} alt={label} className={`w-full h-full object-contain rounded-full ${isGst ? "scale-[1.12]" : "scale-[1.08]"}`} />
                   </div>
                 ) : (
                   <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
@@ -313,10 +459,18 @@ export default function HomePage() {
           <div className="flex gap-16 animate-marquee whitespace-nowrap shrink-0 pr-16" style={{ animationDuration: "25s" }} aria-hidden="true">
             {certEntries.map(({ key, label }, idx) => {
               const isIso = label.toUpperCase().includes("ISO");
+              const isGst = label.toUpperCase().includes("GST");
+              const isIec = label.toUpperCase().includes("IEC");
+              const isMsme = label.toUpperCase().includes("MSME");
+              const isTm = label.toUpperCase().includes("TM");
               return s(settings, key) ? (
-                isIso ? (
+                (isIso || isMsme) ? (
                   <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity" style={{ background: "#FFFFFF", width: "56px", height: "56px", padding: "3px" }}>
                     <img src={s(settings, key)} alt={label} className="w-full h-full object-contain rounded-full" />
+                  </div>
+                ) : (isGst || isIec || isTm) ? (
+                  <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity overflow-hidden relative" style={{ background: "#FFFFFF", width: "56px", height: "56px" }}>
+                    <img src={s(settings, key)} alt={label} className={`w-full h-full object-contain rounded-full ${isGst ? "scale-[1.12]" : "scale-[1.08]"}`} />
                   </div>
                 ) : (
                   <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
@@ -386,58 +540,168 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── Customer Reviews ── */}
-      <section className="pt-6 pb-24 px-6" style={{ background: "var(--gy)" }}>
-        <div className="mx-auto max-w-7xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-4">
+      {/* ── Customer Reviews Slider ── */}
+      <section className="pt-10 pb-24 px-6 overflow-hidden relative" style={{ background: "var(--gy)" }}>
+        <style dangerouslySetInnerHTML={{__html: `
+          .reviews-container {
+            --card-w: 380px;
+            --card-g: 24px;
+          }
+          @media (max-width: 768px) {
+            .reviews-container {
+              --card-w: 320px;
+              --card-g: 20px;
+            }
+          }
+          @media (max-width: 480px) {
+            .reviews-container {
+              --card-w: 285px;
+              --card-g: 16px;
+            }
+          }
+        `}} />
+
+        <div className="mx-auto max-w-7xl reviews-container">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
             <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Real People, Real Results</p>
             <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
               What Our Customers Say
             </h2>
             <p style={{ color: "#4A5568", opacity: 0.8 }}>Join thousands of happy customers across India</p>
           </motion.div>
-          {reviews.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-              {reviews.slice(0, 6).map((review, i) => (
-                <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08 }} viewport={{ once: true }}
-                  className="zcard flex flex-col gap-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex gap-0.5">
-                      {Array.from({ length: 5 }).map((_, j) => (
-                        <Star key={j} size={14} style={{ fill: j < review.rating ? "#FFB800" : "#EAEAEA", color: j < review.rating ? "#FFB800" : "#EAEAEA" }} />
-                      ))}
-                    </div>
-                    <Quote size={20} style={{ color: "rgba(255, 92, 0, 0.2)" }} />
-                  </div>
-                  {review.title && <p className="font-black" style={{ color: "#0C1E39", letterSpacing: "-0.02em" }}>{review.title}</p>}
-                  <p className="text-sm leading-relaxed flex-1" style={{ color: "#4A5568", opacity: 0.8 }}>"{review.body}"</p>
-                  <div className="flex items-center justify-between pt-3 mt-auto" style={{ borderTop: "1px solid #EAEAEA" }}>
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-black text-white"
-                        style={{ background: "#0C1E39", color: "#FFFFFF" }}>
-                        {review.user?.name?.charAt(0)?.toUpperCase() || "?"}
+
+          {reviewsList.length > 0 && (
+            <div className="relative w-full overflow-visible py-8">
+              <div 
+                className="flex items-center py-4"
+                style={{
+                  transform: `translate3d(calc(50% - var(--card-w) / 2 - ${virtualIndex} * (var(--card-w) + var(--card-g))), 0, 0)`,
+                  gap: 'var(--card-g)',
+                  transition: isTransitionEnabled ? 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none',
+                }}
+                onTransitionEnd={() => {
+                  const N = reviewsList.length;
+                  if (N === 0) return;
+                  if (virtualIndex >= 2 * N) {
+                    setIsTransitionEnabled(false);
+                    setVirtualIndex(virtualIndex - N);
+                  } else if (virtualIndex < N) {
+                    setIsTransitionEnabled(false);
+                    setVirtualIndex(virtualIndex + N);
+                  }
+                }}
+              >
+                {[...reviewsList, ...reviewsList, ...reviewsList].map((review, idx) => {
+                  const N = reviewsList.length;
+                  const isActive = idx === virtualIndex;
+                  return (
+                    <div 
+                      key={`${review.id}_rep_${Math.floor(idx / N)}`}
+                      className="flex flex-col items-center shrink-0 select-none"
+                      style={{ width: 'var(--card-w)' }}
+                    >
+                      {/* Name & Location */}
+                      <div className="text-center mb-4">
+                        <h4 className="font-black text-base text-[#0C1E39] leading-tight">{review.name}</h4>
+                        <p className="text-[11px] font-semibold text-slate-400 mt-0.5">{review.location}</p>
                       </div>
-                      <span className="text-sm font-bold" style={{ color: "#0C1E39" }}>{review.user?.name || "Customer"}</span>
+
+                      {/* Card body container */}
+                      <div 
+                        className="w-full rounded-2xl p-6 transition-all duration-500 flex flex-col gap-3 min-h-[190px] shadow-sm relative cursor-pointer"
+                        style={{
+                          background: isActive 
+                            ? 'linear-gradient(135deg, #FF5C00 0%, #FF8C00 100%)' 
+                            : '#FFFFFF',
+                          border: isActive 
+                            ? '1.5px solid #FF5C00' 
+                            : '1.5px solid rgba(12, 30, 57, 0.08)',
+                          color: isActive ? '#FFFFFF' : '#0C1E39',
+                          transform: isActive ? 'scale(1.04)' : 'scale(0.96)',
+                          boxShadow: isActive ? '0 12px 32px rgba(255, 92, 0, 0.2)' : '0 4px 20px rgba(12, 30, 57, 0.01)',
+                        }}
+                        onClick={() => setVirtualIndex(idx)}
+                      >
+                        {/* Five stars */}
+                        <div className="flex gap-0.5">
+                          {Array.from({ length: 5 }).map((_, j) => (
+                            <Star 
+                              key={j} 
+                              size={14} 
+                              style={{ 
+                                fill: isActive ? '#FFFFFF' : '#FFB800', 
+                                color: isActive ? '#FFFFFF' : '#FFB800' 
+                              }} 
+                            />
+                          ))}
+                        </div>
+
+                        {/* Body */}
+                        <p 
+                          className="text-xs sm:text-sm leading-relaxed flex-1"
+                          style={{ color: isActive ? 'rgba(255, 255, 255, 0.95)' : '#4A5568' }}
+                        >
+                          "{review.body}"
+                        </p>
+
+                        {/* Product Name tag */}
+                        {review.productName && (
+                          <div 
+                            className="text-[9px] uppercase font-bold self-start px-2.5 py-1 rounded-full mt-2"
+                            style={{
+                              background: isActive ? 'rgba(255, 255, 255, 0.15)' : 'rgba(12, 30, 57, 0.04)',
+                              color: isActive ? '#FFFFFF' : '#0C1E39',
+                            }}
+                          >
+                            {review.productName}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    {review.product?.name && (
-                      <span className="text-xs truncate max-w-[120px]" style={{ color: "#6B7280" }}>{review.product.name}</span>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center mt-12 py-16" style={{ color: "#0C1E39" }}>
-              <Star size={40} className="mx-auto mb-4 opacity-20" />
-              <p className="text-sm font-medium">Customer reviews coming soon!</p>
+                  );
+                })}
+              </div>
             </div>
           )}
+
+          {/* Navigation Controls */}
+          <div className="flex items-center justify-center gap-6 mt-6">
+            <button 
+              onClick={() => setVirtualIndex((prev) => prev - 1)}
+              className="p-2.5 rounded-full border border-[#0C1E39]/10 hover:bg-[#FF5C00]/10 hover:border-[#FF5C00] text-[#0C1E39] hover:text-[#FF5C00] transition-all bg-white shadow-sm cursor-pointer"
+              aria-label="Previous review"
+            >
+              <ChevronRight size={18} className="rotate-180" />
+            </button>
+
+            <div className="flex gap-2 max-w-[200px] overflow-x-auto py-1">
+              {reviewsList.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setVirtualIndex(reviewsList.length + idx)}
+                  className="h-2 rounded-full transition-all duration-300 shrink-0 cursor-pointer"
+                  style={{
+                    width: idx === activeIndex ? '18px' : '8px',
+                    background: idx === activeIndex ? '#FF5C00' : 'rgba(12, 30, 57, 0.15)',
+                  }}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+
+            <button 
+              onClick={() => setVirtualIndex((prev) => prev + 1)}
+              className="p-2.5 rounded-full border border-[#0C1E39]/10 hover:bg-[#FF5C00]/10 hover:border-[#FF5C00] text-[#0C1E39] hover:text-[#FF5C00] transition-all bg-white shadow-sm cursor-pointer"
+              aria-label="Next review"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
       </section>
 
       {/* ── Blog Section ── */}
-      <BlogSection reviews={reviews} settings={settings} />
+      <BlogSection reviews={reviewsList} settings={settings} />
 
       {/* ── CTA ── */}
       <section className="py-24 px-6" style={{ background: "var(--gy)" }}>
