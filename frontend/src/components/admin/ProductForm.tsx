@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Upload, X, Plus, Trash2 } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
+import { Toggle } from "@/components/ui";
 
 interface Props { productId?: number; }
 
@@ -144,11 +145,7 @@ export default function ProductForm({ productId }: Props) {
             {[["isActive", "Active (visible on store)"], ["isFeatured", "Featured on homepage"]].map(([k, label]) => (
               <label key={k} className="flex items-center justify-between cursor-pointer">
                 <span className="text-sm" style={{ color: '#0C1E39' }}>{label}</span>
-                <button type="button" onClick={() => setForm(f => ({ ...f, [k]: !(f as any)[k] }))}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${(form as any)[k] ? "bg-[#FF5C00]" : "bg-gray-300"}`}
-                  style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
-                  <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${(form as any)[k] ? "translate-x-6" : "translate-x-1"}`} />
-                </button>
+                <Toggle checked={!!(form as any)[k]} onChange={val => setForm(f => ({ ...f, [k]: val }))} />
               </label>
             ))}
           </div>

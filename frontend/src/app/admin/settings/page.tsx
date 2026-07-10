@@ -450,7 +450,6 @@ const SETTING_GROUPS = [
     desc: "Controls the big headline and tagline on the home page",
     keys: [
       { key: "hero_title",        label: "Hero Title (English)", type: "text" },
-      { key: "hero_tagline",      label: "Hero Tagline (Gujarati/Hindi)", type: "text" },
       { key: "hero_badge",        label: "Top Badge Text", type: "text" },
       { key: "hero_subtext",      label: "Hero Subtext", type: "textarea" },
       { key: "hero_stat1_value",  label: "Stat 1 Value (e.g. 200+)", type: "text" },
@@ -573,8 +572,6 @@ const SETTING_GROUPS = [
       { key: "contact_whatsapp",      label: "WhatsApp Number (with country code, e.g. 916355466208)", type: "text" },
       { key: "contact_support_email", label: "Support Email", type: "email" },
       { key: "contact_info_email",    label: "Info Email", type: "email" },
-      { key: "contact_instagram",     label: "Instagram URL", type: "text" },
-      { key: "contact_facebook",      label: "Facebook URL", type: "text" },
       { key: "contact_hero_badge",    label: "Hero Badge", type: "text" },
       { key: "contact_hero_title",    label: "Hero Title", type: "text" },
       { key: "contact_hero_subtext",  label: "Hero Subtext", type: "textarea" },
@@ -641,8 +638,6 @@ const SETTING_GROUPS = [
     keys: [
       { key: "social_instagram", label: "Instagram URL", type: "text" },
       { key: "social_facebook",  label: "Facebook URL",  type: "text" },
-      { key: "social_youtube",   label: "YouTube URL",   type: "text" },
-      { key: "social_linkedin",  label: "LinkedIn URL",  type: "text" },
     ],
   },
   {

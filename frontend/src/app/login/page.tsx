@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { authApi, adminApi, API_URL } from "@/lib/api";
-import { GoogleIcon, FacebookIcon } from "@/components/ui";
+import { GoogleIcon, FacebookIcon, InlineSpinner } from "@/components/ui";
 import { useStore } from "@/lib/store";
 import { setAuthCookie } from "@/lib/auth-cookie";
 import toast from "react-hot-toast";
@@ -162,7 +162,7 @@ function LoginForm() {
               className="btn-primary w-full py-3 mt-2 disabled:opacity-50 disabled:cursor-not-allowed">
               {loading
                 ? <span className="flex items-center justify-center gap-2">
-                    <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                    <InlineSpinner />
                     Signing in...
                   </span>
                 : "Sign In"

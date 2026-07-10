@@ -21,27 +21,27 @@ export default function CertificationsPage() {
     certs = [
       {
         label: "FSSAI",
-        title: settingsRaw["cert_fssai_title"] || "Food Safety and Standards Authority of India",
-        desc: settingsRaw["cert_fssai_desc"] || "Licensed under FSSAI regulations. This ensures our manufacturing practices, ingredient safety, and packaging standards comply fully with national food safety guidelines.",
-        fileUrl: settingsRaw["cert_fssai_file"] || "/fssai.png",
+        title: "Food Safety and Standards Authority of India",
+        desc: "Licensed under FSSAI regulations. This ensures our manufacturing practices, ingredient safety, and packaging standards comply fully with national food safety guidelines.",
+        fileUrl: "/fssai.png",
       },
       {
         label: "GMP",
-        title: settingsRaw["cert_gmp_title"] || "Good Manufacturing Practices",
-        desc: settingsRaw["cert_gmp_desc"] || "WHO-GMP compliant manufacturing processes. This guarantees that all products are consistently produced and controlled according to international quality standards.",
-        fileUrl: settingsRaw["cert_gmp_file"] || "/gmp.png",
+        title: "Good Manufacturing Practices",
+        desc: "WHO-GMP compliant manufacturing processes. This guarantees that all products are consistently produced and controlled according to international quality standards.",
+        fileUrl: "/gmp.png",
       },
       {
         label: "ISO",
-        title: settingsRaw["cert_iso_title"] || "ISO 9001:2015 Certification",
-        desc: settingsRaw["cert_iso_desc"] || "ISO 9001:2015 Certified facility. We adhere to rigorous quality management system (QMS) protocols, ensuring safety, reliability, and continuous improvement across all stages of production.",
-        fileUrl: settingsRaw["cert_iso_file"] || "/iso.png",
+        title: "ISO 9001:2015 Certification",
+        desc: "ISO 9001:2015 Certified facility. We adhere to rigorous quality management system (QMS) protocols, ensuring safety, reliability, and continuous improvement across all stages of production.",
+        fileUrl: "/iso.png",
       },
       {
         label: "HACCP",
-        title: settingsRaw["cert_haccp_title"] || "Hazard Analysis Critical Control Point",
-        desc: settingsRaw["cert_haccp_desc"] || "HACCP Certified system. A systematic preventive approach to food safety from biological, chemical, and physical hazards in production processes.",
-        fileUrl: settingsRaw["cert_haccp_file"] || "/haccp.png",
+        title: "Hazard Analysis Critical Control Point",
+        desc: "HACCP Certified system. A systematic preventive approach to food safety from biological, chemical, and physical hazards in production processes.",
+        fileUrl: "/haccp.png",
       },
     ];
   }

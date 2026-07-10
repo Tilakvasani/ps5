@@ -5,6 +5,7 @@ import { Plus, Search, Edit3, Trash2, Eye, RefreshCw } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { Toggle } from "@/components/ui";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -116,11 +117,7 @@ export default function AdminProductsPage() {
                     ) : <span style={{ color: "#6B7280" }}>—</span>}
                   </td>
                   <td className="px-4 py-3">
-                    <button onClick={() => toggleActive(p)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${p.isActive ? "bg-[#FF5C00]" : "bg-gray-300"}`}
-                      style={{ border: "1.5px solid rgba(12,30,57,0.08)" }}>
-                      <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${p.isActive ? "translate-x-6" : "translate-x-1"}`} />
-                    </button>
+                    <Toggle checked={p.isActive} onChange={() => toggleActive(p)} />
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">

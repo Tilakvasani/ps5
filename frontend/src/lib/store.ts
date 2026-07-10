@@ -28,8 +28,8 @@ interface AppStore {
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   addToCart: (item: CartItem) => void;
-  updateCartQty: (productId: number, variantId: number | undefined, qty: number) => void;
-  removeFromCart: (productId: number, variantId?: number) => void;
+  updateCartQty: (productId: number, variantId: number | undefined, qty: number, pack?: number) => void;
+  removeFromCart: (productId: number, variantId?: number, pack?: number) => void;
   clearCart: () => void;
   logout: () => void;
 }
@@ -47,13 +47,13 @@ export const useStore = create<AppStore>()(
       addToCart: (item) => {
         const { cart } = get();
         const existing = cart.find(
-          (c) => c.productId === item.productId && c.variantId === item.variantId
+          (c) => c.productId === item.productId && c.variantId === item.variantId && (c.pack || 1) === (item.pack || 1)
         );
         if (existing) {
           set({
             cart: cart.map((c) =>
-              c.productId === item.productId && c.variantId === item.variantId
-                ? { ...c, qty: c.qty + item.qty }
+              c.productId === item.productId && c.variantId === item.variantId && (c.pack || 1) === (item.pack || 1)
+                ? { ...c, qty: c.qty + item.qty, price: item.price }
                 : c
             ),
           });
@@ -62,23 +62,23 @@ export const useStore = create<AppStore>()(
         }
       },
 
-      updateCartQty: (productId, variantId, qty) => {
+      updateCartQty: (productId, variantId, qty, pack) => {
         const { cart } = get();
         if (qty <= 0) {
-          set({ cart: cart.filter((c) => !(c.productId === productId && c.variantId === variantId)) });
+          set({ cart: cart.filter((c) => !(c.productId === productId && c.variantId === variantId && (c.pack || 1) === (pack || 1))) });
         } else {
           set({
             cart: cart.map((c) =>
-              c.productId === productId && c.variantId === variantId ? { ...c, qty } : c
+              c.productId === productId && c.variantId === variantId && (c.pack || 1) === (pack || 1) ? { ...c, qty } : c
             ),
           });
         }
       },
 
-      removeFromCart: (productId, variantId) => {
+      removeFromCart: (productId, variantId, pack) => {
         set({
           cart: get().cart.filter(
-            (c) => !(c.productId === productId && c.variantId === variantId)
+            (c) => !(c.productId === productId && c.variantId === variantId && (c.pack || 1) === (pack || 1))
           ),
         });
       },

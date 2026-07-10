@@ -17,11 +17,12 @@ export default function CartPage() {
   const [couponDiscount, setCouponDiscount] = useState(0);
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
-  const cgst = subtotal * cgstRate;
-  const sgst = subtotal * sgstRate;
-  const shipping = calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
   const discount = couponApplied ? couponDiscount : 0;
-  const rawTotal = subtotal + cgst + sgst + shipping - discount;
+  const taxable = Math.max(0, subtotal - discount);
+  const cgst = taxable * cgstRate;
+  const sgst = taxable * sgstRate;
+  const shipping = calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
+  const rawTotal = taxable + cgst + sgst + shipping;
   const total = Math.round(rawTotal);
   const roundOffDiff = total - rawTotal;
 
@@ -84,11 +85,11 @@ export default function CartPage() {
                     <p style={{ fontSize: "0.75rem", color: "#6B7280", marginBottom: 12 }}>{item.unit} · {item.sku}</p>
                     <div className="flex items-center justify-between">
                       <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#F8F8F8", padding: 2 }}>
-                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.qty - 1)}
+                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.qty - 1, item.pack)}
                           style={{ height: 28, width: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, color: "#0C1E39", transition: "background 0.15s" }}
                           className="hover:bg-[#0C1E39]/10 transition-colors"><Minus size={12} /></button>
                         <span style={{ width: 24, textAlign: "center", fontSize: "0.875rem", fontWeight: 700, color: "#0C1E39" }}>{item.qty}</span>
-                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.qty + 1)}
+                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.qty + 1, item.pack)}
                           style={{ height: 28, width: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, color: "#0C1E39", transition: "background 0.15s" }}
                           className="hover:bg-[#0C1E39]/10 transition-colors"><Plus size={12} /></button>
                       </div>
@@ -100,7 +101,7 @@ export default function CartPage() {
                   </div>
 
                   {/* Remove */}
-                  <button onClick={() => removeFromCart(item.productId, item.variantId)}
+                  <button onClick={() => removeFromCart(item.productId, item.variantId, item.pack)}
                     className="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-lg text-red-500/60 hover:text-red-500 hover:bg-red-500/10 transition-all">
                     <Trash2 size={14} />
                   </button>
