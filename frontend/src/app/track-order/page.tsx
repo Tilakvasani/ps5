@@ -115,7 +115,7 @@ export default function TrackOrderPage() {
           </div>
 
           <div className="text-center mb-10">
-            <span className="inline-block zbadge mb-4" style={{ background: "#0C1E39", color: "#FFFFFF", fontSize: "10px", letterSpacing: "1.2px" }}>
+            <span className="inline-block zbadge mb-4" style={{ background: "#0C1E39", color: "#FFFFFF", fontSize: "12px", letterSpacing: "1.2px" }}>
               SHIPMENT STATUS
             </span>
             <div className="mb-3">

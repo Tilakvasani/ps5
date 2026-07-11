@@ -175,7 +175,7 @@ export default function ZupwellChat() {
         {
           id: uid(),
           role: "bot",
-          text: "Sorry, I'm having trouble connecting right now. 😔\n\nPlease try again or contact us at info@zupwell.com",
+          text: "Sorry, I'm having trouble connecting right now. 😔\n\nPlease try again or contact us at support@zupwell.com",
           timestamp: new Date(),
         },
       ]);
@@ -500,7 +500,7 @@ export default function ZupwellChat() {
 
             <div className="zw-footer">
               Powered by Zupwell AI ·{" "}
-              <a href="mailto:info@zupwell.com">info@zupwell.com</a>
+              <a href="mailto:support@zupwell.com">support@zupwell.com</a>
             </div>
           </div>
         )}

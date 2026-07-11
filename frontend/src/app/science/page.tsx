@@ -26,7 +26,7 @@ const D: Record<string, string> = {
   science_cert2_title: "FSSAI Approved",
   science_cert2_desc: "Every Zupwell product is manufactured and tested under the strict regulations of FSSAI — India's food safety authority.",
   science_cert3_title: "Lab Tested Batches",
-  science_cert3_desc: "Each batch is microbiologically tested before being released into the market. 100% verified. 100% safe.",
+  science_cert3_desc: "Each batch is microbiologically tested before being released into the market. 100% verified and safe.",
   science_clean_badge: "Clean Label",
   science_clean_title: "100% Transparent\nZero Compromise",
   science_clean_desc: "We believe you have the right to know exactly what goes into your body. That's why we have a clean-label promise.",
@@ -149,11 +149,12 @@ export default function SciencePage() {
         <div className="relative mx-auto max-w-4xl text-center">
           <motion.div {...fadeUp(0)}>
             <span
-              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-6"
+              className="inline-flex items-center gap-2 font-bold uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-6"
               style={{
                 background: "#0C1E39",
                 color: "var(--or)",
                 border: "1px solid #0C1E39",
+                fontSize: "14px",
               }}
             >
               <FlaskConical size={12} /> {s(settings, "science_hero_badge")}

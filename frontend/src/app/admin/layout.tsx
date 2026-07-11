@@ -4,6 +4,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminLogout } from "@/lib/useAuth";
+import { adminApi } from "@/lib/api";
+import { clearAdminAuthCookie } from "@/lib/auth-cookie";
 import {
   LayoutDashboard, Package, Tag, Boxes, ShoppingBag, FileText,
   Users, Ticket, Star, Settings, Bell, LogOut, Menu, X, ChevronRight
@@ -28,18 +30,58 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [adminName, setAdminName] = useState("Admin");
+  const [isChecking, setIsChecking] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    const raw = localStorage.getItem("zupwell-admin");
-    if (!raw && !pathname.includes("/admin/login")) {
-      router.push("/admin/login");
-    } else if (raw) {
-      const data = JSON.parse(raw);
-      setAdminName(data?.name || "Admin");
+    if (pathname === "/admin/login") {
+      setIsChecking(false);
+      setAuthorized(true);
+      return;
     }
+
+    adminApi.me()
+      .then((data) => {
+        setAdminName(data.name || "Admin");
+        setAuthorized(true);
+        setIsChecking(false);
+      })
+      .catch((err) => {
+        console.error("Admin authentication check failed:", err);
+        // Token invalid, expired, or admin deactivated — show 404
+        localStorage.removeItem("zupwell-admin");
+        try {
+          clearAdminAuthCookie();
+        } catch (e) {}
+        setAuthorized(false);
+        setIsChecking(false);
+      });
   }, [pathname, router]);
 
   if (pathname === "/admin/login") return <>{children}</>;
+
+  if (isChecking) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center" style={{ background: "var(--dk)" }}>
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-t-transparent" style={{ borderTopColor: "var(--or)" }} />
+      </div>
+    );
+  }
+
+  if (!authorized) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-6" style={{ background: "var(--dk)" }}>
+        <div className="text-center">
+          <h1 className="text-[10rem] font-black leading-none" style={{ color: "var(--or)", letterSpacing: "-0.05em" }}>404</h1>
+          <h2 className="text-2xl font-black mt-2" style={{ color: "#FFFFFF" }}>Page not found</h2>
+          <p className="mt-2 max-w-sm mx-auto" style={{ color: "#F8F8F8", opacity: 0.85 }}>
+            The page you&apos;re looking for doesn&apos;t exist or has been moved.
+          </p>
+          <Link href="/" className="zbtn-or mt-8 inline-block" style={{ padding: "12px 32px" }}>Go Home</Link>
+        </div>
+      </main>
+    );
+  }
 
   const handleLogout = useAdminLogout();
 

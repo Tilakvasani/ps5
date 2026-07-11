@@ -4,8 +4,9 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  // Admin auth is handled by admin/layout.tsx (reads localStorage via useEffect)
-  // Middleware cannot read localStorage — so no admin check here.
+  // Admin routes are protected by admin/layout.tsx which calls adminApi.me()
+  // to verify the JWT against the backend on every page load. This is stronger
+  // than a cookie-existence check and avoids race conditions after login.
 
   // Protect user account/checkout/order routes
   if (

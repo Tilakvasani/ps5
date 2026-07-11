@@ -81,7 +81,7 @@ export default function CertificationsPage() {
 
         <div className="pt-32 pb-20 px-6 mx-auto max-w-5xl">
           <div className="text-center mb-16">
-            <span className="inline-block zbadge zbadge-or mb-4" style={{ fontSize: "10px", letterSpacing: "1.2px" }}>
+            <span className="inline-block zbadge zbadge-or mb-4" style={{ fontSize: "12px", letterSpacing: "1.2px" }}>
               🛡️ VERIFIED QUALITY
             </span>
             <h1 className="text-3xl md:text-5xl font-black mb-4 leading-tight text-[#0C1E39]" style={{ letterSpacing: "-0.04em" }}>

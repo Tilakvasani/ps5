@@ -40,7 +40,7 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
   const storeGstin     = settings.site_gstin      || "24XXXXXXXXXXXXX";
   const storeStateCode = settings.site_state_code || "24 (Gujarat)";
   const storeName      = settings.site_name        || "Zupwell";
-  const storeEmail     = settings.site_email       || "info@zupwell.com";
+  const storeEmail     = settings.site_email       || "support@zupwell.com";
   const storeAddress   = settings.site_address     || "A-102, Adarsh Lifestyle, New India Colony Road, Ahmedabad, Gujarat - 382350";
 
   res.setHeader("Content-Type", "application/pdf");

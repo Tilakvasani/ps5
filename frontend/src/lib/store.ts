@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { clearAuthCookie } from "./auth-cookie";
+import { clearAuthCookie, clearAdminAuthCookie } from "./auth-cookie";
 
 interface CartItem {
   productId: number;
@@ -92,6 +92,10 @@ export const useStore = create<AppStore>()(
 
       logout: () => {
         clearAuthCookie();
+        try {
+          clearAdminAuthCookie();
+          localStorage.removeItem("zupwell-admin");
+        } catch (e) {}
         set({ user: null, token: null, cart: [] });
       },
     }),

@@ -21,7 +21,7 @@ export default function Footer() {
   }, []);
 
   const name      = s.site_name        || "Zupwell";
-  const email     = s.site_email       || "info@zupwell.com";
+  const email     = s.site_email       || "support@zupwell.com";
   const phone     = s.site_phone       || "+91 6355466208";
   const address   = s.site_address     || "Ahmedabad, Gujarat";
   const gstin     = s.site_gstin       || "";

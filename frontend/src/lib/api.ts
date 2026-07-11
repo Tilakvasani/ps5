@@ -38,7 +38,10 @@ api.interceptors.response.use(
       if (typeof window !== "undefined") {
         if (window.location.pathname.startsWith("/admin") && window.location.pathname !== "/admin/login") {
           localStorage.removeItem("zupwell-admin");
-          window.location.href = "/admin/login";
+          try {
+            const { clearAdminAuthCookie } = require("./auth-cookie");
+            clearAdminAuthCookie();
+          } catch (e) {}
         }
       }
     }
@@ -48,10 +51,10 @@ api.interceptors.response.use(
 
 // ── Auth ──────────────────────────────────────────
 export const authApi = {
-  register: (data: { name: string; email: string; phone: string; password: string }) =>
-    api.post("/api/auth/register", data).then((r) => r.data),
-  login: (email: string, password: string) =>
-    api.post("/api/auth/login", { email, password }).then((r) => r.data),
+  sendOtp: (phone: string) =>
+    api.post("/api/auth/send-otp", { phone }).then((r) => r.data),
+  verifyOtp: (phone: string, otp: string, notified: boolean) =>
+    api.post("/api/auth/verify-otp", { phone, otp, notified }).then((r) => r.data),
   logout: () => api.post("/api/auth/logout").then((r) => r.data),
   me: () => api.get("/api/auth/me").then((r) => r.data),
 };
@@ -157,6 +160,8 @@ export const accountApi = {
 export const adminApi = {
   login: (email: string, password: string) =>
     api.post("/api/admin/auth/login", { email, password }).then((r) => r.data),
+  me: () =>
+    api.get("/api/admin/auth/me").then((r) => r.data),
 
   dashboard: () => api.get("/api/admin/dashboard/stats").then((r) => r.data),
   revenueChart: (days = 30) => api.get(`/api/admin/dashboard/revenue-chart?days=${days}`).then((r) => r.data),

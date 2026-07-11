@@ -144,7 +144,7 @@ export default function FAQsPage() {
         <div className="pointer-events-none absolute -top-40 -left-40 h-[400px] w-[400px] rounded-full" style={{ background: "rgba(255, 92, 0, 0.06)" }} />
         <div className="relative mx-auto max-w-3xl text-center">
           <motion.span initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-block zbadge zbadge-or mb-4">
+            className="inline-block zbadge zbadge-or mb-4" style={{ fontSize: "12px" }}>
             {settings.faqs_hero_badge || "FAQs"}
           </motion.span>
           <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}

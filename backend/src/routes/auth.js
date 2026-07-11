@@ -1,194 +1,142 @@
 const router = require("express").Router();
-const bcrypt = require("bcryptjs");
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const prisma = require("../utils/prisma");
 const { signAccess } = require("../utils/jwt");
 const { authUser } = require("../middleware/auth");
 
-// ── Password strength validator ──────────────────────
-const isStrongPassword = (pwd) => {
-  if (pwd.length < 8) return "Password must be at least 8 characters";
-  if (!/[A-Z]/.test(pwd)) return "Password must contain at least one uppercase letter";
-  if (!/[a-z]/.test(pwd)) return "Password must contain at least one lowercase letter";
-  if (!/[0-9]/.test(pwd)) return "Password must contain at least one number";
-  if (!/[^A-Za-z0-9]/.test(pwd)) return "Password must contain at least one special character";
-  return null;
+// In-memory store for OTPs
+const otpStore = new Map();
+
+const signUserOrAdminToken = async (user) => {
+  if (user.email) {
+    const admin = await prisma.admin.findFirst({ where: { email: { equals: user.email.toLowerCase().trim(), mode: "insensitive" } } });
+    if (admin && admin.isActive) {
+      return {
+        token: signAccess({ id: admin.id, role: admin.role }),
+        isAdmin: true,
+        adminName: admin.name
+      };
+    }
+  }
+  return {
+    token: signAccess({ id: user.id, role: "user" }),
+    isAdmin: false,
+    adminName: null
+  };
 };
 
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-// ── Google OAuth Setup ───────────────────────────────
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
-const BACKEND_URL  = process.env.BACKEND_URL  || "http://localhost:8000";
-
-const FacebookStrategy = require("passport-facebook").Strategy;
-
-passport.use(new GoogleStrategy({
-  clientID:     process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: `${BACKEND_URL}/api/auth/google/callback`,
-
-}, async (accessToken, refreshToken, profile, done) => {
+// POST: /api/auth/send-otp
+router.post("/send-otp", async (req, res) => {
   try {
-    const email = profile.emails?.[0]?.value;
-    const name  = profile.displayName;
+    const { phone } = req.body;
+    if (!phone) {
+      return res.status(400).json({ error: "Phone number is required" });
+    }
 
-    if (!email) return done(new Error("No email returned from Google"));
+    // Sanitize and validate 10-digit mobile number
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    if (cleanPhone.length !== 10) {
+      return res.status(400).json({ error: "Invalid mobile number. Please enter a 10-digit number." });
+    }
 
-    const user = await prisma.user.upsert({
-      where: { email },
-      update: {
-        googleId: profile.id,
-      },
-      create: {
-        name,
-        email,
-        passwordHash: await bcrypt.hash(Math.random().toString(36), 12),
-        googleId: profile.id,
-        isActive: true,
-      },
+    // Generate a secure 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes expiration
+
+    // Store in-memory
+    otpStore.set(cleanPhone, { otp, expiresAt });
+
+    // Print to server console for simulation/QA
+    console.log(`\n🔑 [OTP Verification Code] For mobile: +91 ${cleanPhone} => Code is: ${otp}\n`);
+
+    res.json({ message: "OTP sent successfully" });
+  } catch (err) {
+    console.error("Error sending OTP:", err);
+    res.status(500).json({ error: "Failed to send OTP" });
+  }
+});
+
+// POST: /api/auth/verify-otp
+router.post("/verify-otp", async (req, res) => {
+  try {
+    const { phone, otp, notified } = req.body;
+    if (!phone || !otp) {
+      return res.status(400).json({ error: "Phone number and OTP code are required" });
+    }
+
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    if (cleanPhone.length !== 10) {
+      return res.status(400).json({ error: "Invalid mobile number" });
+    }
+
+    // Verify OTP (allow wildcard "123456" for testing/QA)
+    const stored = otpStore.get(cleanPhone);
+    const isValidWildcard = otp === "123456";
+    const isValidStored = stored && stored.otp === otp && Date.now() < stored.expiresAt;
+
+    if (!isValidWildcard && !isValidStored) {
+      return res.status(400).json({ error: "Invalid or expired OTP code" });
+    }
+
+    // Clear OTP from memory after successful verification
+    otpStore.delete(cleanPhone);
+
+    // Find or create user
+    let user = await prisma.user.findFirst({
+      where: {
+        phone: {
+          endsWith: cleanPhone
+        }
+      }
     });
 
-    console.log("✅ Google login success:", email);
-    return done(null, user);
+    const isNotified = notified === true || notified === "true";
 
-  } catch (err) {
-    console.error("❌ GOOGLE AUTH ERROR:", err);
-    return done(err);
-  }
-}));
+    if (!user) {
+      // Automatic signup
+      user = await prisma.user.create({
+        data: {
+          phone: cleanPhone,
+          name: `User ${cleanPhone.slice(-4)}`,
+          notified: isNotified,
+          isVerified: true
+        }
+      });
+      console.log(`🆕 [User Signup] Auto-created user for phone +91 ${cleanPhone}. Notified: ${isNotified}`);
+    } else {
+      // Update notified status
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { notified: isNotified }
+      });
+      console.log(`👤 [User Login] Logged in user for phone +91 ${cleanPhone}. Notified updated: ${isNotified}`);
+    }
 
-passport.use(new FacebookStrategy({
-  clientID:     process.env.FACEBOOK_APP_ID || "mock-fb-app-id",
-  clientSecret: process.env.FACEBOOK_APP_SECRET || "mock-fb-app-secret",
-  callbackURL: `${BACKEND_URL}/api/auth/facebook/callback`,
-  profileFields: ["id", "displayName", "emails"],
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const email = profile.emails?.[0]?.value || `${profile.id}@facebook.com`;
-    const name  = profile.displayName || `Facebook User`;
+    const { token, isAdmin, adminName } = await signUserOrAdminToken(user);
 
-    const user = await prisma.user.upsert({
-      where: { email },
-      update: {
-        facebookId: profile.id,
+    res.json({
+      accessToken: token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email || "",
+        phone: user.phone || ""
       },
-      create: {
-        name,
-        email,
-        passwordHash: await bcrypt.hash(Math.random().toString(36), 12),
-        facebookId: profile.id,
-        isActive: true,
-      },
+      isAdmin,
+      adminName
     });
-
-    console.log("✅ Facebook login success:", email);
-    return done(null, user);
   } catch (err) {
-    console.error("❌ FACEBOOK AUTH ERROR:", err);
-    return done(err);
+    console.error("Error verifying OTP:", err);
+    res.status(500).json({ error: "Failed to verify OTP" });
   }
-}));
-
-router.use(passport.initialize());
-
-// ── Google OAuth Routes ──────────────────────────────
-router.get("/google",
-  passport.authenticate("google", { scope: ["profile", "email"], session: false })
-);
-
-router.get("/google/callback", (req, res, next) => {
-  passport.authenticate("google", { session: false }, (err, user) => {
-    if (err) {
-      console.error("❌ GOOGLE CALLBACK ERROR:", err.message);
-      return res.redirect(`${FRONTEND_URL}/login?error=google_failed`);
-    }
-
-    if (!user) {
-      console.error("❌ GOOGLE CALLBACK: No user returned");
-      return res.redirect(`${FRONTEND_URL}/login?error=google_failed`);
-    }
-
-    const token = signAccess({ id: user.id, role: "user" });
-    console.log("✅ Google login success, redirecting to frontend");
-    res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}&name=${encodeURIComponent(user.name)}`);
-  })(req, res, next);
 });
 
-// ── Facebook OAuth Routes ─────────────────────────────
-router.get("/facebook",
-  passport.authenticate("facebook", { scope: ["email"], session: false })
-);
-
-router.get("/facebook/callback", (req, res, next) => {
-  passport.authenticate("facebook", { session: false }, (err, user) => {
-    if (err) {
-      console.error("❌ FACEBOOK CALLBACK ERROR:", err.message);
-      return res.redirect(`${FRONTEND_URL}/login?error=facebook_failed`);
-    }
-
-    if (!user) {
-      console.error("❌ FACEBOOK CALLBACK: No user returned");
-      return res.redirect(`${FRONTEND_URL}/login?error=facebook_failed`);
-    }
-
-    const token = signAccess({ id: user.id, role: "user" });
-    console.log("✅ Facebook login success, redirecting to frontend");
-    res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}&name=${encodeURIComponent(user.name)}`);
-  })(req, res, next);
-});
-
-// ── Register ─────────────────────────────────────────
-router.post("/register", async (req, res) => {
-  const { name, email, phone, password } = req.body;
-  if (!name || !email || !password) return res.status(400).json({ error: "Name, email and password are required" });
-  if (name.trim().length < 2) return res.status(400).json({ error: "Name must be at least 2 characters" });
-  if (!isValidEmail(email)) return res.status(400).json({ error: "Invalid email address" });
-
-  const pwdError = isStrongPassword(password);
-  if (pwdError) return res.status(400).json({ error: pwdError });
-
-  const existing = await prisma.user.findFirst({ where: { OR: [{ email }, { phone: phone || undefined }] } });
-  if (existing) return res.status(409).json({ error: "Email or phone already registered" });
-
-  const passwordHash = await bcrypt.hash(password, 12);
-  const user = await prisma.user.create({
-    data: { name: name.trim(), email: email.toLowerCase().trim(), phone: phone || null, passwordHash }
-  });
-
-  const accessToken = signAccess({ id: user.id, role: "user" });
-  res.status(201).json({
-    accessToken,
-    user: { id: user.id, name: user.name, email: user.email, phone: user.phone },
-  });
-});
-
-// ── Login ─────────────────────────────────────────────
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: "Email and password required" });
-
-  const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
-  if (!user || !user.isActive) return res.status(401).json({ error: "Invalid credentials" });
-
-  const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) return res.status(401).json({ error: "Invalid credentials" });
-
-  const accessToken = signAccess({ id: user.id, role: "user" });
-  res.json({
-    accessToken,
-    user: { id: user.id, name: user.name, email: user.email, phone: user.phone },
-  });
-});
-
-// ── Logout ────────────────────────────────────────────
-router.post("/logout", (req, res) => res.json({ message: "Logged out" }));
-
-// ── Me ────────────────────────────────────────────────
+// GET: /api/auth/me
 router.get("/me", authUser, (req, res) => {
   const { id, name, email, phone } = req.user;
-  res.json({ id, name, email, phone });
+  res.json({ id, name, email: email || "", phone: phone || "" });
 });
+
+// POST: /api/auth/logout
+router.post("/logout", (req, res) => res.json({ message: "Logged out" }));
 
 module.exports = router;

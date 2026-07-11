@@ -97,7 +97,7 @@ interface SiteSettings {
 
 const DEFAULTS: Omit<SiteSettings, "raw" | "loading"> = {
   siteName:              "Zupwell",
-  siteEmail:             "info@zupwell.com",
+  siteEmail:             "support@zupwell.com",
   sitePhone:             "+91 6355466208",
   siteAddress:           "Ahmedabad, Gujarat",
   gstin:                 "",
@@ -110,7 +110,7 @@ const DEFAULTS: Omit<SiteSettings, "raw" | "loading"> = {
   sgstRate:              0.025,
   whatsapp:              "",
   supportEmail:          "support@zupwell.com",
-  infoEmail:             "info@zupwell.com",
+  infoEmail:             "support@zupwell.com",
   instagram:             "",
   facebook:              "",
 };

@@ -14,7 +14,7 @@ const D: Record<string, string> = {
   about_brand_story: "In today's fast-paced life, we want to achieve a lot, but often our bodies don't cooperate. Fatigue, dehydration, and lack of energy hold us back. That's exactly what Zupwell was started to solve. Our goal is simple: to keep you healthy, hydrated, and active.",
   about_mission:     "Health, which is not boring! We believe that taking health supplements should not be like taking a painkiller or a bitter medicine. That's why we have brought you products that are both effective and delicious!",
   about_vision:      "To be India's leading name in Health Supplements, recognized for quality, scientific integrity and commitment to patient and athlete well-being.",
-  about_future:      "Our electrolyte formula is just the beginning. At Zupwell, we are committed to becoming a leader in health supplements. We are currently in the research and development phase for a diverse pipeline of wellness solutions, including daily multivitamins and immune boosters, energy and focus formulations, and specialized recovery blends. Innovation is in our DNA. We are constantly looking for new ways to make high-quality nutrition more effective and easier to consume.",
+  about_future:      "Our electrolyte formula is just the beginning. At Zupwell, we are committed to becoming a leader in health supplements. We are currently in the research and development phase for a diverse pipeline of wellness solutions. Including,\n\n→ Daily multivitamins and immune boosters.\n→ Energy and focus formulations.\n→ Specialized recovery blends for post-operative care.\n\nWe are constantly looking for new ways to make high-quality nutrition more effective and easier to consume.",
   about_why1_title:  "Science-Backed",
   about_why1_desc:   "Formulas that actually work — grounded in clinical research, not marketing hype.",
   about_why2_title:  "Quality First",
@@ -103,16 +103,32 @@ export default function AboutPage() {
 
       {/* ── Hero ── */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden" style={{ background: "linear-gradient(180deg, #051124 0%, #0C1E39 100%)" }}>
-        <div className="relative mx-auto max-w-4xl text-center">
+        <div className="relative mx-auto max-w-6xl text-center">
           <motion.span {...fadeUp(0)}
-            className="inline-block text-xs font-semibold uppercase tracking-widest mb-4"
-            style={{ color: "var(--or)" }}>
+            className="inline-block font-semibold uppercase tracking-widest mb-4"
+            style={{ color: "var(--or)", fontSize: "14px" }}>
             About Zupwell
           </motion.span>
           <motion.h1 {...fadeUp(0.1)}
-            className="text-3xl sm:text-4xl md:text-6xl font-black leading-tight mb-6"
+            className="text-[4.8vw] xs:text-[22px] sm:text-3xl md:text-5xl lg:text-6xl font-black leading-tight mb-6 tracking-tight mx-auto w-full"
             style={{ color: "#FFFFFF" }}>
-            &quot;{s(settings, "about_punchline")}&quot;
+            {(() => {
+              const punchline = s(settings, "about_punchline");
+              if (punchline.includes(";")) {
+                const parts = punchline.split(";");
+                return (
+                  <>
+                    <span className="block whitespace-nowrap mb-1">
+                      &quot;{parts[0]};
+                    </span>
+                    <span className="block whitespace-nowrap">
+                      {parts[1].trim()}&quot;
+                    </span>
+                  </>
+                );
+              }
+              return `"${punchline}"`;
+            })()}
           </motion.h1>
           <motion.p {...fadeUp(0.2)} className="text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.85 }}>
             {s(settings, "about_description")}
@@ -265,28 +281,30 @@ export default function AboutPage() {
             <motion.div {...fadeUp(0.1)}
               className="card"
               style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#FFFFFF" }}>
-              <p className="leading-relaxed text-lg mb-6" style={{ color: "#4A5568", opacity: 0.85 }}>
-                {s(settings, "about_future")}
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div className="leading-relaxed text-lg mb-6" style={{ color: "#4A5568", opacity: 0.85 }}>
                 {(() => {
-                  let pipeline = [
-                    "Daily multivitamins & immune boosters",
-                    "Energy and focus formulations",
-                    "Specialized recovery blends",
-                  ];
-                  try {
-                    const parsed = JSON.parse(s(settings, "about_future_pipeline_json"));
-                    if (Array.isArray(parsed) && parsed.length > 0) pipeline = parsed;
-                  } catch (e) {}
-                  return pipeline.map((item) => (
-                    <div key={item} className="flex items-start gap-2 text-sm" style={{ color: "#4A5568", opacity: 0.8 }}>
-                      <span className="mt-0.5 shrink-0" style={{ color: "var(--or)" }}>→</span>
-                      {item}
-                    </div>
-                  ));
+                  const text = s(settings, "about_future");
+                  if (!text) return null;
+                  const lines = text.split("\n");
+                  return lines.map((line, idx) => {
+                    if (line.trim().startsWith("→")) {
+                      const itemText = line.replace(/^\s*→\s*/, "");
+                      return (
+                        <div key={idx} className="flex items-start gap-2 my-2 pl-4">
+                          <span className="shrink-0 font-black text-lg" style={{ color: "var(--or)" }}>→</span>
+                          <span className="font-bold text-[#0C1E39]">{itemText}</span>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={idx} className={line.trim() === "" ? "h-4" : ""}>
+                        {line}
+                      </div>
+                    );
+                  });
                 })()}
               </div>
+
             </motion.div>
           </div>
         </section>

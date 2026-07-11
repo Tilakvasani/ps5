@@ -38,7 +38,7 @@ export default function ProductsPage() {
 
         <div className="pt-32 pb-16 px-6 mx-auto max-w-7xl">
           <div className="text-center mb-12">
-            <span className="inline-block zbadge mb-4" style={{ background: "#0C1E39", color: "#FFFFFF", fontSize: "10px", letterSpacing: "1px" }}>
+            <span className="inline-block zbadge mb-4" style={{ background: "#0C1E39", color: "#FFFFFF", fontSize: "12px", letterSpacing: "1px" }}>
               {shopBadge}
             </span>
             <h1 className="text-4xl md:text-6xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>

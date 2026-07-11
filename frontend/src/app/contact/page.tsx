@@ -12,7 +12,7 @@ import { fadeUp } from "@/lib/utils";
 const D: Record<string, string> = {
   contact_whatsapp:      "",
   contact_support_email: "support@zupwell.com",
-  contact_info_email:    "info@zupwell.com",
+  contact_info_email:    "support@zupwell.com",
   contact_instagram:     "",
   contact_facebook:      "",
 };
@@ -81,7 +81,7 @@ export default function ContactPage() {
       <section className="relative pt-32 pb-16 px-6 overflow-hidden" style={{ background: "#0C1E39", borderBottom: "1.5px solid #051124" }}>
         <div className="pointer-events-none absolute -top-40 -left-40 h-[400px] w-[400px] rounded-full" style={{ background: "rgba(255,92,0,0.06)" }} />
         <div className="relative mx-auto max-w-3xl text-center">
-          <motion.span {...fadeUp(0)} className="inline-block zbadge zbadge-or mb-4">
+          <motion.span {...fadeUp(0)} className="inline-block zbadge zbadge-or mb-4" style={{ fontSize: "12px" }}>
             {s(settings, "contact_hero_badge") || "Contact Us"}
           </motion.span>
           <motion.h1 {...fadeUp(0.1)} className="text-3xl sm:text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>

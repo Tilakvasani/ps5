@@ -12,7 +12,7 @@ router.post("/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: "Email and password required" });
-    const admin = await prisma.admin.findUnique({ where: { email } });
+    const admin = await prisma.admin.findFirst({ where: { email: { equals: email.toLowerCase().trim(), mode: "insensitive" } } });
     if (!admin || !admin.isActive) return res.status(401).json({ error: "Invalid credentials" });
     const valid = await bcrypt.compare(password, admin.passwordHash);
     if (!valid) return res.status(401).json({ error: "Invalid credentials" });
@@ -21,6 +21,16 @@ router.post("/auth/login", async (req, res) => {
     res.json({ accessToken, admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role } });
   } catch (err) {
     res.status(500).json({ error: err.message || "Login failed" });
+  }
+});
+
+router.get("/auth/me", authAdmin, async (req, res) => {
+  try {
+    const admin = await prisma.admin.findUnique({ where: { id: req.admin.id } });
+    if (!admin || !admin.isActive) return res.status(401).json({ error: "Unauthorized" });
+    res.json({ id: admin.id, name: admin.name, email: admin.email, role: admin.role });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to fetch admin profile" });
   }
 });
 

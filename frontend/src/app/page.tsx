@@ -46,7 +46,7 @@ const STATIC_REVIEWS = [
   {
     id: "static_1",
     name: "Aarav Patel",
-    location: "Verified Purchase",
+    location: "Verified Purchaser",
     rating: 5,
     body: "Must buy for Ahmedabad summer heat! I take 1 tablet daily before my evening run. No more muscle cramps and dehydration. Taste is also very nice, exactly like orange juice.",
     productName: "Effervescent Tablet"
@@ -54,7 +54,7 @@ const STATIC_REVIEWS = [
   {
     id: "static_2",
     name: "Sneha Rao",
-    location: "Verified Purchase",
+    location: "Verified Purchaser",
     rating: 5,
     body: "Highly recommended. I travel everyday in Mumbai local and get completely exhausted by afternoon. This Zupwell tablet gives a quick boost of energy and keeps me active throughout the day.",
     productName: "Effervescent Tablet"
@@ -62,7 +62,7 @@ const STATIC_REVIEWS = [
   {
     id: "static_3",
     name: "Kabir Malhotra",
-    location: "Verified Purchase",
+    location: "Verified Purchaser",
     rating: 5,
     body: "Really good for morning recovery after a late night party. Just drop one tablet in cold water and drink. Headache vanishes very quickly. Hydration is instant.",
     productName: "Effervescent Tablet"
@@ -70,7 +70,7 @@ const STATIC_REVIEWS = [
   {
     id: "static_4",
     name: "Priya Sharma",
-    location: "Verified Purchase",
+    location: "Verified Purchaser",
     rating: 5,
     body: "Switched my afternoon coffee with Zupwell. Best decision ever. No coffee jitters or acidity anymore, and it keeps me super focused and hydrated in the AC office all day.",
     productName: "Effervescent Tablet"
@@ -78,7 +78,7 @@ const STATIC_REVIEWS = [
   {
     id: "static_5",
     name: "Rajesh Iyer",
-    location: "Verified Purchase",
+    location: "Verified Purchaser",
     rating: 5,
     body: "Excellent product. It is completely sugar-free so safe for my diabetes. The orange flavour is very natural, not like other medicines which taste artificial.",
     productName: "Effervescent Tablet"
@@ -86,7 +86,7 @@ const STATIC_REVIEWS = [
   {
     id: "static_6",
     name: "Ananya Gupta",
-    location: "Verified Purchase",
+    location: "Verified Purchaser",
     rating: 5,
     body: "My gym trainer told me to try this during workouts. Very easy to drink compared to heavy sports drinks, and muscle recovery is much faster. No stomach heaviness.",
     productName: "Effervescent Tablet"
@@ -94,7 +94,7 @@ const STATIC_REVIEWS = [
   {
     id: "static_7",
     name: "Vikram Singh",
-    location: "Verified Purchase",
+    location: "Verified Purchaser",
     rating: 5,
     body: "Took these tablets on our family trip to Jaisalmer last week. Life saver in the hot sun. Very easy to carry in pocket, just drop in normal water bottles. Everyone loved it.",
     productName: "Effervescent Tablet"
@@ -102,7 +102,7 @@ const STATIC_REVIEWS = [
   {
     id: "static_8",
     name: "Meera Deshmukh",
-    location: "Verified Purchase",
+    location: "Verified Purchaser",
     rating: 5,
     body: "My daughter gifted this to me for my daily morning walks. I feel much less tired now. Tastes very refreshing and so easy to use, just drop in water and watch it fizz.",
     productName: "Effervescent Tablet"
@@ -110,7 +110,7 @@ const STATIC_REVIEWS = [
   {
     id: "static_9",
     name: "Aditya Verma",
-    location: "Verified Purchase",
+    location: "Verified Purchaser",
     rating: 5,
     body: "I play football on weekends and used to get bad calf cramps. Started taking Zupwell before the match and haven't got a single cramp since then. Very good product.",
     productName: "Effervescent Tablet"
@@ -118,7 +118,7 @@ const STATIC_REVIEWS = [
   {
     id: "static_10",
     name: "Riya Sen",
-    location: "Verified Purchase",
+    location: "Verified Purchaser",
     rating: 5,
     body: "Replacing cold drinks with this fizz tablet. Tastes amazing, very refreshing, and helps a lot with daily hydration. Perfect drink for the 3 PM office slump.",
     productName: "Effervescent Tablet"
@@ -235,7 +235,7 @@ export default function HomePage() {
       const formattedDb = db5Star.map((r: any) => ({
         id: `db_${r.id}`,
         name: r.user?.name || "Verified Buyer",
-        location: "Verified Purchase",
+        location: "Verified Purchaser",
         rating: 5,
         body: r.body,
         productName: r.product?.name || "Effervescent Tablet",
@@ -334,12 +334,13 @@ export default function HomePage() {
           <div className="lg:col-span-7 flex flex-col items-start text-left">
             <motion.div {...fadeUp(0.0)} className="mb-6">
               <span 
-                className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider px-4 py-2 rounded-full" 
+                className="inline-flex items-center gap-2 font-black uppercase tracking-wider px-4 py-2 rounded-full" 
                 style={{ 
                   background: "rgba(255, 92, 0, 0.12)", 
                   color: "var(--or)",
                   border: "1px solid rgba(255, 92, 0, 0.25)",
-                  boxShadow: "0 0 16px rgba(255, 92, 0, 0.15)"
+                  boxShadow: "0 0 16px rgba(255, 92, 0, 0.15)",
+                  fontSize: "14px"
                 }}
               >
                 {s(settings, "hero_badge") || "⚡ ELECTROLYTE EFFERVESCENT TABLET"}

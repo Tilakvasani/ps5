@@ -2,15 +2,12 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { authApi, adminApi, API_URL } from "@/lib/api";
-import { GoogleIcon, FacebookIcon } from "@/components/ui";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Info, ShieldCheck } from "lucide-react";
+import { authApi } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import { setAuthCookie } from "@/lib/auth-cookie";
 import toast from "react-hot-toast";
-
-
 
 export default function LoginPage() {
   return (
@@ -21,168 +18,231 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPass, setShowPass] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [notifyOffers, setNotifyOffers] = useState(true);
   const [loading, setLoading] = useState(false);
   const { setUser, setToken } = useStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next") || "/";
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    // 1. Try admin login first (silently)
-    try {
-      const adminData = await adminApi.login(email, password);
-      localStorage.setItem("zupwell-admin", JSON.stringify({ name: adminData.admin.name, token: adminData.accessToken }));
-      toast.success(`Welcome, ${adminData.admin.name}!`);
-      setLoading(false);
-      router.push("/admin");
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!phone) {
+      toast.error("Phone number is required");
       return;
-    } catch {
-      // Not admin — continue
     }
 
-    // 2. Try regular user login
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    if (cleanPhone.length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number");
+      return;
+    }
+
+    setLoading(true);
     try {
-      const data = await authApi.login(email, password);
-      setUser(data.user);
-      setToken(data.accessToken);
-      setAuthCookie(data.accessToken); // sync cookie so middleware lets user through
-      toast.success(`Welcome back, ${data.user.name}!`);
-      router.push(nextUrl);
+      await authApi.sendOtp(cleanPhone);
+      toast.success("OTP verification code sent!");
+      setStep("otp");
     } catch (err: any) {
-      toast.error(err.message || "Invalid email or password");
+      toast.error(err.message || "Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // ── FIX: Use production backend URL as fallback (not localhost) ──
-  const handleGoogleLogin = () => {
-    window.location.href = `${API_URL}/api/auth/google`;
-  };
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp) {
+      toast.error("OTP is required");
+      return;
+    }
 
-  const handleFacebookLogin = () => {
-    window.location.href = `${API_URL}/api/auth/facebook`;
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    setLoading(true);
+    try {
+      const data = await authApi.verifyOtp(cleanPhone, otp, notifyOffers);
+      setUser(data.user);
+      setToken(data.accessToken);
+      setAuthCookie(data.accessToken);
+
+      toast.success(`Logged in successfully! Welcome, ${data.user.name || "User"} 🎉`);
+      router.push(nextUrl);
+    } catch (err: any) {
+      toast.error(err.message || "Invalid or expired OTP");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center pt-14 pb-12 px-6" style={{ background: 'var(--dk)' }}>
-      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium transition-colors"
-        style={{ color: '#F8F8F8' }}
-        onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
-        onMouseLeave={e => (e.currentTarget.style.color = '#F8F8F8')}>
-        <ArrowLeft size={16} /> Back to Home
-      </Link>
-
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/4 h-[500px] w-[500px] rounded-full" style={{ background: 'rgba(255,92,0,0.06)' }} />
-        <div className="absolute -bottom-40 right-1/4 h-[400px] w-[400px] rounded-full" style={{ background: 'rgba(5,17,36,0.5)' }} />
+    <main className="relative min-h-screen flex flex-col items-center justify-center py-12 px-6" 
+      style={{ 
+        background: 'radial-gradient(circle at top right, #FF7E36 0%, #E04B00 100%)',
+        overflow: 'hidden' 
+      }}>
+      
+      {/* Background decoration - sports & nutrition vibe lines pattern */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none select-none">
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#FFFFFF" strokeWidth="1" />
+          </pattern>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="relative w-full max-w-md">
+      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium transition-colors text-white hover:text-white/80">
+        <ArrowLeft size={16} /> Back to Store
+      </Link>
+
+      <div className="relative w-full max-w-md flex flex-col items-center">
+        {/* Brand Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center justify-center mb-4">
-            <span className="text-4xl font-black" style={{ color: '#FFFFFF', fontWeight: 900, letterSpacing: '-1.5px' }}>
-              Zupwell<sup style={{ fontSize: "16px", fontWeight: 700, color: '#FF5C00', marginLeft: "2.5px", letterSpacing: "1px", verticalAlign: "super" }}>TM</sup>
+          <Link href="/" className="inline-flex items-center justify-center">
+            <span className="text-5xl font-black text-white tracking-tight" style={{ fontWeight: 900, letterSpacing: '-2px' }}>
+              Zupwell<sup style={{ fontSize: "18px", fontWeight: 700, color: '#FFFFFF', opacity: 0.9, marginLeft: "3px", verticalAlign: "super" }}>TM</sup>
             </span>
           </Link>
-          <h1 className="text-3xl font-black" style={{ color: '#FFFFFF' }}>Welcome back</h1>
-          <p className="mt-1" style={{ color: '#F8F8F8' }}>Sign in to your account</p>
         </div>
 
-        <div className="card" style={{ padding: '32px' }}>
-          {/* Social Login Buttons */}
-          <div className="space-y-3 mb-6">
-            <button onClick={handleGoogleLogin}
-              className="zbtn-out w-full justify-center flex items-center gap-3 text-sm font-semibold" 
-              style={{ borderRadius: '8px', padding: '11px', color: '#0C1E39', borderColor: 'rgba(12, 30, 57, 0.12)' }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(12, 30, 57, 0.05)';
-                e.currentTarget.style.color = '#0C1E39';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = '#0C1E39';
-              }}>
-              <GoogleIcon /> Continue with Google
-            </button>
-            <button onClick={handleFacebookLogin}
-              className="zbtn-out w-full justify-center flex items-center gap-3 text-sm font-semibold" 
-              style={{ borderRadius: '8px', padding: '11px', color: '#0C1E39', borderColor: 'rgba(12, 30, 57, 0.12)' }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(12, 30, 57, 0.05)';
-                e.currentTarget.style.color = '#0C1E39';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = '#0C1E39';
-              }}>
-              <FacebookIcon /> Continue with Facebook
-            </button>
-          </div>
+        {/* Card Component */}
+        <div className="w-full bg-white rounded-3xl shadow-2xl p-8 border border-white/10">
+          <AnimatePresence mode="wait">
+            {step === "phone" ? (
+              <motion.div
+                key="phone-step"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Title */}
+                <h2 className="text-xl font-bold text-gray-900 text-center leading-snug mb-6 px-1">
+                  Fuel Better, Perform Stronger. Login to unlock personalized nutrition, faster checkout & exclusive deals.
+                </h2>
 
-          <div className="my-5 flex items-center gap-3">
-            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
-            <span className="text-xs uppercase tracking-wide" style={{ color: '#0C1E39', opacity: 0.6 }}>or with email</span>
-            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
-          </div>
+                <form onSubmit={handleSendOtp} className="space-y-4">
+                  {/* Phone Input Box Styled like Fast&Up / Shiprocket */}
+                  <div className="flex items-center border-2 border-indigo-600/80 rounded-2xl p-1 bg-white focus-within:ring-4 focus-within:ring-indigo-100 transition-all">
+                    {/* Country Code with Flag */}
+                    <div className="flex items-center gap-2 px-3 py-2 shrink-0">
+                      <span className="text-lg">🇮🇳</span>
+                      <span className="text-sm font-bold text-gray-600">+91</span>
+                    </div>
+                    {/* Vertical Divider */}
+                    <div className="w-px h-6 bg-gray-200 shrink-0" />
+                    {/* Input */}
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                      required
+                      placeholder="10-digit mobile number"
+                      className="w-full px-3 py-2 text-base text-gray-800 bg-transparent focus:outline-none placeholder:text-gray-400 font-medium"
+                    />
+                    {/* Integrated Login Button */}
+                    <button
+                      type="submit"
+                      disabled={loading || phone.length !== 10}
+                      className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shrink-0 cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      {loading ? "..." : "Login"}
+                    </button>
+                  </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block mb-1.5" style={{ color: '#0C1E39', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px', opacity: 0.8 }}>Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-                className="input-field" placeholder="you@company.com" autoComplete="email" />
-            </div>
-            <div>
-              <label className="block mb-1.5" style={{ color: '#0C1E39', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px', opacity: 0.8 }}>Password</label>
-              <div className="relative">
-                <input type={showPass ? "text" : "password"} value={password}
-                  onChange={e => setPassword(e.target.value)} required
-                  className="input-field pr-10" placeholder="••••••••" autoComplete="current-password" />
-                <button type="button" onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: '#0C1E39' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--or)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#0C1E39')}>
-                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-              <div className="text-right mt-1">
-                <Link href="/forgot-password" className="text-xs" style={{ color: 'var(--or)' }}>Forgot password?</Link>
-              </div>
-            </div>
+                  {/* Pre-checked notify checkbox */}
+                  <div className="flex items-start gap-2.5 mt-2 px-1">
+                    <input
+                      id="notify-offers-checkbox"
+                      type="checkbox"
+                      checked={notifyOffers}
+                      onChange={(e) => setNotifyOffers(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer mt-0.5"
+                    />
+                    <label htmlFor="notify-offers-checkbox" className="text-xs text-gray-600 select-none cursor-pointer leading-tight">
+                      Notify me for any updates & offers
+                    </label>
+                  </div>
 
-            <motion.button type="submit" disabled={loading}
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              className="btn-primary w-full py-3 mt-2 disabled:opacity-50 disabled:cursor-not-allowed">
-              {loading
-                ? <span className="flex items-center justify-center gap-2">
-                    <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
-                    Signing in...
-                  </span>
-                : "Sign In"
-              }
-            </motion.button>
-          </form>
+                  {/* T&C and Privacy Policy Disclaimer Line */}
+                  <div className="flex items-start gap-2 pt-2 border-t border-gray-100 mt-4 text-[11px] text-gray-500 leading-normal px-1">
+                    <Info size={14} className="shrink-0 mt-0.5 text-gray-400" />
+                    <span>
+                      By proceeding, you are agreeing to our{" "}
+                      <Link href="/privacy-policy" className="font-semibold text-indigo-600 hover:underline">Privacy Policy</Link>,{" "}
+                      <Link href="/terms-of-service" className="font-semibold text-indigo-600 hover:underline">T & C</Link> and{" "}
+                      <Link href="/legal-disclaimer" className="font-semibold text-indigo-600 hover:underline">Legal Disclaimer</Link>.
+                    </span>
+                  </div>
+                </form>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="otp-step"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+                className="text-center"
+              >
+                <div className="inline-flex p-3 bg-indigo-50 rounded-2xl mb-4 text-indigo-600">
+                  <ShieldCheck size={28} />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-1">Verify OTP</h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  We have sent a verification code to <span className="font-semibold text-gray-800">+91 {phone}</span>
+                </p>
 
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
-            <span className="text-xs uppercase tracking-wide" style={{ color: '#0C1E39', opacity: 0.6 }}>or</span>
-            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
-          </div>
+                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                  <div>
+                    <input
+                      type="text"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      required
+                      placeholder="Enter 6-digit OTP"
+                      className="w-full tracking-[8px] text-center border-2 border-indigo-600/80 rounded-2xl py-3.5 text-xl font-bold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-300 placeholder:tracking-normal"
+                      autoComplete="one-time-code"
+                      autoFocus
+                    />
+                  </div>
 
-          <p className="text-center text-sm" style={{ color: '#0C1E39', opacity: 0.8 }}>
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold" style={{ color: 'var(--or)' }}>Create one free</Link>
-          </p>
+                  <button
+                    type="submit"
+                    disabled={loading || otp.length < 4}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    {loading ? "Verifying..." : "Verify & Proceed"}
+                  </button>
+
+                  <div className="flex items-center justify-between text-xs font-semibold pt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStep("phone");
+                        setOtp("");
+                      }}
+                      className="text-gray-500 hover:text-indigo-600"
+                    >
+                      Change Number
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
+                      className="text-indigo-600 hover:text-indigo-700"
+                    >
+                      Resend OTP
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </motion.div>
+      </div>
     </main>
   );
 }
-// LoginForm ends above; LoginPage wraps it in Suspense
