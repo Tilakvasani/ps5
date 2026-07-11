@@ -111,18 +111,6 @@ export default function CertificationsPage() {
                   </h3>
                   <p className="font-semibold text-sm mb-2" style={{ color: "#4A5568" }}>{c.title}</p>
                   <p className="text-sm leading-relaxed mb-4" style={{ color: "#6B7280" }}>{c.desc}</p>
-                  {c.fileUrl && (
-                    <div className="pt-3 border-t border-dashed border-[#0C1E39]/10 flex items-center gap-3">
-                      <a href={c.fileUrl} target="_blank" rel="noopener noreferrer" 
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--or)] hover:underline border border-[var(--or)]/30 px-3.5 py-1.5 rounded-xl transition-all"
-                        style={{ background: 'transparent' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,92,0,0.08)' }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-                      >
-                        📄 View Official Document
-                      </a>
-                    </div>
-                  )}
                 </div>
               </motion.div>
             ))}

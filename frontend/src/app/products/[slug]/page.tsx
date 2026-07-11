@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingCart, Star, Package, ChevronLeft, Minus, Plus,
-  Droplets, Zap, CheckCircle, AlertCircle, Shield, Award,
-  Truck, RotateCcw, Microscope, Leaf, ChevronRight
+  Zap, CheckCircle, AlertCircle, Shield, Award,
+  Truck, RotateCcw, Microscope, Leaf, ChevronRight,
+  GlassWater, Sparkles, Droplet
 } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
@@ -13,6 +14,7 @@ import { productsApi, publicApi } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CertLogo } from "@/components/storefront/CertLogos";
 
 /* ── Simple HTML sanitizer (strips script/iframe tags) ── */
@@ -32,15 +34,82 @@ const C = {
   mintHex: "#FF5C00",
   mintDim: "#FF5C00",
   border:  "rgba(12, 30, 57, 0.08)",
-  mid:     "#4A5568",
+  mid:     "#4B5563",
   light:   "#6B7280",
   altBg:   "#F8F8F8",
 };
 
+const Step1Icon = ({ className, style }: any) => (
+  <svg viewBox="0 0 64 64" className={className} style={style} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    {/* Glass Rim Ellipse */}
+    <ellipse cx="32" cy="24" rx="14" ry="4" stroke="#ff5c00" strokeWidth="2.5" />
+    {/* Water body inside glass */}
+    <path d="M19,34 C19,34 22,32 32,32 C42,32 45,34 45,34 L43,54 C43,56.2 38.1,58 32,58 C25.9,58 21,56.2 21,54 Z" fill="rgba(99, 179, 237, 0.25)" stroke="none" />
+    {/* Glass body outline */}
+    <path d="M18,24.5 L21,54 C21,57.3 25.9,60 32,60 C38.1,60 43,57.3 43,54 L46,24.5" stroke="#ff5c00" />
+    {/* Tablet dropping from top */}
+    <g transform="translate(0, -2)">
+      {/* Tablet Body */}
+      <ellipse cx="32" cy="11" rx="5" ry="2.2" fill="#ff5c00" stroke="none" />
+      <ellipse cx="32" cy="13" rx="5" ry="2.2" fill="#ff7a00" stroke="none" />
+      <rect x="27" y="11" width="10" height="2" fill="#ff7a00" stroke="none" />
+      <ellipse cx="32" cy="11" rx="5" ry="2.2" fill="none" stroke="#ffffff" strokeWidth="1" />
+      {/* Motion lines */}
+      <path d="M29,17 L29,19 M35,17 L35,19" stroke="#ff5c00" strokeWidth="1.5" strokeDasharray="1 1" />
+    </g>
+  </svg>
+);
+
+const Step2Icon = ({ className, style }: any) => (
+  <svg viewBox="0 0 64 64" className={className} style={style} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    {/* Glass Rim Ellipse */}
+    <ellipse cx="32" cy="24" rx="14" ry="4" stroke="#ff5c00" strokeWidth="2.5" />
+    {/* Water body inside glass */}
+    <path d="M19,34 C19,34 22,32 32,32 C42,32 45,34 45,34 L43,54 C43,56.2 38.1,58 32,58 C25.9,58 21,56.2 21,54 Z" fill="rgba(99, 179, 237, 0.25)" stroke="none" />
+    {/* Glass body outline */}
+    <path d="M18,24.5 L21,54 C21,57.3 25.9,60 32,60 C38.1,60 43,57.3 43,54 L46,24.5" stroke="#ff5c00" />
+    {/* Tablet at bottom of glass */}
+    <ellipse cx="32" cy="54" rx="4.5" ry="1.8" fill="#ff7a00" stroke="none" />
+    <ellipse cx="32" cy="55.2" rx="4.5" ry="1.8" fill="#ff5c00" stroke="none" />
+    <rect x="27.5" y="54" width="9" height="1.2" fill="#ff5c00" stroke="none" />
+    {/* Fizz bubbles rising from tablet */}
+    <circle cx="32" cy="46" r="1.5" fill="#ff7a00" stroke="none" />
+    <circle cx="29" cy="42" r="1.2" fill="#ff7a00" stroke="none" />
+    <circle cx="35" cy="40" r="1" fill="#ff5c00" stroke="none" />
+    <circle cx="31" cy="35" r="1.5" fill="#ff5c00" stroke="none" />
+    <circle cx="33" cy="29" r="1.2" fill="#ff7a00" stroke="none" />
+    <circle cx="28" cy="31" r="1" fill="#ff7a00" stroke="none" />
+    {/* Fizz bubbles popping out of the top */}
+    <circle cx="26" cy="19" r="1.2" fill="#ff7a00" stroke="none" />
+    <circle cx="32" cy="17" r="1.5" fill="#ff5c00" stroke="none" />
+    <circle cx="38" cy="18" r="1" fill="#ff7a00" stroke="none" />
+  </svg>
+);
+
+const Step3Icon = ({ className, style }: any) => (
+  <svg viewBox="0 0 64 64" className={className} style={style} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    {/* Straw sticking out */}
+    <path d="M32,38 L43,10 L48,9" stroke="#ff7a00" strokeWidth="2.5" />
+    {/* Glass Rim Ellipse */}
+    <ellipse cx="32" cy="24" rx="14" ry="4" stroke="#ff5c00" strokeWidth="2.5" />
+    {/* Fully dissolved orange liquid inside glass */}
+    <path d="M19,34 C19,34 22,32 32,32 C42,32 45,34 45,34 L43,54 C43,56.2 38.1,58 32,58 C25.9,58 21,56.2 21,54 Z" fill="rgba(255, 92, 0, 0.25)" stroke="none" />
+    {/* Glass body outline */}
+    <path d="M18,24.5 L21,54 C21,57.3 25.9,60 32,60 C38.1,60 43,57.3 43,54 L46,24.5" stroke="#ff5c00" />
+    {/* Bubbles representing completed carbonated drink */}
+    <circle cx="26" cy="48" r="1.2" fill="#ff7a00" stroke="none" />
+    <circle cx="37" cy="46" r="1" fill="#ff7a00" stroke="none" />
+    <circle cx="30" cy="40" r="1.5" fill="#ff5c00" stroke="none" />
+    <circle cx="34" cy="49" r="0.8" fill="#ff7a00" stroke="none" />
+    <circle cx="25" cy="38" r="1" fill="#ff7a00" stroke="none" />
+    <circle cx="39" cy="36" r="1.2" fill="#ff5c00" stroke="none" />
+  </svg>
+);
+
 const HOW_TO_USE = [
-  { icon: Droplets,    step: "1", title: "Drop It",         desc: "Drop the tablet into a glass of water (200 ml)" },
-  { icon: Zap,         step: "2", title: "Watch the Magic", desc: "Watch the fizz! Let it dissolve completely" },
-  { icon: CheckCircle, step: "3", title: "Vibe On",         desc: "Sip and get back to work, powered up!" },
+  { icon: Step1Icon,   step: "1", title: "Drop It",         desc: "Drop the tablet into a glass of water (200 ml)" },
+  { icon: Step2Icon,   step: "2", title: "Watch the Magic", desc: "Watch the fizz! Let it dissolve completely" },
+  { icon: Step3Icon,   step: "3", title: "Vibe On",         desc: "Sip and get back to work, powered up!" },
 ];
 
 const TRUST_BADGES = [
@@ -60,7 +129,7 @@ const FALLBACK_REVIEWS = [
 ];
 
 const DELIVERY_PERKS = [
-  { icon: RotateCcw, label: "Easy 48 hours return"               },
+  { icon: RotateCcw, label: "Easy 24 hours return"               },
   { icon: Shield,    label: "100% authentic & safe"              },
   { icon: Truck,     label: "Order Now | Est. Delivery: 5–7 Days" },
 ];
@@ -83,6 +152,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const [selectedPack, setSelectedPack] = useState(1);
   const { addToCart, token } = useStore();
   const { cgstRate, sgstRate } = useSettings();
+  const router = useRouter();
 
   useEffect(() => {
     productsApi.get(params.slug)
@@ -128,7 +198,26 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const total        = Math.round(rawTotal);
   const primaryImage = product.images?.find((i: any) => i.isPrimary)?.imageUrl || product.images?.[0]?.imageUrl;
   const images       = product.images?.length ? product.images : [{ imageUrl: null }];
-  const nutritionalFacts = product.nutritionalFacts || null;
+  const nutritionalFacts = product.nutritionFacts || null;
+  let nutritionRows: [string, string][] = [
+    ["Energy", "20 kcal"],
+    ["Carbohydrates", "5g"],
+    ["Sugars", "<1g"],
+    ["Sodium", "300mg"],
+    ["Potassium", "200mg"],
+    ["Magnesium", "100mg"],
+    ["Vitamin C", "100mg"],
+    ["Vitamin B6", "1.4mg"],
+    ["Zinc", "5mg"]
+  ];
+
+  if (nutritionalFacts) {
+    if (Array.isArray(nutritionalFacts)) {
+      nutritionRows = nutritionalFacts.map((x: any) => [x.key || x[0] || "", x.value || x[1] || ""]);
+    } else if (typeof nutritionalFacts === "object") {
+      nutritionRows = Object.entries(nutritionalFacts);
+    }
+  }
 
   const handleAddToCart = () => {
     addToCart({ 
@@ -164,7 +253,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     { id: "desc",      label: "Description" },
     { id: "howto",     label: "How to Use" },
     { id: "nutrition", label: "Nutrition" },
-    { id: "specs",     label: "Specifications" },
+    { id: "specs",     label: "Key Features" },
     { id: "reviews",   label: `Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` },
   ] as const;
 
@@ -255,12 +344,9 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             <div className="mt-5 grid grid-cols-4 gap-2">
               {TRUST_BADGES.map((b, i) => (
                 <div key={i}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl text-center justify-between min-h-[76px]"
+                  className="flex flex-col items-center justify-center p-2 rounded-xl text-center h-[86px] overflow-hidden"
                   style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
-                  <div className="h-6 flex items-center justify-center">
-                    <CertLogo label={b.logoLabel} className="h-5 object-contain" />
-                  </div>
-                  <span className="text-[9px] font-semibold leading-tight mt-0.5" style={{ color: C.blue }}>{b.label}</span>
+                  <CertLogo label={b.logoLabel} className="h-14 w-auto object-contain shrink-0" />
                 </div>
               ))}
             </div>
@@ -272,7 +358,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: C.mintHex, letterSpacing: "0.15em" }}>{product.brand}</p>
             )}
             <div className="flex justify-between items-start gap-4 mb-3">
-              <h1 className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: C.blue, letterSpacing: "-0.03em" }}>
+              <h1 className="text-xl md:text-2xl font-bold leading-tight" style={{ color: C.blue, letterSpacing: "-0.02em" }}>
                 {product.name}
               </h1>
               <button onClick={handleShare} className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold hover:opacity-85 transition-opacity shrink-0" style={{ borderColor: C.border, color: C.blue, background: C.surface }}>
@@ -426,7 +512,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           {TABS.map((tab) => {
             const isOpen = activeTab === tab.id;
             const label = tab.id === "reviews" 
-              ? `Reviews (${product.reviews?.length || 0})` 
+              ? `Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` 
               : tab.label;
             
             return (
@@ -453,7 +539,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                       transition={{ duration: 0.2 }}
                       style={{ overflow: "hidden" }}
                     >
-                      <div className="p-6 md:p-8" style={{ background: "#0c1e39", borderTop: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
+                      <div className="px-6 py-3 md:px-8 md:py-4" style={{ background: "#0c1e39", borderTop: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
                         {tab.id === "desc" && (
                           <div className="text-sm leading-relaxed" style={{ color: "#f8f8f8", opacity: 0.85 }}>
                             <div dangerouslySetInnerHTML={{__html: sanitizeHtml(product.description || product.shortDescription || "No description available.")}}/>
@@ -462,23 +548,27 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
                         {tab.id === "howto" && (
                           <div>
-                            <h3 className="font-bold text-2xl mb-8" style={{ color: "#ffffff" }}>
-                              How to Use — <span style={{ color: "#ff5c00" }}>The Simple Way</span>
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-                              {HOW_TO_USE.map((step,i) => (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                              {HOW_TO_USE.map((step, i) => (
                                 <div key={i}
                                   className="flex flex-col items-center text-center p-7 rounded-2xl"
-                                  style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
-                                  <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-5"
-                                    style={{ background: "rgba(255,92,0,0.1)" }}>
-                                    <step.icon size={22} style={{ color: "#ff5c00" }}/>
+                                  style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.08)" }}>
+                                  {/* Dark Orange Rounded-2xl Icon Container */}
+                                  <div className="h-20 w-20 rounded-2xl flex items-center justify-center mb-5 shadow-lg select-none"
+                                    style={{ background: "rgba(255, 92, 0, 0.04)", border: "1.5px solid rgba(255, 92, 0, 0.12)" }}>
+                                    <step.icon className="h-14 w-14" />
                                   </div>
+                                  
+                                  {/* Step Tag */}
                                   <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#ff5c00", letterSpacing: "0.15em" }}>
                                     Step {step.step}
                                   </div>
-                                  <h4 className="font-bold text-lg mb-2" style={{ color: "#ffffff" }}>{step.title}</h4>
-                                  <p className="text-sm" style={{ color: "#f8f8f8", opacity: 0.85 }}>{step.desc}</p>
+
+                                  {/* Bold Title */}
+                                  <h4 className="font-bold text-lg mb-2 text-white">{step.title}</h4>
+                                  
+                                  {/* Description */}
+                                  <p className="text-sm text-white/80 leading-relaxed">{step.desc}</p>
                                 </div>
                               ))}
                             </div>
@@ -491,40 +581,99 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                         )}
 
                         {tab.id === "nutrition" && (
-                          <div>
-                            <h3 className="font-bold text-2xl mb-8" style={{ color: "#ffffff" }}>Nutritional Facts</h3>
-                            <div className="max-w-sm rounded-2xl overflow-hidden" style={{ border: "2px solid rgba(255, 255, 255, 0.1)" }}>
-                              <div className="p-5" style={{ background: "#051124" }}>
-                                <p className="text-xl font-bold" style={{ color: "#ffffff" }}>Nutrition Facts</p>
-                                <p className="text-xs mt-1" style={{ color: "#f8f8f8", opacity: 0.7 }}>Per tablet (approx. values)</p>
+                          <div className="space-y-6">
+                            {/* Serving Info Headers */}
+                            <div className="flex flex-col sm:flex-row justify-between gap-4 p-5 rounded-2xl" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.08)" }}>
+                              <div>
+                                <span className="text-xs uppercase font-black text-gray-400 tracking-wider">Serving Size</span>
+                                <p className="text-lg font-bold text-white mt-0.5">1 Tablet</p>
                               </div>
-                              <div className="divide-y" style={{ background: "#0c1e39", borderColor: "rgba(255, 255, 255, 0.1)" }}>
-                                {(nutritionalFacts?Object.entries(nutritionalFacts):[
-                                  ["Energy","20 kcal"],["Carbohydrates","5g"],["Sugars","<1g"],
-                                  ["Sodium","300mg"],["Potassium","200mg"],["Magnesium","100mg"],
-                                  ["Vitamin C","100mg"],["Vitamin B6","1.4mg"],["Zinc","5mg"]
-                                ]).map(([k,v]) => (
-                                  <div key={k as string} className="flex justify-between px-5 py-3 text-sm" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}>
-                                    <span style={{ color: "#f8f8f8", opacity: 0.85 }}>{k as string}</span>
-                                    <span className="font-semibold" style={{ color: "#ffffff" }}>{v as string}</span>
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="px-5 py-3" style={{ background: "#051124", borderTop: "1px solid rgba(255, 255, 255, 0.1)" }}>
-                                <p className="text-[10px]" style={{ color: "#f8f8f8", opacity: 0.6 }}>* Approximate values. Actual values may vary by variant.</p>
+                              <div className="hidden sm:block w-px bg-white/10" />
+                              <div>
+                                <span className="text-xs uppercase font-black text-gray-400 tracking-wider">Servings Per Pack</span>
+                                <p className="text-lg font-bold text-white mt-0.5">15 Effervescent Tablets</p>
                               </div>
                             </div>
+
+                            {/* Side-by-side Tables Grid */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              {/* Left Table: Nutrients */}
+                              <div className="rounded-2xl overflow-hidden border border-white/10" style={{ background: "#051124" }}>
+                                <div className="grid grid-cols-3 p-4 font-bold text-xs uppercase tracking-wider text-white/90 border-b border-white/10" style={{ background: "#0c1e39" }}>
+                                  <span>Nutrients</span>
+                                  <span className="text-right">Amount / Serving</span>
+                                  <span className="text-right">%RDA</span>
+                                </div>
+                                <div className="divide-y divide-white/5">
+                                  {[
+                                    ["Energy", "1.08 kcal", "0.05%"],
+                                    ["Protein", "0 g", "0%"],
+                                    ["Carbohydrate", "0.27 g", "**"],
+                                    ["Fat", "0 g", "0%"],
+                                    ["Total Sugar", "0.3 g", "**"],
+                                    ["Sodium", "335 mg", "16.75%"]
+                                  ].map(([name, amt, rda]) => (
+                                    <div key={name} className="grid grid-cols-3 px-4 py-3 text-sm text-white/80">
+                                      <span className="font-semibold">{name}</span>
+                                      <span className="text-right">{amt}</span>
+                                      <span className="text-right font-semibold" style={{ color: rda.includes("0%") ? "inherit" : "var(--or)" }}>{rda}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Right Table: Ingredients */}
+                              <div className="rounded-2xl overflow-hidden border border-white/10" style={{ background: "#051124" }}>
+                                <div className="grid grid-cols-3 p-4 font-bold text-xs uppercase tracking-wider text-white/90 border-b border-white/10" style={{ background: "#0c1e39" }}>
+                                  <span>Ingredients</span>
+                                  <span className="text-right">Amount / Serving</span>
+                                  <span className="text-right">%RDA</span>
+                                </div>
+                                <div className="divide-y divide-white/5">
+                                  {[
+                                    ["Chloride", "220 mg", "9.56%"],
+                                    ["Magnesium", "56 mg", "12.72%"],
+                                    ["Potassium", "115 mg", "3.28%"],
+                                    ["Calcium", "100 mg", "10%"],
+                                    ["Vitamin C", "40 mg", "50%"],
+                                    ["Zinc", "5 mg", "29.4%"]
+                                  ].map(([name, amt, rda]) => (
+                                    <div key={name} className="grid grid-cols-3 px-4 py-3 text-sm text-white/80">
+                                      <span className="font-semibold">{name}</span>
+                                      <span className="text-right">{amt}</span>
+                                      <span className="text-right font-semibold" style={{ color: "var(--or)" }}>{rda}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* RDA Disclaimer Footer */}
+                            <p className="text-[11px] leading-relaxed text-gray-400 mt-2">
+                              * % RDA calculated based on ICMR 2020 guidelines for moderate work men and labelling & display regulation.
+                            </p>
                           </div>
                         )}
 
                         {tab.id === "specs" && (
                           <div>
-                            <h3 className="font-bold text-2xl mb-6" style={{ color: "#ffffff" }}>Specifications</h3>
-                            <div className="rounded-2xl overflow-hidden" style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
-                              {[["Brand",product.brand||"—"],["Category",product.category?.name||"—"]].map(([k,v],i,arr) => (
-                                <div key={k} className="flex text-sm" style={{ background: i%2===0 ? "#0c1e39" : "#051124", borderBottom: i<arr.length-1?"1px solid rgba(255, 255, 255, 0.1)":"none" }}>
-                                  <div className="w-1/3 px-5 py-4 font-semibold" style={{ color: "#f8f8f8", opacity: 0.85 }}>{k}</div>
-                                  <div className="flex-1 px-5 py-4" style={{ color: "#ffffff" }}>{v}</div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {[
+                                { text: "Fast Dissolving Formula", emoji: "⚡" },
+                                { text: "Refreshing Orange Flavour", emoji: "🍊" },
+                                { text: "Supports Hydration", emoji: "💧" },
+                                { text: "Supports Electrolyte Balance", emoji: "⚖️" },
+                                { text: "Supports Nerve Function", emoji: "🧠" },
+                                { text: "Helps Reduce Fatigue", emoji: "😫" },
+                                { text: "Contains Vitamin C", emoji: "🍋" },
+                                { text: "Easy to Carry", emoji: "🎒" },
+                                { text: "Sugar Conscious Formula", emoji: "🍃" },
+                                { text: "Vegetarian", emoji: "🌱" }
+                              ].map((feat) => (
+                                <div key={feat.text} className="flex items-center gap-3.5 p-4 rounded-xl"
+                                  style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.08)" }}>
+                                  <span className="text-lg shrink-0 select-none">{feat.emoji}</span>
+                                  <span className="text-sm font-semibold" style={{ color: "#ffffff" }}>{feat.text}</span>
                                 </div>
                               ))}
                             </div>
@@ -567,27 +716,27 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                             <div className="rounded-3xl p-6" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
                               <h3 className="font-bold text-xl mb-5" style={{ color: "#ffffff" }}>Write a Review</h3>
 
-                              {!token ? (
-                                <div className="text-center py-6">
-                                  <p className="text-sm mb-3" style={{ color: "#f8f8f8", opacity: 0.85 }}>Please sign in to leave a review</p>
-                                  <a href="/login" className="inline-block px-6 py-2.5 rounded-xl text-white text-sm font-semibold" style={{ background: C.mint }}>Sign In</a>
-                                </div>
-                              ) : reviewSuccess ? (
+                              {reviewSuccess ? (
                                 <div className="text-center py-6">
                                   <CheckCircle size={40} className="mx-auto mb-3" style={{ color: C.mintHex }} />
                                   <p className="font-bold" style={{ color: "#ffffff" }}>Thank you for your review!</p>
                                   <p className="text-sm mt-1" style={{ color: "#f8f8f8", opacity: 0.85 }}>It will appear after approval.</p>
                                 </div>
                               ) : (
-                                <div className="space-y-4">
+                                <div className="space-y-4" onClickCapture={() => {
+                                  if (!token) {
+                                    toast.error("Please login first to write a review!");
+                                    router.push("/login");
+                                  }
+                                }}>
                                   <div>
                                     <label className="text-sm font-semibold block mb-2" style={{ color: "#ffffff" }}>Your Rating</label>
                                     <div className="flex gap-1">
                                       {Array.from({length:5}).map((_,i) => (
                                         <button key={i} type="button"
-                                          onMouseEnter={() => setReviewHover(i+1)}
-                                          onMouseLeave={() => setReviewHover(0)}
-                                          onClick={() => setReviewRating(i+1)}>
+                                          onMouseEnter={() => token && setReviewHover(i+1)}
+                                          onMouseLeave={() => token && setReviewHover(0)}
+                                          onClick={() => token && setReviewRating(i+1)}>
                                           <Star size={28}
                                             className={(reviewHover || reviewRating) > i ? "fill-yellow-400 text-yellow-400" : ""}
                                             style={(reviewHover || reviewRating) > i ? {} : {color: "rgba(255, 255, 255, 0.2)"}} />
@@ -601,7 +750,8 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                     <input value={reviewTitle} onChange={e => setReviewTitle(e.target.value)}
                                       placeholder="e.g. Great product!"
                                       className="w-full px-4 py-2.5 rounded-xl text-sm outline-none"
-                                      style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)", background: "#0c1e39", color: "#ffffff" }} />
+                                      style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)", background: "#0c1e39", color: "#ffffff" }}
+                                      readOnly={!token} />
                                   </div>
 
                                   <div>
@@ -609,12 +759,14 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                     <textarea value={reviewBody} onChange={e => setReviewBody(e.target.value)}
                                       rows={4} placeholder="Share your experience with this product..."
                                       className="w-full px-4 py-2.5 rounded-xl text-sm outline-none resize-none"
-                                      style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)", background: "#0c1e39", color: "#ffffff" }} />
+                                      style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)", background: "#0c1e39", color: "#ffffff" }}
+                                      readOnly={!token} />
                                   </div>
 
                                   <button
-                                    disabled={!reviewBody.trim() || reviewSubmitting}
+                                    disabled={token && (!reviewBody.trim() || reviewSubmitting)}
                                     onClick={async () => {
+                                      if (!token) return;
                                       if (!reviewBody.trim()) return;
                                       setReviewSubmitting(true);
                                       try {

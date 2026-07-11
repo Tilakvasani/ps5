@@ -16,6 +16,17 @@ export default function ProductForm({ productId }: Props) {
   const [images, setImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<any[]>([]);
   const [variants, setVariants] = useState<{ variantName: string; sku: string; price: string; }[]>([]);
+  const [nutritionFacts, setNutritionFacts] = useState<{ key: string; value: string; }[]>([
+    { key: "Energy", value: "20 kcal" },
+    { key: "Carbohydrates", value: "5g" },
+    { key: "Sugars", value: "<1g" },
+    { key: "Sodium", value: "300mg" },
+    { key: "Potassium", value: "200mg" },
+    { key: "Magnesium", value: "100mg" },
+    { key: "Vitamin C", value: "100mg" },
+    { key: "Vitamin B6", value: "1.4mg" },
+    { key: "Zinc", value: "5mg" }
+  ]);
   const [form, setForm] = useState({
     name: "", sku: "", hsnCode: "2106", brand: "", unit: "NOS",
     categoryId: "", basePrice: "", sellingPrice: "", discountPercent: "0",
@@ -40,6 +51,15 @@ export default function ProductForm({ productId }: Props) {
             isActive: p.isActive, isFeatured: p.isFeatured });
           setExistingImages(p.images || []);
           setVariants(p.variants?.map((v: any) => ({ variantName: v.variantName, sku: v.sku, price: v.price })) || []);
+          if (p.nutritionFacts) {
+            let loadedNutrition: { key: string; value: string; }[] = [];
+            if (Array.isArray(p.nutritionFacts)) {
+              loadedNutrition = p.nutritionFacts.map((x: any) => ({ key: x.key || x[0] || "", value: x.value || x[1] || "" }));
+            } else if (typeof p.nutritionFacts === "object") {
+              loadedNutrition = Object.entries(p.nutritionFacts).map(([key, value]) => ({ key, value: String(value) }));
+            }
+            if (loadedNutrition.length) setNutritionFacts(loadedNutrition);
+          }
         }
       }).catch(() => {});
     }
@@ -59,6 +79,14 @@ export default function ProductForm({ productId }: Props) {
     Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
     images.forEach(img => fd.append("images", img));
     if (variants.length) fd.append("variants", JSON.stringify(variants));
+    
+    const nutritionObj: Record<string, string> = {};
+    nutritionFacts.forEach(row => {
+      if (row.key.trim()) {
+        nutritionObj[row.key.trim()] = row.value;
+      }
+    });
+    fd.append("nutritionFacts", JSON.stringify(nutritionObj));
     try {
       if (productId) {
         await adminApi.updateProduct(productId, fd);
@@ -228,6 +256,30 @@ export default function ProductForm({ productId }: Props) {
                 <input type="number" value={v.price} onChange={e => setVariants(vs => vs.map((x, j) => j === i ? { ...x, price: e.target.value } : x))}
                   className="input-field text-sm flex-1" placeholder="Price ₹" />
                 <button type="button" onClick={() => setVariants(vs => vs.filter((_, j) => j !== i))}
+                  className="h-full px-2 text-red-400/50 hover:text-red-400 transition-colors"><Trash2 size={14} /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Nutrition Facts */}
+        <div className="card md:col-span-2" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold" style={{ color: '#0C1E39' }}>Nutrition Facts</h2>
+            <button type="button" onClick={() => setNutritionFacts(n => [...n, { key: "", value: "" }])}
+              className="flex items-center gap-1.5 text-sm transition-opacity hover:opacity-80" style={{ color: 'var(--or, #FF5C00)' }}>
+              <Plus size={14} /> Add Row
+            </button>
+          </div>
+          {nutritionFacts.length === 0 && <p className="text-sm" style={{ color: '#4A5568' }}>No nutrition facts added.</p>}
+          {nutritionFacts.map((row, i) => (
+            <div key={i} className="grid grid-cols-2 gap-3 mb-2 items-center">
+              <input value={row.key} onChange={e => setNutritionFacts(ns => ns.map((x, j) => j === i ? { ...x, key: e.target.value } : x))}
+                className="input-field text-sm" placeholder="e.g. Energy, Vitamin C" />
+              <div className="flex gap-2">
+                <input value={row.value} onChange={e => setNutritionFacts(ns => ns.map((x, j) => j === i ? { ...x, value: e.target.value } : x))}
+                  className="input-field text-sm flex-1" placeholder="e.g. 20 kcal, 100mg" />
+                <button type="button" onClick={() => setNutritionFacts(ns => ns.filter((_, j) => j !== i))}
                   className="h-full px-2 text-red-400/50 hover:text-red-400 transition-colors"><Trash2 size={14} /></button>
               </div>
             </div>

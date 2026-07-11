@@ -85,7 +85,7 @@ export default function CartPage() {
                   <div className="flex-1 min-w-0">
                     <h3 style={{ fontWeight: 600, color: "#0C1E39", fontSize: "0.875rem", marginBottom: 2 }} className="line-clamp-1">{item.name}</h3>
                     <p style={{ fontSize: "0.75rem", color: "#6B7280", marginBottom: 12 }}>
-                      {item.unit} · {item.sku}{item.pack ? ` · Pack of ${item.pack}` : ""}
+                      {item.pack ? `Pack of ${item.pack}` : ""}
                     </p>
                     <div className="flex items-center justify-between">
                       <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#F8F8F8", padding: 2 }}>

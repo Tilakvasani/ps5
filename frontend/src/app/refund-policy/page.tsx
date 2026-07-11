@@ -4,8 +4,8 @@ import LegalPage from "@/components/storefront/LegalPage";
 import { fetchSettings } from "@/lib/useSettings";
 
 const DEFAULT_SECTIONS = [
-  { title: "Return Eligibility", body: "Returns are accepted within 48 hours of delivery for products that are damaged, defective, or incorrectly shipped. Products must be unopened, in their original sealed condition, and accompanied by the original invoice." },
-  { title: "How to Initiate a Return", body: "WhatsApp us within 48 hours of delivery with your order number and photos of the damaged/defective product. Our team will respond within 2-3 business days." },
+  { title: "Return Eligibility", body: "Returns are accepted within 24 hours of delivery for products that are damaged, defective, or incorrectly shipped. Products must be unopened, in their original sealed condition, and accompanied by the original invoice." },
+  { title: "How to Initiate a Return", body: "WhatsApp us within 24 hours of delivery with your order number and photos of the damaged/defective product. Our team will respond within 2-3 business days." },
   { title: "Refund Process", body: "Once your return is received and inspected, we will notify you. Approved refunds are processed within 7-10 business days. Online payments are refunded to the original payment method. COD orders are refunded via bank transfer." },
   { title: "Non-Returnable Items", body: [
     "Opened or partially used supplement products",

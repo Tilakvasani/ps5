@@ -158,8 +158,12 @@ export const accountApi = {
 
 // ── Admin ─────────────────────────────────────────
 export const adminApi = {
-  login: (email: string, password: string) =>
-    api.post("/api/admin/auth/login", { email, password }).then((r) => r.data),
+  checkNumber: (number: string) =>
+    api.post("/api/admin/auth/check-number", { number }).then((r) => r.data),
+  verifyGate: (gateToken: string) =>
+    api.post("/api/admin/auth/verify-gate", { gateToken }).then((r) => r.data),
+  login: (email: string, password: string, gateToken: string) =>
+    api.post("/api/admin/auth/login", { email, password, gateToken }).then((r) => r.data),
   me: () =>
     api.get("/api/admin/auth/me").then((r) => r.data),
 

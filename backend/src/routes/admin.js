@@ -8,10 +8,69 @@ const { upload } = require("../middleware/upload");
 const { sanitizeBody, validatePagination, validateProductBody, validateOrderStatus, validateIdParam, VALID_ORDER_STATUSES } = require("../middleware/validate");
 
 // ── Admin Auth ────────────────────────────────────────
+router.post("/auth/check-number", async (req, res) => {
+  try {
+    const { number } = req.body;
+    if (!number) return res.status(400).json({ error: "Mobile number is required" });
+    const cleanNumber = number.replace(/\D/g, "").slice(-10);
+    if (cleanNumber.length !== 10) return res.status(400).json({ error: "Please enter a valid 10-digit mobile number" });
+
+    const admin = await prisma.admin.findFirst({
+      where: {
+        number: { contains: cleanNumber }
+      }
+    });
+
+    if (!admin || !admin.isActive) {
+      return res.status(401).json({ error: "Invalid admin mobile number" });
+    }
+
+    const jwtSecret = process.env.JWT_SECRET;
+    const gateToken = require("jsonwebtoken").sign(
+      { adminId: admin.id, scope: "admin-gate" },
+      jwtSecret,
+      { expiresIn: "5m" }
+    );
+
+    res.json({ success: true, gateToken });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to verify admin number" });
+  }
+});
+
+router.post("/auth/verify-gate", async (req, res) => {
+  try {
+    const { gateToken } = req.body;
+    if (!gateToken) return res.status(400).json({ error: "Gate token required" });
+
+    const jwtSecret = process.env.JWT_SECRET;
+    const payload = require("jsonwebtoken").verify(gateToken, jwtSecret);
+    if (payload.scope !== "admin-gate") {
+      return res.status(400).json({ error: "Invalid gate token scope" });
+    }
+
+    res.json({ valid: true });
+  } catch (err) {
+    res.json({ valid: false, error: "Invalid or expired token" });
+  }
+});
+
 router.post("/auth/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, gateToken } = req.body;
     if (!email || !password) return res.status(400).json({ error: "Email and password required" });
+    if (!gateToken) return res.status(401).json({ error: "Gate token required to authenticate" });
+
+    const jwtSecret = process.env.JWT_SECRET;
+    try {
+      const payload = require("jsonwebtoken").verify(gateToken, jwtSecret);
+      if (payload.scope !== "admin-gate") {
+        return res.status(401).json({ error: "Invalid gate token scope" });
+      }
+    } catch (err) {
+      return res.status(401).json({ error: "Gate token invalid or expired. Please verify your phone number again." });
+    }
+
     const admin = await prisma.admin.findFirst({ where: { email: { equals: email.toLowerCase().trim(), mode: "insensitive" } } });
     if (!admin || !admin.isActive) return res.status(401).json({ error: "Invalid credentials" });
     const valid = await bcrypt.compare(password, admin.passwordHash);
@@ -261,8 +320,18 @@ router.get("/products", validatePagination, authAdmin, async (req, res) => {
 
 router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), async (req, res) => {
   try {
-    const { name, sku, hsnCode = "2106", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants, flavors } = req.body;
+    const { name, sku, hsnCode = "2106", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants, flavors, nutritionFacts } = req.body;
     const slug = slugify(name, { lower: true, strict: true });
+
+    let parsedNutrition = null;
+    if (nutritionFacts) {
+      try {
+        parsedNutrition = typeof nutritionFacts === "string" ? JSON.parse(nutritionFacts) : nutritionFacts;
+      } catch (e) {
+        console.error("Failed to parse nutritionFacts in POST:", e);
+      }
+    }
+
     const product = await prisma.$transaction(async tx => {
       const p = await tx.product.create({
         data: {
@@ -270,6 +339,7 @@ router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), as
           categoryId: categoryId ? Number(categoryId) : null,
           basePrice: parseFloat(basePrice), sellingPrice: parseFloat(sellingPrice), discountPercent: parseFloat(discountPercent),
           description, shortDescription, metaTitle, metaDescription, flavors,
+          nutritionFacts: parsedNutrition,
           isActive: isActive === "true" || isActive === true,
           isFeatured: isFeatured === "true" || isFeatured === true,
         },
@@ -299,7 +369,7 @@ router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), as
 router.put("/products/:id", sanitizeBody, authAdmin, upload.array("images", 10), async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, flavors, ...rest } = req.body;
+    const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, flavors, nutritionFacts, ...rest } = req.body;
     const data = { ...rest };
     if (name)             { data.name = name; data.slug = slugify(name, { lower: true, strict: true }); }
     if (isActive !== undefined) data.isActive = isActive === "true" || isActive === true;
@@ -309,6 +379,17 @@ router.put("/products/:id", sanitizeBody, authAdmin, upload.array("images", 10),
     if (discountPercent !== undefined) data.discountPercent = parseFloat(discountPercent);
     if (categoryId)       data.categoryId = Number(categoryId);
     if (flavors !== undefined) data.flavors = flavors;
+    if (nutritionFacts !== undefined) {
+      if (nutritionFacts === "" || nutritionFacts === null) {
+        data.nutritionFacts = null;
+      } else {
+        try {
+          data.nutritionFacts = typeof nutritionFacts === "string" ? JSON.parse(nutritionFacts) : nutritionFacts;
+        } catch (e) {
+          console.error("Failed to parse nutritionFacts in PUT:", e);
+        }
+      }
+    }
 
     const product = await prisma.product.update({ where: { id }, data });
     if (req.files?.length) {
