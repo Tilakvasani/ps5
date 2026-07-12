@@ -53,8 +53,8 @@ api.interceptors.response.use(
 export const authApi = {
   sendOtp: (phone: string) =>
     api.post("/api/auth/send-otp", { phone }).then((r) => r.data),
-  verifyOtp: (phone: string, otp: string, notified: boolean) =>
-    api.post("/api/auth/verify-otp", { phone, otp, notified }).then((r) => r.data),
+  verifyOtp: (phone: string, otp: string, notified: boolean, name?: string, email?: string) =>
+    api.post("/api/auth/verify-otp", { phone, otp, notified, name, email }).then((r) => r.data),
   logout: () => api.post("/api/auth/logout").then((r) => r.data),
   me: () => api.get("/api/auth/me").then((r) => r.data),
 };

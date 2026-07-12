@@ -39,6 +39,16 @@ router.post("/send-otp", async (req, res) => {
       return res.status(400).json({ error: "Invalid mobile number. Please enter a 10-digit number." });
     }
 
+    // Check if user exists in database
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        phone: {
+          endsWith: cleanPhone
+        }
+      }
+    });
+    const exists = !!existingUser;
+
     // Generate a secure 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes expiration
@@ -53,7 +63,7 @@ router.post("/send-otp", async (req, res) => {
     // Print to server console for simulation/QA
     console.log(`\n🔑 [OTP Verification Code] For mobile: +91 ${cleanPhone} => Code is: ${otp}\n`);
 
-    res.json({ message: "OTP sent successfully" });
+    res.json({ message: "OTP sent successfully", exists });
   } catch (err) {
     console.error("Error sending OTP:", err);
     res.status(500).json({ error: "Failed to send OTP" });
@@ -63,7 +73,7 @@ router.post("/send-otp", async (req, res) => {
 // POST: /api/auth/verify-otp
 router.post("/verify-otp", async (req, res) => {
   try {
-    const { phone, otp, notified } = req.body;
+    const { phone, otp, notified, name, email } = req.body;
     if (!phone || !otp) {
       return res.status(400).json({ error: "Phone number and OTP code are required" });
     }
@@ -73,12 +83,11 @@ router.post("/verify-otp", async (req, res) => {
       return res.status(400).json({ error: "Invalid mobile number" });
     }
 
-    // Verify OTP (allow wildcard "123456" for testing/QA)
+    // Verify OTP
     const stored = otpStore.get(cleanPhone);
-    const isValidWildcard = otp === "123456";
     const isValidStored = stored && stored.otp === otp && Date.now() < stored.expiresAt;
 
-    if (!isValidWildcard && !isValidStored) {
+    if (!isValidStored) {
       return res.status(400).json({ error: "Invalid or expired OTP code" });
     }
 
@@ -97,16 +106,32 @@ router.post("/verify-otp", async (req, res) => {
     const isNotified = notified === true || notified === "true";
 
     if (!user) {
-      // Automatic signup
+      // Validate that name is provided for new signups
+      if (!name || !name.trim()) {
+        return res.status(400).json({ error: "Name is compulsory for registration." });
+      }
+
+      // Check if email already exists
+      if (email && email.trim()) {
+        const emailExists = await prisma.user.findUnique({
+          where: { email: email.toLowerCase().trim() }
+        });
+        if (emailExists) {
+          return res.status(400).json({ error: "Email is already in use by another account." });
+        }
+      }
+
+      // Sign up new user
       user = await prisma.user.create({
         data: {
           phone: cleanPhone,
-          name: `User ${cleanPhone.slice(-4)}`,
+          name: name.trim(),
+          email: email ? email.toLowerCase().trim() : null,
           notified: isNotified,
           isVerified: true
         }
       });
-      console.log(`🆕 [User Signup] Auto-created user for phone +91 ${cleanPhone}. Notified: ${isNotified}`);
+      console.log(`🆕 [User Signup] Created user for phone +91 ${cleanPhone}. Name: ${name}, Email: ${email}, Notified: ${isNotified}`);
     } else {
       // Update notified status
       user = await prisma.user.update({

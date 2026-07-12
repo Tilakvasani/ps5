@@ -20,6 +20,9 @@ export default function LoginPage() {
 function LoginForm() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [exists, setExists] = useState<boolean | null>(null);
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [notifyOffers, setNotifyOffers] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -43,7 +46,8 @@ function LoginForm() {
 
     setLoading(true);
     try {
-      await authApi.sendOtp(cleanPhone);
+      const response = await authApi.sendOtp(cleanPhone);
+      setExists(response.exists);
       toast.success("OTP verification code sent!");
       setStep("otp");
     } catch (err: any) {
@@ -60,10 +64,23 @@ function LoginForm() {
       return;
     }
 
+    if (exists === false) {
+      if (!name || !name.trim()) {
+        toast.error("Full Name is compulsory for new registrations.");
+        return;
+      }
+    }
+
     const cleanPhone = phone.replace(/\D/g, "").slice(-10);
     setLoading(true);
     try {
-      const data = await authApi.verifyOtp(cleanPhone, otp, notifyOffers);
+      const data = await authApi.verifyOtp(
+        cleanPhone,
+        otp,
+        notifyOffers,
+        exists === false ? name.trim() : undefined,
+        exists === false ? email.trim() || undefined : undefined
+      );
       setUser(data.user);
       setToken(data.accessToken);
       setAuthCookie(data.accessToken);
@@ -80,7 +97,7 @@ function LoginForm() {
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center py-12 px-6" 
       style={{ 
-        background: 'radial-gradient(circle at top right, #FF7E36 0%, #E04B00 100%)',
+        background: 'radial-gradient(circle at top right, #0C1E39 0%, #051124 100%)',
         overflow: 'hidden' 
       }}>
       
@@ -119,11 +136,6 @@ function LoginForm() {
                 exit={{ opacity: 0, x: 10 }}
                 transition={{ duration: 0.2 }}
               >
-                {/* Title */}
-                <h2 className="text-xl font-bold text-gray-900 text-center leading-snug mb-6 px-1">
-                  Fuel Better, Perform Stronger. Login to unlock personalized nutrition, faster checkout & exclusive deals.
-                </h2>
-
                 <form onSubmit={handleSendOtp} className="space-y-4">
                   {/* Phone Input Box Styled like Fast&Up / Shiprocket */}
                   <div className="flex items-center border-2 border-indigo-600/80 rounded-2xl p-1 bg-white focus-within:ring-4 focus-within:ring-indigo-100 transition-all">
@@ -204,18 +216,48 @@ function LoginForm() {
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                       required
                       placeholder="Enter 6-digit OTP"
-                      className="w-full tracking-[8px] text-center border-2 border-indigo-600/80 rounded-2xl py-3.5 text-xl font-bold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-300 placeholder:tracking-normal"
+                      className="w-full tracking-[8px] text-center border-2 border-indigo-600/80 rounded-2xl py-3.5 text-xl font-bold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-300 placeholder:tracking-normal mb-1"
                       autoComplete="one-time-code"
                       autoFocus
                     />
                   </div>
 
+                  {exists === false && (
+                    <div className="space-y-3.5 mt-2 animate-fade-in-up">
+                      <div className="text-left">
+                        <label className="block text-xs font-bold text-gray-600 mb-1 ml-1 uppercase tracking-wider">
+                          Full Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          required
+                          placeholder="e.g. Rahul Sharma"
+                          className="w-full border-2 border-gray-200 focus:border-indigo-600/80 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-400"
+                        />
+                      </div>
+                      <div className="text-left">
+                        <label className="block text-xs font-bold text-gray-600 mb-1 ml-1 uppercase tracking-wider">
+                          Email Address <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="e.g. rahul@domain.com"
+                          className="w-full border-2 border-gray-200 focus:border-indigo-600/80 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-400"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    disabled={loading || otp.length < 4}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer disabled:cursor-not-allowed"
+                    disabled={loading || otp.length < 4 || (exists === false && !name.trim())}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer disabled:cursor-not-allowed mt-2"
                   >
-                    {loading ? "Verifying..." : "Verify & Proceed"}
+                    {loading ? "Verifying..." : exists === false ? "Register & Verify" : "Verify & Proceed"}
                   </button>
 
                   <div className="flex items-center justify-between text-xs font-semibold pt-4">
@@ -224,6 +266,7 @@ function LoginForm() {
                       onClick={() => {
                         setStep("phone");
                         setOtp("");
+                        setExists(null);
                       }}
                       className="text-gray-500 hover:text-indigo-600"
                     >
