@@ -2,6 +2,7 @@ const router = require("express").Router();
 const prisma = require("../utils/prisma");
 const { signAccess } = require("../utils/jwt");
 const { authUser } = require("../middleware/auth");
+const { sendSMS } = require("../utils/sms");
 
 // In-memory store for OTPs
 const otpStore = new Map();
@@ -44,6 +45,10 @@ router.post("/send-otp", async (req, res) => {
 
     // Store in-memory
     otpStore.set(cleanPhone, { otp, expiresAt });
+
+    // Send SMS via Twilio (with console fallback inside sendSMS if credentials aren't set yet)
+    const messageBody = `Your Zupwell verification code is ${otp}. Valid for 5 minutes.`;
+    await sendSMS(cleanPhone, messageBody);
 
     // Print to server console for simulation/QA
     console.log(`\n🔑 [OTP Verification Code] For mobile: +91 ${cleanPhone} => Code is: ${otp}\n`);

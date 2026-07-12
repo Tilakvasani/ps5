@@ -300,16 +300,16 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       <div className="pt-24 pb-16 px-6 mx-auto max-w-7xl">
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm mb-8" style={{ color: C.mid }}>
-          <Link href="/products" className="flex items-center gap-1 transition-colors"
+        <div className="flex items-center gap-2 text-sm mb-8 overflow-x-auto whitespace-nowrap scrollbar-none py-1" style={{ color: C.mid }}>
+          <Link href="/products" className="flex items-center gap-1 transition-colors shrink-0"
             style={{ color: C.mid }}
             onMouseEnter={e => (e.currentTarget.style.color = C.mintHex)}
             onMouseLeave={e => (e.currentTarget.style.color = C.mid)}
           >
             <ChevronLeft size={14}/> Products
           </Link>
-          <ChevronRight size={12} style={{ color: C.border }}/>
-          <span style={{ color: C.blue }}>{product.name}</span>
+          <ChevronRight size={12} style={{ color: C.border }} className="shrink-0"/>
+          <span style={{ color: C.blue }} className="shrink-0">{product.name}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
