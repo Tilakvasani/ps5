@@ -21,6 +21,8 @@ app.use(cors({
     "http://localhost:3000",
     "https://ps5-phi.vercel.app",
     "https://ps5-hhvf.vercel.app",
+    "https://www.zupwell.com",
+    "https://zupwell.com",
     process.env.FRONTEND_URL,
   ].filter(Boolean),
   credentials: true,
