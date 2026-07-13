@@ -92,7 +92,6 @@ const adminAuthLimiter = rateLimit({
   legacyHeaders: false,
 });
 app.use("/api/admin/auth/login", adminAuthLimiter);
-app.use("/api/admin/auth/check-number", adminAuthLimiter);
 
 // ── Routes ───────────────────────────────────────────
 app.use("/api/auth",       require("./routes/auth"));
@@ -103,7 +102,12 @@ app.use("/api/payments",   require("./routes/payments"));
 app.use("/api/invoices",   require("./routes/invoices"));
 app.use("/api/account",    require("./routes/account"));
 app.use("/api/cart",       require("./routes/cart"));
-app.use("/api/admin",      (req, res) => res.status(404).json({ error: "Not Found" }));
+app.use("/api/admin",      require("./routes/admin"));
+
+// Any admin route that doesn't match a known endpoint (or fails auth
+// inside authAdmin) should look identical to a route that doesn't
+// exist at all — never confirm the admin API surface to a prober.
+app.use("/api/admin", (req, res) => res.status(404).json({ error: "Not Found" }));
 
 // ── Public Settings ──────────────────────────────────
 app.get("/api/settings", async (req, res) => {
@@ -161,7 +165,7 @@ app.post("/api/reviews", async (req, res) => {
     res.status(201).json({ success: true, reviewId: review.id, message: "Review submitted, pending approval" });
   } catch (err) {
     console.error("Review submit error:", err);
-    res.status(500).json({ error: err.message || "Failed to submit review" });
+    res.status(500).json({ error: "Failed to submit review" });
   }
 });
 

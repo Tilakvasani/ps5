@@ -1,0 +1,84 @@
+"use client";
+import { useEffect, useState } from "react";
+import { Star, CheckCircle, Trash2 } from "lucide-react";
+import { adminApi } from "@/lib/api";
+import toast from "react-hot-toast";
+
+export default function AdminReviewsPage() {
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("pending");
+
+  const fetch = async () => { setLoading(true); try { setReviews(await adminApi.getReviews()); } catch {} setLoading(false); };
+  useEffect(() => { fetch(); }, []);
+
+  const approve = async (id: number) => {
+    try { await adminApi.approveReview(id); toast.success("Approved!"); fetch(); } catch (err: any) { toast.error(err.message); }
+  };
+  const del = async (id: number) => {
+    if (!confirm("Delete review?")) return;
+    try {
+      const res = await adminApi.deleteReview(id);
+      toast.success(res.message || "Deleted");
+      fetch();
+    } catch (err: any) { toast.error(err.message); }
+  };
+
+  const filtered = reviews.filter(r => tab === "all" || (tab === "pending" ? !r.isApproved : r.isApproved));
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-black" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>Reviews</h1>
+      </div>
+      <div className="flex gap-1.5 mb-4">
+        {["pending", "approved", "all"].map(t => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className="zpill font-semibold capitalize transition-all"
+            style={{
+              background: tab === t ? "var(--or)" : "transparent",
+              color: tab === t ? "#FFFFFF" : "#0C1E39",
+              borderColor: tab === t ? "var(--or)" : "rgba(12, 30, 57, 0.15)",
+            }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+      <div className="space-y-3">
+        {loading ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="zcard h-20 animate-pulse animate-duration-1000" style={{ background: "rgba(12, 30, 57, 0.04)", borderColor: "rgba(12, 30, 57, 0.08)" }} />)
+          : filtered.map((r: any) => (
+          <div key={r.id} className="zcard" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-1.5">
+                  <div className="flex gap-0.5">{Array.from({ length: r.rating }).map((_, i) => <Star key={i} size={11} className="fill-yellow-400 text-yellow-400" />)}</div>
+                  <span className="font-bold" style={{ color: "#0C1E39", fontSize: "13px" }}>{r.user?.name}</span>
+                  <span className="text-xs" style={{ color: "#6B7280" }}>{new Date(r.createdAt).toLocaleDateString("en-IN")}</span>
+                  {r.isApproved ? <span className="zbadge zbadge-gr text-[9px]">Approved</span> : <span className="zbadge zbadge-am text-[9px]">Pending</span>}
+                </div>
+                <p className="text-sm font-semibold" style={{ color: "#0C1E39" }}>{r.title}</p>
+                <p className="text-sm mt-0.5" style={{ color: "#4A5568" }}>{r.body}</p>
+                <p className="text-xs mt-1" style={{ color: "#6B7280" }}>Product: <span style={{ color: "#0C1E39", fontWeight: 600 }}>{r.product?.name}</span></p>
+              </div>
+              <div className="flex gap-1 flex-shrink-0">
+                {!r.isApproved && (
+                  <button onClick={() => approve(r.id)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "var(--or)" }} onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,92,0,0.08)"; }} onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}><CheckCircle size={14} /></button>
+                )}
+                <button onClick={() => del(r.id)} className="h-8 w-8 flex items-center justify-center rounded-lg transition-all" style={{ color: "#EF4444" }} onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }} onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}><Trash2 size={14} /></button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {!loading && filtered.length === 0 && (
+          <div className="zcard text-center py-10" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39" }}>
+            No {tab} reviews
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+

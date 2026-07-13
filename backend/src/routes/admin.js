@@ -10,142 +10,11 @@ const { sendSMS } = require("../utils/sms");
 const jwt = require("jsonwebtoken");
 
 // ── Admin Auth ────────────────────────────────────────
-router.post("/auth/check-number", async (req, res) => {
-  try {
-    const { number, website } = req.body;
-    
-    // Honeypot field check
-    if (website) {
-      return res.json({ success: true, message: "OTP sent to registered number" });
-    }
-
-    if (!number) return res.status(400).json({ error: "Mobile number is required" });
-    const cleanNumber = number.replace(/\D/g, "").slice(-10);
-    if (cleanNumber.length !== 10) return res.status(400).json({ error: "Please enter a valid 10-digit mobile number" });
-
-    // Throttle: max 3 sends per phone per hour
-    const recentCount = await prisma.otpCode.count({
-      where: {
-        phone: cleanNumber,
-        createdAt: { gte: new Date(Date.now() - 60 * 60 * 1000) },
-      },
-    });
-    if (recentCount >= 3) {
-      return res.status(429).json({ error: "Too many OTP requests for this number. Try again in an hour." });
-    }
-
-    const admin = await prisma.admin.findFirst({
-      where: {
-        number: { contains: cleanNumber }
-      }
-    });
-
-    if (!admin || !admin.isActive) {
-      // Fake successful response to prevent phone number enumeration
-      return res.json({ success: true, message: "OTP sent to registered number" });
-    }
-
-    // Generate secure 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const codeHash = await bcrypt.hash(otp, 10);
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiration
-
-    // Store OTP in database
-    await prisma.otpCode.create({
-      data: { phone: cleanNumber, codeHash, expiresAt }
-    });
-
-    // Send SMS via Twilio
-    await sendSMS(cleanNumber, `Your Zupwell admin access code is ${otp}. Valid for 5 minutes.`);
-
-    // Print to server console for simulation/QA
-    console.log(`\n🔑 [Admin OTP Verification Code] For mobile: +91 ${cleanNumber} => Code is: ${otp}\n`);
-
-    res.json({ success: true, message: "OTP sent to registered number" });
-  } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to verify admin number" });
-  }
-});
-
-router.post("/auth/verify-otp-gate", async (req, res) => {
-  try {
-    const { number, otp } = req.body;
-    if (!number || !otp) {
-      return res.status(400).json({ error: "Mobile number and OTP code are required" });
-    }
-    const cleanNumber = number.replace(/\D/g, "").slice(-10);
-
-    const record = await prisma.otpCode.findFirst({
-      where: { phone: cleanNumber, expiresAt: { gt: new Date() } },
-      orderBy: { createdAt: "desc" },
-    });
-
-    if (!record) {
-      return res.status(400).json({ error: "Invalid or expired code" });
-    }
-
-    if (record.attempts >= 5) {
-      return res.status(429).json({ error: "Too many incorrect attempts. Request a new OTP." });
-    }
-
-    if (record.attempts >= 3) {
-      const elapsedMs = Date.now() - new Date(record.updatedAt).getTime();
-      if (elapsedMs < 60 * 1000) {
-        const remainingSecs = Math.ceil((60 * 1000 - elapsedMs) / 1000);
-        return res.status(429).json({ error: `Too many incorrect attempts. Please wait ${remainingSecs} seconds before trying again.` });
-      }
-    }
-
-    const isValid = await bcrypt.compare(otp, record.codeHash);
-    if (!isValid) {
-      await prisma.otpCode.update({
-        where: { id: record.id },
-        data: { attempts: { increment: 1 } },
-      });
-      return res.status(400).json({ error: "Invalid or expired code" });
-    }
-
-    // Delete OTP record after successful validation
-    await prisma.otpCode.delete({ where: { id: record.id } });
-
-    const admin = await prisma.admin.findFirst({
-      where: { number: { contains: cleanNumber } }
-    });
-
-    if (!admin || !admin.isActive) {
-      return res.status(401).json({ error: "Admin access disabled" });
-    }
-
-    const jwtSecret = process.env.JWT_SECRET;
-    const gateToken = jwt.sign(
-      { adminId: admin.id, scope: "admin-gate" },
-      jwtSecret,
-      { expiresIn: "5m" }
-    );
-
-    res.json({ success: true, gateToken });
-  } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to verify OTP gate" });
-  }
-});
-
-router.post("/auth/verify-gate", async (req, res) => {
-  try {
-    const { gateToken } = req.body;
-    if (!gateToken) return res.status(400).json({ error: "Gate token required" });
-
-    const jwtSecret = process.env.JWT_SECRET;
-    const payload = jwt.verify(gateToken, jwtSecret);
-    if (payload.scope !== "admin-gate") {
-      return res.status(400).json({ error: "Invalid gate token scope" });
-    }
-
-    res.json({ valid: true });
-  } catch (err) {
-    res.json({ valid: false, error: "Invalid or expired token" });
-  }
-});
-
+// NOTE: the phone-number + OTP "gate" step now lives in /api/auth
+// (identify → verify-identify-otp) so that admin and regular-user login
+// share a single entry page. This route only handles the second factor:
+// verifying the admin's email + password against the gate token issued
+// by that OTP step, and finally issuing the 8-hour admin JWT.
 router.post("/auth/login", async (req, res) => {
   try {
     const { email, password, gateToken } = req.body;
@@ -216,7 +85,7 @@ router.post("/auth/login", async (req, res) => {
 
     res.json({ accessToken, admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role } });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Login failed" });
+    res.status(500).json({ error: "Login failed" });
   }
 });
 
@@ -226,7 +95,7 @@ router.get("/auth/me", authAdmin, async (req, res) => {
     if (!admin || !admin.isActive) return res.status(401).json({ error: "Unauthorized" });
     res.json({ id: admin.id, name: admin.name, email: admin.email, role: admin.role });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch admin profile" });
+    res.status(500).json({ error: "Failed to fetch admin profile" });
   }
 });
 
@@ -365,7 +234,7 @@ router.get("/dashboard/stats", authAdmin, async (req, res) => {
       usersChange:   changePct(thisMonthUsers, lastMonthUsers),
     });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to load dashboard stats" });
+    res.status(500).json({ error: "Failed to load dashboard stats" });
   }
 });
 
@@ -402,7 +271,7 @@ router.get("/dashboard/revenue-chart", authAdmin, async (req, res) => {
       profit:  Math.round(profitMap[date]),
     })));
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to load revenue chart" });
+    res.status(500).json({ error: "Failed to load revenue chart" });
   }
 });
 
@@ -428,7 +297,7 @@ router.get("/dashboard/top-products", authAdmin, async (req, res) => {
     }));
     res.json(products);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to load top products" });
+    res.status(500).json({ error: "Failed to load top products" });
   }
 });
 
@@ -451,7 +320,7 @@ router.get("/products", validatePagination, authAdmin, async (req, res) => {
     ]);
     res.json({ products, total });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch products" });
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 
@@ -498,7 +367,7 @@ router.post("/products", sanitizeBody, authAdmin, requireRole("admin", "super_ad
     res.status(201).json(product);
   } catch (err) {
     console.error("Create product error:", err);
-    res.status(500).json({ error: err.message || "Failed to create product" });
+    res.status(500).json({ error: "Failed to create product" });
   }
 });
 
@@ -536,7 +405,7 @@ router.put("/products/:id", sanitizeBody, authAdmin, requireRole("admin", "super
     }
     res.json(product);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update product" });
+    res.status(500).json({ error: "Failed to update product" });
   }
 });
 
@@ -559,7 +428,7 @@ router.delete("/products/images/:imageId", authAdmin, requireRole("admin", "supe
     await prisma.productImage.delete({ where: { id: imageId } });
     res.json({ message: "Image deleted successfully" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to delete image" });
+    res.status(500).json({ error: "Failed to delete image" });
   }
 });
 
@@ -593,7 +462,7 @@ router.get("/categories", authAdmin, async (req, res) => {
     const cats = await prisma.category.findMany({ orderBy: { sortOrder: "asc" }, include: { _count: { select: { products: true } }, children: true } });
     res.json(cats);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch categories" });
+    res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
 
@@ -605,7 +474,7 @@ router.post("/categories", authAdmin, requireRole("admin", "super_admin"), async
     const cat = await prisma.category.create({ data: { name, slug, description, parentId: parentId ? Number(parentId) : null, isActive } });
     res.status(201).json(cat);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to create category" });
+    res.status(500).json({ error: "Failed to create category" });
   }
 });
 
@@ -618,7 +487,7 @@ router.put("/categories/:id", authAdmin, requireRole("admin", "super_admin"), as
     const cat = await prisma.category.update({ where: { id: Number(req.params.id) }, data });
     res.json(cat);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update category" });
+    res.status(500).json({ error: "Failed to update category" });
   }
 });
 
@@ -644,7 +513,7 @@ router.get("/inventory", authAdmin, async (req, res) => {
     const inv = await prisma.inventory.findMany({ include: { product: { select: { id: true, name: true, sku: true, isActive: true } }, variant: true }, orderBy: { qtyInStock: "asc" } });
     res.json(inv);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch inventory" });
+    res.status(500).json({ error: "Failed to fetch inventory" });
   }
 });
 
@@ -673,7 +542,7 @@ router.post("/inventory/movement", authAdmin, async (req, res) => {
     }
     res.json({ message: "Stock updated", qtyBefore, qtyAfter });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update stock" });
+    res.status(500).json({ error: "Failed to update stock" });
   }
 });
 
@@ -682,7 +551,7 @@ router.get("/inventory/movements", authAdmin, async (req, res) => {
     const movements = await prisma.stockMovement.findMany({ orderBy: { createdAt: "desc" }, take: 100, include: { product: { select: { name: true } }, admin: { select: { name: true } } } });
     res.json(movements);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch movements" });
+    res.status(500).json({ error: "Failed to fetch movements" });
   }
 });
 
@@ -700,7 +569,7 @@ router.get("/orders", validatePagination, authAdmin, async (req, res) => {
     ]);
     res.json({ orders, total });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch orders" });
+    res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
 
@@ -710,7 +579,7 @@ router.get("/orders/:id", authAdmin, async (req, res) => {
     if (!order) return res.status(404).json({ error: "Order not found" });
     res.json(order);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch order" });
+    res.status(500).json({ error: "Failed to fetch order" });
   }
 });
 
@@ -724,7 +593,7 @@ router.put("/orders/:id/status", authAdmin, validateOrderStatus, async (req, res
     const order = await prisma.order.update({ where: { id: Number(req.params.id) }, data: { status } });
     res.json(order);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update order status" });
+    res.status(500).json({ error: "Failed to update order status" });
   }
 });
 
@@ -736,7 +605,7 @@ router.get("/invoices", authAdmin, async (req, res) => {
     const invoices = await prisma.invoice.findMany({ where, orderBy: { createdAt: "desc" }, include: { order: { include: { user: { select: { name: true } } } } } });
     res.json(invoices);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch invoices" });
+    res.status(500).json({ error: "Failed to fetch invoices" });
   }
 });
 
@@ -745,7 +614,7 @@ router.put("/invoices/:id/cancel", authAdmin, async (req, res) => {
     const inv = await prisma.invoice.update({ where: { id: Number(req.params.id) }, data: { status: "cancelled" } });
     res.json(inv);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to cancel invoice" });
+    res.status(500).json({ error: "Failed to cancel invoice" });
   }
 });
 
@@ -760,7 +629,7 @@ router.get("/users", authAdmin, async (req, res) => {
     ]);
     res.json({ users, total });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch users" });
+    res.status(500).json({ error: "Failed to fetch users" });
   }
 });
 
@@ -771,7 +640,7 @@ router.get("/users/:id", authAdmin, async (req, res) => {
     const { passwordHash, ...safe } = user;
     res.json(safe);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch user" });
+    res.status(500).json({ error: "Failed to fetch user" });
   }
 });
 
@@ -781,7 +650,7 @@ router.delete("/users/:id", authAdmin, requireRole("super_admin"), async (req, r
     await prisma.user.update({ where: { id: Number(req.params.id) }, data: { isActive: false } });
     res.json({ message: "User deactivated" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to deactivate user" });
+    res.status(500).json({ error: "Failed to deactivate user" });
   }
 });
 
@@ -792,7 +661,7 @@ router.get("/coupons", authAdmin, async (req, res) => {
     const coupons = await prisma.coupon.findMany({ orderBy: { createdAt: "desc" } });
     res.json(coupons);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch coupons" });
+    res.status(500).json({ error: "Failed to fetch coupons" });
   }
 });
 
@@ -816,7 +685,7 @@ router.post("/coupons", authAdmin, requireRole("admin", "super_admin"), async (r
     });
     res.status(201).json(coupon);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to create coupon" });
+    res.status(500).json({ error: "Failed to create coupon" });
   }
 });
 
@@ -838,7 +707,7 @@ router.put("/coupons/:id", authAdmin, requireRole("admin", "super_admin"), async
     const coupon = await prisma.coupon.update({ where: { id: Number(req.params.id) }, data });
     res.json(coupon);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update coupon" });
+    res.status(500).json({ error: "Failed to update coupon" });
   }
 });
 
@@ -864,7 +733,7 @@ router.get("/reviews", authAdmin, async (req, res) => {
     const reviews = await prisma.review.findMany({ orderBy: { createdAt: "desc" }, include: { user: { select: { name: true } }, product: { select: { name: true } } } });
     res.json(reviews);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch reviews" });
+    res.status(500).json({ error: "Failed to fetch reviews" });
   }
 });
 
@@ -873,7 +742,7 @@ router.put("/reviews/:id/approve", authAdmin, requireRole("admin", "super_admin"
     const r = await prisma.review.update({ where: { id: Number(req.params.id) }, data: { isApproved: true } });
     res.json(r);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to approve review" });
+    res.status(500).json({ error: "Failed to approve review" });
   }
 });
 
@@ -883,7 +752,7 @@ router.delete("/reviews/:id", authAdmin, requireRole("super_admin"), async (req,
     await prisma.review.delete({ where: { id: Number(req.params.id) } });
     res.json({ message: "Review deleted completely" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to delete review" });
+    res.status(500).json({ error: "Failed to delete review" });
   }
 });
 
@@ -893,7 +762,7 @@ router.get("/settings", authAdmin, async (req, res) => {
     const settings = await prisma.setting.findMany();
     res.json(settings);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch settings" });
+    res.status(500).json({ error: "Failed to fetch settings" });
   }
 });
 
@@ -905,7 +774,7 @@ router.put("/settings", authAdmin, requireRole("super_admin"), async (req, res) 
     ));
     res.json({ message: "Settings updated" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update settings" });
+    res.status(500).json({ error: "Failed to update settings" });
   }
 });
 
@@ -915,7 +784,7 @@ router.post("/settings/upload", authAdmin, requireRole("super_admin"), upload.si
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
     res.json({ url: req.file.path });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to upload setting image" });
+    res.status(500).json({ error: "Failed to upload setting image" });
   }
 });
 
@@ -925,7 +794,7 @@ router.get("/notifications", authAdmin, async (req, res) => {
     const notifications = await prisma.notification.findMany({ orderBy: { createdAt: "desc" }, take: 50 });
     res.json(notifications);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch notifications" });
+    res.status(500).json({ error: "Failed to fetch notifications" });
   }
 });
 
@@ -936,7 +805,7 @@ router.put("/notifications/read-all", authAdmin, async (req, res) => {
     await prisma.notification.updateMany({ data: { isRead: true } });
     res.json({ message: "All marked read" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to mark all read" });
+    res.status(500).json({ error: "Failed to mark all read" });
   }
 });
 
@@ -945,7 +814,7 @@ router.put("/notifications/:id/read", authAdmin, async (req, res) => {
     const n = await prisma.notification.update({ where: { id: Number(req.params.id) }, data: { isRead: true } });
     res.json(n);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to mark notification read" });
+    res.status(500).json({ error: "Failed to mark notification read" });
   }
 });
 
@@ -955,7 +824,7 @@ router.get("/gst-rates", authAdmin, async (req, res) => {
     const rates = await prisma.gstRate.findMany();
     res.json(rates);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch GST rates" });
+    res.status(500).json({ error: "Failed to fetch GST rates" });
   }
 });
 

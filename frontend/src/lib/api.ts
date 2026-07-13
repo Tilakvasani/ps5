@@ -35,14 +35,12 @@ api.interceptors.response.use(
   (err) => {
     const msg = err.response?.data?.error || err.message || "Something went wrong";
     if (err.response?.status === 401) {
-      if (typeof window !== "undefined") {
-        if (window.location.pathname.startsWith("/admin") && window.location.pathname !== "/admin/login") {
-          localStorage.removeItem("zupwell-admin");
-          try {
-            const { clearAdminAuthCookie } = require("./auth-cookie");
-            clearAdminAuthCookie();
-          } catch (e) {}
-        }
+      if (typeof window !== "undefined" && window.location.pathname.startsWith("/admin")) {
+        localStorage.removeItem("zupwell-admin");
+        try {
+          const { clearAdminAuthCookie } = require("./auth-cookie");
+          clearAdminAuthCookie();
+        } catch (e) {}
       }
     }
     return Promise.reject(new Error(msg));
@@ -50,11 +48,23 @@ api.interceptors.response.use(
 );
 
 // ── Auth ──────────────────────────────────────────
+// Single entry point (phone) branches into: admin gate / password login /
+// OTP-based registration or first-time password setup.
 export const authApi = {
-  sendOtp: (phone: string) =>
-    api.post("/api/auth/send-otp", { phone }).then((r) => r.data),
-  verifyOtp: (phone: string, otp: string, notified: boolean, name?: string, email?: string) =>
-    api.post("/api/auth/verify-otp", { phone, otp, notified, name, email }).then((r) => r.data),
+  identify: (phone: string) =>
+    api.post("/api/auth/identify", { phone }).then((r) => r.data),
+  login: (identifier: string, password: string) =>
+    api.post("/api/auth/login", { identifier, password }).then((r) => r.data),
+  verifyIdentifyOtp: (phone: string, otp: string) =>
+    api.post("/api/auth/verify-identify-otp", { phone, otp }).then((r) => r.data),
+  completeRegistration: (data: { setupToken: string; name: string; email?: string; password: string; confirmPassword: string; notified: boolean }) =>
+    api.post("/api/auth/complete-registration", data).then((r) => r.data),
+  completePasswordSetup: (data: { setupToken: string; password: string; confirmPassword: string }) =>
+    api.post("/api/auth/complete-password-setup", data).then((r) => r.data),
+  forgotPasswordRequest: (phone: string) =>
+    api.post("/api/auth/forgot-password-request", { phone }).then((r) => r.data),
+  forgotPasswordVerify: (data: { phone: string; otp: string; password: string; confirmPassword: string }) =>
+    api.post("/api/auth/forgot-password-verify", data).then((r) => r.data),
   logout: () => api.post("/api/auth/logout").then((r) => r.data),
   me: () => api.get("/api/auth/me").then((r) => r.data),
 };
@@ -160,12 +170,10 @@ export const accountApi = {
 
 // ── Admin ─────────────────────────────────────────
 export const adminApi = {
-  checkNumber: (number: string, website?: string) =>
-    api.post("/api/admin/auth/check-number", { number, website }).then((r) => r.data),
-  verifyGate: (gateToken: string) =>
-    api.post("/api/admin/auth/verify-gate", { gateToken }).then((r) => r.data),
-  verifyOtpGate: (number: string, otp: string) =>
-    api.post("/api/admin/auth/verify-otp-gate", { number, otp }).then((r) => r.data),
+  // The phone + OTP "gate" step lives in authApi (identify / verifyIdentifyOtp)
+  // so admin and regular-user login share one entry page. This is the
+  // second factor: email + password, checked against the gate token that
+  // step issued, finalized into the 8-hour admin JWT.
   login: (email: string, password: string, gateToken: string) =>
     api.post("/api/admin/auth/login", { email, password, gateToken }).then((r) => r.data),
   me: () =>

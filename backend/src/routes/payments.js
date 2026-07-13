@@ -59,7 +59,7 @@ router.post("/create-razorpay-order", authUser, async (req, res) => {
     });
   } catch (err) {
     console.error("Razorpay Order Creation Error:", err);
-    res.status(500).json({ error: "Razorpay API error: " + err.message });
+    res.status(500).json({ error: "Failed to create payment order. Please try again." });
   }
 });
 
@@ -109,7 +109,7 @@ router.post("/verify", authUser, async (req, res) => {
     await markOrderPaid(order.id, razorpay_payment_id);
   } catch (err) {
     console.error("Payment transaction error:", err);
-    return res.status(400).json({ error: err.message || "Failed to process payment details" });
+    return res.status(400).json({ error: "Failed to process payment details" });
   }
 
   res.json({ message: "Payment verified and invoice generated" });

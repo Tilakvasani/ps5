@@ -36,7 +36,7 @@ import { clearAdminAuthCookie } from "./auth-cookie";
 
 /**
  * useAdminLogout — handles admin logout.
- * Clears localStorage admin token, redirects to admin login.
+ * Clears localStorage admin token, redirects to the single unified login page.
  */
 export function useAdminLogout() {
   const router = useRouter();
@@ -46,7 +46,7 @@ export function useAdminLogout() {
     try {
       clearAdminAuthCookie();
     } catch (e) {}
-    router.push("/admin/login");
+    router.push("/login");
   };
 }
 
