@@ -103,7 +103,7 @@ app.use("/api/payments",   require("./routes/payments"));
 app.use("/api/invoices",   require("./routes/invoices"));
 app.use("/api/account",    require("./routes/account"));
 app.use("/api/cart",       require("./routes/cart"));
-app.use("/api/admin",      require("./routes/admin"));
+app.use("/api/admin",      (req, res) => res.status(404).json({ error: "Not Found" }));
 
 // ── Public Settings ──────────────────────────────────
 app.get("/api/settings", async (req, res) => {
