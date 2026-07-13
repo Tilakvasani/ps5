@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, PhoneCall, ShieldCheck, Eye, EyeOff, LogIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { adminApi } from "@/lib/api";
+import { adminApi, authApi } from "@/lib/api";
 import { setAdminAuthCookie } from "@/lib/auth-cookie";
 import toast from "react-hot-toast";
 
@@ -35,9 +35,16 @@ export default function AdminLoginPage() {
       return;
     }
 
+    if (website) {
+      // Honeypot field triggered: simulate success without performing action
+      setStep("otp");
+      toast.success("OTP verification code sent!");
+      return;
+    }
+
     setLoading(true);
     try {
-      await adminApi.checkNumber(cleanPhone, website);
+      await authApi.identify(cleanPhone);
       setStep("otp");
       toast.success("OTP verification code sent!");
     } catch (err: any) {
@@ -57,7 +64,7 @@ export default function AdminLoginPage() {
     setLoading(true);
     try {
       const cleanPhone = phone.replace(/\D/g, "").slice(-10);
-      const data = await adminApi.verifyOtpGate(cleanPhone, otp);
+      const data = await authApi.verifyIdentifyOtp(cleanPhone, otp);
       setGateToken(data.gateToken);
       setStep("credentials");
       toast.success("Phone verified! Provide admin credentials.");
