@@ -197,11 +197,20 @@ router.delete("/:id/cancel", authUser, async (req, res) => {
   res.json({ message: "Order cancelled" });
 });
 
-// GET /api/orders/track/:orderNumber - public tracking status
-router.get("/track/:orderNumber", async (req, res) => {
+// POST /api/orders/track - public tracking status requiring order number and phone
+router.post("/track", async (req, res) => {
   try {
-    const order = await prisma.order.findUnique({
-      where: { orderNumber: req.params.orderNumber },
+    const { orderNumber, phone } = req.body;
+    if (!orderNumber || !phone) {
+      return res.status(400).json({ error: "Order number and phone are required" });
+    }
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+
+    const order = await prisma.order.findFirst({
+      where: {
+        orderNumber: orderNumber.trim().toUpperCase(),
+        address: { phone: { endsWith: cleanPhone } },
+      },
       select: {
         orderNumber: true,
         status: true,
@@ -212,7 +221,7 @@ router.get("/track/:orderNumber", async (req, res) => {
         paymentStatus: true,
       }
     });
-    if (!order) return res.status(404).json({ error: "Order not found" });
+    if (!order) return res.status(404).json({ error: "Order not found. Check your order number and phone." });
     res.json(order);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch order status" });

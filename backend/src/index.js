@@ -13,18 +13,33 @@ const app = express();
 app.set("trust proxy", 1);
 
 // ── Security Headers ─────────────────────────────────
-app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "https://res.cloudinary.com", "data:"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com"],
+      connectSrc: ["'self'", "https://api.razorpay.com", "https://lumberjack-cx.razorpay.com"],
+      frameSrc: ["https://api.razorpay.com", "https://checkout.razorpay.com"],
+    },
+  },
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+}));
 
 // ── CORS ─────────────────────────────────────────────
+const allowedOrigins = [
+  "https://www.zupwell.com",
+  "https://zupwell.com",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+if (process.env.NODE_ENV !== "production") {
+  allowedOrigins.push("http://localhost:3000");
+}
+
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://ps5-phi.vercel.app",
-    "https://ps5-hhvf.vercel.app",
-    "https://www.zupwell.com",
-    "https://zupwell.com",
-    process.env.FRONTEND_URL,
-  ].filter(Boolean),
+  origin: allowedOrigins,
   credentials: true,
 }));
 
@@ -41,7 +56,13 @@ app.use((req, res, next) => {
 });
 
 // ── Body Parsers ─────────────────────────────────────
-app.use(express.json({ limit: "10mb" }));
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/payments/webhook") {
+    express.raw({ type: "application/json" })(req, res, next);
+  } else {
+    express.json({ limit: "10mb" })(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // ── Rate Limiting ────────────────────────────────────
@@ -53,6 +74,25 @@ app.use("/api/auth/", authLimiter);
 
 const adminLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 1000, message: { error: "Too many admin requests" } });
 app.use("/api/admin/", adminLimiter);
+
+const trackLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: "Too many tracking attempts. Try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/orders/track", trackLimiter);
+
+const adminAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  message: { error: "Too many login attempts. Try again in 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/admin/auth/login", adminAuthLimiter);
+app.use("/api/admin/auth/check-number", adminAuthLimiter);
 
 // ── Routes ───────────────────────────────────────────
 app.use("/api/auth",       require("./routes/auth"));
@@ -144,45 +184,6 @@ app.get("/api/reviews/public", async (req, res) => {
   }
 });
 
-// ── Submit Review (authenticated user) ───────────────
-app.post("/api/reviews", async (req, res) => {
-  try {
-    const prisma = require("./utils/prisma");
-    const jwt = require("jsonwebtoken");
-
-    const authHeader = req.headers.authorization || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-    if (!token) return res.status(401).json({ error: "Sign in to leave a review" });
-
-    let userId;
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      userId = decoded.id;
-    } catch {
-      return res.status(401).json({ error: "Invalid or expired session" });
-    }
-
-    const { productId, rating, title, body } = req.body;
-    if (!productId || !rating || !body?.trim())
-      return res.status(400).json({ error: "Product, rating and review body are required" });
-    if (rating < 1 || rating > 5)
-      return res.status(400).json({ error: "Rating must be between 1 and 5" });
-
-    const product = await prisma.product.findUnique({ where: { id: Number(productId) } });
-    if (!product) return res.status(404).json({ error: "Product not found" });
-
-    const review = await prisma.review.upsert({
-      where: { productId_userId: { productId: Number(productId), userId } },
-      update: { rating: Number(rating), title: title || null, body: body.trim(), isApproved: false },
-      create: { productId: Number(productId), userId, rating: Number(rating), title: title || null, body: body.trim(), isApproved: false },
-    });
-
-    res.status(201).json({ success: true, reviewId: review.id, message: "Review submitted, pending approval" });
-  } catch (err) {
-    console.error("Review submit error:", err);
-    res.status(500).json({ error: err.message || "Failed to submit review" });
-  }
-});
 
 // ── Health Check ─────────────────────────────────────
 app.get("/health", (req, res) => res.json({ status: "ok", time: new Date().toISOString() }));
@@ -457,6 +458,13 @@ app.listen(PORT, async () => {
       });
     }
     console.log("✅ Settings initialized");
+    // Check if Razorpay is using a TEST key in production
+    const loadedSettings = await prisma.setting.findMany();
+    const settingsMap = {};
+    loadedSettings.forEach(s => { settingsMap[s.key] = s.value; });
+    if (settingsMap.razorpay_key_id?.startsWith("rzp_test_") && process.env.NODE_ENV === "production") {
+      console.warn("⚠️  WARNING: Razorpay is using a TEST key in production!");
+    }
   } catch (e) {
     console.error("⚠️  Settings seed failed:", e.message);
   }

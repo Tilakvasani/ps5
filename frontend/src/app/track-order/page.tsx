@@ -9,19 +9,37 @@ import { API_URL } from "@/lib/api";
 
 export default function TrackOrderPage() {
   const [orderNumber, setOrderNumber] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState<any>(null);
   const [searched, setSearched] = useState(false);
 
-  const autoTrack = async (code: string) => {
+  const trackOrder = async (code: string, phoneNumber: string) => {
+    if (!code.trim() || !phoneNumber.trim()) {
+      toast.error("Please enter both order number and phone number");
+      return;
+    }
     setLoading(true);
     setOrder(null);
     setSearched(false);
     try {
       const trimmedNum = code.trim().toUpperCase();
-      const res = await fetch(`${API_URL}/api/orders/track/${trimmedNum}`);
+      const cleanPhone = phoneNumber.replace(/\D/g, "").slice(-10);
+      if (cleanPhone.length !== 10) {
+        throw new Error("Please enter a valid 10-digit mobile number");
+      }
+      
+      const res = await fetch(`${API_URL}/api/orders/track`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ orderNumber: trimmedNum, phone: cleanPhone }),
+      });
+      
       if (!res.ok) {
-        throw new Error(res.status === 404 ? "Order not found" : "Failed to fetch order");
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Order not found. Check your order number and phone.");
       }
       const data = await res.json();
       setOrder(data);
@@ -39,18 +57,13 @@ export default function TrackOrderPage() {
       const code = params.get("order") || params.get("code") || "";
       if (code) {
         setOrderNumber(code);
-        autoTrack(code);
       }
     }
   }, []);
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!orderNumber.trim()) {
-      toast.error("Please enter a valid order number");
-      return;
-    }
-    await autoTrack(orderNumber);
+    await trackOrder(orderNumber, phone);
   };
 
   const handleShare = () => {
@@ -124,30 +137,54 @@ export default function TrackOrderPage() {
               </h1>
             </div>
             <p className="text-sm max-w-md mx-auto text-[#4A5568] font-medium">
-              Enter your Zupwell Order Number (e.g. ZW1001) below to view delivery updates.
+              Enter your Zupwell Order Number and registered phone number below to view delivery updates.
             </p>
           </div>
 
           {/* Search Form */}
-          <form onSubmit={handleTrack} className="max-w-md mx-auto mb-12">
-            <div className="relative flex items-center bg-white border-2 border-[#0C1E39]/12 rounded-2xl overflow-hidden focus-within:border-[#0C1E39] transition-all p-1.5 shadow-sm">
-              <input
-                type="text"
-                value={orderNumber}
-                onChange={(e) => setOrderNumber(e.target.value)}
-                placeholder="Enter Order Number (e.g. ZW1001)"
-                className="w-full pl-3 pr-2 py-3 text-sm focus:outline-none text-[#0C1E39] font-bold"
-              />
+          <form onSubmit={handleTrack} className="max-w-md mx-auto mb-12 space-y-4">
+            <div className="bg-white border-2 border-[#0C1E39]/12 rounded-2xl p-4 shadow-sm space-y-3 focus-within:border-[#0C1E39]/30 transition-all">
+              <div>
+                <label className="block mb-1.5 text-xs font-black tracking-widest text-[#0C1E39] uppercase opacity-75">Order Number</label>
+                <input
+                  type="text"
+                  value={orderNumber}
+                  onChange={(e) => setOrderNumber(e.target.value)}
+                  placeholder="e.g. ZW-2026-00001"
+                  className="w-full px-3 py-2.5 text-sm border border-[#0C1E39]/10 rounded-xl focus:outline-none focus:border-[#0C1E39] text-[#0C1E39] font-bold bg-[#F8FAFC]"
+                />
+              </div>
+              
+              <div>
+                <label className="block mb-1.5 text-xs font-black tracking-widest text-[#0C1E39] uppercase opacity-75">Phone Number</label>
+                <div className="flex items-center border border-[#0C1E39]/10 rounded-xl bg-[#F8FAFC] focus-within:border-[#0C1E39] focus-within:bg-white transition-all overflow-hidden">
+                  <span className="text-xs font-bold text-gray-500 pl-3 pr-2 shrink-0 select-none">+91</span>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                    placeholder="10-digit mobile number"
+                    className="w-full px-1 py-2.5 text-sm focus:outline-none text-[#0C1E39] font-bold bg-transparent"
+                  />
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary p-3 rounded-xl flex items-center justify-center shrink-0"
-                style={{ height: "46px", width: "46px" }}
+                className="w-full btn-primary py-3 rounded-xl flex items-center justify-center font-bold text-sm shadow-md gap-2"
+                style={{ cursor: "pointer" }}
               >
                 {loading ? (
-                  <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  <>
+                    <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    Tracking...
+                  </>
                 ) : (
-                  <Search size={18} />
+                  <>
+                    <Search size={16} />
+                    Track Shipment
+                  </>
                 )}
               </button>
             </div>

@@ -9,35 +9,39 @@ datasource db {
 }
 
 model Admin {
-  id             Int             @id @default(autoincrement())
-  name           String          @db.VarChar(120)
-  email          String          @unique @db.VarChar(255)
-  number         String?         @unique @db.VarChar(20)
-  passwordHash   String          @map("password_hash") @db.VarChar(255)
-  role           String          @default("staff") @db.VarChar(20)
-  avatarUrl      String?         @map("avatar_url")
-  isActive       Boolean         @default(true) @map("is_active")
-  lastLoginAt    DateTime?       @map("last_login_at")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  stockMovements StockMovement[]
+  id                  Int             @id @default(autoincrement())
+  name                String          @db.VarChar(120)
+  email               String          @unique @db.VarChar(255)
+  number              String?         @unique @db.VarChar(20)
+  passwordHash        String          @map("password_hash") @db.VarChar(255)
+  role                String          @default("staff") @db.VarChar(20)
+  avatarUrl           String?         @map("avatar_url")
+  isActive            Boolean         @default(true) @map("is_active")
+  lastLoginAt         DateTime?       @map("last_login_at")
+  failedLoginAttempts Int             @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime?       @map("locked_until")
+  tokenVersion        Int             @default(0) @map("token_version")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  stockMovements      StockMovement[]
   @@map("admins")
 }
 
 model User {
-  id           Int           @id @default(autoincrement())
-  name         String        @default("User") @db.VarChar(120)
-  email        String?       @unique @db.VarChar(255)
-  phone        String?       @unique @db.VarChar(15)
-  passwordHash String?       @map("password_hash") @db.VarChar(255)
-  notified     Boolean       @default(false)
-  isVerified   Boolean       @default(false) @map("is_verified")
-  isActive     Boolean       @default(true) @map("is_active")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
+  id           Int            @id @default(autoincrement())
+  name         String         @default("User") @db.VarChar(120)
+  email        String?        @unique @db.VarChar(255)
+  phone        String?        @unique @db.VarChar(15)
+  passwordHash String?        @map("password_hash") @db.VarChar(255)
+  notified     Boolean        @default(false)
+  isVerified   Boolean        @default(false) @map("is_verified")
+  isActive     Boolean        @default(true) @map("is_active")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
   addresses    UserAddress[]
   orders       Order[]
   reviews      Review[]
   invoices     Invoice[]
+  wishlist     WishlistItem[]
   @@map("users")
 }
 
@@ -116,6 +120,7 @@ model Product {
   stockMovements   StockMovement[]
   orderItems       OrderItem[]
   reviews          Review[]
+  wishlist         WishlistItem[]
   @@map("products")
 }
 
@@ -199,6 +204,7 @@ model Coupon {
 model Order {
   id                 Int         @id @default(autoincrement())
   orderNumber        String      @unique @map("order_number") @db.VarChar(30)
+  trackingToken      String?     @unique @default(uuid()) @map("tracking_token")
   userId             Int         @map("user_id")
   addressId          Int         @map("address_id")
   couponId           Int?        @map("coupon_id")
@@ -300,4 +306,41 @@ model Notification {
   isRead    Boolean  @default(false) @map("is_read")
   createdAt DateTime @default(now()) @map("created_at")
   @@map("notifications")
+}
+
+model OtpCode {
+  id        Int      @id @default(autoincrement())
+  phone     String   @db.VarChar(15)
+  codeHash  String   @map("code_hash")
+  attempts  Int      @default(0)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([phone])
+  @@map("otp_codes")
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  email     String   @db.VarChar(255)
+  tokenHash String   @unique @map("token_hash")
+  isAdmin   Boolean  @default(false) @map("is_admin")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email])
+  @@map("password_reset_tokens")
+}
+
+model WishlistItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  productId Int      @map("product_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("wishlist_items")
 }

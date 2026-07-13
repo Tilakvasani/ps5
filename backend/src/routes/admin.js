@@ -3,17 +3,36 @@ const bcrypt = require("bcryptjs");
 const slugify = require("slugify");
 const prisma = require("../utils/prisma");
 const { signAccess } = require("../utils/jwt");
-const { authAdmin } = require("../middleware/auth");
+const { authAdmin, requireRole } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
 const { sanitizeBody, validatePagination, validateProductBody, validateOrderStatus, validateIdParam, VALID_ORDER_STATUSES } = require("../middleware/validate");
+const { sendSMS } = require("../utils/sms");
+const jwt = require("jsonwebtoken");
 
 // ── Admin Auth ────────────────────────────────────────
 router.post("/auth/check-number", async (req, res) => {
   try {
-    const { number } = req.body;
+    const { number, website } = req.body;
+    
+    // Honeypot field check
+    if (website) {
+      return res.json({ success: true, message: "OTP sent to registered number" });
+    }
+
     if (!number) return res.status(400).json({ error: "Mobile number is required" });
     const cleanNumber = number.replace(/\D/g, "").slice(-10);
     if (cleanNumber.length !== 10) return res.status(400).json({ error: "Please enter a valid 10-digit mobile number" });
+
+    // Throttle: max 3 sends per phone per hour
+    const recentCount = await prisma.otpCode.count({
+      where: {
+        phone: cleanNumber,
+        createdAt: { gte: new Date(Date.now() - 60 * 60 * 1000) },
+      },
+    });
+    if (recentCount >= 3) {
+      return res.status(429).json({ error: "Too many OTP requests for this number. Try again in an hour." });
+    }
 
     const admin = await prisma.admin.findFirst({
       where: {
@@ -22,11 +41,83 @@ router.post("/auth/check-number", async (req, res) => {
     });
 
     if (!admin || !admin.isActive) {
-      return res.status(401).json({ error: "Invalid admin mobile number" });
+      // Fake successful response to prevent phone number enumeration
+      return res.json({ success: true, message: "OTP sent to registered number" });
+    }
+
+    // Generate secure 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const codeHash = await bcrypt.hash(otp, 10);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiration
+
+    // Store OTP in database
+    await prisma.otpCode.create({
+      data: { phone: cleanNumber, codeHash, expiresAt }
+    });
+
+    // Send SMS via Twilio
+    await sendSMS(cleanNumber, `Your Zupwell admin access code is ${otp}. Valid for 5 minutes.`);
+
+    // Print to server console for simulation/QA
+    console.log(`\n🔑 [Admin OTP Verification Code] For mobile: +91 ${cleanNumber} => Code is: ${otp}\n`);
+
+    res.json({ success: true, message: "OTP sent to registered number" });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to verify admin number" });
+  }
+});
+
+router.post("/auth/verify-otp-gate", async (req, res) => {
+  try {
+    const { number, otp } = req.body;
+    if (!number || !otp) {
+      return res.status(400).json({ error: "Mobile number and OTP code are required" });
+    }
+    const cleanNumber = number.replace(/\D/g, "").slice(-10);
+
+    const record = await prisma.otpCode.findFirst({
+      where: { phone: cleanNumber, expiresAt: { gt: new Date() } },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!record) {
+      return res.status(400).json({ error: "Invalid or expired code" });
+    }
+
+    if (record.attempts >= 5) {
+      return res.status(429).json({ error: "Too many incorrect attempts. Request a new OTP." });
+    }
+
+    if (record.attempts >= 3) {
+      const elapsedMs = Date.now() - new Date(record.updatedAt).getTime();
+      if (elapsedMs < 60 * 1000) {
+        const remainingSecs = Math.ceil((60 * 1000 - elapsedMs) / 1000);
+        return res.status(429).json({ error: `Too many incorrect attempts. Please wait ${remainingSecs} seconds before trying again.` });
+      }
+    }
+
+    const isValid = await bcrypt.compare(otp, record.codeHash);
+    if (!isValid) {
+      await prisma.otpCode.update({
+        where: { id: record.id },
+        data: { attempts: { increment: 1 } },
+      });
+      return res.status(400).json({ error: "Invalid or expired code" });
+    }
+
+    // Delete OTP record after successful validation
+    await prisma.otpCode.delete({ where: { id: record.id } });
+
+    const admin = await prisma.admin.findFirst({
+      where: { number: { contains: cleanNumber } }
+    });
+
+    if (!admin || !admin.isActive) {
+      return res.status(401).json({ error: "Admin access disabled" });
     }
 
     const jwtSecret = process.env.JWT_SECRET;
-    const gateToken = require("jsonwebtoken").sign(
+    const gateToken = jwt.sign(
       { adminId: admin.id, scope: "admin-gate" },
       jwtSecret,
       { expiresIn: "5m" }
@@ -34,7 +125,7 @@ router.post("/auth/check-number", async (req, res) => {
 
     res.json({ success: true, gateToken });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to verify admin number" });
+    res.status(500).json({ error: err.message || "Failed to verify OTP gate" });
   }
 });
 
@@ -44,7 +135,7 @@ router.post("/auth/verify-gate", async (req, res) => {
     if (!gateToken) return res.status(400).json({ error: "Gate token required" });
 
     const jwtSecret = process.env.JWT_SECRET;
-    const payload = require("jsonwebtoken").verify(gateToken, jwtSecret);
+    const payload = jwt.verify(gateToken, jwtSecret);
     if (payload.scope !== "admin-gate") {
       return res.status(400).json({ error: "Invalid gate token scope" });
     }
@@ -63,7 +154,7 @@ router.post("/auth/login", async (req, res) => {
 
     const jwtSecret = process.env.JWT_SECRET;
     try {
-      const payload = require("jsonwebtoken").verify(gateToken, jwtSecret);
+      const payload = jwt.verify(gateToken, jwtSecret);
       if (payload.scope !== "admin-gate") {
         return res.status(401).json({ error: "Invalid gate token scope" });
       }
@@ -73,10 +164,56 @@ router.post("/auth/login", async (req, res) => {
 
     const admin = await prisma.admin.findFirst({ where: { email: { equals: email.toLowerCase().trim(), mode: "insensitive" } } });
     if (!admin || !admin.isActive) return res.status(401).json({ error: "Invalid credentials" });
+
+    // Check account lockout status
+    if (admin.lockedUntil && admin.lockedUntil > new Date()) {
+      const remainingMs = admin.lockedUntil.getTime() - Date.now();
+      const remainingMin = Math.ceil(remainingMs / 60000);
+      return res.status(423).json({ error: `Account temporarily locked due to failed attempts. Try again in ${remainingMin} minute(s).` });
+    }
+
     const valid = await bcrypt.compare(password, admin.passwordHash);
-    if (!valid) return res.status(401).json({ error: "Invalid credentials" });
-    await prisma.admin.update({ where: { id: admin.id }, data: { lastLoginAt: new Date() } });
-    const accessToken = signAccess({ id: admin.id, role: admin.role });
+    if (!valid) {
+      const attempts = admin.failedLoginAttempts + 1;
+      let lockedUntil = null;
+      if (attempts >= 5) {
+        lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 min lock after 5 attempts
+      } else if (attempts >= 3) {
+        lockedUntil = new Date(Date.now() + 5 * 60 * 1000); // 5 min cooldown after 3 attempts
+      }
+
+      await prisma.admin.update({
+        where: { id: admin.id },
+        data: { failedLoginAttempts: attempts, lockedUntil }
+      });
+
+      if (attempts >= 5) {
+        return res.status(423).json({ error: "Account temporarily locked due to failed attempts. Try again in 30 minutes." });
+      } else if (attempts >= 3) {
+        return res.status(429).json({ error: "Too many failed attempts. Cooldown active. Try again in 5 minutes." });
+      }
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Reset lock/attempts on successful login
+    await prisma.admin.update({
+      where: { id: admin.id },
+      data: { lastLoginAt: new Date(), failedLoginAttempts: 0, lockedUntil: null }
+    });
+
+    // Send SMS Notification Alert
+    if (admin.number) {
+      const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+      sendSMS(admin.number, `Zupwell alert: Successful login to admin panel detected at ${timestamp}.`).catch(err => {
+        console.error("⚠️ Failed to send admin login SMS notification:", err.message);
+      });
+    }
+
+    const accessToken = signAccess(
+      { id: admin.id, role: admin.role, tokenVersion: admin.tokenVersion },
+      { expiresIn: "8h" }
+    );
+
     res.json({ accessToken, admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role } });
   } catch (err) {
     res.status(500).json({ error: err.message || "Login failed" });
@@ -318,7 +455,7 @@ router.get("/products", validatePagination, authAdmin, async (req, res) => {
   }
 });
 
-router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), async (req, res) => {
+router.post("/products", sanitizeBody, authAdmin, requireRole("admin", "super_admin"), upload.array("images", 10), async (req, res) => {
   try {
     const { name, sku, hsnCode = "2106", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants, flavors, nutritionFacts } = req.body;
     const slug = slugify(name, { lower: true, strict: true });
@@ -366,7 +503,7 @@ router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), as
 });
 
 // BUG FIX: Added try/catch so errors return proper response instead of crashing server
-router.put("/products/:id", sanitizeBody, authAdmin, upload.array("images", 10), async (req, res) => {
+router.put("/products/:id", sanitizeBody, authAdmin, requireRole("admin", "super_admin"), upload.array("images", 10), async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, flavors, nutritionFacts, ...rest } = req.body;
@@ -404,7 +541,7 @@ router.put("/products/:id", sanitizeBody, authAdmin, upload.array("images", 10),
 });
 
 // DELETE product image by ID
-router.delete("/products/images/:imageId", authAdmin, async (req, res) => {
+router.delete("/products/images/:imageId", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
     const imageId = Number(req.params.imageId);
     const img = await prisma.productImage.findUnique({ where: { id: imageId } });
@@ -427,7 +564,7 @@ router.delete("/products/images/:imageId", authAdmin, async (req, res) => {
 });
 
 // Try hard delete first, fall back to soft deactivate if referenced in orderItems
-router.delete("/products/:id", authAdmin, async (req, res) => {
+router.delete("/products/:id", authAdmin, requireRole("super_admin"), async (req, res) => {
   try {
     const id = Number(req.params.id);
     await prisma.$transaction(async (tx) => {
@@ -460,7 +597,7 @@ router.get("/categories", authAdmin, async (req, res) => {
   }
 });
 
-router.post("/categories", authAdmin, async (req, res) => {
+router.post("/categories", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
     const { name, description, parentId, isActive = true } = req.body;
     if (!name) return res.status(400).json({ error: "Category name is required" });
@@ -472,7 +609,7 @@ router.post("/categories", authAdmin, async (req, res) => {
   }
 });
 
-router.put("/categories/:id", authAdmin, async (req, res) => {
+router.put("/categories/:id", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
     const { name, ...rest } = req.body;
     const data = { ...rest };
@@ -486,7 +623,7 @@ router.put("/categories/:id", authAdmin, async (req, res) => {
 });
 
 // Try hard delete first, fall back to soft deactivate if referenced in products
-router.delete("/categories/:id", authAdmin, async (req, res) => {
+router.delete("/categories/:id", authAdmin, requireRole("super_admin"), async (req, res) => {
   try {
     const id = Number(req.params.id);
     await prisma.category.delete({ where: { id } });
@@ -639,7 +776,7 @@ router.get("/users/:id", authAdmin, async (req, res) => {
 });
 
 // SOFT DELETE user — deactivate instead of remove from DB
-router.delete("/users/:id", authAdmin, async (req, res) => {
+router.delete("/users/:id", authAdmin, requireRole("super_admin"), async (req, res) => {
   try {
     await prisma.user.update({ where: { id: Number(req.params.id) }, data: { isActive: false } });
     res.json({ message: "User deactivated" });
@@ -659,7 +796,7 @@ router.get("/coupons", authAdmin, async (req, res) => {
   }
 });
 
-router.post("/coupons", authAdmin, async (req, res) => {
+router.post("/coupons", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
     const { code, discountType, discountValue, minOrderValue, maxDiscount, usageLimit, startDate, endDate, description, isActive = true } = req.body;
     if (!code || !discountType || !discountValue) return res.status(400).json({ error: "code, discountType and discountValue are required" });
@@ -684,7 +821,7 @@ router.post("/coupons", authAdmin, async (req, res) => {
 });
 
 // BUG FIX: Added try/catch + explicit field updates (not raw req.body) to prevent type errors
-router.put("/coupons/:id", authAdmin, async (req, res) => {
+router.put("/coupons/:id", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
     const { code, discountType, discountValue, minOrderValue, maxDiscount, usageLimit, startDate, endDate, description, isActive } = req.body;
     const data = {};
@@ -706,7 +843,7 @@ router.put("/coupons/:id", authAdmin, async (req, res) => {
 });
 
 // Try hard delete first, fall back to soft deactivate if referenced in orders
-router.delete("/coupons/:id", authAdmin, async (req, res) => {
+router.delete("/coupons/:id", authAdmin, requireRole("super_admin"), async (req, res) => {
   try {
     const id = Number(req.params.id);
     await prisma.coupon.delete({ where: { id } });
@@ -731,7 +868,7 @@ router.get("/reviews", authAdmin, async (req, res) => {
   }
 });
 
-router.put("/reviews/:id/approve", authAdmin, async (req, res) => {
+router.put("/reviews/:id/approve", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
     const r = await prisma.review.update({ where: { id: Number(req.params.id) }, data: { isApproved: true } });
     res.json(r);
@@ -741,7 +878,7 @@ router.put("/reviews/:id/approve", authAdmin, async (req, res) => {
 });
 
 // Hard delete reviews completely from the database
-router.delete("/reviews/:id", authAdmin, async (req, res) => {
+router.delete("/reviews/:id", authAdmin, requireRole("super_admin"), async (req, res) => {
   try {
     await prisma.review.delete({ where: { id: Number(req.params.id) } });
     res.json({ message: "Review deleted completely" });
@@ -760,7 +897,7 @@ router.get("/settings", authAdmin, async (req, res) => {
   }
 });
 
-router.put("/settings", authAdmin, async (req, res) => {
+router.put("/settings", authAdmin, requireRole("super_admin"), async (req, res) => {
   try {
     const updates = Object.entries(req.body);
     await Promise.all(updates.map(([key, value]) =>
@@ -773,7 +910,7 @@ router.put("/settings", authAdmin, async (req, res) => {
 });
 
 // Upload setting image (logo, founder photo, etc.) to Cloudinary
-router.post("/settings/upload", authAdmin, upload.single("file"), async (req, res) => {
+router.post("/settings/upload", authAdmin, requireRole("super_admin"), upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
     res.json({ url: req.file.path });
@@ -819,6 +956,75 @@ router.get("/gst-rates", authAdmin, async (req, res) => {
     res.json(rates);
   } catch (err) {
     res.status(500).json({ error: err.message || "Failed to fetch GST rates" });
+  }
+});
+
+const crypto = require("crypto");
+const { sendPasswordReset } = require("../utils/mailer");
+
+// POST /api/admin/auth/forgot-password
+router.post("/auth/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    const cleanEmail = email.toLowerCase().trim();
+    const admin = await prisma.admin.findUnique({ where: { email: cleanEmail } });
+    if (!admin || !admin.isActive) {
+      return res.json({ message: "If your email is registered, you will receive a reset link shortly." });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await prisma.passwordResetToken.create({
+      data: { email: cleanEmail, tokenHash, isAdmin: true, expiresAt }
+    });
+
+    await sendPasswordReset(cleanEmail, token, true);
+
+    res.json({ message: "If your email is registered, you will receive a reset link shortly." });
+  } catch (err) {
+    console.error("Admin forgot password error:", err);
+    res.status(500).json({ error: "Failed to process request" });
+  }
+});
+
+// POST /api/admin/auth/reset-password
+router.post("/auth/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).json({ error: "Token and password are required" });
+    }
+    if (password.length < 12) {
+      return res.status(400).json({ error: "Password must be at least 12 characters long" });
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const record = await prisma.passwordResetToken.findFirst({
+      where: { tokenHash, isAdmin: true, expiresAt: { gt: new Date() } }
+    });
+
+    if (!record) {
+      return res.status(400).json({ error: "Invalid or expired token" });
+    }
+
+    const newPasswordHash = await bcrypt.hash(password, 10);
+
+    await prisma.$transaction([
+      prisma.admin.update({
+        where: { email: record.email },
+        data: { passwordHash: newPasswordHash, failedLoginAttempts: 0, lockedUntil: null, tokenVersion: { increment: 1 } }
+      }),
+      prisma.passwordResetToken.delete({ where: { id: record.id } })
+    ]);
+
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    console.error("Admin reset password error:", err);
+    res.status(500).json({ error: "Failed to reset password" });
   }
 });
 

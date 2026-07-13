@@ -47,6 +47,15 @@ async function cancelStaleOrders() {
   }
 }
 
+async function cleanupExpiredOtps() {
+  try {
+    const { count } = await prisma.otpCode.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+    if (count > 0) console.log(`🧹 Cleanup: removed ${count} expired OTP code(s)`);
+  } catch (err) {
+    console.error("⚠️  OTP cleanup error:", err.message);
+  }
+}
+
 /**
  * Start the cleanup job on an interval.
  * Call this once from index.js after the server starts.
@@ -55,13 +64,17 @@ async function cancelStaleOrders() {
 function startCleanupJobs(intervalMs = 10 * 60 * 1000) {
   // Run once immediately on startup to clean any leftovers from last deploy
   cancelStaleOrders();
+  cleanupExpiredOtps();
 
   // Then run on interval
-  setInterval(cancelStaleOrders, intervalMs);
+  setInterval(() => {
+    cancelStaleOrders();
+    cleanupExpiredOtps();
+  }, intervalMs);
 
   console.log(
-    `🧹 Cleanup job started — stale pending orders cancelled every ${intervalMs / 60000} min`
+    `🧹 Cleanup job started — stale pending orders and expired OTPs cleaned every ${intervalMs / 60000} min`
   );
 }
 
-module.exports = { startCleanupJobs, cancelStaleOrders };
+module.exports = { startCleanupJobs, cancelStaleOrders, cleanupExpiredOtps };
