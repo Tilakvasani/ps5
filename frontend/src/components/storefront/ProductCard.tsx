@@ -16,6 +16,7 @@ interface Product {
   hsnCode: string;
   brand?: string;
   images: { imageUrl: string; isPrimary: boolean }[];
+  inventory?: { qtyInStock: number; lowStockThreshold: number }[];
   _count?: { reviews: number };
   avgRating?: number;
 }
@@ -27,8 +28,12 @@ export default function ProductCard({ product }: { product: Product }) {
   const discount = Number(product.discountPercent);
   const finalPrice = Math.round(Number(product.sellingPrice) * (1 + cgstRate + sgstRate));
 
+  const isOutOfStock = !product.inventory || product.inventory.length === 0 || product.inventory.every(inv => inv.qtyInStock <= 0);
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (isOutOfStock) return;
+    
     addToCart({
       productId: product.id,
       name: product.name,
@@ -43,7 +48,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <Link href={`/products/${product.slug}`} style={{ textDecoration: "none" }}>
-      <div className="zpcard group">
+      <div className={`zpcard group ${isOutOfStock ? "opacity-90" : ""}`}>
         {/* Image */}
         <div
           className="relative overflow-hidden flex items-center justify-center p-4"
@@ -65,6 +70,21 @@ export default function ProductCard({ product }: { product: Product }) {
               style={{ color: "#0C1E39" }}
             >
               💊
+            </div>
+          )}
+
+          {/* Out of Stock Overlay */}
+          {isOutOfStock && (
+            <div 
+              className="absolute inset-0 bg-white/60 flex items-center justify-center pointer-events-none"
+              style={{ zIndex: 10 }}
+            >
+              <span 
+                className="px-3.5 py-1.5 text-[10px] font-black tracking-widest text-white rounded-lg uppercase shadow-sm"
+                style={{ backgroundColor: "#E53E3E" }}
+              >
+                Out of Stock
+              </span>
             </div>
           )}
         </div>
@@ -112,13 +132,23 @@ export default function ProductCard({ product }: { product: Product }) {
               </span>
               <p style={{ fontSize: "9px", color: "#6B7280", marginTop: "1px" }}>includes all taxes</p>
             </div>
-            <button
-              onClick={handleAddToCart}
-              className="zbtn-or animate-pulse-subtle"
-              style={{ padding: "8px 16px", fontSize: "11px", borderRadius: "30px" }}
-            >
-              <ShoppingCart size={11} /> ADD
-            </button>
+            {isOutOfStock ? (
+              <button
+                disabled
+                className="bg-gray-200 text-gray-400 font-bold border-none text-[10px] tracking-wide"
+                style={{ padding: "8px 12px", borderRadius: "30px", cursor: "not-allowed" }}
+              >
+                SOLD OUT
+              </button>
+            ) : (
+              <button
+                onClick={handleAddToCart}
+                className="zbtn-or animate-pulse-subtle"
+                style={{ padding: "8px 16px", fontSize: "11px", borderRadius: "30px" }}
+              >
+                <ShoppingCart size={11} /> ADD
+              </button>
+            )}
           </div>
         </div>
       </div>

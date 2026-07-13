@@ -219,7 +219,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     }
   }
 
+  const isOutOfStock = !product.inventory || product.inventory.length === 0 || product.inventory.every((inv: any) => inv.qtyInStock <= 0);
+
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
     addToCart({ 
       productId: product.id, 
       variantId: selectedVariant?.id, 
@@ -281,16 +284,25 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <div className="flex items-center gap-1 rounded-xl p-1" style={{ border: `1.5px solid ${C.border}`, background: C.bg }}>
-                  <button onClick={() => setQty(Math.max(1,qty-1))} className="h-7 w-7 flex items-center justify-center rounded-lg transition-colors" style={{ color: C.blue }}><Minus size={12}/></button>
-                  <span className="w-6 text-center text-sm font-bold" style={{ color: C.blue }}>{qty}</span>
-                  <button onClick={() => setQty(qty+1)} className="h-7 w-7 flex items-center justify-center rounded-lg transition-colors" style={{ color: C.blue }}><Plus size={12}/></button>
-                </div>
-                <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} onClick={handleAddToCart}
-                  className="btn-primary flex items-center gap-2 py-2 px-5 text-sm"
-                  style={{ color: "#ffffff" }}>
-                  <ShoppingCart size={14}/> Add To Cart · ₹{total}
-                </motion.button>
+                {!isOutOfStock && (
+                  <div className="flex items-center gap-1 rounded-xl p-1" style={{ border: `1.5px solid ${C.border}`, background: C.bg }}>
+                    <button onClick={() => setQty(Math.max(1,qty-1))} className="h-7 w-7 flex items-center justify-center rounded-lg transition-colors" style={{ color: C.blue }}><Minus size={12}/></button>
+                    <span className="w-6 text-center text-sm font-bold" style={{ color: C.blue }}>{qty}</span>
+                    <button onClick={() => setQty(qty+1)} className="h-7 w-7 flex items-center justify-center rounded-lg transition-colors" style={{ color: C.blue }}><Plus size={12}/></button>
+                  </div>
+                )}
+                {isOutOfStock ? (
+                  <button disabled
+                    className="bg-gray-200 text-gray-400 font-bold py-2 px-5 text-sm rounded-xl cursor-not-allowed border-none">
+                    SOLD OUT
+                  </button>
+                ) : (
+                  <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} onClick={handleAddToCart}
+                    className="btn-primary flex items-center gap-2 py-2 px-5 text-sm"
+                    style={{ color: "#ffffff" }}>
+                    <ShoppingCart size={14}/> Add To Cart · ₹{total}
+                  </motion.button>
+                )}
               </div>
             </div>
           </motion.div>
@@ -354,6 +366,11 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
           {/* ── Info ── */}
           <div>
+            {isOutOfStock && (
+              <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-black tracking-widest text-white uppercase mb-4" style={{ backgroundColor: "#E53E3E" }}>
+                Out of Stock
+              </span>
+            )}
             {product.brand && (
               <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: C.mintHex, letterSpacing: "0.15em" }}>{product.brand}</p>
             )}
@@ -465,24 +482,34 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
             {/* Qty + Cart */}
             <div className="flex items-center gap-4 mb-5">
-              <div className="flex items-center gap-2 rounded-xl p-1" style={{ border: `1.5px solid ${C.border}`, background: C.surface }}>
-                <button onClick={() => setQty(Math.max(1,qty-1))}
-                  className="h-10 w-10 flex items-center justify-center rounded-lg transition-colors"
-                  style={{ color: C.blue }}>
-                  <Minus size={14}/>
+              {!isOutOfStock && (
+                <div className="flex items-center gap-2 rounded-xl p-1" style={{ border: `1.5px solid ${C.border}`, background: C.surface }}>
+                  <button onClick={() => setQty(Math.max(1,qty-1))}
+                    className="h-10 w-10 flex items-center justify-center rounded-lg transition-colors"
+                    style={{ color: C.blue }}>
+                    <Minus size={14}/>
+                  </button>
+                  <span className="w-8 text-center font-bold text-lg" style={{ color: C.blue }}>{qty}</span>
+                  <button onClick={() => setQty(qty+1)}
+                    className="h-10 w-10 flex items-center justify-center rounded-lg transition-colors"
+                    style={{ color: C.blue }}>
+                    <Plus size={14}/>
+                  </button>
+                </div>
+              )}
+              {isOutOfStock ? (
+                <button disabled
+                  className="w-full bg-gray-200 text-gray-400 font-bold py-3.5 rounded-2xl cursor-not-allowed border-none text-center"
+                  style={{ textTransform: "uppercase", fontSize: "14px", letterSpacing: "1px" }}>
+                  Out of Stock
                 </button>
-                <span className="w-8 text-center font-bold text-lg" style={{ color: C.blue }}>{qty}</span>
-                <button onClick={() => setQty(qty+1)}
-                  className="h-10 w-10 flex items-center justify-center rounded-lg transition-colors"
-                  style={{ color: C.blue }}>
-                  <Plus size={14}/>
-                </button>
-              </div>
-              <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} onClick={handleAddToCart}
-                className="btn-primary flex-1 flex items-center justify-center gap-2 py-3.5 text-base"
-                style={{ color: "#ffffff" }}>
-                <ShoppingCart size={18}/> Add To Cart
-              </motion.button>
+              ) : (
+                <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} onClick={handleAddToCart}
+                  className="btn-primary flex-1 flex items-center justify-center gap-2 py-3.5 text-base"
+                  style={{ color: "#ffffff" }}>
+                  <ShoppingCart size={18}/> Add To Cart
+                </motion.button>
+              )}
             </div>
 
             {/* Delivery perks */}
