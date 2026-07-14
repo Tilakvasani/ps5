@@ -156,6 +156,26 @@ export default function Footer() {
                 {l}
               </Link>
             ))}
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined" && (window as any).showConsentBanner) {
+                  (window as any).showConsentBanner();
+                }
+              }}
+              style={{
+                ...linkStyle,
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                textAlign: "left",
+                width: "100%",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--or)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#F8F8F8")}
+            >
+              Cookie Settings
+            </button>
           </div>
 
           {/* Contact */}

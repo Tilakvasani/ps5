@@ -4,6 +4,7 @@ import WhatsAppButton from "@/components/storefront/WhatsAppButton";
 import ServerWakeup from "@/components/ServerWakeup";
 import { Toaster } from "react-hot-toast";
 import dynamic from "next/dynamic";
+import ConsentBanner from "@/components/storefront/ConsentBanner";
 
 const AuthSync = dynamic(() => import("@/components/AuthSync"), { ssr: false });
 
@@ -169,12 +170,65 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `
           }}
         />
+        {/* Google Tag (gtag.js) and Consent Mode v2 Initialization */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){window.dataLayer.push(arguments);}
+
+              // Default consent state: all denied by default
+              var consentState = {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied'
+              };
+
+              // Retrieve saved consent from localStorage if it exists
+              try {
+                var savedConsent = localStorage.getItem('zupwell-consent');
+                if (savedConsent) {
+                  var parsed = JSON.parse(savedConsent);
+                  if (parsed) {
+                    consentState.ad_storage = parsed.ad_storage || 'denied';
+                    consentState.ad_user_data = parsed.ad_user_data || 'denied';
+                    consentState.ad_personalization = parsed.ad_personalization || 'denied';
+                    consentState.analytics_storage = parsed.analytics_storage || 'denied';
+                  }
+                }
+              } catch (e) {
+                console.error('Error reading saved consent', e);
+              }
+
+              // Set default consent state
+              gtag('consent', 'default', {
+                'ad_storage': consentState.ad_storage,
+                'ad_user_data': consentState.ad_user_data,
+                'ad_personalization': consentState.ad_personalization,
+                'analytics_storage': consentState.analytics_storage,
+                'wait_for_update': 500
+              });
+            `
+          }}
+        />
+        {/* Load Google Tag script */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-2E4EEGNE46"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              gtag('js', new Date());
+              gtag('config', 'G-2E4EEGNE46');
+            `
+          }}
+        />
       </head>
       <body>
         <AuthSync />
         <ServerWakeup />
         <WhatsAppButton />
         {children}
+        <ConsentBanner />
         <Toaster
           position="top-right"
           toastOptions={{
