@@ -18,13 +18,20 @@ const jwt = require("jsonwebtoken");
 router.post("/auth/login", async (req, res) => {
   try {
     const { email, password, gateToken } = req.body;
+    if (typeof email !== "string" || typeof password !== "string" || typeof gateToken !== "string") {
+      return res.status(400).json({ error: "Email and password required" });
+    }
+    if (email.length > 255 || password.length > 128) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
     if (!email || !password) return res.status(400).json({ error: "Email and password required" });
     if (!gateToken) return res.status(401).json({ error: "Gate token required to authenticate" });
 
     const jwtSecret = process.env.JWT_SECRET;
+    let gatePayload;
     try {
-      const payload = jwt.verify(gateToken, jwtSecret);
-      if (payload.scope !== "admin-gate") {
+      gatePayload = jwt.verify(gateToken, jwtSecret);
+      if (gatePayload.scope !== "admin-gate") {
         return res.status(401).json({ error: "Invalid gate token scope" });
       }
     } catch (err) {
@@ -33,6 +40,14 @@ router.post("/auth/login", async (req, res) => {
 
     const admin = await prisma.admin.findFirst({ where: { email: { equals: email.toLowerCase().trim(), mode: "insensitive" } } });
     if (!admin || !admin.isActive) return res.status(401).json({ error: "Invalid credentials" });
+
+    // The OTP gate was issued for one specific admin's phone number — the
+    // credentials submitted here must belong to that exact same admin.
+    // Without this check, verifying OTP on Admin A's phone could be reused
+    // to log in as a *different* Admin B by simply knowing Admin B's password.
+    if (gatePayload.adminId !== admin.id) {
+      return res.status(401).json({ error: "Gate token does not match this account. Please verify your phone number again." });
+    }
 
     // Check account lockout status
     if (admin.lockedUntil && admin.lockedUntil > new Date()) {

@@ -19,6 +19,15 @@ function isEmailLike(identifier) {
   return typeof identifier === "string" && identifier.includes("@");
 }
 
+// Reject anything that isn't actually a string of sane length — closes off
+// type-confusion payloads (objects/arrays passed where a string is expected)
+// before they ever reach Prisma or bcrypt.
+function isSafeString(value, maxLen = 255) {
+  return typeof value === "string" && value.length > 0 && value.length <= maxLen;
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // Never leak internal error details to the client.
 function fail(res, status, message) {
   return res.status(status).json({ error: message });
@@ -71,7 +80,9 @@ function verifyShortToken(token, expectedScope) {
 }
 
 function validatePasswordPair(password, confirmPassword) {
-  if (!password || !confirmPassword) return "Password and confirmation are required";
+  if (!isSafeString(password, 128) || !isSafeString(confirmPassword, 128)) {
+    return "Password and confirmation are required";
+  }
   if (password !== confirmPassword) return "Passwords do not match";
   if (password.length < PASSWORD_MIN_LENGTH) return `Password must be at least ${PASSWORD_MIN_LENGTH} characters`;
   return null;
@@ -120,20 +131,34 @@ router.post("/identify", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { identifier, password } = req.body;
-    if (!identifier || !password) return fail(res, 400, "Please enter your credentials");
+    if (!isSafeString(identifier, 255) || !isSafeString(password, 128)) {
+      return fail(res, 400, "Please enter your credentials");
+    }
 
-    // Admins are never allowed to authenticate through this endpoint —
-    // they must always go through the phone + OTP gate.
+    // If this identifier belongs to an admin, never authenticate them here
+    // directly — silently kick off the phone-OTP gate instead (2nd factor
+    // credentials are checked afterwards via /api/admin/auth/login).
     const admin = isEmailLike(identifier)
       ? await prisma.admin.findFirst({ where: { email: { equals: identifier.toLowerCase().trim(), mode: "insensitive" } } })
       : await prisma.admin.findFirst({ where: { number: { contains: cleanPhone(identifier) } } });
-    if (admin) return fail(res, 401, "Invalid credentials");
+
+    if (admin && admin.isActive && admin.number) {
+      const adminPhone = cleanPhone(admin.number);
+      if (await throttleOtp(adminPhone)) {
+        return fail(res, 429, "Too many requests. Try again in an hour.");
+      }
+      await createAndSendOtp(adminPhone, "access code");
+      return res.json({ step: "admin-otp-required", phone: adminPhone });
+    }
 
     const user = isEmailLike(identifier)
       ? await prisma.user.findUnique({ where: { email: identifier.toLowerCase().trim() } })
       : await prisma.user.findFirst({ where: { phone: { endsWith: cleanPhone(identifier) } } });
 
-    if (!user || !user.passwordHash || !user.isActive) return fail(res, 401, "Invalid credentials");
+    if (!user || !user.isActive) return fail(res, 401, "Invalid credentials");
+    if (!user.passwordHash) {
+      return fail(res, 400, "No password set for this account yet. Use 'Forgot password?' below to set one via OTP.");
+    }
 
     if (user.lockedUntil && user.lockedUntil > new Date()) {
       const mins = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
@@ -155,7 +180,7 @@ router.post("/login", async (req, res) => {
     await prisma.user.update({ where: { id: user.id }, data: { failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() } });
 
     const token = signAccess({ id: user.id, role: "user" });
-    res.json({ accessToken: token, user: publicUser(user) });
+    res.json({ step: "logged-in", accessToken: token, user: publicUser(user) });
   } catch (err) {
     console.error("login error:", err);
     fail(res, 500, "Login failed. Please try again.");
@@ -166,8 +191,8 @@ router.post("/login", async (req, res) => {
 router.post("/verify-identify-otp", async (req, res) => {
   try {
     const phone = cleanPhone(req.body.phone);
-    const { otp } = req.body;
-    if (phone.length !== 10 || !otp) return fail(res, 400, "Phone number and OTP code are required");
+    const otp = req.body.otp;
+    if (phone.length !== 10 || !isSafeString(otp, 6)) return fail(res, 400, "Phone number and OTP code are required");
 
     const result = await consumeOtp(phone, otp);
     if (!result.ok) return fail(res, result.status, result.error);
@@ -201,7 +226,7 @@ router.post("/verify-identify-otp", async (req, res) => {
 router.post("/complete-registration", async (req, res) => {
   try {
     const { setupToken, name, email, password, confirmPassword, notified } = req.body;
-    if (!setupToken) return fail(res, 400, "Session expired. Please start again.");
+    if (!isSafeString(setupToken, 2000)) return fail(res, 400, "Session expired. Please start again.");
 
     let payload;
     try {
@@ -210,7 +235,7 @@ router.post("/complete-registration", async (req, res) => {
       return fail(res, 400, "Session expired. Please verify your number again.");
     }
 
-    if (!name || !name.trim()) return fail(res, 400, "Full name is required");
+    if (!isSafeString(name, 120) || !name.trim()) return fail(res, 400, "Full name is required");
     const pwError = validatePasswordPair(password, confirmPassword);
     if (pwError) return fail(res, 400, pwError);
 
@@ -218,7 +243,8 @@ router.post("/complete-registration", async (req, res) => {
     const existing = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
     if (existing) return fail(res, 409, "An account with this number already exists. Please log in instead.");
 
-    const cleanEmail = email && email.trim() ? email.toLowerCase().trim() : null;
+    const cleanEmail = isSafeString(email, 255) && email.trim() ? email.toLowerCase().trim() : null;
+    if (cleanEmail && !EMAIL_RE.test(cleanEmail)) return fail(res, 400, "Please enter a valid email address.");
     if (cleanEmail) {
       const emailExists = await prisma.user.findUnique({ where: { email: cleanEmail } });
       if (emailExists) return fail(res, 400, "Email is already in use by another account.");
@@ -249,7 +275,7 @@ router.post("/complete-registration", async (req, res) => {
 router.post("/complete-password-setup", async (req, res) => {
   try {
     const { setupToken, password, confirmPassword } = req.body;
-    if (!setupToken) return fail(res, 400, "Session expired. Please start again.");
+    if (!isSafeString(setupToken, 2000)) return fail(res, 400, "Session expired. Please start again.");
 
     let payload;
     try {
@@ -305,7 +331,7 @@ router.post("/forgot-password-verify", async (req, res) => {
   try {
     const phone = cleanPhone(req.body.phone);
     const { otp, password, confirmPassword } = req.body;
-    if (phone.length !== 10 || !otp) return fail(res, 400, "Phone number and OTP code are required");
+    if (phone.length !== 10 || !isSafeString(otp, 6)) return fail(res, 400, "Phone number and OTP code are required");
 
     const pwError = validatePasswordPair(password, confirmPassword);
     if (pwError) return fail(res, 400, pwError);
