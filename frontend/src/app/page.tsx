@@ -8,7 +8,7 @@ import Footer from "@/components/storefront/Footer";
 import { CertLogo } from "@/components/storefront/CertLogos";
 import { publicApi, productsApi } from "@/lib/api";
 import { getSettingsCache, fetchSettings } from "@/lib/useSettings";
-import { fadeUp } from "@/lib/utils";
+import { fadeUp, cldOptimize } from "@/lib/utils";
 
 
 const FEATURE_ICONS = [Zap, Shield, Truck, Award];
@@ -443,14 +443,14 @@ export default function HomePage() {
               return s(settings, key) ? (
                 (isIso || isMsme) ? (
                   <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity" style={{ background: "#FFFFFF", width: "56px", height: "56px", padding: "3px" }}>
-                    <img src={s(settings, key)} alt={label} className="w-full h-full object-contain rounded-full"  loading="lazy" decoding="async" />
+                    <img src={cldOptimize(s(settings, key), 112)} alt={label} width={112} height={112} className="w-full h-full object-contain rounded-full"  loading="lazy" decoding="async" />
                   </div>
                 ) : (isGst || isIec || isTm) ? (
                   <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity overflow-hidden relative" style={{ background: "#FFFFFF", width: "56px", height: "56px" }}>
-                    <img src={s(settings, key)} alt={label} className={`w-full h-full object-contain rounded-full ${isGst ? "scale-[1.12]" : "scale-[1.08]"}`}  loading="lazy" decoding="async" />
+                    <img src={cldOptimize(s(settings, key), 112)} alt={label} width={112} height={112} className={`w-full h-full object-contain rounded-full ${isGst ? "scale-[1.12]" : "scale-[1.08]"}`}  loading="lazy" decoding="async" />
                   </div>
                 ) : (
-                  <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0"  loading="lazy" decoding="async" />
+                  <img key={idx} src={cldOptimize(s(settings, key), 112)} alt={label} width={112} height={56} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0"  loading="lazy" decoding="async" />
                 )
               ) : (
                 <CertLogo key={idx} label={label} className="h-14 opacity-70 hover:opacity-100 transition-opacity" />
@@ -467,14 +467,14 @@ export default function HomePage() {
               return s(settings, key) ? (
                 (isIso || isMsme) ? (
                   <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity" style={{ background: "#FFFFFF", width: "56px", height: "56px", padding: "3px" }}>
-                    <img src={s(settings, key)} alt={label} className="w-full h-full object-contain rounded-full"  loading="lazy" decoding="async" />
+                    <img src={cldOptimize(s(settings, key), 112)} alt={label} width={112} height={112} className="w-full h-full object-contain rounded-full"  loading="lazy" decoding="async" />
                   </div>
                 ) : (isGst || isIec || isTm) ? (
                   <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity overflow-hidden relative" style={{ background: "#FFFFFF", width: "56px", height: "56px" }}>
-                    <img src={s(settings, key)} alt={label} className={`w-full h-full object-contain rounded-full ${isGst ? "scale-[1.12]" : "scale-[1.08]"}`}  loading="lazy" decoding="async" />
+                    <img src={cldOptimize(s(settings, key), 112)} alt={label} width={112} height={112} className={`w-full h-full object-contain rounded-full ${isGst ? "scale-[1.12]" : "scale-[1.08]"}`}  loading="lazy" decoding="async" />
                   </div>
                 ) : (
-                  <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0"  loading="lazy" decoding="async" />
+                  <img key={idx} src={cldOptimize(s(settings, key), 112)} alt={label} width={112} height={56} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0"  loading="lazy" decoding="async" />
                 )
               ) : (
                 <CertLogo key={idx} label={label} className="h-14 opacity-70 hover:opacity-100 transition-opacity" />
@@ -500,8 +500,10 @@ export default function HomePage() {
                     <div className="flex-1 overflow-hidden" style={{ minHeight: 240 }}>
                       {s(settings, "founder_photo") ? (
                         <img
-                          src={s(settings, "founder_photo")}
+                          src={cldOptimize(s(settings, "founder_photo"), 448)}
                           alt={s(settings, "founder_name")}
+                          width={448}
+                          height={480}
                           className="w-full h-full"
                           style={{ objectFit: "cover", objectPosition: "top center", minHeight: 240 }}
                          loading="lazy" decoding="async" />

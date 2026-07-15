@@ -5,6 +5,37 @@
  * Import from here instead of redefining in each file.
  */
 
+// ── Image delivery optimization ───────────────────────────────────────────────
+
+/**
+ * cldOptimize — Injects Cloudinary transformation params into a Cloudinary
+ * image URL so the browser downloads a properly-sized, auto-compressed,
+ * modern-format (WebP/AVIF) image instead of the full-resolution original.
+ *
+ * This is the fix for Lighthouse's "Improve image delivery" audit (was
+ * flagging ~2.3MB of avoidable image weight) — most images in this app were
+ * being served at their original upload resolution regardless of the
+ * (often much smaller) size they're actually displayed at.
+ *
+ * Only touches Cloudinary URLs (res.cloudinary.com/.../upload/...) — any
+ * other URL (relative /assets paths, placehold.co, etc.) is returned as-is,
+ * so this is safe to wrap around every image src in the app without risk
+ * of breaking non-Cloudinary images.
+ *
+ * @param url    The original image URL (may or may not be Cloudinary)
+ * @param width  The rendered width in px — pass the largest size this image
+ *               is ever displayed at (e.g. 600 for a product thumbnail,
+ *               1200 for a full-width hero)
+ */
+export function cldOptimize(url: string | undefined | null, width: number): string {
+  if (!url) return "";
+  const marker = "/upload/";
+  const idx = url.indexOf(marker);
+  if (!url.includes("res.cloudinary.com") || idx === -1) return url;
+  const transform = `f_auto,q_auto,w_${width},c_limit`;
+  return url.slice(0, idx + marker.length) + transform + "/" + url.slice(idx + marker.length);
+}
+
 // ── Framer Motion Helpers ─────────────────────────────────────────────────────
 
 /**

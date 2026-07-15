@@ -5,6 +5,7 @@ import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Tag } from "lucide-react
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useStore } from "@/lib/store";
+import { cldOptimize } from "@/lib/utils";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -77,7 +78,7 @@ export default function CartPage() {
                   style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 16, display: "flex", gap: 16, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
                   {/* Image */}
                   <div style={{ height: 80, width: 80, flexShrink: 0, borderRadius: 12, background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.08)", overflow: "hidden" }}>
-                    {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover"  loading="lazy" decoding="async" /> :
+                    {item.imageUrl ? <img src={cldOptimize(item.imageUrl, 160)} alt={item.name} width={160} height={160} className="w-full h-full object-cover"  loading="lazy" decoding="async" /> :
                       <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(12, 30, 57, 0.2)" }}><ShoppingCart size={24} /></div>}
                   </div>
 

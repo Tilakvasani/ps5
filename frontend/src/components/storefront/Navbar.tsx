@@ -138,6 +138,7 @@ export default function Navbar() {
               href="/cart"
               className="relative p-2 transition-colors"
               style={{ color: "#0C1E39" }}
+              aria-label={`Cart${cartCount > 0 ? ` (${cartCount} items)` : ""}`}
               onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = "#FF5C00"}
               onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = "#0C1E39"}
             >
@@ -254,6 +255,7 @@ export default function Navbar() {
               className="md:hidden transition-colors p-1"
               style={{ color: "#0C1E39" }}
               onClick={() => setMenuOpen(!menuOpen)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
             >
               {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -343,6 +345,7 @@ export default function Navbar() {
                   <button
                     onClick={() => setShowSearch(false)}
                     className="p-2 rounded-full hover:bg-black/5 transition-colors text-gray-500 hover:text-[#0C1E39]"
+                    aria-label="Close search"
                   >
                     <X size={22} />
                   </button>

@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CertLogo } from "@/components/storefront/CertLogos";
+import { cldOptimize } from "@/lib/utils";
 
 /* ── Simple HTML sanitizer (strips script/iframe tags) ── */
 function sanitizeHtml(html: string): string {
@@ -312,7 +313,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             <div className="mx-auto max-w-7xl flex items-center justify-between gap-4 rounded-2xl px-6 py-3"
               style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
               <div className="flex items-center gap-3 min-w-0">
-                {primaryImage && <img src={primaryImage} alt="" className="h-10 w-10 rounded-xl object-cover shrink-0" style={{ border: `1px solid ${C.border}` }}  loading="lazy" decoding="async" />}
+                {primaryImage && <img src={cldOptimize(primaryImage, 80)} alt="" width={80} height={80} className="h-10 w-10 rounded-xl object-cover shrink-0" style={{ border: `1px solid ${C.border}` }}  loading="lazy" decoding="async" />}
                 <div className="min-w-0">
                   <p className="font-bold truncate text-sm" style={{ color: C.blue }}>{product.name}</p>
                   <p className="text-xs" style={{ color: C.mid }}>₹{price.toFixed(0)} per unit</p>
@@ -366,7 +367,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             <div className="relative rounded-3xl overflow-hidden aspect-square mb-4 shadow-sm flex items-center justify-center p-6"
               style={{ background: C.altBg, border: `1.5px solid ${C.border}` }}>
               {images[activeImage]?.imageUrl ? (
-                <img src={images[activeImage].imageUrl} alt={product.name}
+                <img src={cldOptimize(images[activeImage].imageUrl, 800)} alt={product.name} width={800} height={800}
                   className="max-w-full max-h-full object-contain transition-transform duration-500 hover:scale-[1.03]" loading="eager" fetchPriority="high" decoding="async" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center" style={{ color: C.border }}><Package size={80}/></div>
@@ -381,7 +382,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   <button key={i} onClick={() => setActiveImage(i)}
                     className="flex-shrink-0 h-20 w-20 rounded-xl overflow-hidden transition-all flex items-center justify-center p-2"
                     style={{ border: `2px solid ${activeImage===i ? C.mintHex : C.border}` }}>
-                    {img.imageUrl ? <img src={img.imageUrl} alt="" className="max-w-full max-h-full object-contain" loading="lazy" decoding="async" /> : <div className="w-full h-full" style={{ background: C.surface }}/>}
+                    {img.imageUrl ? <img src={cldOptimize(img.imageUrl, 160)} alt="" width={160} height={160} className="max-w-full max-h-full object-contain" loading="lazy" decoding="async" /> : <div className="w-full h-full" style={{ background: C.surface }}/>}
                   </button>
                 ))}
               </div>
