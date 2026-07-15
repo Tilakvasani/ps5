@@ -4,6 +4,7 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "placehold.co" },
+      { protocol: "https", hostname: "i.ibb.co" },
     ],
   },
   env: {
@@ -21,7 +22,7 @@ const nextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://checkout.razorpay.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https://res.cloudinary.com https://placehold.co https://www.googletagmanager.com",
+      "img-src 'self' data: https://res.cloudinary.com https://placehold.co https://i.ibb.co https://www.googletagmanager.com",
       "font-src 'self' data:",
       "connect-src 'self' https://www.google-analytics.com https://api.razorpay.com https://lumberjack-cx.razorpay.com " +
         (process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com") + " " +

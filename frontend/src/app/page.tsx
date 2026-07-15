@@ -566,7 +566,7 @@ export default function HomePage() {
 
         <div className="mx-auto max-w-7xl reviews-container">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
-            <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Real People, Real Results</p>
+            <p style={{ fontSize: "11px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Real People, Real Results</p>
             <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
               What Our Customers Say
             </h2>
