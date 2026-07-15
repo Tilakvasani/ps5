@@ -4,6 +4,7 @@ import { ShoppingCart, Star } from "lucide-react";
 import { useStore } from "@/lib/store";
 import toast from "react-hot-toast";
 import { useSettings } from "@/lib/useSettings";
+import { cldOptimize } from "@/lib/utils";
 
 interface Product {
   id: number;
@@ -60,8 +61,12 @@ export default function ProductCard({ product }: { product: Product }) {
         >
           {primaryImage ? (
             <img
-              src={primaryImage}
+              src={cldOptimize(primaryImage, 320)}
               alt={product.name}
+              width={320}
+              height={320}
+              loading="lazy"
+              decoding="async"
               className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
             />
           ) : (

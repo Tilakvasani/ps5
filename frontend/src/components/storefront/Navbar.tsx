@@ -7,6 +7,7 @@ import { ShoppingCart, Menu, X, HeartPulse, User, LogOut, Search } from "lucide-
 import { useStore } from "@/lib/store";
 import { useLogout } from "@/lib/useAuth";
 import { productsApi } from "@/lib/api";
+import { cldOptimize } from "@/lib/utils";
 import { useSettings } from "@/lib/useSettings";
 
 export default function Navbar() {
@@ -376,8 +377,12 @@ export default function Navbar() {
                           >
                             {primaryImage ? (
                               <img
-                                src={primaryImage}
+                                src={cldOptimize(primaryImage, 112)}
                                 alt={product.name}
+                                width={112}
+                                height={112}
+                                loading="lazy"
+                                decoding="async"
                                 className="h-14 w-14 rounded-xl object-cover bg-black/5"
                               />
                             ) : (
