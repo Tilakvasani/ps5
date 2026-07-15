@@ -1,6 +1,19 @@
 import axios from "axios";
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+let baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+if (typeof window !== "undefined") {
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+  const isIpAddress = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname);
+
+  if (!process.env.NEXT_PUBLIC_API_URL && (isLocalhost || isIpAddress)) {
+    const protocol = window.location.protocol;
+    baseUrl = `${protocol}//${hostname}:8000`;
+  }
+}
+
+export const API_URL = baseUrl;
 
 const api = axios.create({
   baseURL: API_URL,

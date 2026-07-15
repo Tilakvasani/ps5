@@ -28,6 +28,20 @@ app.use(helmet({
 }));
 
 // ── CORS ─────────────────────────────────────────────
+const { networkInterfaces } = require("os");
+const nets = networkInterfaces();
+let localIp = "";
+for (const name of Object.keys(nets)) {
+  for (const net of nets[name]) {
+    const isIPv4 = net.family === "IPv4" || net.family === 4;
+    if (isIPv4 && !net.internal) {
+      localIp = net.address;
+      break;
+    }
+  }
+  if (localIp) break;
+}
+
 const allowedOrigins = [
   "https://www.zupwell.com",
   "https://zupwell.com",
@@ -36,8 +50,49 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
+if (localIp) {
+  allowedOrigins.push(`http://${localIp}:3000`);
+  allowedOrigins.push(`http://${localIp}:3001`);
+  allowedOrigins.push(`http://${localIp}:3002`);
+  allowedOrigins.push(`http://${localIp}:8000`);
+}
+
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    // If request has no origin (like mobile apps, curl, server-to-server), allow it
+    if (!origin) return callback(null, true);
+
+    // Check if origin is in the allowed list
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+
+    // Check if the origin matches a local development pattern (localhost or private subnets)
+    try {
+      const url = new URL(origin);
+      const hostname = url.hostname;
+
+      const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+      const isPrivateIp =
+        hostname.startsWith("192.168.") ||
+        hostname.startsWith("10.") ||
+        (hostname.startsWith("172.") &&
+         (() => {
+           const parts = hostname.split(".");
+           if (parts.length !== 4) return false;
+           const second = parseInt(parts[1], 10);
+           return second >= 16 && second <= 31;
+         })());
+
+      if (isLocalhost || isPrivateIp) {
+        return callback(null, true);
+      }
+    } catch (e) {
+      // Invalid URL format
+    }
+
+    callback(null, false);
+  },
   credentials: true,
 }));
 
@@ -244,7 +299,12 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, async () => {
-  console.log(`🚀 Zupwell API running on http://localhost:${PORT}`);
+  console.log(`\n🚀 Zupwell API running:`);
+  console.log(`   - Local:        http://localhost:${PORT}`);
+  if (localIp) {
+    console.log(`   - Network:      http://${localIp}:${PORT}`);
+  }
+  console.log(`🔒 Allowed CORS origins: ${allowedOrigins.join(", ")}\n`);
   try {
     const prisma = require("./utils/prisma");
     const defaultSettings = [
