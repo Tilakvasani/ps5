@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import WhatsAppButton from "@/components/storefront/WhatsAppButton";
 import ServerWakeup from "@/components/ServerWakeup";
@@ -8,9 +9,19 @@ import ConsentBanner from "@/components/storefront/ConsentBanner";
 
 const AuthSync = dynamic(() => import("@/components/AuthSync"), { ssr: false });
 
+// next/font self-hosts Inter at build time — no request to Google Fonts at
+// runtime, no render-blocking @import, and no font-swap layout flicker.
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
 
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://zupwell.com"),
   title: {
     default:  "Zupwell — Premium Health & Wellness Supplements",
     template: "%s | Zupwell",
@@ -45,131 +56,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                if (typeof window === 'undefined') return;
-                try {
-                  var prefix = "_zw_";
-
-                  var obfuscateKey = function(k) {
-                    if (typeof k !== 'string') return k;
-                    if (
-                      k.indexOf('zupwell') !== -1 ||
-                      k.indexOf('ally') !== -1 ||
-                      k.indexOf('rzp') !== -1 ||
-                      k.indexOf('checkout') !== -1 ||
-                      k === 'token' ||
-                      k === 'auth_token'
-                    ) {
-                      return prefix + btoa(k).replace(/=/g, "");
-                    }
-                    return k;
-                  };
-
-                  var deobfuscateKey = function(ok) {
-                    if (typeof ok !== 'string' || ok.indexOf(prefix) !== 0) return ok;
-                    var raw = ok.slice(prefix.length);
-                    while (raw.length % 4 !== 0) {
-                      raw += "=";
-                    }
-                    try {
-                      return atob(raw);
-                    } catch (e) {
-                      return ok;
-                    }
-                  };
-
-                  var obfuscateValue = function(v) {
-                    if (typeof v !== 'string') return v;
-                    try {
-                      return btoa(unescape(encodeURIComponent(v)));
-                    } catch (e) {
-                      return v;
-                    }
-                  };
-
-                  var deobfuscateValue = function(ov) {
-                    if (typeof ov !== 'string') return ov;
-                    try {
-                      return decodeURIComponent(escape(atob(ov)));
-                    } catch (e) {
-                      return ov;
-                    }
-                  };
-
-                  var origGetItem = Storage.prototype.getItem;
-                  Storage.prototype.getItem = function(key) {
-                    var ok = obfuscateKey(key);
-                    var val = origGetItem.call(this, ok);
-                    if (val === null && ok !== key) {
-                      var fallback = origGetItem.call(this, key);
-                      if (fallback !== null) return fallback;
-                    }
-                    return deobfuscateValue(val);
-                  };
-
-                  var origSetItem = Storage.prototype.setItem;
-                  Storage.prototype.setItem = function(key, value) {
-                    var ok = obfuscateKey(key);
-                    var ov = obfuscateValue(value);
-                    origSetItem.call(this, ok, ov);
-                  };
-
-                  var origRemoveItem = Storage.prototype.removeItem;
-                  Storage.prototype.removeItem = function(key) {
-                    var ok = obfuscateKey(key);
-                    origRemoveItem.call(this, ok);
-                    if (ok !== key) {
-                      origRemoveItem.call(this, key);
-                    }
-                  };
-
-                  var origKey = Storage.prototype.key;
-                  Storage.prototype.key = function(index) {
-                    var ok = origKey.call(this, index);
-                    return deobfuscateKey(ok);
-                  };
-
-                  // Clean up and migrate old plaintext keys so they are deleted from DevTools
-                  var oldKeys = [
-                    'zupwell-admin',
-                    'zupwell-store',
-                    'zupwell-settings-cache',
-                    'zupwell_chat_session',
-                    'ally-supports-cache',
-                    'rzp_checkout_anon_id',
-                    'rzp_device_id',
-                    'rzp_stored_checkout_id',
-                    'zupwell-settings-bust',
-                    'auth_token',
-                    'token'
-                  ];
-                  [window.localStorage, window.sessionStorage].forEach(function(store) {
-                    if (!store) return;
-                    for (var i = 0; i < oldKeys.length; i++) {
-                      var oldK = oldKeys[i];
-                      try {
-                        var oldV = origGetItem.call(store, oldK);
-                        if (oldV !== null) {
-                          var newK = obfuscateKey(oldK);
-                          var newV = obfuscateValue(oldV);
-                          origSetItem.call(store, newK, newV);
-                          origRemoveItem.call(store, oldK);
-                        }
-                      } catch (e) {}
-                    }
-                  });
-                } catch (err) {
-                  console.error("Storage obfuscation error:", err);
-                }
-              })();
-            `
-          }}
-        />
         {/* Google Tag (gtag.js) and Consent Mode v2 Initialization */}
         <script
           dangerouslySetInnerHTML={{

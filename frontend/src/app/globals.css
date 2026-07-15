@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+/* Inter font is now loaded via next/font in layout.tsx (see --font-inter
+   CSS variable below) instead of this render-blocking @import — this
+   removes an extra network round-trip to Google Fonts on every page load
+   and self-hosts the font files from your own domain. */
 
 /* ─────────────────────────────────────────
    ZUPWELL GEN Z DESIGN SYSTEM
@@ -31,13 +34,13 @@
     @apply antialiased;
     background-color: var(--gy); /* Desert Storm #F8F8F8 */
     color: #4A5568; /* Body Text */
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-inter), 'Inter', sans-serif;
     font-size: 14px;
     line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-inter), 'Inter', sans-serif;
     color: #0C1E39; /* Main Heading */
     font-weight: 900;
     letter-spacing: -0.04em;

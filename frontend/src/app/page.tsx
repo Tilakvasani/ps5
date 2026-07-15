@@ -443,14 +443,14 @@ export default function HomePage() {
               return s(settings, key) ? (
                 (isIso || isMsme) ? (
                   <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity" style={{ background: "#FFFFFF", width: "56px", height: "56px", padding: "3px" }}>
-                    <img src={s(settings, key)} alt={label} className="w-full h-full object-contain rounded-full" />
+                    <img src={s(settings, key)} alt={label} className="w-full h-full object-contain rounded-full"  loading="lazy" decoding="async" />
                   </div>
                 ) : (isGst || isIec || isTm) ? (
                   <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity overflow-hidden relative" style={{ background: "#FFFFFF", width: "56px", height: "56px" }}>
-                    <img src={s(settings, key)} alt={label} className={`w-full h-full object-contain rounded-full ${isGst ? "scale-[1.12]" : "scale-[1.08]"}`} />
+                    <img src={s(settings, key)} alt={label} className={`w-full h-full object-contain rounded-full ${isGst ? "scale-[1.12]" : "scale-[1.08]"}`}  loading="lazy" decoding="async" />
                   </div>
                 ) : (
-                  <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
+                  <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0"  loading="lazy" decoding="async" />
                 )
               ) : (
                 <CertLogo key={idx} label={label} className="h-14 opacity-70 hover:opacity-100 transition-opacity" />
@@ -467,14 +467,14 @@ export default function HomePage() {
               return s(settings, key) ? (
                 (isIso || isMsme) ? (
                   <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity" style={{ background: "#FFFFFF", width: "56px", height: "56px", padding: "3px" }}>
-                    <img src={s(settings, key)} alt={label} className="w-full h-full object-contain rounded-full" />
+                    <img src={s(settings, key)} alt={label} className="w-full h-full object-contain rounded-full"  loading="lazy" decoding="async" />
                   </div>
                 ) : (isGst || isIec || isTm) ? (
                   <div key={idx} className="inline-flex items-center justify-center shrink-0 rounded-full opacity-70 hover:opacity-100 transition-opacity overflow-hidden relative" style={{ background: "#FFFFFF", width: "56px", height: "56px" }}>
-                    <img src={s(settings, key)} alt={label} className={`w-full h-full object-contain rounded-full ${isGst ? "scale-[1.12]" : "scale-[1.08]"}`} />
+                    <img src={s(settings, key)} alt={label} className={`w-full h-full object-contain rounded-full ${isGst ? "scale-[1.12]" : "scale-[1.08]"}`}  loading="lazy" decoding="async" />
                   </div>
                 ) : (
-                  <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0" />
+                  <img key={idx} src={s(settings, key)} alt={label} className="h-14 object-contain opacity-70 hover:opacity-100 transition-opacity inline-block shrink-0"  loading="lazy" decoding="async" />
                 )
               ) : (
                 <CertLogo key={idx} label={label} className="h-14 opacity-70 hover:opacity-100 transition-opacity" />
@@ -504,7 +504,7 @@ export default function HomePage() {
                           alt={s(settings, "founder_name")}
                           className="w-full h-full"
                           style={{ objectFit: "cover", objectPosition: "top center", minHeight: 240 }}
-                        />
+                         loading="lazy" decoding="async" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center" style={{ minHeight: 240, fontSize: 64, fontWeight: 900, color: "var(--or)" }}>
                           {s(settings, "founder_name").charAt(0)}

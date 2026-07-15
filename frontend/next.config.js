@@ -12,6 +12,25 @@ const nextConfig = {
     NEXT_PUBLIC_RAZORPAY_KEY_ID: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
   },
   async headers() {
+    // CSP is scoped to what this app actually loads: Google Tag Manager/
+    // Analytics, Razorpay checkout, and Cloudinary-hosted images. If you
+    // add a new third-party script later (a new chat widget, a new
+    // analytics tool, etc.), its domain needs to be added here or the
+    // browser will silently block it.
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://checkout.razorpay.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https://res.cloudinary.com https://placehold.co https://www.googletagmanager.com",
+      "font-src 'self' data:",
+      "connect-src 'self' https://www.google-analytics.com https://api.razorpay.com https://lumberjack-cx.razorpay.com " +
+        (process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com") + " " +
+        (process.env.NEXT_PUBLIC_CHAT_API_URL || "https://whatsappchatbot-jfki.onrender.com"),
+      "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+    ].join("; ");
+
     return [
       {
         source: "/(.*)",
@@ -20,6 +39,7 @@ const nextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          { key: "Content-Security-Policy", value: csp },
         ],
       },
     ];

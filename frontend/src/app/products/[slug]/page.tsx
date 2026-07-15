@@ -260,8 +260,43 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     { id: "reviews",   label: `Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` },
   ] as const;
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: images.map((img: any) => img.imageUrl),
+    description: product.description || product.name,
+    sku: product.sku,
+    brand: { "@type": "Brand", name: "Zupwell" },
+    aggregateRating: product.avgRating
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: product.avgRating.toFixed(1),
+          reviewCount: product._count?.reviews || product.reviews?.length || 1,
+        }
+      : undefined,
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "INR",
+      price: unitPrice,
+      availability: isOutOfStock
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock",
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://zupwell.com"}/products/${product.slug}`,
+    },
+  };
+
   return (
     <main style={{ minHeight: "100vh", background: C.bg }}>
+      {/* Product structured data — lets Google show price/stock/rating
+          directly in search results. Injected client-side since this page
+          is a client component; for the strongest SEO signal this would
+          ideally be server-rendered via generateMetadata, which needs a
+          bigger refactor (splitting into a server page + client component). */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <Navbar />
 
       {/* ── Sticky Buy Bar ── */}
@@ -277,7 +312,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             <div className="mx-auto max-w-7xl flex items-center justify-between gap-4 rounded-2xl px-6 py-3"
               style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
               <div className="flex items-center gap-3 min-w-0">
-                {primaryImage && <img src={primaryImage} alt="" className="h-10 w-10 rounded-xl object-cover shrink-0" style={{ border: `1px solid ${C.border}` }} />}
+                {primaryImage && <img src={primaryImage} alt="" className="h-10 w-10 rounded-xl object-cover shrink-0" style={{ border: `1px solid ${C.border}` }}  loading="lazy" decoding="async" />}
                 <div className="min-w-0">
                   <p className="font-bold truncate text-sm" style={{ color: C.blue }}>{product.name}</p>
                   <p className="text-xs" style={{ color: C.mid }}>₹{price.toFixed(0)} per unit</p>
@@ -332,7 +367,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               style={{ background: C.altBg, border: `1.5px solid ${C.border}` }}>
               {images[activeImage]?.imageUrl ? (
                 <img src={images[activeImage].imageUrl} alt={product.name}
-                  className="max-w-full max-h-full object-contain transition-transform duration-500 hover:scale-[1.03]"/>
+                  className="max-w-full max-h-full object-contain transition-transform duration-500 hover:scale-[1.03]" loading="eager" fetchPriority="high" decoding="async" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center" style={{ color: C.border }}><Package size={80}/></div>
               )}
@@ -346,7 +381,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   <button key={i} onClick={() => setActiveImage(i)}
                     className="flex-shrink-0 h-20 w-20 rounded-xl overflow-hidden transition-all flex items-center justify-center p-2"
                     style={{ border: `2px solid ${activeImage===i ? C.mintHex : C.border}` }}>
-                    {img.imageUrl ? <img src={img.imageUrl} alt="" className="max-w-full max-h-full object-contain"/> : <div className="w-full h-full" style={{ background: C.surface }}/>}
+                    {img.imageUrl ? <img src={img.imageUrl} alt="" className="max-w-full max-h-full object-contain" loading="lazy" decoding="async" /> : <div className="w-full h-full" style={{ background: C.surface }}/>}
                   </button>
                 ))}
               </div>

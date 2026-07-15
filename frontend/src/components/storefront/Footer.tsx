@@ -228,7 +228,7 @@ export default function Footer() {
                     className="inline-flex items-center justify-center shrink-0 rounded-full"
                     style={{ background: "#FFFFFF", width: "40px", height: "40px", padding: "2px" }}
                   >
-                    <img src={val} alt={label} className="w-full h-full object-contain rounded-full" />
+                    <img src={val} alt={label} className="w-full h-full object-contain rounded-full"  loading="lazy" decoding="async" />
                   </div>
                 );
               }
@@ -241,12 +241,12 @@ export default function Footer() {
                     className="inline-flex items-center justify-center shrink-0 rounded-full overflow-hidden relative"
                     style={{ background: "#FFFFFF", width: "40px", height: "40px" }}
                   >
-                    <img src={val} alt={label} className={`w-full h-full object-contain rounded-full ${scaleClass}`} />
+                    <img src={val} alt={label} className={`w-full h-full object-contain rounded-full ${scaleClass}`}  loading="lazy" decoding="async" />
                   </div>
                 );
               }
               return (
-                <img key={key} src={val} alt={label} className="h-10 object-contain opacity-100 transition-opacity" />
+                <img key={key} src={val} alt={label} className="h-10 object-contain opacity-100 transition-opacity"  loading="lazy" decoding="async" />
               );
             }
 
@@ -273,7 +273,7 @@ export default function Footer() {
           <div className="flex items-center gap-2 opacity-90 hover:opacity-100 transition-opacity">
             <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Secured by</span>
             <div style={{ background: '#FFFFFF', padding: '4px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', height: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-              <img src="/razorpay.png" alt="Razorpay" className="h-4 w-auto object-contain" />
+              <img src="/razorpay.png" alt="Razorpay" className="h-4 w-auto object-contain"  loading="lazy" decoding="async" />
             </div>
           </div>
         </div>

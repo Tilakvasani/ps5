@@ -77,7 +77,7 @@ export default function CartPage() {
                   style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 16, display: "flex", gap: 16, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
                   {/* Image */}
                   <div style={{ height: 80, width: 80, flexShrink: 0, borderRadius: 12, background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.08)", overflow: "hidden" }}>
-                    {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" /> :
+                    {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover"  loading="lazy" decoding="async" /> :
                       <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(12, 30, 57, 0.2)" }}><ShoppingCart size={24} /></div>}
                   </div>
 

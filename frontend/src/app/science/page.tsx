@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
@@ -178,10 +179,12 @@ export default function SciencePage() {
             {...fadeUp(0.1)} 
             className="group relative rounded-3xl overflow-hidden aspect-[16/10] border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
           >
-            <img 
+            <Image 
               src="/assets/laboratory_work.png" 
               alt="Laboratory work featuring researchers" 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#051124]/90 via-transparent to-transparent flex flex-col justify-end p-6">
               <span className="text-xs font-bold uppercase tracking-wider text-[#FF5C00] mb-1">R&D Facilities</span>
@@ -193,10 +196,12 @@ export default function SciencePage() {
             {...fadeUp(0.2)} 
             className="group relative rounded-3xl overflow-hidden aspect-[16/10] border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
           >
-            <img 
+            <Image 
               src="/assets/scientists_collaborating.png" 
               alt="Scientists collaborating on new formulations" 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#051124]/90 via-transparent to-transparent flex flex-col justify-end p-6">
               <span className="text-xs font-bold uppercase tracking-wider text-[#FF5C00] mb-1">Collaborative Innovation</span>
