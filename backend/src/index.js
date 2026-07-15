@@ -31,12 +31,10 @@ app.use(helmet({
 const allowedOrigins = [
   "https://www.zupwell.com",
   "https://zupwell.com",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
   process.env.FRONTEND_URL,
 ].filter(Boolean);
-
-if (process.env.NODE_ENV !== "production") {
-  allowedOrigins.push("http://localhost:3000");
-}
 
 app.use(cors({
   origin: allowedOrigins,

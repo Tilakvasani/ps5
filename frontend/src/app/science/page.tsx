@@ -186,8 +186,13 @@ export default function SciencePage() {
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#051124]/90 via-transparent to-transparent flex flex-col justify-end p-6">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#FF5C00] mb-1">R&D Facilities</span>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051124] via-[#051124]/30 to-transparent flex flex-col justify-end p-6">
+              <span 
+                className="inline-block text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md mb-2 text-white self-start"
+                style={{ background: "#FF5C00" }}
+              >
+                R&D Facilities
+              </span>
               <h3 className="text-xl font-black text-white leading-tight">Advanced Formulations Lab</h3>
             </div>
           </motion.div>
@@ -203,8 +208,13 @@ export default function SciencePage() {
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#051124]/90 via-transparent to-transparent flex flex-col justify-end p-6">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#FF5C00] mb-1">Collaborative Innovation</span>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051124] via-[#051124]/30 to-transparent flex flex-col justify-end p-6">
+              <span 
+                className="inline-block text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md mb-2 text-white self-start"
+                style={{ background: "#FF5C00" }}
+              >
+                Collaborative Innovation
+              </span>
               <h3 className="text-xl font-black text-white leading-tight">Quality Assurance & Synergy</h3>
             </div>
           </motion.div>

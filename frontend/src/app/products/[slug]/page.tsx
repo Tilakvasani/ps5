@@ -135,6 +135,33 @@ const DELIVERY_PERKS = [
   { icon: Truck,     label: "Order Now | Est. Delivery: 5–7 Days" },
 ];
 
+const GrowequalLogo = () => (
+  <div className="flex items-center gap-2">
+    <div className="relative shrink-0">
+      <svg className="h-8 w-8" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Outer stylized crescent shape */}
+        <path
+          d="M80,50 C80,66.57 66.57,80 50,80 C36.25,80 24.71,70.73 21.14,58.07 C23.63,60.85 27.27,62.73 31.42,63.07 C33.15,50.72 40.23,43.23 50.15,43.23 C60.07,43.23 67.15,50.72 68.88,63.07 C75.29,56.66 77.29,46.66 73.29,38.66 C68.29,28.66 56.29,23.66 45.29,27.66 C34.29,31.66 27.29,42.66 28.29,54.66 C26.29,44.66 30.29,33.66 38.29,27.66 C46.29,21.66 57.29,21.66 65.29,26.66 C74.29,32.25 78.89,40.85 80,50 Z"
+          fill="#70155a"
+        />
+        {/* Head */}
+        <circle cx="50" cy="30" r="7" fill="#70155a" />
+        {/* Torso/Arms */}
+        <path
+          d="M38,50 C38,43 62,43 62,50 C62,55 58,60 50,60 C42,60 38,55 38,50 Z"
+          fill="#70155a"
+        />
+      </svg>
+      {/* Trademark symbol */}
+      <span className="absolute -top-1 -right-1 text-[8px] font-bold text-[#70155a]">®</span>
+    </div>
+    <div className="flex flex-col select-none">
+      <span className="text-[17px] font-serif font-black tracking-tight text-[#70155a] leading-none">GROWEQUAL</span>
+      <span className="text-[8px] font-bold tracking-widest text-[#70155a]/90 leading-none uppercase self-end mt-0.5" style={{ letterSpacing: "1.5px" }}>Limited</span>
+    </div>
+  </div>
+);
+
 export default function ProductDetailPage({ params }: { params: { slug: string } }) {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -258,6 +285,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     { id: "howto",     label: "How to Use" },
     { id: "nutrition", label: "Nutrition" },
     { id: "specs",     label: "Key Features" },
+    { id: "info",      label: "Additional Product Info" },
     { id: "reviews",   label: `Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` },
   ] as const;
 
@@ -739,6 +767,53 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                   <span className="text-sm font-semibold" style={{ color: "#ffffff" }}>{feat.text}</span>
                                 </div>
                               ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {tab.id === "info" && (
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {/* Marketed By */}
+                              <div className="p-6 rounded-2xl" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.08)" }}>
+                                <h4 className="text-[10px] uppercase tracking-widest mb-3 font-black text-gray-400">Marketed By</h4>
+                                <p className="text-lg font-black text-white mb-2 tracking-tight">GLOBENT</p>
+                                <p className="text-sm leading-relaxed text-white/80">
+                                  A-102, Adarsh Lifestyle, New India Colony Road, Nr. Devashya School, Ahmedabad, Gujarat, 382350.
+                                </p>
+                                <div className="flex items-center gap-3 mt-5 pt-4" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
+                                  <img src="/fssai.png" alt="FSSAI" className="h-6 object-contain" />
+                                  <p className="text-xs font-semibold text-white/90">
+                                    <span className="opacity-60 uppercase mr-1">Lic No.:</span>10726026000527
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Manufactured By */}
+                              <div className="p-6 rounded-2xl" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.08)" }}>
+                                <h4 className="text-[10px] uppercase tracking-widest mb-4 font-black text-gray-400">Manufactured By</h4>
+                                
+                                <div className="mb-4">
+                                  <GrowequalLogo />
+                                </div>
+                                
+                                <p className="text-xs font-black mb-3 tracking-wide" style={{ color: "#d065b3" }}>(A WHO-GMP, HACCP Certified Company)</p>
+                                <p className="text-sm leading-relaxed text-white/80">
+                                  D-15, Sahjanand Business Park, S.P. Ring Road, Nikol, Ahmedabad, Gujarat - 382350, India.
+                                </p>
+                                <div className="flex items-center gap-3 mt-5 pt-4" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
+                                  <img src="/fssai.png" alt="FSSAI" className="h-6 object-contain" />
+                                  <p className="text-xs font-semibold text-white/90">
+                                    <span className="opacity-60 uppercase mr-1">Lic No.:</span>10723999000788
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Country of Origin */}
+                            <div className="p-5 rounded-2xl flex items-center justify-between gap-4" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.08)" }}>
+                              <span className="text-xs font-black text-white/60 uppercase tracking-widest">Country of Origin</span>
+                              <span className="text-sm font-black text-white px-4 py-2 rounded-xl uppercase tracking-wider" style={{ background: C.mint }}>India</span>
                             </div>
                           </div>
                         )}

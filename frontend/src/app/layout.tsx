@@ -5,7 +5,6 @@ import WhatsAppButton from "@/components/storefront/WhatsAppButton";
 import ServerWakeup from "@/components/ServerWakeup";
 import { Toaster } from "react-hot-toast";
 import dynamic from "next/dynamic";
-import ConsentBanner from "@/components/storefront/ConsentBanner";
 
 const AuthSync = dynamic(() => import("@/components/AuthSync"), { ssr: false });
 
@@ -65,36 +64,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               window.dataLayer = window.dataLayer || [];
               function gtag(){window.dataLayer.push(arguments);}
 
-              // Default consent state: all denied by default
-              var consentState = {
-                'ad_storage': 'denied',
-                'ad_user_data': 'denied',
-                'ad_personalization': 'denied',
-                'analytics_storage': 'denied'
-              };
-
-              // Retrieve saved consent from localStorage if it exists
-              try {
-                var savedConsent = localStorage.getItem('zupwell-consent');
-                if (savedConsent) {
-                  var parsed = JSON.parse(savedConsent);
-                  if (parsed) {
-                    consentState.ad_storage = parsed.ad_storage || 'denied';
-                    consentState.ad_user_data = parsed.ad_user_data || 'denied';
-                    consentState.ad_personalization = parsed.ad_personalization || 'denied';
-                    consentState.analytics_storage = parsed.analytics_storage || 'denied';
-                  }
-                }
-              } catch (e) {
-                console.error('Error reading saved consent', e);
-              }
-
-              // Set default consent state
+              // Set default consent state to granted by default (implied consent)
               gtag('consent', 'default', {
-                'ad_storage': consentState.ad_storage,
-                'ad_user_data': consentState.ad_user_data,
-                'ad_personalization': consentState.ad_personalization,
-                'analytics_storage': consentState.analytics_storage,
+                'ad_storage': 'granted',
+                'ad_user_data': 'granted',
+                'ad_personalization': 'granted',
+                'analytics_storage': 'granted',
                 'wait_for_update': 500
               });
             `
@@ -116,7 +91,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ServerWakeup />
         <WhatsAppButton />
         {children}
-        <ConsentBanner />
         <Toaster
           position="top-right"
           toastOptions={{
