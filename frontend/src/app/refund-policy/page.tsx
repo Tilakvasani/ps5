@@ -21,7 +21,6 @@ export default function RefundPolicy() {
 
   if (loading) return (
     <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
-      <Navbar />
       <div className="flex items-center justify-center pt-40">
         <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
       </div>
