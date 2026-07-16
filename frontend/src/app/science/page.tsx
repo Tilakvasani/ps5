@@ -6,7 +6,7 @@ import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { CertLogo } from "@/components/storefront/CertLogos";
 import { FlaskConical, Shield, Leaf, Droplets, Award, CheckCircle, Microscope, Package, Globe, Cylinder, Beaker, GlassWater, Waves, Sparkles, Activity, Zap, TestTube } from "lucide-react";
-import { fetchSettings } from "@/lib/useSettings";
+import { useSettings } from "@/lib/useSettings";
 import { fadeUp } from "@/lib/utils";
 
 const D: Record<string, string> = {
@@ -56,17 +56,16 @@ const s = (settings: Record<string, string>, key: string) =>
   settings[key] || D[key] || "";
 
 export default function SciencePage() {
-  const [settings, setSettings] = useState<Record<string, string>>({});
+  const { raw: settings, loading } = useSettings();
 
-  useEffect(() => {
-    fetchSettings().then(setSettings).catch(() => {});
-    const onBust = (e: StorageEvent) => {
-      if (e.key === "zupwell-settings-bust")
-        fetchSettings().then(setSettings).catch(() => {});
-    };
-    window.addEventListener("storage", onBust);
-    return () => window.removeEventListener("storage", onBust);
-  }, []);
+  if (loading) return (
+    <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
+      <Navbar />
+      <div className="flex items-center justify-center pt-40">
+        <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
+      </div>
+    </main>
+  );
 
   const manufacturing = [
     {
@@ -177,45 +176,51 @@ export default function SciencePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <motion.div 
             {...fadeUp(0.1)} 
-            className="group relative rounded-3xl overflow-hidden aspect-[16/10] border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
+            className="group rounded-3xl overflow-hidden border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
+            style={{ background: "#0C1E39", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}
           >
-            <Image 
-              src="/assets/laboratory_work.png" 
-              alt="Laboratory work featuring researchers" 
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#051124] via-[#051124]/30 to-transparent flex flex-col justify-end p-6">
+            <div className="relative aspect-[16/10] overflow-hidden">
+              <Image 
+                src="/assets/laboratory_work.png" 
+                alt="Laboratory work featuring researchers" 
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            </div>
+            <div className="p-6 flex flex-col">
               <span 
-                className="inline-block text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md mb-2 text-white self-start"
-                style={{ background: "#FF5C00" }}
+                className="text-[10px] font-black uppercase tracking-widest mb-2 self-start"
+                style={{ color: "#FF5C00" }}
               >
                 R&D Facilities
               </span>
-              <h3 className="text-xl font-black text-white leading-tight">Advanced Formulations Lab</h3>
+              <h3 className="text-xl font-black leading-tight" style={{ color: "#FFFFFF" }}>Advanced Formulations Lab</h3>
             </div>
           </motion.div>
 
           <motion.div 
             {...fadeUp(0.2)} 
-            className="group relative rounded-3xl overflow-hidden aspect-[16/10] border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
+            className="group rounded-3xl overflow-hidden border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
+            style={{ background: "#0C1E39", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}
           >
-            <Image 
-              src="/assets/scientists_collaborating.png" 
-              alt="Scientists collaborating on new formulations" 
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#051124] via-[#051124]/30 to-transparent flex flex-col justify-end p-6">
+            <div className="relative aspect-[16/10] overflow-hidden">
+              <Image 
+                src="/assets/scientists_collaborating.png" 
+                alt="Scientists collaborating on new formulations" 
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            </div>
+            <div className="p-6 flex flex-col">
               <span 
-                className="inline-block text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md mb-2 text-white self-start"
-                style={{ background: "#FF5C00" }}
+                className="text-[10px] font-black uppercase tracking-widest mb-2 self-start"
+                style={{ color: "#FF5C00" }}
               >
                 Collaborative Innovation
               </span>
-              <h3 className="text-xl font-black text-white leading-tight">Quality Assurance & Synergy</h3>
+              <h3 className="text-xl font-black leading-tight" style={{ color: "#FFFFFF" }}>Quality Assurance & Synergy</h3>
             </div>
           </motion.div>
         </div>
