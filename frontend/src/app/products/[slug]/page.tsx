@@ -273,7 +273,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const TABS = [
     { id: "desc",      label: "Description" },
     { id: "howto",     label: "How to Use" },
-    { id: "nutrition", label: "Nutrition" },
+    { id: "nutrition", label: "Nutrition Facts" },
     { id: "specs",     label: "Key Features" },
     { id: "info",      label: "Additional Product Information" },
     { id: "reviews",   label: `Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` },
@@ -726,6 +726,14 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                   ))}
                                 </div>
                               </div>
+                            </div>
+
+                            {/* Ingredients list at bottom of the tables */}
+                            <div className="p-5 rounded-2xl border border-white/10" style={{ background: "#051124" }}>
+                              <p className="text-sm leading-relaxed text-white/80">
+                                <strong className="text-white font-bold block mb-1.5 text-xs uppercase tracking-wider text-gray-400">Ingredients:</strong>
+                                Chloride, Magnesium, Potassium, Calcium, Vitamin C, Zinc, Acidity regulators (INS 330, INS 500(ii)), Malic Acid, Artificial sweetener (INS 955), Preservative (INS 211), Dextrose, Sodium Chloride, PVP K30 (Polyvinylpyrrolidone K30) (INS 1201), Natural food colour, Natural flavouring substance (Orange).
+                              </p>
                             </div>
 
                             {/* RDA Disclaimer Footer */}
