@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import WhatsAppButton from "@/components/storefront/WhatsAppButton";
 import ServerWakeup from "@/components/ServerWakeup";
 import { Toaster } from "react-hot-toast";
 import dynamic from "next/dynamic";
@@ -89,7 +88,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AuthSync />
         <ServerWakeup />
-        <WhatsAppButton />
         {children}
         <Toaster
           position="top-right"

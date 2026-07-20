@@ -453,6 +453,11 @@ const SETTING_GROUPS = [
       { key: "hero_title",        label: "Hero Title (English)", type: "text" },
       { key: "hero_badge",        label: "Top Badge Text", type: "text" },
       { key: "hero_subtext",      label: "Hero Subtext", type: "textarea" },
+<<<<<<< HEAD
+=======
+      { key: "hero_image",        label: "Hero Product Image", type: "image" },
+      { key: "hero_image_link",   label: "Hero Image Redirect URL", type: "text" },
+>>>>>>> 3bf54fbd9a12ff4e65d422727741f10564305b9f
       { key: "hero_stat1_value",  label: "Stat 1 Value (e.g. 200+)", type: "text" },
       { key: "hero_stat1_label",  label: "Stat 1 Label (e.g. Products)", type: "text" },
       { key: "hero_stat2_value",  label: "Stat 2 Value (e.g. 50K+)", type: "text" },
