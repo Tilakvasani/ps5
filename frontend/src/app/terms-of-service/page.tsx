@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import LegalPage from "@/components/storefront/LegalPage";
-import { useSettings } from "@/lib/useSettings";
+import { fetchSettings } from "@/lib/useSettings";
 
 const DEFAULT_SECTIONS = [
   { title: "1. Acceptance of Terms", body: "By accessing and using Zupwell's website and services, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services." },
@@ -15,15 +15,17 @@ const DEFAULT_SECTIONS = [
 ];
 
 export default function TermsOfService() {
-  const { raw: settings, loading } = useSettings();
+  const [settings, setSettings] = useState<Record<string, string>>({});
 
-  if (loading) return (
-    <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
-      <div className="flex items-center justify-center pt-40">
-        <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
-      </div>
-    </main>
-  );
+  useEffect(() => {
+    fetchSettings().then(setSettings).catch(() => {});
+    const onBust = (e: StorageEvent) => {
+      if (e.key === "zupwell-settings-bust")
+        fetchSettings().then(setSettings).catch(() => {});
+    };
+    window.addEventListener("storage", onBust);
+    return () => window.removeEventListener("storage", onBust);
+  }, []);
 
   let sections = DEFAULT_SECTIONS;
   if (settings.policy_terms_sections_json) {

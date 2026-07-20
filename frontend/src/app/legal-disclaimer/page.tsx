@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import LegalPage from "@/components/storefront/LegalPage";
-import { useSettings } from "@/lib/useSettings";
+import { fetchSettings } from "@/lib/useSettings";
 
 const DEFAULT_SECTIONS = [
   { title: "Health Supplement Disclaimer", body: "All products sold by Zupwell are health supplements and are NOT intended to diagnose, treat, cure, or prevent any disease or medical condition. These products are not medicines and should not be used as a substitute for professional medical advice, diagnosis, or treatment." },
@@ -14,15 +14,17 @@ const DEFAULT_SECTIONS = [
 ];
 
 export default function LegalDisclaimer() {
-  const { raw: settings, loading } = useSettings();
+  const [settings, setSettings] = useState<Record<string, string>>({});
 
-  if (loading) return (
-    <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
-      <div className="flex items-center justify-center pt-40">
-        <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
-      </div>
-    </main>
-  );
+  useEffect(() => {
+    fetchSettings().then(setSettings).catch(() => {});
+    const onBust = (e: StorageEvent) => {
+      if (e.key === "zupwell-settings-bust")
+        fetchSettings().then(setSettings).catch(() => {});
+    };
+    window.addEventListener("storage", onBust);
+    return () => window.removeEventListener("storage", onBust);
+  }, []);
 
   let sections = DEFAULT_SECTIONS;
   if (settings.policy_disclaimer_sections_json) {

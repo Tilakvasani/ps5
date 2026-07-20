@@ -7,7 +7,7 @@ import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { CertLogo } from "@/components/storefront/CertLogos";
 import { publicApi, productsApi } from "@/lib/api";
-import { useSettings } from "@/lib/useSettings";
+import { getSettingsCache, fetchSettings } from "@/lib/useSettings";
 import { fadeUp, cldOptimize } from "@/lib/utils";
 
 
@@ -215,7 +215,7 @@ function BlogSection({ reviews, settings }: { reviews: any[], settings: Record<s
 }
 
 export default function HomePage() {
-  const { raw: settings, loading } = useSettings();
+  const [settings, setSettings] = useState<Record<string, string>>({});
   const [reviewsList, setReviewsList] = useState<any[]>([]);
   const [featuredProduct, setFeaturedProduct] = useState<any>(null);
   const [virtualIndex, setVirtualIndex] = useState(0);
@@ -224,6 +224,10 @@ export default function HomePage() {
   const activeIndex = reviewsList.length > 0 ? (virtualIndex % reviewsList.length) : 0;
 
   useEffect(() => {
+    const cached = getSettingsCache();
+    if (Object.keys(cached).length > 0) setSettings(cached);
+    fetchSettings().then(setSettings).catch(() => {});
+    
     publicApi.getReviews().then((dbReviews) => {
       // Filter to only include 5-star reviews from database
       const db5Star = (dbReviews || []).filter((r: any) => Number(r.rating) === 5);
@@ -311,17 +315,6 @@ export default function HomePage() {
     { key: "cert_tm_logo",    label: "TM" },
   ];
   const hasCerts = certEntries.some(({ key }) => s(settings, key));
-
-  if (loading) {
-    return (
-      <main style={{ minHeight: "100vh", background: "var(--dk)" }}>
-        <Navbar />
-        <div className="flex items-center justify-center pt-40">
-          <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="relative min-h-screen overflow-x-hidden" style={{ background: "var(--dk)" }}>

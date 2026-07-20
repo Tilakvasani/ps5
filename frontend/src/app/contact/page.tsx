@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Mail, MessageCircle, Instagram, Facebook, Send, User, Building, MapPin, Briefcase, FileText } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { useSettings } from "@/lib/useSettings";
+import { fetchSettings } from "@/lib/useSettings";
 import toast from "react-hot-toast";
 import { fadeUp } from "@/lib/utils";
 
@@ -26,18 +26,19 @@ const EMPTY_FORM = {
 };
 
 export default function ContactPage() {
-  const { raw: settings, loading } = useSettings();
+  const [settings, setSettings] = useState<Record<string, string>>({});
   const [form, setForm]         = useState(EMPTY_FORM);
   const [sending, setSending]   = useState(false);
 
-  if (loading) return (
-    <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
-      <Navbar />
-      <div className="flex items-center justify-center pt-40">
-        <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
-      </div>
-    </main>
-  );
+  useEffect(() => {
+    fetchSettings().then(setSettings).catch(() => {});
+    const onBust = (e: StorageEvent) => {
+      if (e.key === "zupwell-settings-bust")
+        fetchSettings().then(setSettings).catch(() => {});
+    };
+    window.addEventListener("storage", onBust);
+    return () => window.removeEventListener("storage", onBust);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

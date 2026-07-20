@@ -5,7 +5,7 @@ import { ChevronDown, MessageCircle } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useEffect } from "react";
-import { useSettings } from "@/lib/useSettings";
+import { fetchSettings } from "@/lib/useSettings";
 
 const FAQS = [
   {
@@ -100,17 +100,17 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function FAQsPage() {
-  const { raw: settings, loading } = useSettings();
+  const [settings, setSettings] = useState<Record<string, string>>({});
   const [faqsList, setFaqsList] = useState<any[]>(FAQS);
   const [whatsapp, setWhatsapp] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
-  useEffect(() => {
-    if (loading) return;
-    setWhatsapp(settings.contact_whatsapp || "");
-    if (settings.faqs_list_json) {
+  const loadSettings = (s: Record<string, string>) => {
+    setSettings(s);
+    setWhatsapp(s.contact_whatsapp || "");
+    if (s.faqs_list_json) {
       try {
-        const list = JSON.parse(settings.faqs_list_json);
+        const list = JSON.parse(s.faqs_list_json);
         if (Array.isArray(list) && list.length > 0) {
           setFaqsList(list);
         }
@@ -118,16 +118,19 @@ export default function FAQsPage() {
         console.error("Failed to parse faqs_list_json:", e);
       }
     }
-  }, [settings, loading]);
+  };
 
-  if (loading) return (
-    <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
-      <Navbar />
-      <div className="flex items-center justify-center pt-40">
-        <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
-      </div>
-    </main>
-  );
+  useEffect(() => {
+    fetchSettings()
+      .then(loadSettings)
+      .catch(() => {});
+    const onBust = (e: StorageEvent) => {
+      if (e.key === "zupwell-settings-bust")
+        fetchSettings().then(loadSettings).catch(() => {});
+    };
+    window.addEventListener("storage", onBust);
+    return () => window.removeEventListener("storage", onBust);
+  }, []);
 
   const categories = ["All", ...faqsList.map(f => f.category)];
   const filtered = activeCategory === "All" ? faqsList : faqsList.filter(f => f.category === activeCategory);
