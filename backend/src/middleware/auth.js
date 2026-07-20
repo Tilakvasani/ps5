@@ -32,6 +32,12 @@ const authAdmin = async (req, res, next) => {
     }
     const admin = await prisma.admin.findUnique({ where: { id: payload.id } });
     if (!admin || !admin.isActive) return res.status(401).json({ error: "Admin account inactive" });
+    
+    // Check token version to support session revocation
+    if (payload.tokenVersion !== undefined && admin.tokenVersion !== payload.tokenVersion) {
+      return res.status(401).json({ error: "Session has been revoked or logged out" });
+    }
+
     req.admin = admin;
     next();
   } catch {
@@ -53,4 +59,11 @@ const optionalAuth = async (req, res, next) => {
   next();
 };
 
-module.exports = { authUser, authAdmin, optionalAuth };
+const requireRole = (...allowedRoles) => (req, res, next) => {
+  if (!req.admin || !allowedRoles.includes(req.admin.role)) {
+    return res.status(403).json({ error: "You don't have permission to perform this action" });
+  }
+  next();
+};
+
+module.exports = { authUser, authAdmin, optionalAuth, requireRole };

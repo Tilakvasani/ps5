@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import WhatsAppButton from "@/components/storefront/WhatsAppButton";
 import ServerWakeup from "@/components/ServerWakeup";
@@ -7,9 +8,19 @@ import dynamic from "next/dynamic";
 
 const AuthSync = dynamic(() => import("@/components/AuthSync"), { ssr: false });
 
+// next/font self-hosts Inter at build time — no request to Google Fonts at
+// runtime, no render-blocking @import, and no font-swap layout flicker.
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
 
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://zupwell.com"),
   title: {
     default:  "Zupwell — Premium Health & Wellness Supplements",
     template: "%s | Zupwell",
@@ -44,7 +55,37 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
+      <head>
+        {/* Google Tag (gtag.js) and Consent Mode v2 Initialization */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){window.dataLayer.push(arguments);}
+
+              // Set default consent state to granted by default (implied consent)
+              gtag('consent', 'default', {
+                'ad_storage': 'granted',
+                'ad_user_data': 'granted',
+                'ad_personalization': 'granted',
+                'analytics_storage': 'granted',
+                'wait_for_update': 500
+              });
+            `
+          }}
+        />
+        {/* Load Google Tag script */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-2E4EEGNE46"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              gtag('js', new Date());
+              gtag('config', 'G-2E4EEGNE46');
+            `
+          }}
+        />
+      </head>
       <body>
         <AuthSync />
         <ServerWakeup />

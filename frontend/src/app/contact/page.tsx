@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Mail, MessageCircle, Instagram, Facebook, Send, User, Building, MapPin, Briefcase, FileText } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { fetchSettings } from "@/lib/useSettings";
+import { useSettings } from "@/lib/useSettings";
 import toast from "react-hot-toast";
 import { fadeUp } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ import { fadeUp } from "@/lib/utils";
 const D: Record<string, string> = {
   contact_whatsapp:      "",
   contact_support_email: "support@zupwell.com",
-  contact_info_email:    "info@zupwell.com",
+  contact_info_email:    "support@zupwell.com",
   contact_instagram:     "",
   contact_facebook:      "",
 };
@@ -26,19 +26,18 @@ const EMPTY_FORM = {
 };
 
 export default function ContactPage() {
-  const [settings, setSettings] = useState<Record<string, string>>({});
+  const { raw: settings, loading } = useSettings();
   const [form, setForm]         = useState(EMPTY_FORM);
   const [sending, setSending]   = useState(false);
 
-  useEffect(() => {
-    fetchSettings().then(setSettings).catch(() => {});
-    const onBust = (e: StorageEvent) => {
-      if (e.key === "zupwell-settings-bust")
-        fetchSettings().then(setSettings).catch(() => {});
-    };
-    window.addEventListener("storage", onBust);
-    return () => window.removeEventListener("storage", onBust);
-  }, []);
+  if (loading) return (
+    <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
+      <Navbar />
+      <div className="flex items-center justify-center pt-40">
+        <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
+      </div>
+    </main>
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,15 +80,27 @@ export default function ContactPage() {
       <section className="relative pt-32 pb-16 px-6 overflow-hidden" style={{ background: "#0C1E39", borderBottom: "1.5px solid #051124" }}>
         <div className="pointer-events-none absolute -top-40 -left-40 h-[400px] w-[400px] rounded-full" style={{ background: "rgba(255,92,0,0.06)" }} />
         <div className="relative mx-auto max-w-3xl text-center">
-          <motion.span {...fadeUp(0)} className="inline-block zbadge zbadge-or mb-4">
-            Contact Us
+          <motion.span {...fadeUp(0)} className="inline-block zbadge zbadge-or mb-4" style={{ fontSize: "12px" }}>
+            {s(settings, "contact_hero_badge") || "Contact Us"}
           </motion.span>
           <motion.h1 {...fadeUp(0.1)} className="text-3xl sm:text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
-            Got Questions?<br />
-            <span style={{ color: "var(--or)" }}>We've Got Answers!</span>
+            {s(settings, "contact_hero_title") ? (
+              s(settings, "contact_hero_title").split("\n").map((line, idx) => (
+                <span key={idx}>
+                  {line.toLowerCase().includes("answers") ? (
+                    <span style={{ color: "var(--or)" }}>{line}</span>
+                  ) : (
+                    line
+                  )}
+                  {idx < s(settings, "contact_hero_title").split("\n").length - 1 && <br />}
+                </span>
+              ))
+            ) : (
+              <>Got Questions?<br /><span style={{ color: "var(--or)" }}>We've Got Answers!</span></>
+            )}
           </motion.h1>
           <motion.p {...fadeUp(0.2)} className="text-lg" style={{ color: "#F8F8F8", opacity: 0.85 }}>
-            Reach out to us 9 AM to 6 PM — we're always happy to help.
+            {s(settings, "contact_hero_subtext") || "Reach out to us 9 AM to 6 PM — we're always happy to help."}
           </motion.p>
         </div>
       </section>
@@ -142,81 +153,91 @@ export default function ContactPage() {
       </section>
 
       {/* ── Distributor Inquiry Form ── */}
-      <section className="pt-8 pb-16 px-6" style={{ background: "var(--gy)" }}>
+      <section className="pt-8 pb-16 px-6" style={{ background: "#0c1e39" }}>
         <div className="mx-auto max-w-3xl">
           <motion.div {...fadeUp(0)} className="text-center mb-10">
             <span className="inline-block zbadge zbadge-or mb-3">
-              Grow with Zupwell
+              {s(settings, "contact_form_badge") || "Grow with Zupwell"}
             </span>
-            <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
-              Distributor <span style={{ color: "var(--or)" }}>Inquiry</span>
+            <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
+              {s(settings, "contact_form_title") ? (
+                s(settings, "contact_form_title").split(" ").map((w, idx) => (
+                  idx === s(settings, "contact_form_title").split(" ").length - 1 ? (
+                    <span key={idx} style={{ color: "var(--or)" }}>{w} </span>
+                  ) : (
+                    w + " "
+                  )
+                ))
+              ) : (
+                <>Distributor <span style={{ color: "var(--or)" }}>Inquiry</span></>
+              )}
             </h2>
-            <p style={{ color: "#4A5568" }}>
-              Interested in partnering with us? Fill in your details and let's do business!
+            <p style={{ color: "#F8F8F8", opacity: 0.85 }}>
+              {s(settings, "contact_form_subtext") || "Interested in partnering with us? Fill in your details and let's do business!"}
             </p>
           </motion.div>
 
-          <motion.form {...fadeUp(0.1)} onSubmit={handleSubmit} className="zcard space-y-5" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+          <motion.form {...fadeUp(0.1)} onSubmit={handleSubmit} className="space-y-5" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.08)", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)" }}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Full Name */}
               <div>
-                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                   <User size={13} style={{ color: "var(--or)" }} /> Full Name *
                 </label>
                 <input type="text" value={form.fullName} required
                   onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
-                  className="zinp text-sm" placeholder="Your full name" />
+                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your full name" />
               </div>
 
               {/* Firm Name */}
               <div>
-                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                   <Building size={13} style={{ color: "var(--or)" }} /> Firm Name
                 </label>
                 <input type="text" value={form.firmName}
                   onChange={e => setForm(f => ({ ...f, firmName: e.target.value }))}
-                  className="zinp text-sm" placeholder="Your firm / company name" />
+                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your firm / company name" />
               </div>
 
               {/* City */}
               <div>
-                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                   <MapPin size={13} style={{ color: "var(--or)" }} /> City *
                 </label>
                 <input type="text" value={form.city} required
                   onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-                  className="zinp text-sm" placeholder="Your city" />
+                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your city" />
               </div>
 
               {/* State */}
               <div>
-                <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+                <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                   <MapPin size={13} style={{ color: "var(--or)" }} /> State
                 </label>
                 <input type="text" value={form.state}
                   onChange={e => setForm(f => ({ ...f, state: e.target.value }))}
-                  className="zinp text-sm" placeholder="Your state" />
+                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your state" />
               </div>
             </div>
 
             {/* Experience */}
             <div>
-              <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+              <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                 <Briefcase size={13} style={{ color: "var(--or)" }} /> Experience in Distribution
               </label>
               <input type="text" value={form.experience}
                 onChange={e => setForm(f => ({ ...f, experience: e.target.value }))}
-                className="zinp text-sm" placeholder="e.g. 3 years in FMCG, new to distribution, etc." />
+                className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="e.g. 3 years in FMCG, new to distribution, etc." />
             </div>
 
             {/* Message */}
             <div>
-              <label className="zlabel flex items-center gap-1.5" style={{ color: "#0C1E39" }}>
+              <label className="zlabel flex items-center gap-1.5" style={{ color: "#FFFFFF" }}>
                 <FileText size={13} style={{ color: "var(--or)" }} /> Message *
               </label>
               <textarea value={form.message} required rows={4}
                 onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                className="zinp text-sm resize-none"
+                className="zinp text-sm resize-none" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }}
                 placeholder="Tell us about your distribution network, area of operation, and what you're looking for..." />
             </div>
 
@@ -227,8 +248,8 @@ export default function ContactPage() {
               {sending ? "Sending..." : "Send Inquiry"}
             </motion.button>
 
-            <p className="text-xs text-center" style={{ color: "#6B7280" }}>
-              We typically respond within 24 hours on business days.
+            <p className="text-xs text-center" style={{ color: "#A0AEC0" }}>
+              {s(settings, "contact_form_footer") || "We typically respond within 24 hours on business days."}
             </p>
           </motion.form>
         </div>

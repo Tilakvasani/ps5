@@ -12,14 +12,14 @@ async function main() {
   const admin = await prisma.admin.upsert({
     where:  { email: "admin@zupwell.in" },
     update: {},
-    create: { name: "Super Admin", email: "admin@zupwell.in", passwordHash: adminHash, role: "super_admin" },
+    create: { name: "Super Admin", email: "admin@zupwell.in", number: "9999999999", passwordHash: adminHash, role: "super_admin" },
   });
   console.log("✅ Admin:", admin.email);
 
   // ── Settings ─────────────────────────────────────
   const defaultSettings = [
     { key: "site_name",                value: "Zupwell",                           group: "general"  },
-    { key: "site_email",               value: "info@zupwell.in",                   group: "general"  },
+    { key: "site_email",               value: "support@zupwell.com",               group: "general"  },
     { key: "site_phone",               value: "+91 9999999999",                    group: "general"  },
     { key: "site_address",             value: "A-102, Adarsh Lifestyle, Ahmedabad, Gujarat 382350", group: "general" },
     { key: "gstin",                    value: "24XXXXXXXXXXXXX",                   group: "tax"      },
@@ -36,12 +36,9 @@ async function main() {
 
   // ── GST Rates ─────────────────────────────────────
   const gstRates = [
-    { hsnCode: "3919", description: "Adhesive Sheets & Films", cgstRate: 9, sgstRate: 9, igstRate: 18 },
-    { hsnCode: "3920", description: "Other Plastic Plates / Films",        cgstRate: 9, sgstRate: 9, igstRate: 18 },
-    { hsnCode: "3923", description: "Polythene Bags / Immunity",       cgstRate: 9, sgstRate: 9, igstRate: 18 },
-    { hsnCode: "4819", description: "Cartons / Boxes (Paper/Paperboard)",  cgstRate: 6, sgstRate: 6, igstRate: 12 },
-    { hsnCode: "3921", description: "Vitamins / PE Foam",              cgstRate: 9, sgstRate: 9, igstRate: 18 },
-    { hsnCode: "5806", description: "Protein / Wrapping Film",        cgstRate: 6, sgstRate: 6, igstRate: 12 },
+    { hsnCode: "2106", description: "Food Supplements / Effervescent Tablets", cgstRate: 9, sgstRate: 9, igstRate: 18 },
+    { hsnCode: "3004", description: "Medicaments / Vitamins",                  cgstRate: 6, sgstRate: 6, igstRate: 12 },
+    { hsnCode: "2202", description: "Hydration & Energy Drinks",                cgstRate: 9, sgstRate: 9, igstRate: 18 },
   ];
   for (const r of gstRates) {
     await prisma.gstRate.upsert({ where: { hsnCode: r.hsnCode }, update: {}, create: { ...r, cgstRate: r.cgstRate, sgstRate: r.sgstRate, igstRate: r.igstRate } });
@@ -126,6 +123,35 @@ async function main() {
     create: { code: "FLAT50", description: "₹50 flat off above ₹500", discountType: "flat", discountValue: 50, minOrderValue: 500, isActive: true },
   });
   console.log("✅ Coupons seeded");
+
+  // ── Sample Reviews ────────────────────────────────
+  console.log("🌱 Seeding sample reviews...");
+  const sampleReviews = [
+    { name: "Rohan Mehta", email: "rohan@gmail.com", rating: 5, title: "Great energy boost", body: "Dissolves fast and tastes great. I feel more hydrated after workouts." },
+    { name: "Priya Sharma", email: "priya@gmail.com", rating: 5, title: "Perfect for summer", body: "Keeps me going through Ahmedabad heat. No sugar crash, just steady energy." },
+    { name: "Arjun Patel", email: "arjun@gmail.com", rating: 4, title: "Good taste, works well", body: "Orange flavour is refreshing and not too sweet. Repeat customer now." },
+    { name: "Sneha Iyer", email: "sneha@gmail.com", rating: 5, title: "Helped with fatigue", body: "Used it during a work trip and it really helped with tiredness and cramps." },
+    { name: "Vikram Nair", email: "vikram@gmail.com", rating: 4, title: "Solid daily supplement", body: "Easy to carry the tube around. Fizzes up nicely in cold water." },
+    { name: "Ananya Reddy", email: "ananya@gmail.com", rating: 5, title: "My gym essential now", body: "Take it post workout every day. Noticeably less soreness the next day." }
+  ];
+
+  const dbProduct = await prisma.product.findFirst({ where: { sku: "ZW-ELEC-ORG-15" } });
+  if (dbProduct) {
+    const userPass = await bcrypt.hash("User@123", 10);
+    for (const r of sampleReviews) {
+      const user = await prisma.user.upsert({
+        where: { email: r.email },
+        update: {},
+        create: { name: r.name, email: r.email, passwordHash: userPass, isActive: true, isVerified: true }
+      });
+      await prisma.review.upsert({
+        where: { productId_userId: { productId: dbProduct.id, userId: user.id } },
+        update: { rating: r.rating, title: r.title, body: r.body, isApproved: true },
+        create: { productId: dbProduct.id, userId: user.id, rating: r.rating, title: r.title, body: r.body, isApproved: true }
+      });
+    }
+    console.log("✅ Sample reviews seeded");
+  }
 
   console.log("\n🎉 Seed complete!");
   console.log("   Admin email:    admin@zupwell.in");

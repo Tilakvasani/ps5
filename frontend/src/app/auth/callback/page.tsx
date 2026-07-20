@@ -15,26 +15,37 @@ function CallbackHandler() {
     const token = searchParams.get("token");
     const name  = searchParams.get("name");
     const error = searchParams.get("error");
+    const isAdmin = searchParams.get("isAdmin") === "true";
+    const adminName = searchParams.get("adminName");
 
     if (error || !token) {
-      toast.error("Google sign-in failed. Please try again.");
+      toast.error("Sign-in failed. Please try again.");
       router.replace("/login");
       return;
     }
 
     setToken(token);
     setAuthCookie(token); // sync cookie so middleware lets user through
+
+    if (isAdmin) {
+      localStorage.setItem("zupwell-admin", JSON.stringify({ name: adminName || name || "Admin", token }));
+      try {
+        const { setAdminAuthCookie } = require("@/lib/auth-cookie");
+        setAdminAuthCookie(token);
+      } catch (e) {}
+    }
+
     authApi.me()
       .then((me) => {
         setUser(me);
         toast.success(`Welcome, ${me.name || name || "User"}!`);
-        router.replace("/");
+        router.replace(isAdmin ? "/admin" : "/");
       })
       .catch(() => {
         // Fallback: use name from URL param if /me fails
         setUser({ id: 0, name: name || "User", email: "" });
         toast.success(`Welcome, ${name || "User"}!`);
-        router.replace("/");
+        router.replace(isAdmin ? "/admin" : "/");
       });
   }, [searchParams, router, setToken, setUser]);
 

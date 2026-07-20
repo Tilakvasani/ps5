@@ -5,7 +5,7 @@ import { ChevronDown, MessageCircle } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useEffect } from "react";
-import { fetchSettings } from "@/lib/useSettings";
+import { useSettings } from "@/lib/useSettings";
 
 const FAQS = [
   {
@@ -100,23 +100,37 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function FAQsPage() {
+  const { raw: settings, loading } = useSettings();
+  const [faqsList, setFaqsList] = useState<any[]>(FAQS);
   const [whatsapp, setWhatsapp] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
-    fetchSettings()
-      .then(s => setWhatsapp(s.contact_whatsapp || ""))
-      .catch(() => {});
-    const onBust = (e: StorageEvent) => {
-      if (e.key === "zupwell-settings-bust")
-        fetchSettings().then(s => setWhatsapp(s.contact_whatsapp || "")).catch(() => {});
-    };
-    window.addEventListener("storage", onBust);
-    return () => window.removeEventListener("storage", onBust);
-  }, []);
+    if (loading) return;
+    setWhatsapp(settings.contact_whatsapp || "");
+    if (settings.faqs_list_json) {
+      try {
+        const list = JSON.parse(settings.faqs_list_json);
+        if (Array.isArray(list) && list.length > 0) {
+          setFaqsList(list);
+        }
+      } catch (e) {
+        console.error("Failed to parse faqs_list_json:", e);
+      }
+    }
+  }, [settings, loading]);
 
-  const categories = ["All", ...FAQS.map(f => f.category)];
-  const filtered = activeCategory === "All" ? FAQS : FAQS.filter(f => f.category === activeCategory);
+  if (loading) return (
+    <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
+      <Navbar />
+      <div className="flex items-center justify-center pt-40">
+        <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
+      </div>
+    </main>
+  );
+
+  const categories = ["All", ...faqsList.map(f => f.category)];
+  const filtered = activeCategory === "All" ? faqsList : faqsList.filter(f => f.category === activeCategory);
 
   return (
     <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--gy)" }}>
@@ -127,16 +141,22 @@ export default function FAQsPage() {
         <div className="pointer-events-none absolute -top-40 -left-40 h-[400px] w-[400px] rounded-full" style={{ background: "rgba(255, 92, 0, 0.06)" }} />
         <div className="relative mx-auto max-w-3xl text-center">
           <motion.span initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-block zbadge zbadge-or mb-4">
-            FAQs
+            className="inline-block zbadge zbadge-or mb-4" style={{ fontSize: "12px" }}>
+            {settings.faqs_hero_badge || "FAQs"}
           </motion.span>
           <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             className="text-5xl md:text-6xl font-black mb-4 leading-tight" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
-            Got <span style={{ color: "var(--or)" }}>Questions?</span>
+            {settings.faqs_hero_title ? (
+              settings.faqs_hero_title.includes("Questions?") ? (
+                <>Got <span style={{ color: "var(--or)" }}>Questions?</span></>
+              ) : settings.faqs_hero_title
+            ) : (
+              <>Got <span style={{ color: "var(--or)" }}>Questions?</span></>
+            )}
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
             className="text-lg" style={{ color: "#F8F8F8", opacity: 0.85 }}>
-            Everything you need to know about Zupwell and our products.
+            {settings.faqs_hero_subtext || "Everything you need to know about Zupwell and our products."}
           </motion.p>
         </div>
       </section>
@@ -188,10 +208,10 @@ export default function FAQsPage() {
               <MessageCircle size={28} style={{ color: "var(--or)" }} />
             </div>
             <h2 className="text-2xl font-black mb-2" style={{ color: "#FFFFFF" }}>
-              Still have a question?
+              {settings.faqs_footer_title || "Still have a question?"}
             </h2>
             <p className="mb-6" style={{ color: "#F8F8F8", opacity: 0.85 }}>
-              Can't find what you're looking for? We're just a message away!
+              {settings.faqs_footer_subtext || "Can't find what you're looking for? We're just a message away!"}
             </p>
             {whatsapp ? (
               <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer">

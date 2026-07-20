@@ -56,6 +56,10 @@ router.put("/change-password", authUser, async (req, res) => {
   if (!currentPassword || !newPassword) return res.status(400).json({ error: "Both passwords required" });
   if (newPassword.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
 
+  if (!req.user.passwordHash) {
+    return res.status(400).json({ error: "Password changes are not supported for phone-only OTP accounts." });
+  }
+
   const valid = await bcrypt.compare(currentPassword, req.user.passwordHash);
   if (!valid) return res.status(400).json({ error: "Current password is incorrect" });
 

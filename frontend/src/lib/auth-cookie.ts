@@ -18,3 +18,15 @@ export function clearAuthCookie() {
   if (typeof document === "undefined") return;
   document.cookie = `${COOKIE_NAME}=; path=/; max-age=0`;
 }
+
+const ADMIN_COOKIE_NAME = "admin-token";
+
+export function setAdminAuthCookie(token: string) {
+  if (typeof document === "undefined") return;
+  document.cookie = `${ADMIN_COOKIE_NAME}=${encodeURIComponent(token)}; path=/; max-age=${MAX_AGE}; SameSite=Lax`;
+}
+
+export function clearAdminAuthCookie() {
+  if (typeof document === "undefined") return;
+  document.cookie = `${ADMIN_COOKIE_NAME}=; path=/; max-age=0`;
+}

@@ -3,26 +3,114 @@ const bcrypt = require("bcryptjs");
 const slugify = require("slugify");
 const prisma = require("../utils/prisma");
 const { signAccess } = require("../utils/jwt");
-const { authAdmin } = require("../middleware/auth");
+const { authAdmin, requireRole } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
-const { sanitizeBody, validatePagination, validateProductBody, validateOrderStatus, validateIdParam } = require("../middleware/validate");
-
-const VALID_ORDER_STATUSES = ["pending","confirmed","processing","shipped","delivered","cancelled"];
+const { sanitizeBody, validatePagination, validateProductBody, validateOrderStatus, validateIdParam, VALID_ORDER_STATUSES } = require("../middleware/validate");
+const { sendSMS } = require("../utils/sms");
+const jwt = require("jsonwebtoken");
 
 // ── Admin Auth ────────────────────────────────────────
+// NOTE: the phone-number + OTP "gate" step now lives in /api/auth
+// (identify → verify-identify-otp) so that admin and regular-user login
+// share a single entry page. This route only handles the second factor:
+// verifying the admin's email + password against the gate token issued
+// by that OTP step, and finally issuing the 8-hour admin JWT.
 router.post("/auth/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, gateToken } = req.body;
+    if (typeof email !== "string" || typeof password !== "string" || typeof gateToken !== "string") {
+      return res.status(400).json({ error: "Email and password required" });
+    }
+    if (email.length > 255 || password.length > 128) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
     if (!email || !password) return res.status(400).json({ error: "Email and password required" });
-    const admin = await prisma.admin.findUnique({ where: { email } });
+    if (!gateToken) return res.status(401).json({ error: "Gate token required to authenticate" });
+
+    const jwtSecret = process.env.JWT_SECRET;
+    let gatePayload;
+    try {
+      gatePayload = jwt.verify(gateToken, jwtSecret);
+      if (gatePayload.scope !== "admin-gate") {
+        return res.status(401).json({ error: "Invalid gate token scope" });
+      }
+    } catch (err) {
+      return res.status(401).json({ error: "Gate token invalid or expired. Please verify your phone number again." });
+    }
+
+    const admin = await prisma.admin.findFirst({ where: { email: { equals: email.toLowerCase().trim(), mode: "insensitive" } } });
     if (!admin || !admin.isActive) return res.status(401).json({ error: "Invalid credentials" });
+
+    // The OTP gate was issued for one specific admin's phone number — the
+    // credentials submitted here must belong to that exact same admin.
+    // Without this check, verifying OTP on Admin A's phone could be reused
+    // to log in as a *different* Admin B by simply knowing Admin B's password.
+    if (gatePayload.adminId !== admin.id) {
+      return res.status(401).json({ error: "Gate token does not match this account. Please verify your phone number again." });
+    }
+
+    // Check account lockout status
+    if (admin.lockedUntil && admin.lockedUntil > new Date()) {
+      const remainingMs = admin.lockedUntil.getTime() - Date.now();
+      const remainingMin = Math.ceil(remainingMs / 60000);
+      return res.status(423).json({ error: `Account temporarily locked due to failed attempts. Try again in ${remainingMin} minute(s).` });
+    }
+
     const valid = await bcrypt.compare(password, admin.passwordHash);
-    if (!valid) return res.status(401).json({ error: "Invalid credentials" });
-    await prisma.admin.update({ where: { id: admin.id }, data: { lastLoginAt: new Date() } });
-    const accessToken = signAccess({ id: admin.id, role: admin.role });
+    if (!valid) {
+      const attempts = admin.failedLoginAttempts + 1;
+      let lockedUntil = null;
+      if (attempts >= 5) {
+        lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 min lock after 5 attempts
+      } else if (attempts >= 3) {
+        lockedUntil = new Date(Date.now() + 5 * 60 * 1000); // 5 min cooldown after 3 attempts
+      }
+
+      await prisma.admin.update({
+        where: { id: admin.id },
+        data: { failedLoginAttempts: attempts, lockedUntil }
+      });
+
+      if (attempts >= 5) {
+        return res.status(423).json({ error: "Account temporarily locked due to failed attempts. Try again in 30 minutes." });
+      } else if (attempts >= 3) {
+        return res.status(429).json({ error: "Too many failed attempts. Cooldown active. Try again in 5 minutes." });
+      }
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Reset lock/attempts on successful login
+    await prisma.admin.update({
+      where: { id: admin.id },
+      data: { lastLoginAt: new Date(), failedLoginAttempts: 0, lockedUntil: null }
+    });
+
+    // Send SMS Notification Alert
+    if (admin.number) {
+      const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+      sendSMS(admin.number, `Zupwell alert: Successful login to admin panel detected at ${timestamp}.`).catch(err => {
+        console.error("⚠️ Failed to send admin login SMS notification:", err.message);
+      });
+    }
+
+    const accessToken = signAccess(
+      { id: admin.id, role: admin.role, tokenVersion: admin.tokenVersion },
+      { expiresIn: "8h" }
+    );
+
     res.json({ accessToken, admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role } });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Login failed" });
+    res.status(500).json({ error: "Login failed" });
+  }
+});
+
+router.get("/auth/me", authAdmin, async (req, res) => {
+  try {
+    const admin = await prisma.admin.findUnique({ where: { id: req.admin.id } });
+    if (!admin || !admin.isActive) return res.status(401).json({ error: "Unauthorized" });
+    res.json({ id: admin.id, name: admin.name, email: admin.email, role: admin.role });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch admin profile" });
   }
 });
 
@@ -161,7 +249,7 @@ router.get("/dashboard/stats", authAdmin, async (req, res) => {
       usersChange:   changePct(thisMonthUsers, lastMonthUsers),
     });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to load dashboard stats" });
+    res.status(500).json({ error: "Failed to load dashboard stats" });
   }
 });
 
@@ -198,7 +286,7 @@ router.get("/dashboard/revenue-chart", authAdmin, async (req, res) => {
       profit:  Math.round(profitMap[date]),
     })));
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to load revenue chart" });
+    res.status(500).json({ error: "Failed to load revenue chart" });
   }
 });
 
@@ -224,7 +312,7 @@ router.get("/dashboard/top-products", authAdmin, async (req, res) => {
     }));
     res.json(products);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to load top products" });
+    res.status(500).json({ error: "Failed to load top products" });
   }
 });
 
@@ -247,14 +335,24 @@ router.get("/products", validatePagination, authAdmin, async (req, res) => {
     ]);
     res.json({ products, total });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch products" });
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 
-router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), async (req, res) => {
+router.post("/products", sanitizeBody, authAdmin, requireRole("admin", "super_admin"), upload.array("images", 10), async (req, res) => {
   try {
-    const { name, sku, hsnCode = "3919", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants, flavors } = req.body;
+    const { name, sku, hsnCode = "2106", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants, flavors, nutritionFacts } = req.body;
     const slug = slugify(name, { lower: true, strict: true });
+
+    let parsedNutrition = null;
+    if (nutritionFacts) {
+      try {
+        parsedNutrition = typeof nutritionFacts === "string" ? JSON.parse(nutritionFacts) : nutritionFacts;
+      } catch (e) {
+        console.error("Failed to parse nutritionFacts in POST:", e);
+      }
+    }
+
     const product = await prisma.$transaction(async tx => {
       const p = await tx.product.create({
         data: {
@@ -262,6 +360,7 @@ router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), as
           categoryId: categoryId ? Number(categoryId) : null,
           basePrice: parseFloat(basePrice), sellingPrice: parseFloat(sellingPrice), discountPercent: parseFloat(discountPercent),
           description, shortDescription, metaTitle, metaDescription, flavors,
+          nutritionFacts: parsedNutrition,
           isActive: isActive === "true" || isActive === true,
           isFeatured: isFeatured === "true" || isFeatured === true,
         },
@@ -283,15 +382,15 @@ router.post("/products", sanitizeBody, authAdmin, upload.array("images", 10), as
     res.status(201).json(product);
   } catch (err) {
     console.error("Create product error:", err);
-    res.status(500).json({ error: err.message || "Failed to create product" });
+    res.status(500).json({ error: "Failed to create product" });
   }
 });
 
 // BUG FIX: Added try/catch so errors return proper response instead of crashing server
-router.put("/products/:id", sanitizeBody, authAdmin, upload.array("images", 10), async (req, res) => {
+router.put("/products/:id", sanitizeBody, authAdmin, requireRole("admin", "super_admin"), upload.array("images", 10), async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, flavors, ...rest } = req.body;
+    const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, flavors, nutritionFacts, ...rest } = req.body;
     const data = { ...rest };
     if (name)             { data.name = name; data.slug = slugify(name, { lower: true, strict: true }); }
     if (isActive !== undefined) data.isActive = isActive === "true" || isActive === true;
@@ -301,6 +400,17 @@ router.put("/products/:id", sanitizeBody, authAdmin, upload.array("images", 10),
     if (discountPercent !== undefined) data.discountPercent = parseFloat(discountPercent);
     if (categoryId)       data.categoryId = Number(categoryId);
     if (flavors !== undefined) data.flavors = flavors;
+    if (nutritionFacts !== undefined) {
+      if (nutritionFacts === "" || nutritionFacts === null) {
+        data.nutritionFacts = null;
+      } else {
+        try {
+          data.nutritionFacts = typeof nutritionFacts === "string" ? JSON.parse(nutritionFacts) : nutritionFacts;
+        } catch (e) {
+          console.error("Failed to parse nutritionFacts in PUT:", e);
+        }
+      }
+    }
 
     const product = await prisma.product.update({ where: { id }, data });
     if (req.files?.length) {
@@ -310,18 +420,53 @@ router.put("/products/:id", sanitizeBody, authAdmin, upload.array("images", 10),
     }
     res.json(product);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update product" });
+    res.status(500).json({ error: "Failed to update product" });
   }
 });
 
-// SOFT DELETE — sets isActive: false, does NOT remove from database
-// This preserves order history, invoices and all related data
-router.delete("/products/:id", authAdmin, async (req, res) => {
+// DELETE product image by ID
+router.delete("/products/images/:imageId", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
-    await prisma.product.update({ where: { id: Number(req.params.id) }, data: { isActive: false } });
-    res.json({ message: "Product deactivated" });
+    const imageId = Number(req.params.imageId);
+    const img = await prisma.productImage.findUnique({ where: { id: imageId } });
+    if (!img) return res.status(404).json({ error: "Image not found" });
+
+    if (img.isPrimary) {
+      const nextImg = await prisma.productImage.findFirst({
+        where: { productId: img.productId, id: { not: imageId } }
+      });
+      if (nextImg) {
+        await prisma.productImage.update({ where: { id: nextImg.id }, data: { isPrimary: true } });
+      }
+    }
+
+    await prisma.productImage.delete({ where: { id: imageId } });
+    res.json({ message: "Image deleted successfully" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to deactivate product" });
+    res.status(500).json({ error: "Failed to delete image" });
+  }
+});
+
+// Try hard delete first, fall back to soft deactivate if referenced in orderItems
+router.delete("/products/:id", authAdmin, requireRole("super_admin"), async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    await prisma.$transaction(async (tx) => {
+      await tx.stockMovement.deleteMany({ where: { productId: id } });
+      await tx.inventory.deleteMany({ where: { productId: id } });
+      await tx.review.deleteMany({ where: { productId: id } });
+      await tx.productVariant.deleteMany({ where: { productId: id } });
+      await tx.productImage.deleteMany({ where: { productId: id } });
+      await tx.product.delete({ where: { id } });
+    });
+    res.json({ message: "Product deleted completely" });
+  } catch (err) {
+    try {
+      await prisma.product.update({ where: { id: Number(req.params.id) }, data: { isActive: false } });
+      res.json({ message: "Product is referenced in orders, deactivated instead" });
+    } catch (innerErr) {
+      res.status(500).json({ error: innerErr.message || "Failed to delete product" });
+    }
   }
 });
 
@@ -332,11 +477,11 @@ router.get("/categories", authAdmin, async (req, res) => {
     const cats = await prisma.category.findMany({ orderBy: { sortOrder: "asc" }, include: { _count: { select: { products: true } }, children: true } });
     res.json(cats);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch categories" });
+    res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
 
-router.post("/categories", authAdmin, async (req, res) => {
+router.post("/categories", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
     const { name, description, parentId, isActive = true } = req.body;
     if (!name) return res.status(400).json({ error: "Category name is required" });
@@ -344,11 +489,11 @@ router.post("/categories", authAdmin, async (req, res) => {
     const cat = await prisma.category.create({ data: { name, slug, description, parentId: parentId ? Number(parentId) : null, isActive } });
     res.status(201).json(cat);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to create category" });
+    res.status(500).json({ error: "Failed to create category" });
   }
 });
 
-router.put("/categories/:id", authAdmin, async (req, res) => {
+router.put("/categories/:id", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
     const { name, ...rest } = req.body;
     const data = { ...rest };
@@ -357,17 +502,23 @@ router.put("/categories/:id", authAdmin, async (req, res) => {
     const cat = await prisma.category.update({ where: { id: Number(req.params.id) }, data });
     res.json(cat);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update category" });
+    res.status(500).json({ error: "Failed to update category" });
   }
 });
 
-// SOFT DELETE — sets isActive: false, does NOT remove from database
-router.delete("/categories/:id", authAdmin, async (req, res) => {
+// Try hard delete first, fall back to soft deactivate if referenced in products
+router.delete("/categories/:id", authAdmin, requireRole("super_admin"), async (req, res) => {
   try {
-    await prisma.category.update({ where: { id: Number(req.params.id) }, data: { isActive: false } });
-    res.json({ message: "Category deactivated" });
+    const id = Number(req.params.id);
+    await prisma.category.delete({ where: { id } });
+    res.json({ message: "Category deleted completely" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to deactivate category" });
+    try {
+      await prisma.category.update({ where: { id }, data: { isActive: false } });
+      res.json({ message: "Category has product references, deactivated instead" });
+    } catch (innerErr) {
+      res.status(500).json({ error: innerErr.message || "Failed to delete category" });
+    }
   }
 });
 
@@ -377,7 +528,7 @@ router.get("/inventory", authAdmin, async (req, res) => {
     const inv = await prisma.inventory.findMany({ include: { product: { select: { id: true, name: true, sku: true, isActive: true } }, variant: true }, orderBy: { qtyInStock: "asc" } });
     res.json(inv);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch inventory" });
+    res.status(500).json({ error: "Failed to fetch inventory" });
   }
 });
 
@@ -406,7 +557,7 @@ router.post("/inventory/movement", authAdmin, async (req, res) => {
     }
     res.json({ message: "Stock updated", qtyBefore, qtyAfter });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update stock" });
+    res.status(500).json({ error: "Failed to update stock" });
   }
 });
 
@@ -415,7 +566,7 @@ router.get("/inventory/movements", authAdmin, async (req, res) => {
     const movements = await prisma.stockMovement.findMany({ orderBy: { createdAt: "desc" }, take: 100, include: { product: { select: { name: true } }, admin: { select: { name: true } } } });
     res.json(movements);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch movements" });
+    res.status(500).json({ error: "Failed to fetch movements" });
   }
 });
 
@@ -433,7 +584,7 @@ router.get("/orders", validatePagination, authAdmin, async (req, res) => {
     ]);
     res.json({ orders, total });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch orders" });
+    res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
 
@@ -443,12 +594,12 @@ router.get("/orders/:id", authAdmin, async (req, res) => {
     if (!order) return res.status(404).json({ error: "Order not found" });
     res.json(order);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch order" });
+    res.status(500).json({ error: "Failed to fetch order" });
   }
 });
 
 // BUG FIX: Added try/catch + status validation
-router.put("/orders/:id/status", validateOrderStatus, authAdmin, async (req, res) => {
+router.put("/orders/:id/status", authAdmin, validateOrderStatus, async (req, res) => {
   try {
     const { status } = req.body;
     if (!status || !VALID_ORDER_STATUSES.includes(status)) {
@@ -457,7 +608,7 @@ router.put("/orders/:id/status", validateOrderStatus, authAdmin, async (req, res
     const order = await prisma.order.update({ where: { id: Number(req.params.id) }, data: { status } });
     res.json(order);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update order status" });
+    res.status(500).json({ error: "Failed to update order status" });
   }
 });
 
@@ -469,7 +620,7 @@ router.get("/invoices", authAdmin, async (req, res) => {
     const invoices = await prisma.invoice.findMany({ where, orderBy: { createdAt: "desc" }, include: { order: { include: { user: { select: { name: true } } } } } });
     res.json(invoices);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch invoices" });
+    res.status(500).json({ error: "Failed to fetch invoices" });
   }
 });
 
@@ -478,7 +629,7 @@ router.put("/invoices/:id/cancel", authAdmin, async (req, res) => {
     const inv = await prisma.invoice.update({ where: { id: Number(req.params.id) }, data: { status: "cancelled" } });
     res.json(inv);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to cancel invoice" });
+    res.status(500).json({ error: "Failed to cancel invoice" });
   }
 });
 
@@ -493,7 +644,7 @@ router.get("/users", authAdmin, async (req, res) => {
     ]);
     res.json({ users, total });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch users" });
+    res.status(500).json({ error: "Failed to fetch users" });
   }
 });
 
@@ -504,17 +655,17 @@ router.get("/users/:id", authAdmin, async (req, res) => {
     const { passwordHash, ...safe } = user;
     res.json(safe);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch user" });
+    res.status(500).json({ error: "Failed to fetch user" });
   }
 });
 
 // SOFT DELETE user — deactivate instead of remove from DB
-router.delete("/users/:id", authAdmin, async (req, res) => {
+router.delete("/users/:id", authAdmin, requireRole("super_admin"), async (req, res) => {
   try {
     await prisma.user.update({ where: { id: Number(req.params.id) }, data: { isActive: false } });
     res.json({ message: "User deactivated" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to deactivate user" });
+    res.status(500).json({ error: "Failed to deactivate user" });
   }
 });
 
@@ -525,11 +676,11 @@ router.get("/coupons", authAdmin, async (req, res) => {
     const coupons = await prisma.coupon.findMany({ orderBy: { createdAt: "desc" } });
     res.json(coupons);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch coupons" });
+    res.status(500).json({ error: "Failed to fetch coupons" });
   }
 });
 
-router.post("/coupons", authAdmin, async (req, res) => {
+router.post("/coupons", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
     const { code, discountType, discountValue, minOrderValue, maxDiscount, usageLimit, startDate, endDate, description, isActive = true } = req.body;
     if (!code || !discountType || !discountValue) return res.status(400).json({ error: "code, discountType and discountValue are required" });
@@ -549,12 +700,12 @@ router.post("/coupons", authAdmin, async (req, res) => {
     });
     res.status(201).json(coupon);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to create coupon" });
+    res.status(500).json({ error: "Failed to create coupon" });
   }
 });
 
 // BUG FIX: Added try/catch + explicit field updates (not raw req.body) to prevent type errors
-router.put("/coupons/:id", authAdmin, async (req, res) => {
+router.put("/coupons/:id", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
     const { code, discountType, discountValue, minOrderValue, maxDiscount, usageLimit, startDate, endDate, description, isActive } = req.body;
     const data = {};
@@ -571,18 +722,23 @@ router.put("/coupons/:id", authAdmin, async (req, res) => {
     const coupon = await prisma.coupon.update({ where: { id: Number(req.params.id) }, data });
     res.json(coupon);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update coupon" });
+    res.status(500).json({ error: "Failed to update coupon" });
   }
 });
 
-// SOFT DELETE — deactivate coupon instead of removing from DB
-// Prevents bugs where orders that used this coupon lose their reference
-router.delete("/coupons/:id", authAdmin, async (req, res) => {
+// Try hard delete first, fall back to soft deactivate if referenced in orders
+router.delete("/coupons/:id", authAdmin, requireRole("super_admin"), async (req, res) => {
   try {
-    await prisma.coupon.update({ where: { id: Number(req.params.id) }, data: { isActive: false } });
-    res.json({ message: "Coupon deactivated" });
+    const id = Number(req.params.id);
+    await prisma.coupon.delete({ where: { id } });
+    res.json({ message: "Coupon deleted completely" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to deactivate coupon" });
+    try {
+      await prisma.coupon.update({ where: { id }, data: { isActive: false } });
+      res.json({ message: "Coupon is referenced in orders, deactivated instead" });
+    } catch (innerErr) {
+      res.status(500).json({ error: innerErr.message || "Failed to delete coupon" });
+    }
   }
 });
 
@@ -592,27 +748,26 @@ router.get("/reviews", authAdmin, async (req, res) => {
     const reviews = await prisma.review.findMany({ orderBy: { createdAt: "desc" }, include: { user: { select: { name: true } }, product: { select: { name: true } } } });
     res.json(reviews);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch reviews" });
+    res.status(500).json({ error: "Failed to fetch reviews" });
   }
 });
 
-router.put("/reviews/:id/approve", authAdmin, async (req, res) => {
+router.put("/reviews/:id/approve", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
   try {
     const r = await prisma.review.update({ where: { id: Number(req.params.id) }, data: { isApproved: true } });
     res.json(r);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to approve review" });
+    res.status(500).json({ error: "Failed to approve review" });
   }
 });
 
-// SOFT DELETE — hide review (isApproved: false) instead of deleting from DB
-// Prevents broken foreign key references if review is tied to product ratings
-router.delete("/reviews/:id", authAdmin, async (req, res) => {
+// Hard delete reviews completely from the database
+router.delete("/reviews/:id", authAdmin, requireRole("super_admin"), async (req, res) => {
   try {
-    await prisma.review.update({ where: { id: Number(req.params.id) }, data: { isApproved: false } });
-    res.json({ message: "Review hidden" });
+    await prisma.review.delete({ where: { id: Number(req.params.id) } });
+    res.json({ message: "Review deleted completely" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to hide review" });
+    res.status(500).json({ error: "Failed to delete review" });
   }
 });
 
@@ -622,11 +777,11 @@ router.get("/settings", authAdmin, async (req, res) => {
     const settings = await prisma.setting.findMany();
     res.json(settings);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch settings" });
+    res.status(500).json({ error: "Failed to fetch settings" });
   }
 });
 
-router.put("/settings", authAdmin, async (req, res) => {
+router.put("/settings", authAdmin, requireRole("super_admin"), async (req, res) => {
   try {
     const updates = Object.entries(req.body);
     await Promise.all(updates.map(([key, value]) =>
@@ -634,7 +789,17 @@ router.put("/settings", authAdmin, async (req, res) => {
     ));
     res.json({ message: "Settings updated" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to update settings" });
+    res.status(500).json({ error: "Failed to update settings" });
+  }
+});
+
+// Upload setting image (logo, founder photo, etc.) to Cloudinary
+router.post("/settings/upload", authAdmin, requireRole("super_admin"), upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    res.json({ url: req.file.path });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to upload setting image" });
   }
 });
 
@@ -644,7 +809,7 @@ router.get("/notifications", authAdmin, async (req, res) => {
     const notifications = await prisma.notification.findMany({ orderBy: { createdAt: "desc" }, take: 50 });
     res.json(notifications);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch notifications" });
+    res.status(500).json({ error: "Failed to fetch notifications" });
   }
 });
 
@@ -655,7 +820,7 @@ router.put("/notifications/read-all", authAdmin, async (req, res) => {
     await prisma.notification.updateMany({ data: { isRead: true } });
     res.json({ message: "All marked read" });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to mark all read" });
+    res.status(500).json({ error: "Failed to mark all read" });
   }
 });
 
@@ -664,7 +829,7 @@ router.put("/notifications/:id/read", authAdmin, async (req, res) => {
     const n = await prisma.notification.update({ where: { id: Number(req.params.id) }, data: { isRead: true } });
     res.json(n);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to mark notification read" });
+    res.status(500).json({ error: "Failed to mark notification read" });
   }
 });
 
@@ -674,7 +839,76 @@ router.get("/gst-rates", authAdmin, async (req, res) => {
     const rates = await prisma.gstRate.findMany();
     res.json(rates);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to fetch GST rates" });
+    res.status(500).json({ error: "Failed to fetch GST rates" });
+  }
+});
+
+const crypto = require("crypto");
+const { sendPasswordReset } = require("../utils/mailer");
+
+// POST /api/admin/auth/forgot-password
+router.post("/auth/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    const cleanEmail = email.toLowerCase().trim();
+    const admin = await prisma.admin.findUnique({ where: { email: cleanEmail } });
+    if (!admin || !admin.isActive) {
+      return res.json({ message: "If your email is registered, you will receive a reset link shortly." });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await prisma.passwordResetToken.create({
+      data: { email: cleanEmail, tokenHash, isAdmin: true, expiresAt }
+    });
+
+    await sendPasswordReset(cleanEmail, token, true);
+
+    res.json({ message: "If your email is registered, you will receive a reset link shortly." });
+  } catch (err) {
+    console.error("Admin forgot password error:", err);
+    res.status(500).json({ error: "Failed to process request" });
+  }
+});
+
+// POST /api/admin/auth/reset-password
+router.post("/auth/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).json({ error: "Token and password are required" });
+    }
+    if (password.length < 12) {
+      return res.status(400).json({ error: "Password must be at least 12 characters long" });
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const record = await prisma.passwordResetToken.findFirst({
+      where: { tokenHash, isAdmin: true, expiresAt: { gt: new Date() } }
+    });
+
+    if (!record) {
+      return res.status(400).json({ error: "Invalid or expired token" });
+    }
+
+    const newPasswordHash = await bcrypt.hash(password, 10);
+
+    await prisma.$transaction([
+      prisma.admin.update({
+        where: { email: record.email },
+        data: { passwordHash: newPasswordHash, failedLoginAttempts: 0, lockedUntil: null, tokenVersion: { increment: 1 } }
+      }),
+      prisma.passwordResetToken.delete({ where: { id: record.id } })
+    ]);
+
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    console.error("Admin reset password error:", err);
+    res.status(500).json({ error: "Failed to reset password" });
   }
 });
 

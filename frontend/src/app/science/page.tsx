@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { CertLogo } from "@/components/storefront/CertLogos";
 import { FlaskConical, Shield, Leaf, Droplets, Award, CheckCircle, Microscope, Package, Globe, Cylinder, Beaker, GlassWater, Waves, Sparkles, Activity, Zap, TestTube } from "lucide-react";
-import { fetchSettings } from "@/lib/useSettings";
+import { useSettings } from "@/lib/useSettings";
 import { fadeUp } from "@/lib/utils";
 
 const D: Record<string, string> = {
@@ -20,13 +21,13 @@ const D: Record<string, string> = {
   science_process2_desc: "Our proprietary effervescent formula dissolves completely in water, unlocking fast nutrient absorption. Maximum bioavailability — every single time.",
   science_cert_badge: "Quality & Safety",
   science_cert_title: "Certified & Verified",
-  science_cert_desc: "Every single product is manufactured in state-of-the-art facilities following international safety protocols.",
+  science_cert_subtext: "Every single product is manufactured in state-of-the-art facilities following international safety protocols.",
   science_cert1_title: "GMP & ISO Certified",
   science_cert1_desc: "Manufactured in WHO-GMP and ISO certified facilities. International standards of hygiene and quality — followed without compromise.",
   science_cert2_title: "FSSAI Approved",
   science_cert2_desc: "Every Zupwell product is manufactured and tested under the strict regulations of FSSAI — India's food safety authority.",
   science_cert3_title: "Lab Tested Batches",
-  science_cert3_desc: "Each batch is microbiologically tested before being released into the market. 100% verified. 100% safe.",
+  science_cert3_desc: "Each batch is microbiologically tested before being released into the market. 100% verified and safe.",
   science_clean_badge: "Clean Label",
   science_clean_title: "100% Transparent\nZero Compromise",
   science_clean_desc: "We believe you have the right to know exactly what goes into your body. That's why we have a clean-label promise.",
@@ -55,17 +56,16 @@ const s = (settings: Record<string, string>, key: string) =>
   settings[key] || D[key] || "";
 
 export default function SciencePage() {
-  const [settings, setSettings] = useState<Record<string, string>>({});
+  const { raw: settings, loading } = useSettings();
 
-  useEffect(() => {
-    fetchSettings().then(setSettings).catch(() => {});
-    const onBust = (e: StorageEvent) => {
-      if (e.key === "zupwell-settings-bust")
-        fetchSettings().then(setSettings).catch(() => {});
-    };
-    window.addEventListener("storage", onBust);
-    return () => window.removeEventListener("storage", onBust);
-  }, []);
+  if (loading) return (
+    <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
+      <Navbar />
+      <div className="flex items-center justify-center pt-40">
+        <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
+      </div>
+    </main>
+  );
 
   const manufacturing = [
     {
@@ -145,45 +145,16 @@ export default function SciencePage() {
       <Navbar />
 
       {/* ── HERO ── */}
-      <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-        {/* futuristic background mesh */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `
-              radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.15) 0%, transparent 45%),
-              radial-gradient(circle at 80% 70%, rgba(12, 30, 57, 0.6) 0%, transparent 50%),
-              linear-gradient(180deg, rgba(5, 17, 36, 0.8) 0%, #051124 100%)
-            `,
-          }}
-        />
-        {/* cybernetic grid lines overlay */}
-        <div 
-          className="absolute inset-0 opacity-15 pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(rgba(255, 92, 0, 0.15) 1px, transparent 1px), linear-gradient(to right, rgba(255, 92, 0, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 92, 0, 0.05) 1px, transparent 1px)",
-            backgroundSize: "40px 40px, 40px 40px, 40px 40px",
-            backgroundPosition: "center center"
-          }}
-        />
-        {/* floating accent rings */}
-        <div
-          className="absolute top-24 right-20 w-64 h-64 rounded-full opacity-20 pointer-events-none animate-pulse"
-          style={{ border: "2px solid #FF5C00", transform: "rotate(20deg)" }}
-        />
-        <div
-          className="absolute -bottom-10 -left-16 w-96 h-96 rounded-full opacity-10 pointer-events-none"
-          style={{ border: "3px dashed #FF5C00" }}
-        />
-
+      <section className="relative pt-32 pb-24 px-6 overflow-hidden" style={{ background: "linear-gradient(180deg, #051124 0%, #0C1E39 100%)" }}>
         <div className="relative mx-auto max-w-4xl text-center">
           <motion.div {...fadeUp(0)}>
             <span
-              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-6"
+              className="inline-flex items-center gap-2 font-bold uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-6"
               style={{
                 background: "#0C1E39",
                 color: "var(--or)",
                 border: "1px solid #0C1E39",
+                fontSize: "14px",
               }}
             >
               <FlaskConical size={12} /> {s(settings, "science_hero_badge")}
@@ -201,42 +172,62 @@ export default function SciencePage() {
       </section>
 
       {/* ── LAB SHOWCASE GALLERY ── */}
-      <section className="py-12 px-6 mx-auto max-w-7xl">
+      <section className="pt-12 pb-6 px-6 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <motion.div 
             {...fadeUp(0.1)} 
-            className="group relative rounded-3xl overflow-hidden aspect-[16/10] border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
+            className="group rounded-3xl overflow-hidden border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
+            style={{ background: "#0C1E39", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}
           >
-            <img 
-              src="/assets/laboratory_work.png" 
-              alt="Laboratory work featuring researchers" 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#051124]/90 via-transparent to-transparent flex flex-col justify-end p-6">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#FF5C00] mb-1">R&D Facilities</span>
-              <h3 className="text-xl font-black text-white leading-tight">Advanced Formulations Lab</h3>
+            <div className="relative aspect-[16/10] overflow-hidden">
+              <Image 
+                src="/assets/laboratory_work.png" 
+                alt="Laboratory work featuring researchers" 
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            </div>
+            <div className="p-6 flex flex-col">
+              <span 
+                className="text-[10px] font-black uppercase tracking-widest mb-2 self-start"
+                style={{ color: "#FF5C00" }}
+              >
+                R&D Facilities
+              </span>
+              <h3 className="text-xl font-black leading-tight" style={{ color: "#FFFFFF" }}>Advanced Formulations Lab</h3>
             </div>
           </motion.div>
 
           <motion.div 
             {...fadeUp(0.2)} 
-            className="group relative rounded-3xl overflow-hidden aspect-[16/10] border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
+            className="group rounded-3xl overflow-hidden border-2 border-[#0C1E39]/10 hover:border-[#FF5C00] transition-all duration-300"
+            style={{ background: "#0C1E39", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}
           >
-            <img 
-              src="/assets/scientists_collaborating.png" 
-              alt="Scientists collaborating on new formulations" 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#051124]/90 via-transparent to-transparent flex flex-col justify-end p-6">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#FF5C00] mb-1">Collaborative Innovation</span>
-              <h3 className="text-xl font-black text-white leading-tight">Quality Assurance & Synergy</h3>
+            <div className="relative aspect-[16/10] overflow-hidden">
+              <Image 
+                src="/assets/scientists_collaborating.png" 
+                alt="Scientists collaborating on new formulations" 
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            </div>
+            <div className="p-6 flex flex-col">
+              <span 
+                className="text-[10px] font-black uppercase tracking-widest mb-2 self-start"
+                style={{ color: "#FF5C00" }}
+              >
+                Collaborative Innovation
+              </span>
+              <h3 className="text-xl font-black leading-tight" style={{ color: "#FFFFFF" }}>Quality Assurance & Synergy</h3>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* ── MANUFACTURING EXCELLENCE ── */}
-      <section className="py-20 px-6 mx-auto max-w-7xl">
+      <section className="pt-10 pb-20 px-6 mx-auto max-w-7xl">
         <motion.div {...fadeUp(0)} className="mb-14">
           <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "var(--or)" }}>
             {s(settings, "science_process_badge")}
@@ -279,7 +270,7 @@ export default function SciencePage() {
               {s(settings, "science_cert_title")}
             </h2>
             <p className="text-white/80 mt-4 text-lg max-w-xl mx-auto">
-              {s(settings, "science_cert_desc")}
+              {s(settings, "science_cert_subtext")}
             </p>
           </motion.div>
 

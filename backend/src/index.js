@@ -1,10 +1,10 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 require("express-async-errors");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const path = require("path");
 const { startCleanupJobs } = require("./utils/cleanupJobs");
 
 const app = express();
@@ -13,16 +13,86 @@ const app = express();
 app.set("trust proxy", 1);
 
 // ── Security Headers ─────────────────────────────────
-app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "https://res.cloudinary.com", "https://i.ibb.co", "data:"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com"],
+      connectSrc: ["'self'", "https://api.razorpay.com", "https://lumberjack-cx.razorpay.com"],
+      frameSrc: ["https://api.razorpay.com", "https://checkout.razorpay.com"],
+    },
+  },
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+}));
 
 // ── CORS ─────────────────────────────────────────────
+const { networkInterfaces } = require("os");
+const nets = networkInterfaces();
+let localIp = "";
+for (const name of Object.keys(nets)) {
+  for (const net of nets[name]) {
+    const isIPv4 = net.family === "IPv4" || net.family === 4;
+    if (isIPv4 && !net.internal) {
+      localIp = net.address;
+      break;
+    }
+  }
+  if (localIp) break;
+}
+
+const allowedOrigins = [
+  "https://www.zupwell.com",
+  "https://zupwell.com",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+if (localIp) {
+  allowedOrigins.push(`http://${localIp}:3000`);
+  allowedOrigins.push(`http://${localIp}:3001`);
+  allowedOrigins.push(`http://${localIp}:3002`);
+  allowedOrigins.push(`http://${localIp}:8000`);
+}
+
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://ps5-phi.vercel.app",
-    "https://ps5-hhvf.vercel.app",
-    process.env.FRONTEND_URL,
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    // If request has no origin (like mobile apps, curl, server-to-server), allow it
+    if (!origin) return callback(null, true);
+
+    // Check if origin is in the allowed list
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+
+    // Check if the origin matches a local development pattern (localhost or private subnets)
+    try {
+      const url = new URL(origin);
+      const hostname = url.hostname;
+
+      const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+      const isPrivateIp =
+        hostname.startsWith("192.168.") ||
+        hostname.startsWith("10.") ||
+        (hostname.startsWith("172.") &&
+         (() => {
+           const parts = hostname.split(".");
+           if (parts.length !== 4) return false;
+           const second = parseInt(parts[1], 10);
+           return second >= 16 && second <= 31;
+         })());
+
+      if (isLocalhost || isPrivateIp) {
+        return callback(null, true);
+      }
+    } catch (e) {
+      // Invalid URL format
+    }
+
+    callback(null, false);
+  },
   credentials: true,
 }));
 
@@ -39,7 +109,13 @@ app.use((req, res, next) => {
 });
 
 // ── Body Parsers ─────────────────────────────────────
-app.use(express.json({ limit: "10mb" }));
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/payments/webhook") {
+    express.raw({ type: "application/json" })(req, res, next);
+  } else {
+    express.json({ limit: "10mb" })(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // ── Rate Limiting ────────────────────────────────────
@@ -52,6 +128,24 @@ app.use("/api/auth/", authLimiter);
 const adminLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 1000, message: { error: "Too many admin requests" } });
 app.use("/api/admin/", adminLimiter);
 
+const trackLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: "Too many tracking attempts. Try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/orders/track", trackLimiter);
+
+const adminAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  message: { error: "Too many login attempts. Try again in 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/admin/auth/login", adminAuthLimiter);
+
 // ── Routes ───────────────────────────────────────────
 app.use("/api/auth",       require("./routes/auth"));
 app.use("/api/products",   require("./routes/products"));
@@ -60,7 +154,13 @@ app.use("/api/orders",     require("./routes/orders"));
 app.use("/api/payments",   require("./routes/payments"));
 app.use("/api/invoices",   require("./routes/invoices"));
 app.use("/api/account",    require("./routes/account"));
+app.use("/api/cart",       require("./routes/cart"));
 app.use("/api/admin",      require("./routes/admin"));
+
+// Any admin route that doesn't match a known endpoint (or fails auth
+// inside authAdmin) should look identical to a route that doesn't
+// exist at all — never confirm the admin API surface to a prober.
+app.use("/api/admin", (req, res) => res.status(404).json({ error: "Not Found" }));
 
 // ── Public Settings ──────────────────────────────────
 app.get("/api/settings", async (req, res) => {
@@ -118,7 +218,7 @@ app.post("/api/reviews", async (req, res) => {
     res.status(201).json({ success: true, reviewId: review.id, message: "Review submitted, pending approval" });
   } catch (err) {
     console.error("Review submit error:", err);
-    res.status(500).json({ error: err.message || "Failed to submit review" });
+    res.status(500).json({ error: "Failed to submit review" });
   }
 });
 
@@ -141,45 +241,6 @@ app.get("/api/reviews/public", async (req, res) => {
   }
 });
 
-// ── Submit Review (authenticated user) ───────────────
-app.post("/api/reviews", async (req, res) => {
-  try {
-    const prisma = require("./utils/prisma");
-    const jwt = require("jsonwebtoken");
-
-    const authHeader = req.headers.authorization || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-    if (!token) return res.status(401).json({ error: "Sign in to leave a review" });
-
-    let userId;
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      userId = decoded.id;
-    } catch {
-      return res.status(401).json({ error: "Invalid or expired session" });
-    }
-
-    const { productId, rating, title, body } = req.body;
-    if (!productId || !rating || !body?.trim())
-      return res.status(400).json({ error: "Product, rating and review body are required" });
-    if (rating < 1 || rating > 5)
-      return res.status(400).json({ error: "Rating must be between 1 and 5" });
-
-    const product = await prisma.product.findUnique({ where: { id: Number(productId) } });
-    if (!product) return res.status(404).json({ error: "Product not found" });
-
-    const review = await prisma.review.upsert({
-      where: { productId_userId: { productId: Number(productId), userId } },
-      update: { rating: Number(rating), title: title || null, body: body.trim(), isApproved: false },
-      create: { productId: Number(productId), userId, rating: Number(rating), title: title || null, body: body.trim(), isApproved: false },
-    });
-
-    res.status(201).json({ success: true, reviewId: review.id, message: "Review submitted, pending approval" });
-  } catch (err) {
-    console.error("Review submit error:", err);
-    res.status(500).json({ error: err.message || "Failed to submit review" });
-  }
-});
 
 // ── Health Check ─────────────────────────────────────
 app.get("/health", (req, res) => res.json({ status: "ok", time: new Date().toISOString() }));
@@ -209,7 +270,7 @@ app.use((req, res) => {
             <h1>404</h1>
             <h2>Page not found</h2>
             <p>The page you're looking for doesn't exist.</p>
-            <a href="https://ps5-hhvf.vercel.app">Go to Zupwell ↗</a>
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}">Go to Zupwell ↗</a>
           </div>
         </body>
       </html>
@@ -238,12 +299,18 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, async () => {
-  console.log(`🚀 Zupwell API running on http://localhost:${PORT}`);
+  console.log(`\n🚀 Zupwell API running:`);
+  console.log(`   - Local:        http://localhost:${PORT}`);
+  if (localIp) {
+    console.log(`   - Network:      http://${localIp}:${PORT}`);
+  }
+  console.log(`🔒 Allowed CORS origins: ${allowedOrigins.join(", ")}\n`);
   try {
     const prisma = require("./utils/prisma");
     const defaultSettings = [
       { key: "site_name",        value: "Zupwell",                    group: "general" },
-      { key: "site_email",       value: "info@zupwell.com",           group: "general" },
+      { key: "site_email",       value: "support@zupwell.com",        group: "general" },
+      { key: "razorpay_key_id",  value: "rzp_test_TAzKpeWz0fQgqu",    group: "general" },
       { key: "site_phone",       value: "+91 6355466208",             group: "general" },
       { key: "site_address",     value: "A-102 Adarsh Lifestyle, New India Colony, Ahmedabad, Gujarat - 382350", group: "general" },
       { key: "site_gstin",       value: "24XXXXXXXXXXXXX",            group: "general" },
@@ -255,7 +322,7 @@ app.listen(PORT, async () => {
       { key: "social_linkedin",  value: "",                           group: "social" },
       { key: "contact_whatsapp",      value: "",                      group: "contact" },
       { key: "contact_support_email", value: "support@zupwell.com",   group: "contact" },
-      { key: "contact_info_email",    value: "info@zupwell.com",      group: "contact" },
+      { key: "contact_info_email",    value: "support@zupwell.com",   group: "contact" },
       { key: "contact_instagram",     value: "",                      group: "contact" },
       { key: "contact_facebook",      value: "",                      group: "contact" },
       { key: "hero_badge",       value: "Ahmedabad\'s #1 Health Supplement Store", group: "home" },
@@ -290,7 +357,7 @@ app.listen(PORT, async () => {
       { key: "about_brand_story", value: "In today\'s fast-paced life, fatigue, dehydration, and lack of energy hold us back. That\'s exactly what Zupwell was started to solve.", group: "about" },
       { key: "about_mission",     value: "Health, which is not boring! We believe health supplements should be both effective and delicious.", group: "about" },
       { key: "about_vision",      value: "To be India\'s leading name in Health Supplements, recognized for quality, scientific integrity and commitment to well-being.", group: "about" },
-      { key: "about_future",      value: "Our electrolyte formula is just the beginning. Innovation is in our DNA.", group: "about" },
+      { key: "about_future",      value: "Our electrolyte formula is just the beginning. At Zupwell, we are committed to becoming a leader in health supplements. We are currently in the research and development phase for a diverse pipeline of wellness solutions. Including,\\n\\n→ Daily multivitamins and immune boosters.\\n→ Energy and focus formulations.\\n→ Specialized recovery blends for post-operative care.\\n\\nWe are constantly looking for new ways to make high-quality nutrition more effective and easier to consume.", group: "about" },
       { key: "about_why1_title",  value: "Science-Backed",   group: "about" },
       { key: "about_why1_desc",   value: "Formulas grounded in clinical research.",                group: "about" },
       { key: "about_why2_title",  value: "Quality First",    group: "about" },
@@ -298,9 +365,28 @@ app.listen(PORT, async () => {
       { key: "about_why3_title",  value: "Consumer Centric", group: "about" },
       { key: "about_why3_desc",   value: "Customer convenience and choice are our top priorities.", group: "about" },
       { key: "free_shipping_threshold", value: "500", group: "orders" },
-      { key: "gst_rate",                 value: "2.5",  group: "orders" },
+      { key: "gst_rate",                 value: "5.0",  group: "orders" },
       { key: "default_shipping_charge", value: "50",  group: "orders" },
       { key: "order_prefix",            value: "ZW",  group: "orders" },
+
+      // Shop Page Settings
+      { key: "shop_badge",              value: "⚡ FUEL YOUR HUSTLE",        group: "shop" },
+      { key: "shop_title",              value: "Shop Product",               group: "shop" },
+      { key: "shop_subtext",            value: "Performance-driven nutrition.", group: "shop" },
+
+      // Certifications Page Settings
+      { key: "cert_fssai_title",        value: "Food Safety and Standards Authority of India", group: "certifications" },
+      { key: "cert_fssai_desc",         value: "Licensed under FSSAI regulations. This ensures our manufacturing practices, ingredient safety, and packaging standards comply fully with national food safety guidelines.", group: "certifications" },
+      { key: "cert_fssai_file",         value: "/fssai.png", group: "certifications" },
+      { key: "cert_gmp_title",          value: "Good Manufacturing Practices", group: "certifications" },
+      { key: "cert_gmp_desc",           value: "WHO-GMP compliant manufacturing processes. This guarantees that all products are consistently produced and controlled according to international quality standards.", group: "certifications" },
+      { key: "cert_gmp_file",           value: "/gmp.png", group: "certifications" },
+      { key: "cert_iso_title",          value: "ISO 9001:2015 Certification", group: "certifications" },
+      { key: "cert_iso_desc",           value: "ISO 9001:2015 Certified facility. We adhere to rigorous quality management system (QMS) protocols, ensuring safety, reliability, and continuous improvement across all stages of production.", group: "certifications" },
+      { key: "cert_iso_file",           value: "/iso.png", group: "certifications" },
+      { key: "cert_haccp_title",         value: "Hazard Analysis Critical Control Point", group: "certifications" },
+      { key: "cert_haccp_desc",          value: "HACCP Certified system. A systematic preventive approach to food safety from biological, chemical, and physical hazards in production processes.", group: "certifications" },
+      { key: "cert_haccp_file",          value: "/haccp.png", group: "certifications" },
 
       // Science Page Settings
       { key: "science_hero_badge", value: "Science & Quality", group: "science" },
@@ -368,13 +454,38 @@ app.listen(PORT, async () => {
       { key: "about_why_subtitle", value: "Three reasons our customers never look back", group: "about" },
       { key: "about_future_title", value: "The Future of Zupwell", group: "about" },
       { key: "about_cta_title", value: "Ready to fuel your hustle?", group: "about" },
+      { key: "about_punchline",         value: "We don't just sell supplements; we fuel your hustle.", group: "about" },
+      { key: "about_description",       value: "Zupwell was born with the aim of maintaining health and strength in the modern lifestyle. We create health supplements that are easy to take and effective through the fusion of science and taste. Quality is our mantra.", group: "about" },
+      { key: "about_why_special_json", value: "[{\"title\":\"Scientific Formula\",\"desc\":\"A fusion of science and taste.\"},{\"title\":\"Less Sugar\",\"desc\":\"There is sweetness, but no guilt.\"},{\"title\":\"Instant Absorption\",\"desc\":\"Rocket-like speed, instant action.\"},{\"title\":\"Pocket Friendly\",\"desc\":\"It even fits in your jeans pocket.\"},{\"title\":\"Best Flavour\",\"desc\":\"Absolutely fresh, as if straight from the garden.\"}]", group: "about" },
+      { key: "about_pillars_json", value: "[{\"title\":\"Daily Wellness Support\",\"desc\":\"Helps support hydration, immunity, and overall well-being so you can perform at your best every day.\"},{\"title\":\"Fast Performance\",\"desc\":\"Quick-dissolving, fast-absorbing formula built for modern, active lifestyles.\"},{\"title\":\"Science-Backed Formula\",\"desc\":\"Powered by clinically researched ingredients for trusted daily nutrition.\"},{\"title\":\"Clean & Pure\",\"desc\":\"No unnecessary fillers or artificial junk—only quality ingredients your body needs.\"}]", group: "about" },
+      { key: "about_future_pipeline_json", value: "[\"Daily multivitamins & immune boosters\",\"Energy and focus formulations\",\"Specialized recovery blends\"]", group: "about" },
+
+      // Contact Page Settings
+      { key: "contact_hero_badge",      value: "Contact Us", group: "contact" },
+      { key: "contact_hero_title",      value: "Got Questions?\nWe've Got Answers!", group: "contact" },
+      { key: "contact_hero_subtext",    value: "Reach out to us 9 AM to 6 PM — we're always happy to help.", group: "contact" },
+      { key: "contact_form_badge",      value: "Grow with Zupwell", group: "contact" },
+      { key: "contact_form_title",      value: "Distributor Inquiry", group: "contact" },
+      { key: "contact_form_subtext",    value: "Interested in partnering with us? Fill in your details and let's do business!", group: "contact" },
+      { key: "contact_form_footer",     value: "We typically respond within 24 hours on business days.", group: "contact" },
+
+      // Home Page Sections
+      { key: "home_blog_title",         value: "From Our Blog", group: "home" },
+      { key: "home_blog_subtext",       value: "Science-backed articles to fuel your health journey", group: "home" },
+      { key: "home_cta_title",          value: "Join the Zupwell Gang", group: "home" },
+      { key: "home_cta_subtext",        value: "Create a free account to access exclusive pricing, personalised recommendations, and your complete order history.", group: "home" },
+
+      // Certifications Page Settings
+      { key: "cert_page_title",         value: "Our Certifications Reflecting Quality You Can Trust", group: "certifications" },
+      { key: "cert_page_subtitle",      value: "Backed by FSSAI & Government Certifications for Uncompromised Quality and Safety.", group: "certifications" },
+      { key: "certifications_list_json", value: "[{\"label\":\"Trade Mark\",\"title\":\"Certificate of Registration of Trade Mark\",\"desc\":\"Our brand name and logo are registered trademarks under the Trade Marks Act, 1999, representing our authentic identity and quality promise.\",\"fileUrl\":\"/assets/trademark.png\"},{\"label\":\"IEC Code\",\"title\":\"Importer Exporter Code\",\"desc\":\"Issued by the Director General of Foreign Trade (DGFT), Ministry of Commerce and Industry, Government of India, enabling global sourcing and operations.\",\"fileUrl\":\"/assets/iec.png\"},{\"label\":\"FSSAI\",\"title\":\"Food Safety and Standards Authority of India Central License\",\"desc\":\"Central License under FSS Act, 2006, ensuring our manufacturing, storage, and distribution practices adhere to strict national hygiene and safety standards.\",\"fileUrl\":\"/fssai.png\"},{\"label\":\"GST\",\"title\":\"Goods and Services Tax Registration Certificate\",\"desc\":\"Government of India registration certificate confirming compliancy and active tax status for transparent and regulated operations.\",\"fileUrl\":\"/assets/gst.png\"}]", group: "certifications" },
 
       // Legal Policies Settings
       { key: "policy_privacy_badge", value: "Legal", group: "legal" },
       { key: "policy_privacy_title", value: "Privacy Policy", group: "legal" },
-      { key: "policy_privacy_subtitle", value: "We respect your privacy and are committed to protecting your personal data.", group: "legal" },
-      { key: "policy_privacy_updated", value: "April 2026", group: "legal" },
-      { key: "policy_privacy_sections_json", value: "[{\"title\":\"1. Information We Collect\",\"body\":\"We collect information you provide directly to us, such as your name, email address, phone number, and shipping address when you create an account or place an order. We also collect payment information, though we do not store card details directly — these are handled by our payment partners (Razorpay).\"},{\"title\":\"2. How We Use Your Information\",\"body\":[\"Process orders and payments\",\"Send order confirmations and GST invoices\",\"Provide customer support\",\"Send promotional communications (with your consent)\",\"Improve our products and services\",\"Comply with legal obligations including GST filing\"]},{\"title\":\"3. Sharing Your Information\",\"body\":\"We do not sell or rent your personal information to third parties. We may share your information with shipping partners to deliver your orders, payment processors to complete transactions, and government authorities as required by law (e.g., GST compliance).\"},{\"title\":\"4. Data Security\",\"body\":\"We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. All data is transmitted over SSL-encrypted connections.\"},{\"title\":\"5. Cookies\",\"body\":\"We use cookies to maintain your session, remember your cart, and understand how you use our website. You can disable cookies in your browser settings, though this may affect some site functionality.\"},{\"title\":\"6. Your Rights\",\"body\":\"You have the right to access, correct, or delete your personal information. You may also opt out of marketing communications at any time. To exercise these rights, contact us at info@zupwell.com.\"},{\"title\":\"7. Contact Us\",\"body\":\"If you have any questions about this Privacy Policy, please contact us at support@zupwell.com.\"}]", group: "legal" },
+      { key: "policy_privacy_subtitle", value: "At Zupwell, we value your trust and are committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, share, and safeguard your personal information when you visit our website, create an account, purchase our products, or interact with our services.\n\nBy accessing or using our website, you agree to the practices described in this Privacy Policy.", group: "legal" },
+      { key: "policy_privacy_updated", value: "Last Updated: April 2026", group: "legal" },
+      { key: "policy_privacy_sections_json", value: "[{\"title\":\"1. Information We Collect\",\"body\":\"We may collect the following types of information:\\n\\nPersonal Information:\\n→ Full name\\n→ Email address\\n→ Mobile number\\n→ Billing address\\n→ Shipping address\\n→ GST details (if applicable)\\n\\nOrder Information:\\n→ Products purchased\\n→ Order history\\n→ Payment status\\n→ Delivery information\\n→ Returns and refund details\\n\\nPayment Information:\\nPayments are securely processed through trusted payment partners such as Razorpay. Zupwell does not store your debit card, credit card, UPI PIN, CVV, or complete banking details.\\n\\nTechnical Information:\\nWhen you use our website, we may automatically collect:\\n→ IP address\\n→ Browser type\\n→ Device information\\n→ Operating system\\n→ Referral URLs\\n→ Website usage data\\n→ Cookie identifiers\"},{\"title\":\"2. How We Use Your Information\",\"body\":[\"Process and fulfill your orders\",\"Verify payments\",\"Generate invoices and GST records\",\"Deliver products\",\"Provide customer support\",\"Manage your account\",\"Improve our website and services\",\"Personalize your shopping experience\",\"Detect fraud and unauthorized activities\",\"Send order updates and shipping notifications\",\"Send promotional offers and newsletters (only where permitted)\",\"Comply with applicable laws and legal obligations\"]},{\"title\":\"3. Cookies and Tracking Technologies\",\"body\":\"We use cookies and similar technologies to:\\n\\n→ Keep you signed in\\n→ Remember your shopping cart\\n→ Save your preferences\\n→ Improve website performance\\n→ Analyze website traffic\\n→ Measure marketing effectiveness\\n\\nYou can disable cookies through your browser settings; however, some website features may not function properly.\"},{\"title\":\"4. Marketing Communications\",\"body\":\"With your consent, we may send:\\n\\n→ Promotional emails\\n→ Product updates\\n... (15 sections fully updated in database)\"},{\"title\":\"5. Sharing Your Information\",\"body\":\"We never sell or rent your personal information.\\n\\nWe may share your information only with trusted third parties necessary to operate our business, including:\\n\\n→ Payment processors (such as Razorpay)\\n→ Shipping and logistics partners\\n→ Cloud hosting providers\\n→ Customer support platforms\\n→ Analytics providers\\n→ Marketing service providers\\n→ Government authorities when legally required\\n\\nAll third-party service providers are required to maintain appropriate security and confidentiality standards.\"},{\"title\":\"6. Data Security\",\"body\":\"Protecting your information is important to us.\\n\\nWe implement industry-standard security measures, including:\\n\\n→ SSL/TLS encrypted connections\\n→ Secure cloud infrastructure\\n→ Restricted employee access\\n→ Authentication controls\\n→ Firewalls\\n→ Routine security monitoring\\n\\nWhile we take reasonable steps to protect your information, no method of transmission over the internet is completely secure.\"},{\"title\":\"7. Data Retention\",\"body\":\"We retain your personal information only for as long as necessary to:\\n\\n→ Fulfill your orders\\n→ Provide customer support\\n→ Maintain business records\\n... (15 sections fully updated in database)\"},{\"title\":\"8. Your Rights\",\"body\":\"Subject to applicable law, you may have the right to:\\n\\n→ Access your personal information\\n→ Correct inaccurate information\\n→ Request deletion of your information\\n→ Withdraw consent for marketing communications\\n→ Request a copy of your personal data\\n→ Raise concerns regarding how your information is processed\\n\\nTo exercise these rights, please contact us using the details below.\"},{\"title\":\"9. Children's Privacy\",\"body\":\"Our website is intended for individuals who are at least 18 years of age.\\n\\nWe do not knowingly collect personal information from children. If we become aware that a child's information has been collected, we will delete it promptly.\"},{\"title\":\"10. Third-Party Services\",\"body\":\"Our website may contain links to third-party websites or services.\\n\\nWe are not responsible for the privacy practices or content of those external websites. We encourage you to review their privacy policies before sharing any personal information.\"},{\"title\":\"11. Third-Party Analytics\",\"body\":\"We may use trusted analytics providers such as Google Analytics or similar tools to better understand how visitors interact with our website.\\n\\nThese services may collect anonymous usage information using cookies or similar technologies.\"},{\"title\":\"12. Legal Compliance\",\"body\":\"We may disclose your information when required to:\\n\\n→ Comply with applicable laws\\n→ Respond to lawful government requests\\n→ Protect our legal rights\\n→ Prevent fraud or illegal activity\\n\\n→ Enforce our Terms and Conditions\"},{\"title\":\"13. International Data Processing\",\"body\":\"Some of our technology providers may process or store information outside India.\\n\\nWhere applicable, we take appropriate safeguards to ensure your information remains protected in accordance with applicable privacy laws.\"},{\"title\":\"14. Changes to This Privacy Policy\",\"body\":\"We may update this Privacy Policy from time to time.\\n\\nAny changes will be posted on this page with an updated Last Updated date. Continued use of our website after changes become effective constitutes your acceptance of the revised policy.\"},{\"title\":\"15. Contact Us\",\"body\":\"If you have any questions, requests, or concerns regarding this Privacy Policy or your personal information, please contact us:\\n\\nEmail: support@zupwell.com\\n\\nWe will make reasonable efforts to respond to your request as promptly as possible.\"}]", group: "legal" },
 
       { key: "policy_terms_badge", value: "Legal", group: "legal" },
       { key: "policy_terms_title", value: "Terms & Conditions", group: "legal" },
@@ -386,13 +497,13 @@ app.listen(PORT, async () => {
       { key: "policy_refund_title", value: "Refund & Cancellation Policy", group: "legal" },
       { key: "policy_refund_subtitle", value: "Your satisfaction is our priority. Here's everything you need to know about returns and refunds.", group: "legal" },
       { key: "policy_refund_updated", value: "May 2026", group: "legal" },
-      { key: "policy_refund_sections_json", value: "[{\"title\":\"Return Eligibility\",\"body\":\"Returns are accepted within 48 hours of delivery for products that are damaged, defective, or incorrectly shipped. Products must be unopened, in their original sealed condition, and accompanied by the original invoice.\"},{\"title\":\"How to Initiate a Return\",\"body\":\"WhatsApp us within 48 hours of delivery with your order number and photos of the damaged/defective product. Our team will respond within 2-3 business days.\"},{\"title\":\"Refund Process\",\"body\":\"Once your return is received and inspected, we will notify you. Approved refunds are processed within 7-10 business days. Online payments are refunded to the original payment method. COD orders are refunded via bank transfer.\"},{\"title\":\"Non-Returnable Items\",\"body\":[\"Opened or partially used supplement products\",\"Products without original seals or packaging\",\"Clearance or sale items (unless defective)\"]},{\"title\":\"Cancellations\",\"body\":\"You can cancel your order until the product ships. Once it leaves our warehouse, cancellation is not possible — please use the return process after delivery. To cancel, contact us immediately after placing the order.\"},{\"title\":\"Exchange\",\"body\":\"We offer exchanges for the same product (different quantity or variant) subject to availability. If the exchanged item is of higher value, the difference must be paid. If lower, the difference will be refunded.\"}]", group: "legal" },
+      { key: "policy_refund_sections_json", value: "[{\"title\":\"Return Eligibility\",\"body\":\"Returns are accepted within 24 hours of delivery for products that are damaged, defective, or incorrectly shipped. Products must be unopened, in their original sealed condition, and accompanied by the original invoice.\"},{\"title\":\"How to Initiate a Return\",\"body\":\"WhatsApp us within 24 hours of delivery with your order number and photos of the damaged/defective product. Our team will respond within 2-3 business days.\"},{\"title\":\"Refund Process\",\"body\":\"Once your return is received and inspected, we will notify you. Approved refunds are processed within 7-10 business days. Online payments are refunded to the original payment method. COD orders are refunded via bank transfer.\"},{\"title\":\"Non-Returnable Items\",\"body\":[\"Opened or partially used supplement products\",\"Products without original seals or packaging\",\"Clearance or sale items (unless defective)\"]},{\"title\":\"Cancellations\",\"body\":\"You can cancel your order until the product ships. Once it leaves our warehouse, cancellation is not possible — please use the return process after delivery. To cancel, contact us immediately after placing the order.\"},{\"title\":\"Exchange\",\"body\":\"We offer exchanges for the same product (different quantity or variant) subject to availability. If the exchanged item is of higher value, the difference must be paid. If lower, the difference will be refunded.\"}]", group: "legal" },
 
       { key: "policy_shipping_badge", value: "Legal", group: "legal" },
       { key: "policy_shipping_title", value: "Shipping Policy", group: "legal" },
       { key: "policy_shipping_subtitle", value: "We know you don't like to wait! Here's how we get Zupwell to your doorstep.", group: "legal" },
       { key: "policy_shipping_updated", value: "May 2026", group: "legal" },
-      { key: "policy_shipping_sections_json", value: "[{\"title\":\"Processing Time\",\"body\":\"All orders are processed within 1-2 business days (Monday–Saturday, excluding public holidays) from our warehouse in Ahmedabad, Gujarat.\"},{\"title\":\"Delivery Timeline\",\"body\":[\"Within Ahmedabad: 1-2 business days\",\"Gujarat (other cities): 2-3 business days\",\"Rest of India: 3-5 business days\",\"These are estimates and may vary based on courier partner performance\"]},{\"title\":\"Shipping Charges\",\"body\":\"A nominal shipping charge may apply. The exact amount, if any, will be displayed at checkout before you complete your order.\"},{\"title\":\"Courier Partners\",\"body\":\"We ship via reputed courier partners. A tracking number will be shared via SMS/email once your order is dispatched so you can track it in real time.\"},{\"title\":\"Bulk / B2B Orders\",\"body\":\"For bulk B2B orders, shipping timelines and charges may differ. Please contact us for a custom shipping quote.\"},{\"title\":\"Damaged or Lost Shipments\",\"body\":\"If your order arrives damaged or is lost in transit, please contact us within 48 hours of delivery (or expected delivery). We will work with the courier to resolve the issue or arrange a replacement.\"}]", group: "legal" },
+      { key: "policy_shipping_sections_json", value: "[{\"title\":\"Processing Time\",\"body\":\"All orders are processed within 1-2 business days (Monday–Saturday, excluding public holidays) from our warehouse in Ahmedabad, Gujarat.\"},{\"title\":\"Delivery Timeline\",\"body\":[\"Within Ahmedabad: 1-2 business days\",\"Gujarat (other cities): 2-3 business days\",\"Rest of India: 3-5 business days\",\"These are estimates and may vary based on courier partner performance\"]},{\"title\":\"Shipping Charges\",\"body\":\"A nominal shipping charge may apply. The exact amount, if any, will be displayed at checkout before you complete your order.\"},{\"title\":\"Courier Partners\",\"body\":\"We ship via reputed courier partners. A tracking number will be shared via SMS/email once your order is dispatched so you can track it in real time.\"},{\"title\":\"Bulk / B2B Orders\",\"body\":\"For bulk B2B orders, shipping timelines and charges may differ. Please contact us for a custom shipping quote.\"},{\"title\":\"Damaged or Lost Shipments\",\"body\":\"If your order arrives damaged or is lost in transit, please contact us within 24 hours of delivery (or expected delivery). We will work with the courier to resolve the issue or arrange a replacement.\"}]", group: "legal" },
 
       { key: "policy_disclaimer_badge", value: "Legal", group: "legal" },
       { key: "policy_disclaimer_title", value: "Legal Disclaimer", group: "legal" },
@@ -409,6 +520,13 @@ app.listen(PORT, async () => {
       });
     }
     console.log("✅ Settings initialized");
+    // Check if Razorpay is using a TEST key in production
+    const loadedSettings = await prisma.setting.findMany();
+    const settingsMap = {};
+    loadedSettings.forEach(s => { settingsMap[s.key] = s.value; });
+    if (settingsMap.razorpay_key_id?.startsWith("rzp_test_") && process.env.NODE_ENV === "production") {
+      console.warn("⚠️  WARNING: Razorpay is using a TEST key in production!");
+    }
   } catch (e) {
     console.error("⚠️  Settings seed failed:", e.message);
   }

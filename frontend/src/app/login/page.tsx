@@ -2,171 +2,651 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Info, ShieldCheck, Eye, EyeOff, KeyRound } from "lucide-react";
 import { authApi, adminApi } from "@/lib/api";
-import { GoogleIcon, FacebookIcon } from "@/components/ui";
 import { useStore } from "@/lib/store";
-import { setAuthCookie } from "@/lib/auth-cookie";
+import { setAuthCookie, setAdminAuthCookie } from "@/lib/auth-cookie";
 import toast from "react-hot-toast";
 
-
+type Tab = "login" | "register";
+type LoginStep = "credentials" | "adminOtp" | "adminCreds" | "forgotPhone" | "forgotReset";
+type RegisterStep = "phone" | "otp" | "details" | "setPassword";
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--dk)' }}><div className="h-8 w-8 rounded-full animate-spin" style={{ border: '4px solid rgba(255,92,0,0.2)', borderTopColor: 'var(--or)' }} /></div>}>
-      <LoginForm />
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--dk)" }}>
+          <div className="h-8 w-8 rounded-full animate-spin" style={{ border: "4px solid rgba(255,92,0,0.2)", borderTopColor: "var(--or)" }} />
+        </div>
+      }
+    >
+      <LoginPageInner />
     </Suspense>
   );
 }
 
-function LoginForm() {
+function PasswordInput({
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+  autoFocus,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  autoComplete?: string;
+  autoFocus?: boolean;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        type={show ? "text" : "password"}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        autoFocus={autoFocus}
+        className="w-full border-2 border-gray-200 focus:border-indigo-600/80 rounded-2xl px-4 py-3 pr-10 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-400"
+      />
+      <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600" tabIndex={-1}>
+        {show ? <EyeOff size={16} /> : <Eye size={16} />}
+      </button>
+    </div>
+  );
+}
+
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <main
+      className="relative min-h-screen flex flex-col items-center justify-center py-12 px-6"
+      style={{ background: "radial-gradient(circle at top right, #0C1E39 0%, #051124 100%)", overflow: "hidden" }}
+    >
+      <div className="absolute inset-0 opacity-10 pointer-events-none select-none">
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#FFFFFF" strokeWidth="1" />
+          </pattern>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+      </div>
+      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium text-white hover:text-white/80">
+        <ArrowLeft size={16} /> Back to Store
+      </Link>
+      <div className="relative w-full max-w-md flex flex-col items-center">
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center justify-center">
+            <span className="text-5xl font-black text-white tracking-tight" style={{ fontWeight: 900, letterSpacing: "-2px" }}>
+              Zupwell<sup style={{ fontSize: "18px", fontWeight: 700, color: "#FFFFFF", opacity: 0.9, marginLeft: "3px", verticalAlign: "super" }}>TM</sup>
+            </span>
+          </Link>
+        </div>
+        <div className="w-full bg-white rounded-3xl shadow-2xl p-8 border border-white/10">{children}</div>
+      </div>
+    </main>
+  );
+}
+
+function LoginPageInner() {
+  const [tab, setTab] = useState<Tab>("login");
+  const [loginStep, setLoginStep] = useState<LoginStep>("credentials");
+  const [registerStep, setRegisterStep] = useState<RegisterStep>("phone");
+
+  const [identifier, setIdentifier] = useState(""); // login tab: phone or email
+  const [phone, setPhone] = useState(""); // register tab: phone only
+  const [adminPhone, setAdminPhone] = useState(""); // set once we learn it from the server
+  const [otp, setOtp] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPass, setShowPass] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [notifyOffers, setNotifyOffers] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const [gateToken, setGateToken] = useState("");
+  const [setupToken, setSetupToken] = useState("");
+
   const { setUser, setToken } = useStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next") || "/";
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const clearSensitive = () => {
+    setOtp("");
+    setPassword("");
+    setConfirmPassword("");
+    setGateToken("");
+    setSetupToken("");
+  };
+
+  const switchTab = (t: Tab) => {
+    setTab(t);
+    setLoginStep("credentials");
+    setRegisterStep("phone");
+    clearSensitive();
+  };
+
+  const finishUserLogin = (data: { accessToken: string; user: any }) => {
+    setUser(data.user);
+    setToken(data.accessToken);
+    setAuthCookie(data.accessToken);
+    toast.success(`Welcome, ${data.user.name || "there"}! 🎉`);
+    router.push(nextUrl);
+  };
+
+  const finishAdminLogin = (data: { accessToken: string; admin: any }) => {
+    try {
+      localStorage.setItem("zupwell-admin", JSON.stringify({ name: data.admin.name, token: data.accessToken }));
+      setAdminAuthCookie(data.accessToken);
+    } catch {}
+    toast.success(`Welcome back, ${data.admin.name}!`);
+    router.push("/admin");
+  };
+
+  // ── LOGIN TAB: one-shot phone/email + password ────────────────────
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    // 1. Try admin login first (silently)
-    try {
-      const adminData = await adminApi.login(email, password);
-      localStorage.setItem("zupwell-admin", JSON.stringify({ name: adminData.admin.name, token: adminData.accessToken }));
-      toast.success(`Welcome, ${adminData.admin.name}!`);
-      setLoading(false);
-      router.push("/admin");
+    if (!identifier || !password) {
+      toast.error("Please enter your number/email and password");
       return;
-    } catch {
-      // Not admin — continue
     }
-
-    // 2. Try regular user login
+    setLoading(true);
     try {
-      const data = await authApi.login(email, password);
-      setUser(data.user);
-      setToken(data.accessToken);
-      setAuthCookie(data.accessToken); // sync cookie so middleware lets user through
-      toast.success(`Welcome back, ${data.user.name}!`);
-      router.push(nextUrl);
+      const res = await authApi.login(identifier, password);
+      if (res.step === "admin-otp-required") {
+        setAdminPhone(res.phone);
+        setOtp("");
+        setLoginStep("adminOtp");
+        toast.success("OTP sent to the registered admin number");
+      } else if (res.step === "logged-in") {
+        finishUserLogin(res);
+      }
     } catch (err: any) {
-      toast.error(err.message || "Invalid email or password");
+      toast.error(err.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }
   };
 
-  // ── FIX: Use production backend URL as fallback (not localhost) ──
-  const handleGoogleLogin = () => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com";
-    window.location.href = `${API_URL}/api/auth/google`;
+  const handleAdminOtpVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length < 4) {
+      toast.error("Please enter the OTP");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await authApi.verifyIdentifyOtp(adminPhone, otp);
+      if (res.step === "admin-credentials") {
+        setGateToken(res.gateToken);
+        setLoginStep("adminCreds");
+        toast.success("Verified! Enter your admin credentials.");
+      } else {
+        toast.error("Unexpected response. Please try again.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Invalid or expired OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdminCredentials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error("Email and password are required");
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await adminApi.login(email, password, gateToken);
+      finishAdminLogin(data);
+    } catch (err: any) {
+      toast.error(err.message || "Authentication failed. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── LOGIN TAB: forgot password (OTP-based) ─────────────────────────
+  const handleForgotRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    if (cleanPhone.length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number");
+      return;
+    }
+    setLoading(true);
+    try {
+      await authApi.forgotPasswordRequest(cleanPhone);
+      toast.success("If this number is registered, an OTP has been sent.");
+      setLoginStep("forgotReset");
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    setLoading(true);
+    try {
+      const data = await authApi.forgotPasswordVerify({ phone: cleanPhone, otp, password, confirmPassword });
+      finishUserLogin(data);
+    } catch (err: any) {
+      toast.error(err.message || "Invalid or expired OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── REGISTER TAB: phone -> OTP -> details ─────────────────────────
+  const handleRegisterPhone = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    if (cleanPhone.length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await authApi.identify(cleanPhone);
+      if (res.step === "password") {
+        toast.error("This number is already registered — please log in instead.");
+        setIdentifier(cleanPhone);
+        switchTab("login");
+      } else {
+        toast.success("OTP sent to your mobile number!");
+        setRegisterStep("otp");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegisterOtpVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length < 4) {
+      toast.error("Please enter the OTP");
+      return;
+    }
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    setLoading(true);
+    try {
+      const res = await authApi.verifyIdentifyOtp(cleanPhone, otp);
+      if (res.step === "register") {
+        setSetupToken(res.setupToken);
+        setRegisterStep("details");
+      } else if (res.step === "set-password") {
+        setSetupToken(res.setupToken);
+        setRegisterStep("setPassword");
+        toast.success("Verified! Please set a password for your account.");
+      } else if (res.step === "admin-gate") {
+        // Rare: someone registered an admin's number — route into the login tab's admin flow.
+        setGateToken(res.gateToken);
+        setAdminPhone(cleanPhone);
+        switchTab("login");
+        setLoginStep("adminCreds");
+      } else if (res.step === "logged-in") {
+        finishUserLogin(res);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Invalid or expired OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCompleteRegistration = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      toast.error("Full name is required");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await authApi.completeRegistration({
+        setupToken, name: name.trim(), email: email.trim() || undefined, password, confirmPassword, notified: notifyOffers,
+      });
+      finishUserLogin(data);
+    } catch (err: any) {
+      toast.error(err.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCompletePasswordSetup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await authApi.completePasswordSetup({ setupToken, password, confirmPassword });
+      finishUserLogin(data);
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center pt-14 pb-12 px-6" style={{ background: 'var(--dk)' }}>
-      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium transition-colors"
-        style={{ color: '#F8F8F8' }}
-        onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
-        onMouseLeave={e => (e.currentTarget.style.color = '#F8F8F8')}>
-        <ArrowLeft size={16} /> Back to Home
-      </Link>
-
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/4 h-[500px] w-[500px] rounded-full" style={{ background: 'rgba(255,92,0,0.06)' }} />
-        <div className="absolute -bottom-40 right-1/4 h-[400px] w-[400px] rounded-full" style={{ background: 'rgba(5,17,36,0.5)' }} />
+    <Shell>
+      {/* Tabs */}
+      <div className="grid grid-cols-2 gap-1 bg-gray-100 rounded-2xl p-1 mb-6">
+        <button
+          onClick={() => switchTab("login")}
+          className={`py-2.5 rounded-xl text-sm font-bold transition-all ${tab === "login" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500"}`}
+        >
+          Log In
+        </button>
+        <button
+          onClick={() => switchTab("register")}
+          className={`py-2.5 rounded-xl text-sm font-bold transition-all ${tab === "register" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500"}`}
+        >
+          Register
+        </button>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="relative w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center justify-center mb-4">
-            <span className="text-4xl font-black" style={{ color: '#FFFFFF', fontWeight: 900, letterSpacing: '-1.5px' }}>
-              Zupwell<sup style={{ fontSize: "16px", fontWeight: 700, color: '#FF5C00', marginLeft: "2.5px", letterSpacing: "1px", verticalAlign: "super" }}>TM</sup>
-            </span>
-          </Link>
-          <h1 className="text-3xl font-black" style={{ color: '#FFFFFF' }}>Welcome back</h1>
-          <p className="mt-1" style={{ color: '#F8F8F8' }}>Sign in to your account</p>
-        </div>
-
-        <div className="card" style={{ padding: '32px' }}>
-          {/* Social Login Buttons */}
-          <div className="space-y-3 mb-6">
-            <button onClick={handleGoogleLogin}
-              className="zbtn-out w-full justify-center flex items-center gap-3 text-sm font-semibold" 
-              style={{ borderRadius: '8px', padding: '11px', color: '#0C1E39', borderColor: 'rgba(12, 30, 57, 0.12)' }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(12, 30, 57, 0.05)';
-                e.currentTarget.style.color = '#0C1E39';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = '#0C1E39';
-              }}>
-              <GoogleIcon /> Continue with Google
-            </button>
-          </div>
-
-          <div className="my-5 flex items-center gap-3">
-            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
-            <span className="text-xs uppercase tracking-wide" style={{ color: '#0C1E39', opacity: 0.6 }}>or with email</span>
-            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block mb-1.5" style={{ color: '#0C1E39', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px', opacity: 0.8 }}>Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-                className="input-field" placeholder="you@company.com" autoComplete="email" />
-            </div>
-            <div>
-              <label className="block mb-1.5" style={{ color: '#0C1E39', fontWeight: 900, letterSpacing: '1.2px', textTransform: 'uppercase', fontSize: '10px', opacity: 0.8 }}>Password</label>
-              <div className="relative">
-                <input type={showPass ? "text" : "password"} value={password}
-                  onChange={e => setPassword(e.target.value)} required
-                  className="input-field pr-10" placeholder="••••••••" autoComplete="current-password" />
-                <button type="button" onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: '#0C1E39' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--or)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#0C1E39')}>
-                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+      <AnimatePresence mode="wait">
+        {/* ══════════ LOGIN TAB ══════════ */}
+        {tab === "login" && loginStep === "credentials" && (
+          <motion.div key="credentials" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+            <form onSubmit={handleLogin} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1 ml-1 uppercase tracking-wider">Mobile Number or Email</label>
+                <input
+                  type="text"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  required
+                  placeholder="10-digit number or email"
+                  autoComplete="username"
+                  className="w-full border-2 border-gray-200 focus:border-indigo-600/80 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1 ml-1 uppercase tracking-wider">Password</label>
+                <PasswordInput value={password} onChange={setPassword} placeholder="Password" autoComplete="current-password" />
+              </div>
+              <button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer mt-2">
+                {loading ? "Signing in..." : "Log In"}
+              </button>
+              <div className="text-center pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setLoginStep("forgotPhone"); }}
+                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                >
+                  Forgot Password?
                 </button>
               </div>
-              <div className="text-right mt-1">
-                <Link href="/forgot-password" className="text-xs" style={{ color: 'var(--or)' }}>Forgot password?</Link>
-              </div>
+            </form>
+          </motion.div>
+        )}
+
+        {tab === "login" && loginStep === "adminOtp" && (
+          <motion.div key="adminOtp" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="text-center">
+            <div className="inline-flex p-3 bg-indigo-50 rounded-2xl mb-4 text-indigo-600">
+              <ShieldCheck size={28} />
             </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-1">Verify OTP</h3>
+            <p className="text-sm text-gray-500 mb-6">A verification code has been sent to the registered number</p>
+            <form onSubmit={handleAdminOtpVerify} className="space-y-4">
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                required
+                placeholder="Enter 6-digit OTP"
+                autoFocus
+                autoComplete="one-time-code"
+                className="w-full tracking-[8px] text-center border-2 border-indigo-600/80 rounded-2xl py-3.5 text-xl font-bold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-300 placeholder:tracking-normal"
+              />
+              <button type="submit" disabled={loading || otp.length < 4} className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer">
+                {loading ? "Verifying..." : "Verify & Proceed"}
+              </button>
+              <button type="button" onClick={() => switchTab("login")} className="w-full text-xs font-semibold text-gray-500 hover:text-indigo-600 pt-2">Back</button>
+            </form>
+          </motion.div>
+        )}
 
-            <motion.button type="submit" disabled={loading}
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              className="btn-primary w-full py-3 mt-2 disabled:opacity-50 disabled:cursor-not-allowed">
-              {loading
-                ? <span className="flex items-center justify-center gap-2">
-                    <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
-                    Signing in...
-                  </span>
-                : "Sign In"
-              }
-            </motion.button>
-          </form>
+        {tab === "login" && loginStep === "adminCreds" && (
+          <motion.div key="adminCreds" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+            <div className="text-center mb-5">
+              <h3 className="text-xl font-bold text-gray-900">Admin Verification</h3>
+              <p className="text-sm text-gray-500 mt-1">Complete credentials validation to continue</p>
+            </div>
+            <form onSubmit={handleAdminCredentials} className="space-y-3.5">
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="admin@zupwell.com" autoComplete="email"
+                className="w-full border-2 border-gray-200 focus:border-indigo-600/80 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-400" />
+              <PasswordInput value={password} onChange={setPassword} placeholder="Password" autoComplete="current-password" />
+              <button type="submit" disabled={loading} className="w-full bg-[#FF5C00] hover:bg-[#E04B00] disabled:bg-gray-200 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer">
+                {loading ? "Signing in..." : "Validate Credentials"}
+              </button>
+            </form>
+          </motion.div>
+        )}
 
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
-            <span className="text-xs uppercase tracking-wide" style={{ color: '#0C1E39', opacity: 0.6 }}>or</span>
-            <div className="h-px flex-1" style={{ background: '#0C1E39', opacity: 0.15 }} />
-          </div>
+        {tab === "login" && loginStep === "forgotPhone" && (
+          <motion.div key="forgotPhone" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+            <div className="text-center mb-5">
+              <h3 className="text-xl font-bold text-gray-900">Reset your password</h3>
+              <p className="text-sm text-gray-500 mt-1">We'll send an OTP to your registered mobile number</p>
+            </div>
+            <form onSubmit={handleForgotRequest} className="space-y-4">
+              <div className="flex items-center border-2 border-indigo-600/80 rounded-2xl p-1 bg-white focus-within:ring-4 focus-within:ring-indigo-100 transition-all">
+                <div className="flex items-center gap-2 px-3 py-2 shrink-0">
+                  <span className="text-lg">🇮🇳</span>
+                  <span className="text-sm font-bold text-gray-600">+91</span>
+                </div>
+                <div className="w-px h-6 bg-gray-200 shrink-0" />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                  required
+                  placeholder="10-digit mobile number"
+                  className="w-full px-3 py-2 text-base text-gray-800 bg-transparent focus:outline-none placeholder:text-gray-400 font-medium"
+                />
+              </div>
+              <button type="submit" disabled={loading || phone.length !== 10} className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer">
+                {loading ? "Sending..." : "Send OTP"}
+              </button>
+              <button type="button" onClick={() => setLoginStep("credentials")} className="w-full text-xs font-semibold text-gray-500 hover:text-indigo-600 pt-1">Back to Login</button>
+            </form>
+          </motion.div>
+        )}
 
-          <p className="text-center text-sm" style={{ color: '#0C1E39', opacity: 0.8 }}>
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold" style={{ color: 'var(--or)' }}>Create one free</Link>
-          </p>
-        </div>
-      </motion.div>
-    </main>
+        {tab === "login" && loginStep === "forgotReset" && (
+          <motion.div key="forgotReset" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+            <div className="text-center mb-5">
+              <h3 className="text-xl font-bold text-gray-900">Enter OTP & new password</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Code sent to <span className="font-semibold text-gray-800">+91 {phone}</span>
+              </p>
+            </div>
+            <form onSubmit={handleForgotReset} className="space-y-3.5">
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                required
+                placeholder="Enter 6-digit OTP"
+                autoFocus
+                autoComplete="one-time-code"
+                className="w-full tracking-[8px] text-center border-2 border-indigo-600/80 rounded-2xl py-3.5 text-xl font-bold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-300 placeholder:tracking-normal"
+              />
+              <PasswordInput value={password} onChange={setPassword} placeholder="New password (min 8 chars)" autoComplete="new-password" />
+              <PasswordInput value={confirmPassword} onChange={setConfirmPassword} placeholder="Confirm new password" autoComplete="new-password" />
+              <button type="submit" disabled={loading || otp.length < 4} className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer">
+                {loading ? "Resetting..." : "Reset Password & Log In"}
+              </button>
+              <button type="button" onClick={() => setLoginStep("credentials")} className="w-full text-xs font-semibold text-gray-500 hover:text-indigo-600 pt-1">Back to Login</button>
+            </form>
+          </motion.div>
+        )}
+
+        {/* ══════════ REGISTER TAB ══════════ */}
+        {tab === "register" && registerStep === "phone" && (
+          <motion.div key="regPhone" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+            <form onSubmit={handleRegisterPhone} className="space-y-4">
+              <div className="flex items-center border-2 border-indigo-600/80 rounded-2xl p-1 bg-white focus-within:ring-4 focus-within:ring-indigo-100 transition-all">
+                <div className="flex items-center gap-2 px-3 py-2 shrink-0">
+                  <span className="text-lg">🇮🇳</span>
+                  <span className="text-sm font-bold text-gray-600">+91</span>
+                </div>
+                <div className="w-px h-6 bg-gray-200 shrink-0" />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                  required
+                  placeholder="10-digit mobile number"
+                  className="w-full px-3 py-2 text-base text-gray-800 bg-transparent focus:outline-none placeholder:text-gray-400 font-medium"
+                />
+                <button type="submit" disabled={loading || phone.length !== 10} className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shrink-0 cursor-pointer">
+                  {loading ? "..." : "Send OTP"}
+                </button>
+              </div>
+
+              <div className="flex items-start gap-2.5 mt-2 px-1">
+                <input
+                  id="notify-offers-checkbox"
+                  type="checkbox"
+                  checked={notifyOffers}
+                  onChange={(e) => setNotifyOffers(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer mt-0.5"
+                />
+                <label htmlFor="notify-offers-checkbox" className="text-xs text-gray-600 select-none cursor-pointer leading-tight">
+                  Notify me for any updates & offers
+                </label>
+              </div>
+
+              <div className="flex items-start gap-2 pt-2 border-t border-gray-100 mt-4 text-[11px] text-gray-500 leading-normal px-1">
+                <Info size={14} className="shrink-0 mt-0.5 text-gray-400" />
+                <span>
+                  By proceeding, you are agreeing to our{" "}
+                  <Link href="/privacy-policy" className="font-semibold text-indigo-600 hover:underline">Privacy Policy</Link>,{" "}
+                  <Link href="/terms-of-service" className="font-semibold text-indigo-600 hover:underline">T & C</Link> and{" "}
+                  <Link href="/legal-disclaimer" className="font-semibold text-indigo-600 hover:underline">Legal Disclaimer</Link>.
+                </span>
+              </div>
+            </form>
+          </motion.div>
+        )}
+
+        {tab === "register" && registerStep === "otp" && (
+          <motion.div key="regOtp" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="text-center">
+            <div className="inline-flex p-3 bg-indigo-50 rounded-2xl mb-4 text-indigo-600">
+              <ShieldCheck size={28} />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">Verify OTP</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              We have sent a verification code to <span className="font-semibold text-gray-800">+91 {phone}</span>
+            </p>
+            <form onSubmit={handleRegisterOtpVerify} className="space-y-4">
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                required
+                placeholder="Enter 6-digit OTP"
+                autoFocus
+                autoComplete="one-time-code"
+                className="w-full tracking-[8px] text-center border-2 border-indigo-600/80 rounded-2xl py-3.5 text-xl font-bold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-300 placeholder:tracking-normal mb-1"
+              />
+              <button type="submit" disabled={loading || otp.length < 4} className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer mt-2">
+                {loading ? "Verifying..." : "Verify & Proceed"}
+              </button>
+              <div className="flex items-center justify-between text-xs font-semibold pt-4">
+                <button type="button" onClick={() => setRegisterStep("phone")} className="text-gray-500 hover:text-indigo-600">Change Number</button>
+                <button type="button" onClick={() => handleRegisterPhone()} className="text-indigo-600 hover:text-indigo-700">Resend OTP</button>
+              </div>
+            </form>
+          </motion.div>
+        )}
+
+        {tab === "register" && registerStep === "details" && (
+          <motion.div key="regDetails" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+            <h3 className="text-xl font-bold text-gray-900 mb-1 text-center">Create your account</h3>
+            <p className="text-sm text-gray-500 mb-5 text-center">Just a few details to finish setting up</p>
+            <form onSubmit={handleCompleteRegistration} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1 ml-1 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="e.g. Rahul Sharma"
+                  className="w-full border-2 border-gray-200 focus:border-indigo-600/80 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-400" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1 ml-1 uppercase tracking-wider">Email <span className="text-gray-400 font-normal">(optional)</span></label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g. rahul@domain.com"
+                  className="w-full border-2 border-gray-200 focus:border-indigo-600/80 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-400" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1 ml-1 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
+                <PasswordInput value={password} onChange={setPassword} placeholder="At least 8 characters" autoComplete="new-password" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1 ml-1 uppercase tracking-wider">Confirm Password <span className="text-red-500">*</span></label>
+                <PasswordInput value={confirmPassword} onChange={setConfirmPassword} placeholder="Re-enter password" autoComplete="new-password" />
+              </div>
+              <button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer mt-2">
+                {loading ? "Creating account..." : "Register & Continue"}
+              </button>
+            </form>
+          </motion.div>
+        )}
+
+        {tab === "register" && registerStep === "setPassword" && (
+          <motion.div key="regSetPassword" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+            <div className="text-center mb-5">
+              <div className="inline-flex p-3 bg-indigo-50 rounded-2xl mb-3 text-indigo-600">
+                <KeyRound size={26} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Set a password</h3>
+              <p className="text-sm text-gray-500 mt-1">Your account already exists — secure it with a password for next time</p>
+            </div>
+            <form onSubmit={handleCompletePasswordSetup} className="space-y-3.5">
+              <PasswordInput value={password} onChange={setPassword} placeholder="At least 8 characters" autoComplete="new-password" />
+              <PasswordInput value={confirmPassword} onChange={setConfirmPassword} placeholder="Re-enter password" autoComplete="new-password" />
+              <button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer">
+                {loading ? "Saving..." : "Set Password & Continue"}
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Shell>
   );
 }
-// LoginForm ends above; LoginPage wraps it in Suspense

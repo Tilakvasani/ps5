@@ -5,6 +5,7 @@ import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Tag } from "lucide-react
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useStore } from "@/lib/store";
+import { cldOptimize } from "@/lib/utils";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -17,11 +18,14 @@ export default function CartPage() {
   const [couponDiscount, setCouponDiscount] = useState(0);
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
-  const cgst = subtotal * cgstRate;
-  const sgst = subtotal * sgstRate;
-  const shipping = calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
   const discount = couponApplied ? couponDiscount : 0;
-  const rawTotal = subtotal + cgst + sgst + shipping - discount;
+  // GST must be calculated on the amount AFTER the coupon discount, same as
+  // the Checkout page — otherwise Cart and Checkout totals disagree.
+  const taxable = Math.max(0, subtotal - discount);
+  const cgst = taxable * cgstRate;
+  const sgst = taxable * sgstRate;
+  const shipping = calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
+  const rawTotal = taxable + cgst + sgst + shipping;
   const total = Math.round(rawTotal);
   const roundOffDiff = total - rawTotal;
 
@@ -69,26 +73,28 @@ export default function CartPage() {
           <div className="lg:col-span-2 space-y-4">
             <AnimatePresence>
               {cart.map((item, i) => (
-                <motion.div key={`${item.productId}-${item.variantId}`}
+                <motion.div key={`${item.productId}-${item.variantId}-${item.pack}`}
                   initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ delay: i * 0.05 }}
                   style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 16, display: "flex", gap: 16, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
                   {/* Image */}
                   <div style={{ height: 80, width: 80, flexShrink: 0, borderRadius: 12, background: "#F8F8F8", border: "1.5px solid rgba(12, 30, 57, 0.08)", overflow: "hidden" }}>
-                    {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" /> :
+                    {item.imageUrl ? <img src={cldOptimize(item.imageUrl, 160)} alt={item.name} width={160} height={160} className="w-full h-full object-cover"  loading="lazy" decoding="async" /> :
                       <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(12, 30, 57, 0.2)" }}><ShoppingCart size={24} /></div>}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <h3 style={{ fontWeight: 600, color: "#0C1E39", fontSize: "0.875rem", marginBottom: 2 }} className="line-clamp-1">{item.name}</h3>
-                    <p style={{ fontSize: "0.75rem", color: "#6B7280", marginBottom: 12 }}>{item.unit} · {item.sku}</p>
+                    <p style={{ fontSize: "0.75rem", color: "#6B7280", marginBottom: 12 }}>
+                      {item.pack ? `Pack of ${item.pack}` : ""}
+                    </p>
                     <div className="flex items-center justify-between">
                       <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#F8F8F8", padding: 2 }}>
-                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.qty - 1)}
+                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.pack, item.qty - 1)}
                           style={{ height: 28, width: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, color: "#0C1E39", transition: "background 0.15s" }}
                           className="hover:bg-[#0C1E39]/10 transition-colors"><Minus size={12} /></button>
                         <span style={{ width: 24, textAlign: "center", fontSize: "0.875rem", fontWeight: 700, color: "#0C1E39" }}>{item.qty}</span>
-                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.qty + 1)}
+                        <button onClick={() => updateCartQty(item.productId, item.variantId, item.pack, item.qty + 1)}
                           style={{ height: 28, width: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, color: "#0C1E39", transition: "background 0.15s" }}
                           className="hover:bg-[#0C1E39]/10 transition-colors"><Plus size={12} /></button>
                       </div>
@@ -100,7 +106,7 @@ export default function CartPage() {
                   </div>
 
                   {/* Remove */}
-                  <button onClick={() => removeFromCart(item.productId, item.variantId)}
+                  <button onClick={() => removeFromCart(item.productId, item.variantId, item.pack)}
                     className="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-lg text-red-500/60 hover:text-red-500 hover:bg-red-500/10 transition-all">
                     <Trash2 size={14} />
                   </button>
@@ -129,8 +135,8 @@ export default function CartPage() {
               <h2 style={{ fontWeight: 700, color: "#0C1E39", marginBottom: 16 }}>Order Summary</h2>
               <div className="space-y-2 text-sm mb-4">
                 <div className="flex justify-between" style={{ color: "#4A5568" }}><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>
-                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>CGST @2.5%</span><span>₹{cgst.toFixed(2)}</span></div>
-                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>SGST @2.5%</span><span>₹{sgst.toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>CGST @{(cgstRate * 100).toFixed(1)}%</span><span>₹{cgst.toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>SGST @{(sgstRate * 100).toFixed(1)}%</span><span>₹{sgst.toFixed(2)}</span></div>
                 <div className="flex justify-between" style={{ color: "#4A5568" }}>
                   <span>Shipping</span>
                   <span>{shipping === 0 ? <span style={{ color: "var(--or)" }}>FREE</span> : `₹${shipping.toFixed(2)}`}</span>
@@ -146,7 +152,13 @@ export default function CartPage() {
               </div>
               <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 4, textAlign: "right" }}>Inclusive of GST</p>
 
-              <Link href={user ? "/checkout" : "/login?next=/checkout"} className="block mt-6">
+              <Link 
+                href={user 
+                  ? `/checkout${couponApplied && coupon ? "?coupon=" + encodeURIComponent(coupon.trim()) : ""}` 
+                  : `/login?next=${encodeURIComponent("/checkout" + (couponApplied && coupon ? "?coupon=" + encodeURIComponent(coupon.trim()) : ""))}`
+                } 
+                className="block mt-6"
+              >
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   className="btn-primary w-full flex items-center justify-center gap-2 py-3">
                   Proceed to Checkout <ArrowRight size={16} />

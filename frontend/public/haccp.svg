@@ -1,7 +1,7 @@
 <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="40" cy="40" r="37" stroke="#0C1E39" stroke-width="2.5" />
+  <circle cx="40" cy="40" r="37" stroke="#FFFFFF" stroke-width="2.5" />
   <circle cx="40" cy="40" r="33" stroke="#FF5C00" stroke-width="1" stroke-dasharray="4 2" />
-  <text x="40" y="34" text-anchor="middle" fill="#0C1E39" font-size="12" font-weight="900" font-family="system-ui, -apple-system, sans-serif">HACCP</text>
+  <text x="40" y="34" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="900" font-family="system-ui, -apple-system, sans-serif">HACCP</text>
   <text x="40" y="47" text-anchor="middle" fill="#FF5C00" font-size="8" font-weight="900" font-family="system-ui, -apple-system, sans-serif">SYSTEM</text>
-  <text x="40" y="58" text-anchor="middle" fill="#0C1E39" font-size="5.5" font-weight="bold" font-family="system-ui, -apple-system, sans-serif" letter-spacing="0.5">CERTIFIED</text>
+  <text x="40" y="58" text-anchor="middle" fill="#8F9CAE" font-size="5.5" font-weight="bold" font-family="system-ui, -apple-system, sans-serif" letter-spacing="0.5">CERTIFIED</text>
 </svg>

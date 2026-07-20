@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Heart, Eye, Star, ArrowRight, FlaskConical, Droplets, Zap, Sparkles, Target, HeartHandshake, Activity, Tag, Citrus, Shield, Leaf } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { fetchSettings } from "@/lib/useSettings";
+import { useSettings } from "@/lib/useSettings";
 import Link from "next/link";
 import { fadeUp } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ const D: Record<string, string> = {
   about_brand_story: "In today's fast-paced life, we want to achieve a lot, but often our bodies don't cooperate. Fatigue, dehydration, and lack of energy hold us back. That's exactly what Zupwell was started to solve. Our goal is simple: to keep you healthy, hydrated, and active.",
   about_mission:     "Health, which is not boring! We believe that taking health supplements should not be like taking a painkiller or a bitter medicine. That's why we have brought you products that are both effective and delicious!",
   about_vision:      "To be India's leading name in Health Supplements, recognized for quality, scientific integrity and commitment to patient and athlete well-being.",
-  about_future:      "Our electrolyte formula is just the beginning. At Zupwell, we are committed to becoming a leader in health supplements. We are currently in the research and development phase for a diverse pipeline of wellness solutions, including daily multivitamins and immune boosters, energy and focus formulations, and specialized recovery blends. Innovation is in our DNA. We are constantly looking for new ways to make high-quality nutrition more effective and easier to consume.",
+  about_future:      "Our electrolyte formula is just the beginning. At Zupwell, we are committed to becoming a leader in health supplements. We are currently in the research and development phase for a diverse pipeline of wellness solutions. Including,\n\n→ Daily multivitamins and immune boosters.\n→ Energy and focus formulations.\n→ Specialized recovery blends for post-operative care.\n\nWe are constantly looking for new ways to make high-quality nutrition more effective and easier to consume.",
   about_why1_title:  "Science-Backed",
   about_why1_desc:   "Formulas that actually work — grounded in clinical research, not marketing hype.",
   about_why2_title:  "Quality First",
@@ -31,65 +31,103 @@ const s = (settings: Record<string, string>, key: string) =>
   settings[key] || D[key] || "";
 
 export default function AboutPage() {
-  const [settings, setSettings] = useState<Record<string, string>>({});
+  const { raw: settings, loading } = useSettings();
 
-  useEffect(() => {
-    fetchSettings().then(setSettings).catch(() => {});
-    const onBust = (e: StorageEvent) => {
-      if (e.key === "zupwell-settings-bust")
-        fetchSettings().then(setSettings).catch(() => {});
-    };
-    window.addEventListener("storage", onBust);
-    return () => window.removeEventListener("storage", onBust);
-  }, []);
+  if (loading) return (
+    <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
+      <Navbar />
+      <div className="flex items-center justify-center pt-40">
+        <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
+      </div>
+    </main>
+  );
 
-  const why = [
+
+  // Parse dynamic JSON settings or fallback
+  let whyItems = [
     { icon: FlaskConical, title: "Scientific Formula", desc: "A fusion of science and taste." },
     { icon: Activity,     title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
     { icon: Zap,          title: "Instant Absorption", desc: "Rocket-like speed, instant action." },
     { icon: Tag,          title: "Pocket Friendly",    desc: "It even fits in your jeans pocket." },
     { icon: Citrus,       title: "Best Flavour",       desc: "Absolutely fresh, as if straight from the garden." },
   ];
+  try {
+    const parsed = JSON.parse(s(settings, "about_why_special_json"));
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      whyItems = parsed.map((item: any, idx: number) => {
+        const titleLower = item.title?.toLowerCase() || "";
+        let Icon = FlaskConical;
+        if (titleLower.includes("science") || titleLower.includes("scientific")) Icon = FlaskConical;
+        else if (titleLower.includes("sugar")) Icon = Activity;
+        else if (titleLower.includes("absorb") || titleLower.includes("instant")) Icon = Zap;
+        else if (titleLower.includes("pocket") || titleLower.includes("price") || titleLower.includes("friendly")) Icon = Tag;
+        else if (titleLower.includes("flavour") || titleLower.includes("taste")) Icon = Citrus;
+        else {
+          const defaults = [FlaskConical, Activity, Zap, Tag, Citrus];
+          Icon = defaults[idx % defaults.length];
+        }
+        return { icon: Icon, title: item.title, desc: item.desc };
+      });
+    }
+  } catch (e) {}
+
+  let pillarItems = [
+    { icon: Heart,        title: "Daily Wellness Support",  desc: "Helps support hydration, immunity, and overall well-being so you can perform at your best every day." },
+    { icon: Zap,          title: "Fast Performance",       desc: "Quick-dissolving, fast-absorbing formula built for modern, active lifestyles." },
+    { icon: FlaskConical, title: "Science-Backed Formula",  desc: "Powered by clinically researched ingredients for trusted daily nutrition." },
+    { icon: Leaf,         title: "Clean & Pure",           desc: "No unnecessary fillers or artificial junk—only quality ingredients your body needs." },
+  ];
+  try {
+    const parsed = JSON.parse(s(settings, "about_pillars_json"));
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      pillarItems = parsed.map((item: any, idx: number) => {
+        const titleLower = item.title?.toLowerCase() || "";
+        let Icon = Heart;
+        if (titleLower.includes("wellness") || titleLower.includes("daily")) Icon = Heart;
+        else if (titleLower.includes("fast") || titleLower.includes("performance") || titleLower.includes("speed")) Icon = Zap;
+        else if (titleLower.includes("science") || titleLower.includes("clinical")) Icon = FlaskConical;
+        else if (titleLower.includes("clean") || titleLower.includes("pure") || titleLower.includes("nature")) Icon = Leaf;
+        else {
+          const defaults = [Heart, Zap, FlaskConical, Leaf];
+          Icon = defaults[idx % defaults.length];
+        }
+        return { icon: Icon, title: item.title, desc: item.desc };
+      });
+    }
+  } catch (e) {}
 
   return (
     <main className="min-h-screen overflow-x-hidden" style={{ background: "var(--gy)" }}>
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        {/* futuristic background mesh */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `
-              radial-gradient(circle at 10% 20%, rgba(255, 79, 0, 0.12) 0%, transparent 40%),
-              radial-gradient(circle at 90% 80%, rgba(12, 30, 57, 0.5) 0%, transparent 50%),
-              linear-gradient(180deg, #051124 0%, #0C1E39 100%)
-            `,
-          }}
-        />
-        {/* abstract vector nodes overlay */}
-        <div 
-          className="absolute inset-0 opacity-10 pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(rgba(255, 79, 0, 0.12) 1.5px, transparent 1.5px), linear-gradient(to right, rgba(12, 30, 57, 0.2) 1px, transparent 1px)",
-            backgroundSize: "30px 30px, 60px 60px"
-          }}
-        />
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute top-10 right-10 h-[400px] w-[400px] rounded-full border border-dashed opacity-20 animate-spin-slow" style={{ borderColor: "#FF4F00" }} />
-          <div className="absolute -bottom-20 left-20 h-[300px] w-[300px] rounded-full border border-[#FF4F00] opacity-10" />
-        </div>
-        <div className="relative mx-auto max-w-4xl text-center">
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden" style={{ background: "linear-gradient(180deg, #051124 0%, #0C1E39 100%)" }}>
+        <div className="relative mx-auto max-w-6xl text-center">
           <motion.span {...fadeUp(0)}
-            className="inline-block text-xs font-semibold uppercase tracking-widest mb-4"
-            style={{ color: "var(--or)" }}>
+            className="inline-block font-semibold uppercase tracking-widest mb-4"
+            style={{ color: "var(--or)", fontSize: "14px" }}>
             About Zupwell
           </motion.span>
           <motion.h1 {...fadeUp(0.1)}
-            className="text-3xl sm:text-4xl md:text-6xl font-black leading-tight mb-6"
+            className="text-[4.8vw] xs:text-[22px] sm:text-3xl md:text-5xl lg:text-6xl font-black leading-tight mb-6 tracking-tight mx-auto w-full"
             style={{ color: "#FFFFFF" }}>
-            &quot;{s(settings, "about_punchline")}&quot;
+            {(() => {
+              const punchline = s(settings, "about_punchline");
+              if (punchline.includes(";")) {
+                const parts = punchline.split(";");
+                return (
+                  <>
+                    <span className="block whitespace-nowrap mb-1">
+                      &quot;{parts[0]};
+                    </span>
+                    <span className="block whitespace-nowrap">
+                      {parts[1].trim()}&quot;
+                    </span>
+                  </>
+                );
+              }
+              return `"${punchline}"`;
+            })()}
           </motion.h1>
           <motion.p {...fadeUp(0.2)} className="text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.85 }}>
             {s(settings, "about_description")}
@@ -101,9 +139,21 @@ export default function AboutPage() {
       <section className="pt-20 pb-10 px-6">
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <motion.div {...fadeUp(0)}>
-            <span className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: "var(--or)" }}>Our Story</span>
+            <span className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: "var(--or)" }}>
+              {s(settings, "about_story_badge") || "Our Story"}
+            </span>
             <h2 className="text-3xl md:text-4xl font-black mb-6 leading-tight" style={{ color: "#0C1E39" }}>
-              Born to solve a <span className="gradient-text">real problem</span>
+              {s(settings, "about_story_title") ? (
+                s(settings, "about_story_title").split(" ").map((w, idx) => (
+                  idx === s(settings, "about_story_title").split(" ").length - 1 ? (
+                    <span key={idx} className="gradient-text">{w} </span>
+                  ) : (
+                    w + " "
+                  )
+                ))
+              ) : (
+                <>Born to solve a <span className="gradient-text">real problem</span></>
+              )}
             </h2>
             <p className="leading-relaxed text-lg" style={{ color: "#4A5568", opacity: 0.85 }}>
               {s(settings, "about_brand_story")}
@@ -151,18 +201,23 @@ export default function AboutPage() {
         <div className="mx-auto max-w-6xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
-              Why Choose <span style={{ color: "var(--or)" }}>Zupwell?</span>
+              {s(settings, "about_why_title") ? (
+                s(settings, "about_why_title").split(" ").map((w, idx) => (
+                  idx === s(settings, "about_why_title").split(" ").length - 1 ? (
+                    <span key={idx} style={{ color: "var(--or)" }}>{w} </span>
+                  ) : (
+                    w + " "
+                  )
+                ))
+              ) : (
+                <>Why Choose <span style={{ color: "var(--or)" }}>Zupwell?</span></>
+              )}
             </h2>
-            <p style={{ color: "#4A5568", opacity: 0.85 }}>Our Core Pillars and Commitments to You.</p>
+            <p style={{ color: "#4A5568", opacity: 0.85 }}>{s(settings, "about_why_subtitle") || "Our Core Pillars and Commitments to You."}</p>
           </motion.div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Heart,        title: "Daily Wellness Support",  desc: "Helps support hydration, immunity, and overall well-being so you can perform at your best every day." },
-              { icon: Zap,          title: "Fast Performance",       desc: "Quick-dissolving, fast-absorbing formula built for modern, active lifestyles." },
-              { icon: FlaskConical, title: "Science-Backed Formula",  desc: "Powered by clinically researched ingredients for trusted daily nutrition." },
-              { icon: Leaf,         title: "Clean & Pure",           desc: "No unnecessary fillers or artificial junk—only quality ingredients your body needs." },
-            ].map((pillar, i) => (
+            {pillarItems.map((pillar, i) => (
               <div key={i} className="card p-8 rounded-2xl flex flex-col justify-between" 
                 style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
                 <div>
@@ -188,7 +243,7 @@ export default function AboutPage() {
             <p style={{ color: "#4A5568", opacity: 0.85 }}>Zero-Compromise Health Boosters. Crafted for Perfection.</p>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-            {why.map((f, i) => (
+            {whyItems.map((f, i) => (
               <motion.div key={i} {...fadeUp(i * 0.1)} className="zcard text-center"
                 style={{ borderColor: "rgba(12, 30, 57, 0.08)", background: "#FFFFFF" }}>
                 <div className="h-14 w-14 mx-auto rounded-2xl flex items-center justify-center mb-4 transition-all"
@@ -209,27 +264,46 @@ export default function AboutPage() {
           <div className="mx-auto max-w-4xl">
             <motion.div {...fadeUp(0)} className="text-center mb-8">
               <h2 className="text-3xl md:text-4xl font-black" style={{ color: "#0C1E39" }}>
-                The Future of <span className="gradient-text">Zupwell</span>
+                {s(settings, "about_future_title") ? (
+                  s(settings, "about_future_title").split(" ").map((w, idx) => (
+                    idx === s(settings, "about_future_title").split(" ").length - 1 ? (
+                      <span key={idx} className="gradient-text">{w} </span>
+                    ) : (
+                      w + " "
+                    )
+                  ))
+                ) : (
+                  <>The Future of <span className="gradient-text">Zupwell</span></>
+                )}
               </h2>
             </motion.div>
             <motion.div {...fadeUp(0.1)}
               className="card"
               style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#FFFFFF" }}>
-              <p className="leading-relaxed text-lg mb-6" style={{ color: "#4A5568", opacity: 0.85 }}>
-                {s(settings, "about_future")}
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                {[
-                  "Daily multivitamins & immune boosters",
-                  "Energy and focus formulations",
-                  "Specialized recovery blends",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-2 text-sm" style={{ color: "#4A5568", opacity: 0.8 }}>
-                    <span className="mt-0.5 shrink-0" style={{ color: "var(--or)" }}>→</span>
-                    {item}
-                  </div>
-                ))}
+              <div className="leading-relaxed text-lg mb-6" style={{ color: "#4A5568", opacity: 0.85 }}>
+                {(() => {
+                  const text = s(settings, "about_future");
+                  if (!text) return null;
+                  const lines = text.split("\n");
+                  return lines.map((line, idx) => {
+                    if (line.trim().startsWith("→")) {
+                      const itemText = line.replace(/^\s*→\s*/, "");
+                      return (
+                        <div key={idx} className="flex items-start gap-2 my-2 pl-4">
+                          <span className="shrink-0 font-black text-lg" style={{ color: "var(--or)" }}>→</span>
+                          <span className="font-bold text-[#0C1E39]">{itemText}</span>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={idx} className={line.trim() === "" ? "h-4" : ""}>
+                        {line}
+                      </div>
+                    );
+                  });
+                })()}
               </div>
+
             </motion.div>
           </div>
         </section>
@@ -240,7 +314,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-2xl text-center">
           <motion.div {...fadeUp(0)}>
             <h2 className="text-2xl font-black mb-4" style={{ color: "#FFFFFF" }}>
-              Ready to fuel your hustle?
+              {s(settings, "about_cta_title") || "Ready to fuel your hustle?"}
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-stretch max-w-sm mx-auto sm:max-w-none">
               <Link href="/products" className="w-full sm:w-auto">

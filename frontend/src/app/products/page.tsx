@@ -5,6 +5,7 @@ import Footer from "@/components/storefront/Footer";
 import ProductCard from "@/components/storefront/ProductCard";
 import { productsApi } from "@/lib/api";
 import { motion } from "framer-motion";
+import { useSettings } from "@/lib/useSettings";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -25,6 +26,11 @@ export default function ProductsPage() {
       });
   }, []);
 
+  const { raw: settingsRaw } = useSettings();
+  const shopBadge = settingsRaw["shop_badge"] || "⚡ FUEL YOUR HUSTLE";
+  const shopTitle = settingsRaw["shop_title"] || "Shop Product";
+  const shopSubtext = settingsRaw["shop_subtext"] || "Performance-driven nutrition.";
+
   return (
     <main className="min-h-screen flex flex-col justify-between" style={{ background: "var(--gy)" }}>
       <div>
@@ -32,14 +38,20 @@ export default function ProductsPage() {
 
         <div className="pt-32 pb-16 px-6 mx-auto max-w-7xl">
           <div className="text-center mb-12">
-            <span className="inline-block zbadge mb-4" style={{ background: "#0C1E39", color: "#FFFFFF", fontSize: "10px", letterSpacing: "1px" }}>
-              ⚡ FUEL YOUR HUSTLE
+            <span className="inline-block zbadge mb-4" style={{ background: "#0C1E39", color: "#FFFFFF", fontSize: "12px", letterSpacing: "1px" }}>
+              {shopBadge}
             </span>
             <h1 className="text-4xl md:text-6xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
-              Shop <span style={{ color: "var(--or)" }}>Product</span>
+              {shopTitle.split(" ").map((w, idx) => (
+                idx === shopTitle.split(" ").length - 1 ? (
+                  <span key={idx} style={{ color: "var(--or)" }}>{w} </span>
+                ) : (
+                  w + " "
+                )
+              ))}
             </h1>
             <p className="text-sm max-w-lg mx-auto" style={{ color: "#4A5568", fontWeight: 500 }}>
-              Performance-driven nutrition.
+              {shopSubtext}
             </p>
           </div>
 

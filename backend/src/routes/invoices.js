@@ -18,7 +18,7 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
     include: {
       order: {
         include: {
-          items:   { include: { product: { select: { name: true, hsnCode: true, unit: true } } } },
+          items:   { include: { product: { select: { name: true, hsnCode: true, unit: true } }, variant: true } },
           address: true,
           user:    { select: { name: true, email: true, phone: true } },
         },
@@ -40,7 +40,7 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
   const storeGstin     = settings.site_gstin      || "24XXXXXXXXXXXXX";
   const storeStateCode = settings.site_state_code || "24 (Gujarat)";
   const storeName      = settings.site_name        || "Zupwell";
-  const storeEmail     = settings.site_email       || "info@zupwell.com";
+  const storeEmail     = settings.site_email       || "support@zupwell.com";
   const storeAddress   = settings.site_address     || "A-102, Adarsh Lifestyle, New India Colony Road, Ahmedabad, Gujarat - 382350";
 
   res.setHeader("Content-Type", "application/pdf");
@@ -75,15 +75,17 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
   const payStatus = (invoice.order?.paymentStatus || "PENDING").toUpperCase();
   const isPaid = payStatus === "PAID" || payStatus === "SUCCESS";
 
-  // ── Tax: ALWAYS 2.5% CGST + 2.5% SGST — ignore stored DB rate ──
+  // ── Tax: Load dynamically from the linked order ──
   const subtotal      = Number(invoice.subtotal);
   const discountAmt   = Number(invoice.discountAmount || 0);
-  const cgstRate      = 2.5;
-  const sgstRate      = 2.5;
-  const cgstAmt       = +(subtotal * 0.025).toFixed(2);
-  const sgstAmt       = +(subtotal * 0.025).toFixed(2);
+  const cgstAmt       = Number(invoice.order?.cgstAmount || 0);
+  const sgstAmt       = Number(invoice.order?.sgstAmount || 0);
+  const taxable       = subtotal - discountAmt;
+  // Calculate effective rates to show in table headers
+  const cgstRate      = taxable > 0 ? +((cgstAmt / taxable) * 100).toFixed(2) : 2.5;
+  const sgstRate      = taxable > 0 ? +((sgstAmt / taxable) * 100).toFixed(2) : 2.5;
   const shippingAmt   = Number(invoice.order?.shippingCharge || 0);
-  const rawTotal      = subtotal - discountAmt + cgstAmt + sgstAmt + shippingAmt;
+  const rawTotal      = taxable + cgstAmt + sgstAmt + shippingAmt;
   const roundedTotal  = Math.round(rawTotal);
   const roundOffDiff  = +(roundedTotal - rawTotal).toFixed(2);
 
@@ -95,7 +97,7 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
 
   // Left: brand
   doc.fillColor(C.orange).font("Helvetica-Bold").fontSize(32).text("ZUPWELL", ML + 8, 26);
-  doc.fillColor(C.white).font("Helvetica").fontSize(8.5).text("B2B / B2C Packaging Materials", ML + 8, 66);
+  doc.fillColor(C.white).font("Helvetica").fontSize(8.5).text("Performance-Driven Nutrition", ML + 8, 66);
   doc.fillColor(C.grayL).fontSize(7.5).text(`GSTIN: ${storeGstin}   |   State: ${storeStateCode}`, ML + 8, 80);
 
   // Right: TAX INVOICE box
@@ -181,22 +183,29 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
 
   let rowY = tableY + 24;
   const items = invoice.order?.items || [];
+  const discountRatio = subtotal > 0 ? ((subtotal - discountAmt) / subtotal) : 1;
+
   items.forEach((item, i) => {
     const rh = 26;
     doc.rect(ML, rowY, CW, rh).fill(i % 2 === 0 ? C.white : C.offWhite);
     doc.rect(ML, rowY + rh - 1, CW, 1).fill(C.grayL);
 
-    const base = Number(item.unitPrice) * item.qty;
-    const itemCgst = base * (cgstRate / 100);
+    const baseRaw = Number(item.unitPrice) * item.qty;
+    const discountedBase = baseRaw * discountRatio;
+    const itemCgst = discountedBase * (cgstRate / 100);
+
+    const displayName = item.variant
+      ? `${item.product?.name || "-"} (${item.variant.variantName})`
+      : (item.product?.name || "-");
 
     const cells = [
-      item.product?.name || "-",
+      displayName,
       item.product?.hsnCode || "-",
       String(item.qty),
       item.product?.unit || "NOS",
       Number(item.unitPrice).toFixed(2),
       itemCgst.toFixed(2),
-      base.toFixed(2),
+      discountedBase.toFixed(2),
     ];
     cells.forEach((val, j) => {
       const rightAlign = j >= 4;

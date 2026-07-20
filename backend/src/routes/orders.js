@@ -3,6 +3,7 @@ const prisma = require("../utils/prisma");
 const { authUser } = require("../middleware/auth");
 const { generateOrderNumber, generateInvoiceNumber } = require("../utils/orderNumber");
 const baselinker = require("../utils/baselinker");
+const { calculateGst } = require("../utils/tax");
 
 // POST /api/orders - create order
 router.post("/", authUser, async (req, res) => {
@@ -24,18 +25,26 @@ router.post("/", authUser, async (req, res) => {
     });
     if (!product || !product.isActive) return res.status(400).json({ error: `Product ${item.productId} not found` });
 
-    // FIX: check stock before accepting order
-    const inv = product.inventory.find(i => i.variantId === (item.variantId || null));
-    if (!inv || inv.qtyInStock < item.qty) {
+    // FIX: check stock before accepting order, accounting for pack multiplier
+    const pack = Number(item.pack || 1);
+    const inv = product.inventory.find(i => (i.variantId || null) == (item.variantId || null));
+    if (!inv || inv.qtyInStock < (item.qty * pack)) {
       return res.status(400).json({ error: `Not enough stock for "${product.name}"` });
     }
 
     const unitPrice = item.variantId
-      ? product.variants.find(v => v.id === item.variantId)?.price || product.sellingPrice
+      ? product.variants.find(v => Number(v.id) === Number(item.variantId))?.price || product.sellingPrice
       : product.sellingPrice;
 
-    subtotal += Number(unitPrice) * item.qty;
-    orderItems.push({ productId: item.productId, variantId: item.variantId || null, qty: item.qty, unitPrice, hsnCode: product.hsnCode });
+    const finalUnitPrice = Number(unitPrice);
+    subtotal += finalUnitPrice * pack * item.qty;
+    orderItems.push({ 
+      productId: item.productId, 
+      variantId: item.variantId ? Number(item.variantId) : null, 
+      qty: item.qty * pack, 
+      unitPrice: finalUnitPrice, 
+      hsnCode: product.hsnCode 
+    });
   }
 
   // Coupon
@@ -52,18 +61,19 @@ router.post("/", authUser, async (req, res) => {
     }
   }
 
-  // GST (5% = 2.5% CGST + 2.5% SGST for intra-state Gujarat)
-  const taxableAmount = subtotal - discountAmount;
-  const cgstRate = 2.5, sgstRate = 2.5;
-  const cgstAmount = +(taxableAmount * cgstRate / 100).toFixed(2);
-  const sgstAmount = +(taxableAmount * sgstRate / 100).toFixed(2);
-  const shippingCharge = subtotal > 500 ? 0 : 50;
-  const totalAmount = taxableAmount + cgstAmount + sgstAmount + shippingCharge;
-
-  // Fetch store settings for seller info
+  // Fetch store settings
   const settingRows = await prisma.setting.findMany();
   const cfg = {};
   settingRows.forEach(r => { cfg[r.key] = r.value; });
+
+  // Dynamic shipping calculation (Free for prepaid Razorpay)
+  const freeThreshold = parseFloat(cfg.free_shipping_threshold || "500");
+  const defaultCharge = parseFloat(cfg.default_shipping_charge || "50");
+  const shippingCharge = paymentMethod === "razorpay" ? 0 : (subtotal >= freeThreshold ? 0 : defaultCharge);
+
+  // GST (split equally as CGST + SGST) — single shared implementation, see utils/tax.js
+  const { cgstRate, sgstRate, taxableAmount, cgstAmount, sgstAmount, totalAmount } =
+    calculateGst(subtotal, discountAmount, cfg.gst_rate, shippingCharge);
 
   const orderNumber = await generateOrderNumber();
 
@@ -98,7 +108,7 @@ router.post("/", authUser, async (req, res) => {
         data: {
           invoiceNumber, orderId: newOrder.id, userId: req.user.id,
           status: "issued",
-          subtotal, discountAmount, cgstRate: 2.5, sgstRate: 2.5, igstRate: 0,
+          subtotal, discountAmount, cgstRate, sgstRate, igstRate: 0,
           cgstAmount, sgstAmount, igstAmount: 0,
           totalAmount,
           sellerName:    cfg.site_name    || "Zupwell",
@@ -124,7 +134,7 @@ router.post("/", authUser, async (req, res) => {
   const full = await prisma.order.findUnique({
     where: { id: order.id },
     include: {
-      items:   { include: { product: { select: { name: true, sku: true } } } },
+      items:   { include: { product: { select: { name: true, sku: true } }, variant: true } },
       address: true,
       invoice: true,
     },
@@ -185,6 +195,37 @@ router.delete("/:id/cancel", authUser, async (req, res) => {
   });
 
   res.json({ message: "Order cancelled" });
+});
+
+// POST /api/orders/track - public tracking status requiring order number and phone
+router.post("/track", async (req, res) => {
+  try {
+    const { orderNumber, phone } = req.body;
+    if (!orderNumber || !phone) {
+      return res.status(400).json({ error: "Order number and phone are required" });
+    }
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+
+    const order = await prisma.order.findFirst({
+      where: {
+        orderNumber: orderNumber.trim().toUpperCase(),
+        address: { phone: { endsWith: cleanPhone } },
+      },
+      select: {
+        orderNumber: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        shippingCharge: true,
+        paymentMethod: true,
+        paymentStatus: true,
+      }
+    });
+    if (!order) return res.status(404).json({ error: "Order not found. Check your order number and phone." });
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch order status" });
+  }
 });
 
 // GET /api/orders/:orderNumber

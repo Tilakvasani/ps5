@@ -10,9 +10,7 @@
  */
 
 import { useEffect } from "react";
-
-const NODE_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com";
+import { API_URL as NODE_API_URL } from "@/lib/api";
 
 const PING_INTERVAL_MS = 14 * 60 * 1000; // 14 minutes
 

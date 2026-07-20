@@ -1,139 +1,366 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const jwt = require("jsonwebtoken");
 const prisma = require("../utils/prisma");
 const { signAccess } = require("../utils/jwt");
 const { authUser } = require("../middleware/auth");
+const { sendSMS } = require("../utils/sms");
 
-// ── Password strength validator ──────────────────────
-const isStrongPassword = (pwd) => {
-  if (pwd.length < 8) return "Password must be at least 8 characters";
-  if (!/[A-Z]/.test(pwd)) return "Password must contain at least one uppercase letter";
-  if (!/[a-z]/.test(pwd)) return "Password must contain at least one lowercase letter";
-  if (!/[0-9]/.test(pwd)) return "Password must contain at least one number";
-  if (!/[^A-Za-z0-9]/.test(pwd)) return "Password must contain at least one special character";
+const JWT_SECRET = process.env.JWT_SECRET;
+const PASSWORD_MIN_LENGTH = 8;
+
+// ── Helpers ──────────────────────────────────────────────────────────
+
+function cleanPhone(phone) {
+  return String(phone || "").replace(/\D/g, "").slice(-10);
+}
+
+function isEmailLike(identifier) {
+  return typeof identifier === "string" && identifier.includes("@");
+}
+
+// Reject anything that isn't actually a string of sane length — closes off
+// type-confusion payloads (objects/arrays passed where a string is expected)
+// before they ever reach Prisma or bcrypt.
+function isSafeString(value, maxLen = 255) {
+  return typeof value === "string" && value.length > 0 && value.length <= maxLen;
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Never leak internal error details to the client.
+function fail(res, status, message) {
+  return res.status(status).json({ error: message });
+}
+
+async function throttleOtp(phone) {
+  const recentCount = await prisma.otpCode.count({
+    where: { phone, createdAt: { gte: new Date(Date.now() - 60 * 60 * 1000) } },
+  });
+  return recentCount >= 3;
+}
+
+async function createAndSendOtp(phone, label = "verification code") {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const codeHash = await bcrypt.hash(otp, 10);
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+  await prisma.otpCode.create({ data: { phone, codeHash, expiresAt } });
+  await sendSMS(phone, `Your Zupwell ${label} is ${otp}. Valid for 5 minutes.`);
+  console.log(`\n🔑 [OTP] For mobile: +91 ${phone} => Code is: ${otp}\n`);
+}
+
+/** Validates + consumes an OTP for a phone. Returns {ok, error, status} */
+async function consumeOtp(phone, otp) {
+  const record = await prisma.otpCode.findFirst({
+    where: { phone, expiresAt: { gt: new Date() } },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (!record) return { ok: false, status: 400, error: "OTP expired or not found. Request a new one." };
+  if (record.attempts >= 5) return { ok: false, status: 429, error: "Too many incorrect attempts. Request a new OTP." };
+
+  const isValid = await bcrypt.compare(otp, record.codeHash);
+  if (!isValid) {
+    await prisma.otpCode.update({ where: { id: record.id }, data: { attempts: { increment: 1 } } });
+    return { ok: false, status: 400, error: "Invalid OTP code" };
+  }
+
+  await prisma.otpCode.delete({ where: { id: record.id } });
+  return { ok: true };
+}
+
+function signShortToken(payload, scope, expiresIn) {
+  return jwt.sign({ ...payload, scope }, JWT_SECRET, { expiresIn });
+}
+
+function verifyShortToken(token, expectedScope) {
+  const payload = jwt.verify(token, JWT_SECRET);
+  if (payload.scope !== expectedScope) throw new Error("Invalid token scope");
+  return payload;
+}
+
+function validatePasswordPair(password, confirmPassword) {
+  if (!isSafeString(password, 128) || !isSafeString(confirmPassword, 128)) {
+    return "Password and confirmation are required";
+  }
+  if (password !== confirmPassword) return "Passwords do not match";
+  if (password.length < PASSWORD_MIN_LENGTH) return `Password must be at least ${PASSWORD_MIN_LENGTH} characters`;
   return null;
-};
+}
 
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+function publicUser(user) {
+  return { id: user.id, name: user.name, email: user.email || "", phone: user.phone || "" };
+}
 
-// ── Google OAuth Setup ───────────────────────────────
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://ps5-hhvf.vercel.app";
-const BACKEND_URL  = process.env.BACKEND_URL  || "https://ps5-ufm2.onrender.com";
-
-passport.use(new GoogleStrategy({
-  clientID:     process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: `${BACKEND_URL}/api/auth/google/callback`,
-
-}, async (accessToken, refreshToken, profile, done) => {
+// ── STEP 1: Identify — single entry point for everyone ───────────────
+// Given a phone number, decide the next step without revealing whether
+// the number belongs to an admin: admin numbers and brand-new numbers
+// both simply receive an OTP, so the response can't be used to enumerate
+// admin accounts.
+router.post("/identify", async (req, res) => {
   try {
-    const email = profile.emails?.[0]?.value;
-    const name  = profile.displayName;
+    const phone = cleanPhone(req.body.phone);
+    if (phone.length !== 10) return fail(res, 400, "Please enter a valid 10-digit mobile number");
 
-    if (!email) return done(new Error("No email returned from Google"));
+    if (await throttleOtp(phone)) {
+      return fail(res, 429, "Too many requests for this number. Try again in an hour.");
+    }
 
-    // ✅ FIXED: upsert replaces find + create/update
-    // This is atomic — no race condition when 1000 users login at once
-    const user = await prisma.user.upsert({
-      where: { email },
-      update: {
-        googleId: profile.id, // link Google if account already exists
-      },
-      create: {
-        name,
-        email,
-        passwordHash: await bcrypt.hash(Math.random().toString(36), 12),
-        googleId: profile.id,
-        isActive: true,
+    const admin = await prisma.admin.findFirst({ where: { number: { contains: phone } } });
+    if (admin && admin.isActive) {
+      await createAndSendOtp(phone, "access code");
+      return res.json({ step: "otp" });
+    }
+
+    const user = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
+    if (user && user.passwordHash) {
+      return res.json({ step: "password" });
+    }
+
+    // Either a brand-new number, or an existing legacy (OTP-only) user
+    // who has never set a password yet — both need OTP verification next.
+    await createAndSendOtp(phone);
+    return res.json({ step: "otp" });
+  } catch (err) {
+    console.error("identify error:", err);
+    fail(res, 500, "Something went wrong. Please try again.");
+  }
+});
+
+// ── STEP 2a (existing user w/ password): direct login, no OTP ────────
+router.post("/login", async (req, res) => {
+  try {
+    const { identifier, password } = req.body;
+    if (!isSafeString(identifier, 255) || !isSafeString(password, 128)) {
+      return fail(res, 400, "Please enter your credentials");
+    }
+
+    // If this identifier belongs to an admin, never authenticate them here
+    // directly — silently kick off the phone-OTP gate instead (2nd factor
+    // credentials are checked afterwards via /api/admin/auth/login).
+    const admin = isEmailLike(identifier)
+      ? await prisma.admin.findFirst({ where: { email: { equals: identifier.toLowerCase().trim(), mode: "insensitive" } } })
+      : await prisma.admin.findFirst({ where: { number: { contains: cleanPhone(identifier) } } });
+
+    if (admin && admin.isActive && admin.number) {
+      const adminPhone = cleanPhone(admin.number);
+      if (await throttleOtp(adminPhone)) {
+        return fail(res, 429, "Too many requests. Try again in an hour.");
+      }
+      await createAndSendOtp(adminPhone, "access code");
+      return res.json({ step: "admin-otp-required", phone: adminPhone });
+    }
+
+    const user = isEmailLike(identifier)
+      ? await prisma.user.findUnique({ where: { email: identifier.toLowerCase().trim() } })
+      : await prisma.user.findFirst({ where: { phone: { endsWith: cleanPhone(identifier) } } });
+
+    if (!user || !user.isActive) return fail(res, 401, "Invalid credentials");
+    if (!user.passwordHash) {
+      return fail(res, 400, "No password set for this account yet. Use 'Forgot password?' below to set one via OTP.");
+    }
+
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      const mins = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
+      return fail(res, 423, `Account temporarily locked. Try again in ${mins} minute(s).`);
+    }
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
+      const attempts = user.failedLoginAttempts + 1;
+      let lockedUntil = null;
+      if (attempts >= 5) lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
+      else if (attempts >= 3) lockedUntil = new Date(Date.now() + 5 * 60 * 1000);
+      await prisma.user.update({ where: { id: user.id }, data: { failedLoginAttempts: attempts, lockedUntil } });
+      if (attempts >= 5) return fail(res, 423, "Account temporarily locked. Try again in 30 minutes.");
+      if (attempts >= 3) return fail(res, 429, "Too many failed attempts. Try again in 5 minutes.");
+      return fail(res, 401, "Invalid credentials");
+    }
+
+    await prisma.user.update({ where: { id: user.id }, data: { failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() } });
+
+    const token = signAccess({ id: user.id, role: "user" });
+    res.json({ step: "logged-in", accessToken: token, user: publicUser(user) });
+  } catch (err) {
+    console.error("login error:", err);
+    fail(res, 500, "Login failed. Please try again.");
+  }
+});
+
+// ── STEP 2b: Verify the identify OTP, branch into the right next step ─
+router.post("/verify-identify-otp", async (req, res) => {
+  try {
+    const phone = cleanPhone(req.body.phone);
+    const otp = req.body.otp;
+    if (phone.length !== 10 || !isSafeString(otp, 6)) return fail(res, 400, "Phone number and OTP code are required");
+
+    const result = await consumeOtp(phone, otp);
+    if (!result.ok) return fail(res, result.status, result.error);
+
+    const admin = await prisma.admin.findFirst({ where: { number: { contains: phone } } });
+    if (admin && admin.isActive) {
+      const gateToken = signShortToken({ adminId: admin.id }, "admin-gate", "5m");
+      return res.json({ step: "admin-credentials", gateToken });
+    }
+
+    const user = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
+    if (user && !user.passwordHash) {
+      const setupToken = signShortToken({ phone }, "otp-setup", "10m");
+      return res.json({ step: "set-password", setupToken });
+    }
+    if (user && user.passwordHash) {
+      // Edge case: password already set between identify() and here — just log them in.
+      const token = signAccess({ id: user.id, role: "user" });
+      return res.json({ step: "logged-in", accessToken: token, user: publicUser(user) });
+    }
+
+    const setupToken = signShortToken({ phone }, "otp-register", "10m");
+    res.json({ step: "register", setupToken });
+  } catch (err) {
+    console.error("verify-identify-otp error:", err);
+    fail(res, 500, "Something went wrong. Please try again.");
+  }
+});
+
+// ── STEP 3a: Brand-new user completes registration ────────────────────
+router.post("/complete-registration", async (req, res) => {
+  try {
+    const { setupToken, name, email, password, confirmPassword, notified } = req.body;
+    if (!isSafeString(setupToken, 2000)) return fail(res, 400, "Session expired. Please start again.");
+
+    let payload;
+    try {
+      payload = verifyShortToken(setupToken, "otp-register");
+    } catch {
+      return fail(res, 400, "Session expired. Please verify your number again.");
+    }
+
+    if (!isSafeString(name, 120) || !name.trim()) return fail(res, 400, "Full name is required");
+    const pwError = validatePasswordPair(password, confirmPassword);
+    if (pwError) return fail(res, 400, pwError);
+
+    const phone = payload.phone;
+    const existing = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
+    if (existing) return fail(res, 409, "An account with this number already exists. Please log in instead.");
+
+    const cleanEmail = isSafeString(email, 255) && email.trim() ? email.toLowerCase().trim() : null;
+    if (cleanEmail && !EMAIL_RE.test(cleanEmail)) return fail(res, 400, "Please enter a valid email address.");
+    if (cleanEmail) {
+      const emailExists = await prisma.user.findUnique({ where: { email: cleanEmail } });
+      if (emailExists) return fail(res, 400, "Email is already in use by another account.");
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({
+      data: {
+        phone,
+        name: name.trim(),
+        email: cleanEmail,
+        passwordHash,
+        notified: notified === true || notified === "true",
+        isVerified: true,
+        lastLoginAt: new Date(),
       },
     });
 
-    console.log("✅ Google login success:", email);
-    return done(null, user);
-
-  } catch (err) {
-    console.error("❌ GOOGLE AUTH ERROR:", err);
-    return done(err);
-  }
-}));
-
-router.use(passport.initialize());
-
-// ── Google OAuth Routes ──────────────────────────────
-router.get("/google",
-  passport.authenticate("google", { scope: ["profile", "email"], session: false })
-);
-
-router.get("/google/callback", (req, res, next) => {
-  passport.authenticate("google", { session: false }, (err, user) => {
-    if (err) {
-      console.error("❌ GOOGLE CALLBACK ERROR:", err.message);
-      return res.redirect(`${FRONTEND_URL}/login?error=google_failed`);
-    }
-
-    if (!user) {
-      console.error("❌ GOOGLE CALLBACK: No user returned");
-      return res.redirect(`${FRONTEND_URL}/login?error=google_failed`);
-    }
-
     const token = signAccess({ id: user.id, role: "user" });
-    console.log("✅ Google login success, redirecting to frontend");
-    res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}&name=${encodeURIComponent(user.name)}`);
-  })(req, res, next);
+    res.json({ accessToken: token, user: publicUser(user) });
+  } catch (err) {
+    console.error("complete-registration error:", err);
+    fail(res, 500, "Registration failed. Please try again.");
+  }
 });
 
-// ── Register ─────────────────────────────────────────
-router.post("/register", async (req, res) => {
-  const { name, email, phone, password } = req.body;
-  if (!name || !email || !password) return res.status(400).json({ error: "Name, email and password are required" });
-  if (name.trim().length < 2) return res.status(400).json({ error: "Name must be at least 2 characters" });
-  if (!isValidEmail(email)) return res.status(400).json({ error: "Invalid email address" });
+// ── STEP 3b: Legacy (OTP-only) user sets their first password ─────────
+router.post("/complete-password-setup", async (req, res) => {
+  try {
+    const { setupToken, password, confirmPassword } = req.body;
+    if (!isSafeString(setupToken, 2000)) return fail(res, 400, "Session expired. Please start again.");
 
-  const pwdError = isStrongPassword(password);
-  if (pwdError) return res.status(400).json({ error: pwdError });
+    let payload;
+    try {
+      payload = verifyShortToken(setupToken, "otp-setup");
+    } catch {
+      return fail(res, 400, "Session expired. Please verify your number again.");
+    }
 
-  const existing = await prisma.user.findFirst({ where: { OR: [{ email }, { phone: phone || undefined }] } });
-  if (existing) return res.status(409).json({ error: "Email or phone already registered" });
+    const pwError = validatePasswordPair(password, confirmPassword);
+    if (pwError) return fail(res, 400, pwError);
 
-  const passwordHash = await bcrypt.hash(password, 12);
-  const user = await prisma.user.create({
-    data: { name: name.trim(), email: email.toLowerCase().trim(), phone: phone || null, passwordHash }
-  });
+    const user = await prisma.user.findFirst({ where: { phone: { endsWith: payload.phone } } });
+    if (!user) return fail(res, 404, "Account not found");
 
-  const accessToken = signAccess({ id: user.id, role: "user" });
-  res.status(201).json({
-    accessToken,
-    user: { id: user.id, name: user.name, email: user.email, phone: user.phone },
-  });
+    const passwordHash = await bcrypt.hash(password, 10);
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash, failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() },
+    });
+
+    const token = signAccess({ id: updated.id, role: "user" });
+    res.json({ accessToken: token, user: publicUser(updated) });
+  } catch (err) {
+    console.error("complete-password-setup error:", err);
+    fail(res, 500, "Something went wrong. Please try again.");
+  }
 });
 
-// ── Login ─────────────────────────────────────────────
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: "Email and password required" });
+// ── Forgot password (OTP-based) ────────────────────────────────────────
+router.post("/forgot-password-request", async (req, res) => {
+  try {
+    const phone = cleanPhone(req.body.phone);
+    if (phone.length !== 10) return fail(res, 400, "Please enter a valid 10-digit mobile number");
 
-  const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
-  if (!user || !user.isActive) return res.status(401).json({ error: "Invalid credentials" });
+    if (await throttleOtp(phone)) {
+      return fail(res, 429, "Too many requests for this number. Try again in an hour.");
+    }
 
-  const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) return res.status(401).json({ error: "Invalid credentials" });
-
-  const accessToken = signAccess({ id: user.id, role: "user" });
-  res.json({
-    accessToken,
-    user: { id: user.id, name: user.name, email: user.email, phone: user.phone },
-  });
+    const user = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
+    // Always respond identically whether or not the number is registered,
+    // to avoid leaking account existence — only actually send an OTP if found.
+    if (user && user.isActive) {
+      await createAndSendOtp(phone, "password reset code");
+    }
+    res.json({ message: "If this number is registered, an OTP has been sent." });
+  } catch (err) {
+    console.error("forgot-password-request error:", err);
+    fail(res, 500, "Something went wrong. Please try again.");
+  }
 });
 
-// ── Logout ────────────────────────────────────────────
-router.post("/logout", (req, res) => res.json({ message: "Logged out" }));
+router.post("/forgot-password-verify", async (req, res) => {
+  try {
+    const phone = cleanPhone(req.body.phone);
+    const { otp, password, confirmPassword } = req.body;
+    if (phone.length !== 10 || !isSafeString(otp, 6)) return fail(res, 400, "Phone number and OTP code are required");
 
-// ── Me ────────────────────────────────────────────────
+    const pwError = validatePasswordPair(password, confirmPassword);
+    if (pwError) return fail(res, 400, pwError);
+
+    const result = await consumeOtp(phone, otp);
+    if (!result.ok) return fail(res, result.status, result.error);
+
+    const user = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
+    if (!user) return fail(res, 400, "Invalid request");
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash, failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() },
+    });
+
+    const token = signAccess({ id: updated.id, role: "user" });
+    res.json({ accessToken: token, user: publicUser(updated) });
+  } catch (err) {
+    console.error("forgot-password-verify error:", err);
+    fail(res, 500, "Something went wrong. Please try again.");
+  }
+});
+
+// ── Session ─────────────────────────────────────────────────────────
 router.get("/me", authUser, (req, res) => {
-  const { id, name, email, phone } = req.user;
-  res.json({ id, name, email, phone });
+  res.json(publicUser(req.user));
 });
+
+router.post("/logout", (req, res) => res.json({ message: "Logged out" }));
 
 module.exports = router;

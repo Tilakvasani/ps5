@@ -34,8 +34,8 @@ export default function LegalPage({
           <h1 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#FFFFFF", letterSpacing: "-0.04em" }}>
             {title}
           </h1>
-          {subtitle && <p className="mb-2 text-sm" style={{ color: "#F8F8F8", opacity: 0.85 }}>{subtitle}</p>}
-          {updated && <p className="text-xs" style={{ color: "#F8F8F8", opacity: 0.65 }}>Last updated: {updated}</p>}
+          {subtitle && <p className="mb-2 text-sm whitespace-pre-line" style={{ color: "#F8F8F8", opacity: 0.85 }}>{subtitle}</p>}
+          {updated && <p className="text-xs" style={{ color: "#F8F8F8", opacity: 0.65 }}>{updated}</p>}
         </div>
       </div>
 
@@ -54,7 +54,7 @@ export default function LegalPage({
                   ))}
                 </ul>
               ) : (
-                <p className="leading-relaxed text-sm" style={{ color: "#4A5568" }}>{s.body}</p>
+                <p className="leading-relaxed text-sm whitespace-pre-line" style={{ color: "#4A5568" }}>{s.body}</p>
               )}
             </div>
           ))}

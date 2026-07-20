@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import LegalPage from "@/components/storefront/LegalPage";
-import { fetchSettings } from "@/lib/useSettings";
+import { useSettings } from "@/lib/useSettings";
 
 const DEFAULT_SECTIONS = [
   { title: "Processing Time", body: "All orders are processed within 1-2 business days (Monday–Saturday, excluding public holidays) from our warehouse in Ahmedabad, Gujarat." },
@@ -14,21 +14,19 @@ const DEFAULT_SECTIONS = [
   { title: "Shipping Charges", body: "A nominal shipping charge may apply. The exact amount, if any, will be displayed at checkout before you complete your order." },
   { title: "Courier Partners", body: "We ship via reputed courier partners. A tracking number will be shared via SMS/email once your order is dispatched so you can track it in real time." },
   { title: "Bulk / B2B Orders", body: "For bulk B2B orders, shipping timelines and charges may differ. Please contact us for a custom shipping quote." },
-  { title: "Damaged or Lost Shipments", body: "If your order arrives damaged or is lost in transit, please contact us within 48 hours of delivery (or expected delivery). We will work with the courier to resolve the issue or arrange a replacement." },
+  { title: "Damaged or Lost Shipments", body: "If your order arrives damaged or is lost in transit, please contact us within 24 hours of delivery (or expected delivery). We will work with the courier to resolve the issue or arrange a replacement." },
 ];
 
 export default function ShippingPolicy() {
-  const [settings, setSettings] = useState<Record<string, string>>({});
+  const { raw: settings, loading } = useSettings();
 
-  useEffect(() => {
-    fetchSettings().then(setSettings).catch(() => {});
-    const onBust = (e: StorageEvent) => {
-      if (e.key === "zupwell-settings-bust")
-        fetchSettings().then(setSettings).catch(() => {});
-    };
-    window.addEventListener("storage", onBust);
-    return () => window.removeEventListener("storage", onBust);
-  }, []);
+  if (loading) return (
+    <main style={{ minHeight: "100vh", background: "var(--gy)" }}>
+      <div className="flex items-center justify-center pt-40">
+        <div className="h-8 w-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--or)" }} />
+      </div>
+    </main>
+  );
 
   let sections = DEFAULT_SECTIONS;
   if (settings.policy_shipping_sections_json) {

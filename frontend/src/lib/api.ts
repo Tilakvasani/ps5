@@ -1,6 +1,19 @@
 import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+let baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+if (typeof window !== "undefined") {
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+  const isIpAddress = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname);
+
+  if (!process.env.NEXT_PUBLIC_API_URL && (isLocalhost || isIpAddress)) {
+    const protocol = window.location.protocol;
+    baseUrl = `${protocol}//${hostname}:8000`;
+  }
+}
+
+export const API_URL = baseUrl;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -35,11 +48,12 @@ api.interceptors.response.use(
   (err) => {
     const msg = err.response?.data?.error || err.message || "Something went wrong";
     if (err.response?.status === 401) {
-      if (typeof window !== "undefined") {
-        if (window.location.pathname.startsWith("/admin") && window.location.pathname !== "/admin/login") {
-          localStorage.removeItem("zupwell-admin");
-          window.location.href = "/admin/login";
-        }
+      if (typeof window !== "undefined" && window.location.pathname.startsWith("/admin")) {
+        localStorage.removeItem("zupwell-admin");
+        try {
+          const { clearAdminAuthCookie } = require("./auth-cookie");
+          clearAdminAuthCookie();
+        } catch (e) {}
       }
     }
     return Promise.reject(new Error(msg));
@@ -47,11 +61,23 @@ api.interceptors.response.use(
 );
 
 // ── Auth ──────────────────────────────────────────
+// Single entry point (phone) branches into: admin gate / password login /
+// OTP-based registration or first-time password setup.
 export const authApi = {
-  register: (data: { name: string; email: string; phone: string; password: string }) =>
-    api.post("/api/auth/register", data).then((r) => r.data),
-  login: (email: string, password: string) =>
-    api.post("/api/auth/login", { email, password }).then((r) => r.data),
+  identify: (phone: string) =>
+    api.post("/api/auth/identify", { phone }).then((r) => r.data),
+  login: (identifier: string, password: string) =>
+    api.post("/api/auth/login", { identifier, password }).then((r) => r.data),
+  verifyIdentifyOtp: (phone: string, otp: string) =>
+    api.post("/api/auth/verify-identify-otp", { phone, otp }).then((r) => r.data),
+  completeRegistration: (data: { setupToken: string; name: string; email?: string; password: string; confirmPassword: string; notified: boolean }) =>
+    api.post("/api/auth/complete-registration", data).then((r) => r.data),
+  completePasswordSetup: (data: { setupToken: string; password: string; confirmPassword: string }) =>
+    api.post("/api/auth/complete-password-setup", data).then((r) => r.data),
+  forgotPasswordRequest: (phone: string) =>
+    api.post("/api/auth/forgot-password-request", { phone }).then((r) => r.data),
+  forgotPasswordVerify: (data: { phone: string; otp: string; password: string; confirmPassword: string }) =>
+    api.post("/api/auth/forgot-password-verify", data).then((r) => r.data),
   logout: () => api.post("/api/auth/logout").then((r) => r.data),
   me: () => api.get("/api/auth/me").then((r) => r.data),
 };
@@ -89,6 +115,8 @@ export const ordersApi = {
   // Cancel a pending unpaid order (called when Razorpay is dismissed or fails)
   cancel: (orderId: number) =>
     api.delete(`/api/orders/${orderId}/cancel`).then((r) => r.data),
+  track: (orderNumber: string, phone: string) =>
+    api.post("/api/orders/track", { orderNumber, phone }).then((r) => r.data),
 };
 
 // ── Payments ──────────────────────────────────────
@@ -155,8 +183,14 @@ export const accountApi = {
 
 // ── Admin ─────────────────────────────────────────
 export const adminApi = {
-  login: (email: string, password: string) =>
-    api.post("/api/admin/auth/login", { email, password }).then((r) => r.data),
+  // The phone + OTP "gate" step lives in authApi (identify / verifyIdentifyOtp)
+  // so admin and regular-user login share one entry page. This is the
+  // second factor: email + password, checked against the gate token that
+  // step issued, finalized into the 8-hour admin JWT.
+  login: (email: string, password: string, gateToken: string) =>
+    api.post("/api/admin/auth/login", { email, password, gateToken }).then((r) => r.data),
+  me: () =>
+    api.get("/api/admin/auth/me").then((r) => r.data),
 
   dashboard: () => api.get("/api/admin/dashboard/stats").then((r) => r.data),
   revenueChart: (days = 30) => api.get(`/api/admin/dashboard/revenue-chart?days=${days}`).then((r) => r.data),

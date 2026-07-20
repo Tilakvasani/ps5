@@ -32,16 +32,21 @@ export function useLogout() {
 
 // ── Admin Auth ────────────────────────────────────────────────────────────────
 
+import { clearAdminAuthCookie } from "./auth-cookie";
+
 /**
  * useAdminLogout — handles admin logout.
- * Clears localStorage admin token, redirects to admin login.
+ * Clears localStorage admin token, redirects to the single unified login page.
  */
 export function useAdminLogout() {
   const router = useRouter();
 
   return () => {
     localStorage.removeItem("zupwell-admin");
-    router.push("/admin/login");
+    try {
+      clearAdminAuthCookie();
+    } catch (e) {}
+    router.push("/login");
   };
 }
 

@@ -7,6 +7,7 @@ import { ShoppingCart, Menu, X, HeartPulse, User, LogOut, Search } from "lucide-
 import { useStore } from "@/lib/store";
 import { useLogout } from "@/lib/useAuth";
 import { productsApi } from "@/lib/api";
+import { cldOptimize } from "@/lib/utils";
 import { useSettings } from "@/lib/useSettings";
 
 export default function Navbar() {
@@ -63,6 +64,7 @@ export default function Navbar() {
     ["SHOP",        "/products"],
     ["SCIENCE",     "/science"],
     ["ABOUT",       "/about"],
+    ["TRACK ORDER", "/track-order"],
     ["FAQs",        "/faqs"],
     ["CONTACT",     "/contact"],
   ];
@@ -137,6 +139,7 @@ export default function Navbar() {
               href="/cart"
               className="relative p-2 transition-colors"
               style={{ color: "#0C1E39" }}
+              aria-label={`Cart${cartCount > 0 ? ` (${cartCount} items)` : ""}`}
               onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = "#FF5C00"}
               onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = "#0C1E39"}
             >
@@ -253,6 +256,7 @@ export default function Navbar() {
               className="md:hidden transition-colors p-1"
               style={{ color: "#0C1E39" }}
               onClick={() => setMenuOpen(!menuOpen)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
             >
               {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -342,6 +346,7 @@ export default function Navbar() {
                   <button
                     onClick={() => setShowSearch(false)}
                     className="p-2 rounded-full hover:bg-black/5 transition-colors text-gray-500 hover:text-[#0C1E39]"
+                    aria-label="Close search"
                   >
                     <X size={22} />
                   </button>
@@ -372,8 +377,12 @@ export default function Navbar() {
                           >
                             {primaryImage ? (
                               <img
-                                src={primaryImage}
+                                src={cldOptimize(primaryImage, 112)}
                                 alt={product.name}
+                                width={112}
+                                height={112}
+                                loading="lazy"
+                                decoding="async"
                                 className="h-14 w-14 rounded-xl object-cover bg-black/5"
                               />
                             ) : (
