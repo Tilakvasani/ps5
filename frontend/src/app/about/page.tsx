@@ -162,7 +162,7 @@ export default function AboutPage() {
           {/* Visual block */}
           <motion.div {...fadeUp(0.1)} className="grid grid-cols-2 gap-4">
             {[
-              { val: s(settings, "hero_stat1_value") || "200+", label: s(settings, "hero_stat1_label") || "Products" },
+              { val: s(settings, "hero_stat1_value") || "200+", label: s(settings, "hero_stat1_label") || "Product" },
               { val: s(settings, "hero_stat2_value") || "50K+", label: s(settings, "hero_stat2_label") || "Customers" },
               { val: s(settings, "hero_stat3_value") || "100%", label: s(settings, "hero_stat3_label") || "Authentic" },
               { val: "5-7",  label: "Days Delivery" },
