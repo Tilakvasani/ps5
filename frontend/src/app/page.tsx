@@ -37,8 +37,6 @@ const D = {
   founder_title:   "Founder & CEO",
   founder_message: "At Zupwell, I started with a simple observation: traditional supplements often feel like a chore — hard to swallow, slow to absorb, and difficult to integrate into a busy life. I founded Zupwell to bridge the gap between clinical effectiveness and modern convenience. Through Zupwell, my endeavor is to ensure that everyone can fulfil their dreams without compromising their health.",
   founder_photo:   "",
-  hero_image:      "",
-  hero_image_link: "/products",
 };
 
 const s = (settings: Record<string, string>, key: string) =>
@@ -418,20 +416,12 @@ export default function HomePage() {
 
           {/* Right Column: Premium Mockup display */}
           <div className="lg:col-span-5 flex justify-center items-center relative">
-<<<<<<< HEAD
             <Link href={featuredProduct ? `/products/${featuredProduct.slug}` : "/products"} className="w-full max-w-[420px] aspect-[4/5] block">
-=======
-            <Link href={s(settings, "hero_image_link") || (featuredProduct ? `/products/${featuredProduct.slug}` : "/products")} className="w-full max-w-[420px] aspect-[4/5] block">
->>>>>>> 3bf54fbd9a12ff4e65d422727741f10564305b9f
               <motion.div 
                 whileHover={{ y: -5, scale: 1.02 }}
                 className="w-full h-full rounded-2xl overflow-hidden border-2 border-[#0C1E39] cursor-pointer relative"
                 style={{ 
-<<<<<<< HEAD
                   backgroundImage: `url(${featuredProduct?.images?.[0]?.imageUrl || ""})`,
-=======
-                  backgroundImage: `url(${s(settings, "hero_image") || featuredProduct?.images?.[0]?.imageUrl || ""})`,
->>>>>>> 3bf54fbd9a12ff4e65d422727741f10564305b9f
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                   boxShadow: "0 24px 64px rgba(0, 0, 0, 0.4)"

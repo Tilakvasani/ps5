@@ -35,11 +35,6 @@ const defaults = [
   { key: "hero_stat2_label", value: "Happy Customers", group: "home" },
   { key: "hero_stat3_value", value: "100%",            group: "home" },
   { key: "hero_stat3_label", value: "Authentic",       group: "home" },
-<<<<<<< HEAD
-=======
-  { key: "hero_image",       value: "",                group: "home" },
-  { key: "hero_image_link",  value: "/products",       group: "home" },
->>>>>>> 3bf54fbd9a12ff4e65d422727741f10564305b9f
 
   // Home Features Settings
   { key: "feature1_title", value: "Science-Backed",    group: "home" },

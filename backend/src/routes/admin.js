@@ -9,7 +9,55 @@ const { sanitizeBody, validatePagination, validateProductBody, validateOrderStat
 const { sendSMS } = require("../utils/sms");
 const jwt = require("jsonwebtoken");
 
+function cleanPhone(phone) {
+  return String(phone || "").replace(/\D/g, "").slice(-10);
+}
+
 // ── Admin Auth ────────────────────────────────────────
+// NOTE: the phone-number gate for admin login issues a short-lived token
+// that is later validated when credentials are submitted.
+router.post("/auth/check-number", async (req, res) => {
+  try {
+    const phone = cleanPhone(req.body.phone);
+    if (phone.length !== 10) {
+      return res.status(400).json({ error: "Please enter a valid 10-digit phone number" });
+    }
+
+    const admin = await prisma.admin.findFirst({ where: { number: { contains: phone } } });
+    if (!admin || !admin.isActive) {
+      return res.status(401).json({ error: "Unauthorized phone number" });
+    }
+
+    const gateToken = jwt.sign({ adminId: admin.id, scope: "admin-gate" }, process.env.JWT_SECRET, { expiresIn: "5m" });
+    res.json({ gateToken });
+  } catch (err) {
+    console.error("admin/check-number error:", err);
+    res.status(500).json({ error: "Failed to verify admin number" });
+  }
+});
+
+router.post("/auth/verify-gate", async (req, res) => {
+  try {
+    const gateToken = req.body.gateToken;
+    if (typeof gateToken !== "string" || !gateToken) {
+      return res.status(400).json({ error: "Gate token is required" });
+    }
+
+    try {
+      const payload = jwt.verify(gateToken, process.env.JWT_SECRET);
+      if (payload.scope !== "admin-gate") {
+        return res.json({ valid: false });
+      }
+      return res.json({ valid: true });
+    } catch (err) {
+      return res.json({ valid: false });
+    }
+  } catch (err) {
+    console.error("admin/verify-gate error:", err);
+    res.status(500).json({ error: "Failed to verify gate token" });
+  }
+});
+
 // NOTE: the phone-number + OTP "gate" step now lives in /api/auth
 // (identify → verify-identify-otp) so that admin and regular-user login
 // share a single entry page. This route only handles the second factor:

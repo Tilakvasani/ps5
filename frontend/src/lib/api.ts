@@ -189,6 +189,10 @@ export const adminApi = {
   // step issued, finalized into the 8-hour admin JWT.
   login: (email: string, password: string, gateToken: string) =>
     api.post("/api/admin/auth/login", { email, password, gateToken }).then((r) => r.data),
+  checkNumber: (phone: string) =>
+    api.post("/api/admin/auth/check-number", { phone }).then((r) => r.data),
+  verifyGate: (gateToken: string) =>
+    api.post("/api/admin/auth/verify-gate", { gateToken }).then((r) => r.data),
   me: () =>
     api.get("/api/admin/auth/me").then((r) => r.data),
 
