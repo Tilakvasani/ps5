@@ -338,6 +338,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       <AnimatePresence>
         {stickyVisible && (
           <motion.div
+            key="sticky-buy-bar"
             initial={{ y: -72, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -72, opacity: 0 }}
@@ -983,105 +984,102 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
         </div>
       </div>
       {/* ── Zoom Lightbox Modal ── */}
-      <AnimatePresence>
-        {isZoomOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex flex-col bg-black/95 select-none"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 text-white z-10">
-              <span className="text-sm font-semibold opacity-75">
-                Image {activeImage + 1} of {images.length}
-              </span>
-              <button 
-                onClick={() => { setIsZoomOpen(false); setZoomScale(1); }}
-                className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
+      {isZoomOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex flex-col bg-black/95 select-none"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 text-white z-10">
+            <span className="text-sm font-semibold opacity-75">
+              Image {activeImage + 1} of {images.length}
+            </span>
+            <button 
+              onClick={() => { setIsZoomOpen(false); setZoomScale(1); }}
+              className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
 
-            {/* Main Interactive Zoom View */}
-            <div className="flex-1 w-full flex items-center justify-center relative overflow-hidden">
-              {/* Prev Button */}
-              {images.length > 1 && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setZoomScale(1);
-                    setActiveImage((prev) => (prev - 1 + images.length) % images.length);
-                  }}
-                  className="absolute left-4 h-10 w-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-[#0C1E39] z-10 transition-colors shadow-lg"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-              )}
-
-              {/* Next Button */}
-              {images.length > 1 && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setZoomScale(1);
-                    setActiveImage((prev) => (prev + 1) % images.length);
-                  }}
-                  className="absolute right-4 h-10 w-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-[#0C1E39] z-10 transition-colors shadow-lg"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              )}
-
-              <motion.div
-                className="w-full h-full flex items-center justify-center overflow-hidden"
-                style={{ cursor: zoomScale === 1 ? "zoom-in" : "zoom-out" }}
-                onMouseMove={handleMouseMove}
-                onClick={handleImageClick}
-                drag={zoomScale === 1 ? "x" : false}
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.2}
-                onDragEnd={(e, info) => {
-                  if (zoomScale > 1) return;
-                  const swipeThreshold = 50;
-                  if (info.offset.x < -swipeThreshold) {
-                    // Swipe Left -> Next
-                    setZoomScale(1);
-                    setActiveImage((prev) => (prev + 1) % images.length);
-                  } else if (info.offset.x > swipeThreshold) {
-                    // Swipe Right -> Prev
-                    setZoomScale(1);
-                    setActiveImage((prev) => (prev - 1 + images.length) % images.length);
-                  }
+          {/* Main Interactive Zoom View */}
+          <div className="flex-1 w-full flex items-center justify-center relative overflow-hidden">
+            {/* Prev Button */}
+            {images.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoomScale(1);
+                  setActiveImage((prev) => (prev - 1 + images.length) % images.length);
                 }}
+                className="absolute left-4 h-10 w-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-[#0C1E39] z-10 transition-colors shadow-lg"
               >
-                {images[activeImage]?.imageUrl ? (
-                  <img
-                    src={cldOptimize(images[activeImage].imageUrl, 1200)}
-                    alt=""
-                    className="max-w-full max-h-[72vh] md:max-h-[85vh] object-contain transition-transform duration-200 select-none pointer-events-none"
-                    style={{
-                      transform: `scale(${zoomScale})`,
-                      transformOrigin: `${panOrigin.x * 100}% ${panOrigin.y * 100}%`,
-                    }}
-                  />
-                ) : (
-                  <Package size={80} className="text-white/20" />
-                )}
-              </motion.div>
-            </div>
+                <ChevronLeft size={20} />
+              </button>
+            )}
 
-            {/* Instruction Footer */}
-            <div className="p-4 text-center text-xs text-white/50 z-10">
-              {zoomScale === 1 ? "Click the image to zoom in. Move mouse to pan." : "Click to zoom out."}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {/* Next Button */}
+            {images.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoomScale(1);
+                  setActiveImage((prev) => (prev + 1) % images.length);
+                }}
+                className="absolute right-4 h-10 w-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-[#0C1E39] z-10 transition-colors shadow-lg"
+              >
+                <ChevronRight size={20} />
+              </button>
+            )}
+
+            <motion.div
+              className="w-full h-full flex items-center justify-center overflow-hidden"
+              style={{ cursor: zoomScale === 1 ? "zoom-in" : "zoom-out" }}
+              onMouseMove={handleMouseMove}
+              onClick={handleImageClick}
+              drag={zoomScale === 1 ? "x" : false}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(e, info) => {
+                if (zoomScale > 1) return;
+                const swipeThreshold = 50;
+                if (info.offset.x < -swipeThreshold) {
+                  // Swipe Left -> Next
+                  setZoomScale(1);
+                  setActiveImage((prev) => (prev + 1) % images.length);
+                } else if (info.offset.x > swipeThreshold) {
+                  // Swipe Right -> Prev
+                  setZoomScale(1);
+                  setActiveImage((prev) => (prev - 1 + images.length) % images.length);
+                }
+              }}
+            >
+              {images[activeImage]?.imageUrl ? (
+                <img
+                  src={cldOptimize(images[activeImage].imageUrl, 1200)}
+                  alt=""
+                  className="max-w-full max-h-[72vh] md:max-h-[85vh] object-contain transition-transform duration-200 select-none pointer-events-none"
+                  style={{
+                    transform: `scale(${zoomScale})`,
+                    transformOrigin: `${panOrigin.x * 100}% ${panOrigin.y * 100}%`,
+                  }}
+                />
+              ) : (
+                <Package size={80} className="text-white/20" />
+              )}
+            </motion.div>
+          </div>
+
+          {/* Instruction Footer */}
+          <div className="p-4 text-center text-xs text-white/50 z-10">
+            {zoomScale === 1 ? "Click the image to zoom in. Move mouse to pan." : "Click to zoom out."}
+          </div>
+        </motion.div>
+      )}
 
       <Footer />
     </main>
