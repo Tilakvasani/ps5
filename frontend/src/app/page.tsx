@@ -416,12 +416,12 @@ export default function HomePage() {
 
           {/* Right Column: Premium Mockup display */}
           <div className="lg:col-span-5 flex justify-center items-center relative">
-            <Link href={featuredProduct ? `/products/${featuredProduct.slug}` : "/products"} className="w-full max-w-[420px] aspect-[4/5] block">
+            <Link href={s(settings, "hero_image_link") || "/products"} className="w-full max-w-[420px] aspect-[4/5] block">
               <motion.div 
                 whileHover={{ y: -5, scale: 1.02 }}
                 className="w-full h-full rounded-2xl overflow-hidden border-2 border-[#0C1E39] cursor-pointer relative"
                 style={{ 
-                  backgroundImage: `url(${featuredProduct?.images?.[0]?.imageUrl || ""})`,
+                  backgroundImage: `url(${s(settings, "hero_image") || ""})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                   boxShadow: "0 24px 64px rgba(0, 0, 0, 0.4)"

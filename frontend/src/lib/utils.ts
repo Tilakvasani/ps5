@@ -31,9 +31,18 @@ export function cldOptimize(url: string | undefined | null, width: number): stri
   if (!url) return "";
   const marker = "/upload/";
   const idx = url.indexOf(marker);
-  if (!url.includes("res.cloudinary.com") || idx === -1) return url;
+  if (!url.includes("res.cloudinary.com") || idx === -1) {
+    if (url.startsWith("http://res.cloudinary.com")) {
+      return "https://" + url.slice(7);
+    }
+    return url;
+  }
   const transform = `f_auto,q_auto,w_${width},c_limit`;
-  return url.slice(0, idx + marker.length) + transform + "/" + url.slice(idx + marker.length);
+  let result = url.slice(0, idx + marker.length) + transform + "/" + url.slice(idx + marker.length);
+  if (result.startsWith("http://")) {
+    result = "https://" + result.slice(7);
+  }
+  return result;
 }
 
 // ── Framer Motion Helpers ─────────────────────────────────────────────────────
