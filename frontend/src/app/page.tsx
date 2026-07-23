@@ -154,7 +154,7 @@ function BlogSection({ reviews, settings }: { reviews: any[], settings: Record<s
   const [modal, setModal] = useState<number | null>(null);
   const post = modal !== null ? BLOG_POSTS[modal] : null;
   return (
-    <section className="py-24 px-6" style={{ background: "#0C1E39" }}>
+    <section className="pt-12 pb-24 px-6" style={{ background: "#0C1E39" }}>
       <div className="mx-auto max-w-7xl">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
           <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Health Tips & Insights</p>
@@ -341,7 +341,7 @@ export default function HomePage() {
           <div className="lg:col-span-7 flex flex-col items-start text-left">
             <motion.div {...fadeUp(0.0)} className="mb-6">
               <span 
-                className="inline-flex items-center gap-2 font-black uppercase tracking-wider px-4 py-2 rounded-full whitespace-nowrap text-[10px] sm:text-xs md:text-sm" 
+                className="inline-flex items-center gap-2 font-black uppercase tracking-wider px-4 py-2 rounded-full whitespace-nowrap text-[13px]" 
                 style={{ 
                   background: "rgba(255, 92, 0, 0.12)", 
                   color: "var(--or)",
@@ -528,9 +528,6 @@ export default function HomePage() {
 
                   {/* Right: Quote panel */}
                   <div className="flex-1 flex flex-col justify-center px-8 py-10 relative" style={{ background: "#FFFFFF" }}>
-                    {/* Big decorative quote marks */}
-                    <div className="absolute top-6 left-6 text-7xl font-black leading-none select-none" style={{ color: "var(--or)", opacity: 0.10 }}>"</div>
-                    <div className="absolute bottom-4 right-8 text-7xl font-black leading-none select-none rotate-180" style={{ color: "var(--or)", opacity: 0.10 }}>"</div>
 
                     <p style={{ fontSize: "10px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "16px" }}>Founder's Message</p>
 
@@ -550,7 +547,7 @@ export default function HomePage() {
       )}
 
       {/* ── Customer Reviews Slider ── */}
-      <section className="pt-10 pb-24 px-6 overflow-hidden relative" style={{ background: "var(--gy)" }}>
+      <section className="pt-5 pb-6 px-6 overflow-hidden relative" style={{ background: "var(--gy)" }}>
         <style dangerouslySetInnerHTML={{__html: `
           .reviews-container {
             --card-w: 380px;
@@ -571,16 +568,16 @@ export default function HomePage() {
         `}} />
 
         <div className="mx-auto max-w-7xl reviews-container">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-1">
             <p style={{ fontSize: "11px", fontWeight: 900, letterSpacing: "1.2px", color: "var(--or)", textTransform: "uppercase", marginBottom: "12px" }}>Real People, Real Results</p>
             <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
               What Our Customers Say
             </h2>
-            <p style={{ color: "#4A5568", opacity: 0.8 }}>Join thousands of happy customers across India</p>
+            <p style={{ color: "#0C1E39" }}>Join thousands of happy customers across India</p>
           </motion.div>
 
           {reviewsList.length > 0 && (
-            <div className="relative w-full overflow-visible py-8">
+            <div className="relative w-full overflow-visible py-4">
               <div 
                 className="flex items-center py-4"
                 style={{
@@ -674,7 +671,7 @@ export default function HomePage() {
           )}
 
           {/* Navigation Controls */}
-          <div className="flex items-center justify-center gap-6 mt-6">
+          <div className="flex items-center justify-center gap-6 mt-3">
             <button 
               onClick={() => setVirtualIndex((prev) => prev - 1)}
               className="p-2.5 rounded-full border border-[#0C1E39]/10 hover:bg-[#FF5C00]/10 hover:border-[#FF5C00] text-[#0C1E39] hover:text-[#FF5C00] transition-all bg-white shadow-sm cursor-pointer"

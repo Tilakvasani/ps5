@@ -139,7 +139,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── Brand Story ── */}
-      <section className="pt-20 pb-10 px-6">
+      <section className="pt-10 pb-5 px-6">
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <motion.div {...fadeUp(0)}>
             <span className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: "var(--or)" }}>
@@ -180,14 +180,14 @@ export default function AboutPage() {
       </section>
 
       {/* ── Mission & Vision ── */}
-      <section className="pt-10 pb-10 px-6" style={{ background: "var(--gy)" }}>
+      <section className="pt-5 pb-5 px-6" style={{ background: "var(--gy)" }}>
         <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8">
           <motion.div {...fadeUp(0)} className="card border-l-4 rounded-l-none" style={{ borderLeftColor: "var(--or)", background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
             <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-4" style={{ background: "rgba(255,92,0,0.12)" }}>
               <Target size={20} style={{ color: "var(--or)" }} />
             </div>
             <h3 className="text-xl font-black mb-3" style={{ color: "#0C1E39" }}>Our Mission</h3>
-            <p className="leading-relaxed" style={{ color: "#4A5568", opacity: 0.8 }}>{s(settings, "about_mission")}</p>
+            <p style={{ color: "#0C1E39" }}>{s(settings, "about_mission")}</p>
           </motion.div>
           <motion.div {...fadeUp(0.1)} className="card border-l-4 rounded-l-none" style={{ borderLeftColor: "var(--or)", background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
             <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-4" style={{ background: "rgba(255,92,0,0.12)" }}>
@@ -200,7 +200,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── Why Choose Zupwell ── */}
-      <section className="pt-10 pb-10 px-6">
+      <section className="pt-5 pb-5 px-6">
         <div className="mx-auto max-w-6xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
@@ -216,7 +216,7 @@ export default function AboutPage() {
                 <>Why Choose <span style={{ color: "var(--or)" }}>Zupwell?</span></>
               )}
             </h2>
-            <p style={{ color: "#4A5568", opacity: 0.85 }}>{s(settings, "about_why_subtitle") || "Our Core Pillars and Commitments to You."}</p>
+            <p style={{ color: "#0C1E39" }}>{s(settings, "about_why_subtitle") || "Our Core Pillars and Commitments to You."}</p>
           </motion.div>
           
           <div className="flex flex-wrap justify-center gap-6">
@@ -237,7 +237,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── Why is Our Product Special? ── */}
-      <section className="pt-10 pb-10 px-6">
+      <section className="pt-5 pb-5 px-6">
         <div className="mx-auto max-w-7xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
@@ -253,7 +253,7 @@ export default function AboutPage() {
                 <>What Makes Zupwell <span style={{ color: "var(--or)" }}>Different?</span></>
               )}
             </h2>
-            <p style={{ color: "#4A5568", opacity: 0.85 }}>
+            <p style={{ color: "#0C1E39" }}>
               {s(settings, "about_special_subtext") || "Thoughtfully formulated with quality, convenience, and transparency."}
             </p>
           </motion.div>
@@ -275,7 +275,7 @@ export default function AboutPage() {
 
       {/* ── Future of Zupwell ── */}
       {s(settings, "about_future") && (
-        <section className="pt-10 pb-20 px-6" style={{ background: "var(--gy)" }}>
+        <section className="pt-5 pb-10 px-6" style={{ background: "var(--gy)" }}>
           <div className="mx-auto max-w-4xl">
             <motion.div {...fadeUp(0)} className="text-center mb-8">
               <h2 className="text-3xl md:text-4xl font-black" style={{ color: "#0C1E39" }}>
@@ -355,7 +355,7 @@ export default function AboutPage() {
       )}
 
       {/* ── CTA ── */}
-      <section className="py-16 px-6" style={{ background: "linear-gradient(135deg, #0C1E39 0%, #051124 100%)" }}>
+      <section className="pt-8 pb-16 px-6" style={{ background: "linear-gradient(135deg, #0C1E39 0%, #051124 100%)" }}>
         <div className="mx-auto max-w-2xl text-center">
           <motion.div {...fadeUp(0)}>
             <h2 className="text-2xl font-black mb-4" style={{ color: "#FFFFFF" }}>

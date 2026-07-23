@@ -79,7 +79,7 @@ export default function Footer() {
   };
 
   const linkStyle: React.CSSProperties = {
-    color: "#F8F8F8",
+    color: "#FFFFFF",
     fontSize: "11px",
     fontWeight: 700,
     transition: "color 0.15s",
@@ -106,7 +106,7 @@ export default function Footer() {
             >
               Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "#FF5C00", marginLeft: "2.5px", letterSpacing: "1px", verticalAlign: "super" }}>TM</sup>
             </div>
-            <p style={{ color: "#F8F8F8", opacity: 0.8, fontSize: "12px", lineHeight: 1.7, marginBottom: "14px" }}>
+            <p style={{ color: "#FFFFFF", fontSize: "12px", lineHeight: 1.7, marginBottom: "14px" }}>
               Performance Driven Nutrition.<br />
               Science backed, insanely delicious, and tailored for your 24/7 lifestyle.
             </p>
@@ -175,7 +175,7 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <span style={colHeadStyle}>Contact Us</span>
-            <div style={{ fontSize: "11px", color: "#F8F8F8", opacity: 0.8, display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ fontSize: "11px", color: "#FFFFFF", display: "flex", flexDirection: "column", gap: "10px" }}>
               <div className="flex items-start gap-2">
                 <MapPin size={13} style={{ color: "var(--or)", marginTop: 2, flexShrink: 0 }} />
                 <span>{address}</span>
@@ -193,10 +193,10 @@ export default function Footer() {
                   href={`https://wa.me/${whatsapp}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 font-bold transition-colors"
-                  style={{ color: "var(--or)" }}
+                  className="flex items-center gap-2 font-bold transition-colors hover:opacity-80"
+                  style={{ color: "#FFFFFF" }}
                 >
-                  <MessageCircle size={13} /> WhatsApp Us
+                  <MessageCircle size={13} style={{ color: "var(--or)" }} /> WhatsApp Us
                 </a>
               )}
             </div>
@@ -207,6 +207,7 @@ export default function Footer() {
         <div className="flex flex-wrap justify-center items-center gap-6 pb-6" style={{ borderBottom: "1px solid #0C1E39", marginBottom: "20px" }}>
           {certEntries.map(({ key, label }) => {
             const val = s[key];
+            const isFssai = label.toUpperCase().includes("FSSAI");
             const isIso = label.toUpperCase().includes("ISO");
             const isGst = label.toUpperCase().includes("GST");
             const isIec = label.toUpperCase().includes("IEC");
@@ -214,6 +215,18 @@ export default function Footer() {
             const isTm = label.toUpperCase().includes("TM");
 
             if (val) {
+              // FSSAI needs a white pill background to look clean on dark footer
+              if (isFssai) {
+                return (
+                  <div
+                    key={key}
+                    className="inline-flex items-center justify-center shrink-0 rounded-lg px-2.5 py-1 h-9"
+                    style={{ background: "#FFFFFF" }}
+                  >
+                    <img src={cldOptimize(val, 80)} alt={label} className="h-full object-contain" loading="lazy" decoding="async" />
+                  </div>
+                );
+              }
               // ISO and MSME need a white circular background to look clean on dark footer
               if (isIso || isMsme) {
                 return (
@@ -244,6 +257,18 @@ export default function Footer() {
               );
             }
 
+            if (isFssai) {
+              return (
+                <div
+                  key={key}
+                  className="inline-flex items-center justify-center shrink-0 rounded-lg px-2.5 py-1 h-9"
+                  style={{ background: "#FFFFFF" }}
+                >
+                  <CertLogo label={label} className="h-full opacity-100 transition-opacity" />
+                </div>
+              );
+            }
+
             return (
               <CertLogo key={key} label={label} className="h-10 opacity-100 transition-opacity" />
             );
@@ -262,12 +287,22 @@ export default function Footer() {
               This product is a health supplement and not for medicinal use.
             </p>
           </div>
-          
-          {/* RazorPay Payment Gateway Symbol */}
-          <div className="flex items-center gap-2 opacity-90 hover:opacity-100 transition-opacity">
-            <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Secured by</span>
-            <div style={{ background: '#FFFFFF', padding: '4px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', height: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-              <img src="/razorpay.png" alt="Razorpay" width={60} height={16} className="h-4 w-auto object-contain"  loading="lazy" decoding="async" />
+
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            {/* Powered by GLOBENT Badge */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Powered by</span>
+              <div style={{ background: '#FFFFFF', padding: '4px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', height: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                <span style={{ fontSize: '11px', fontWeight: 900, color: '#0C1E39', letterSpacing: '1px', fontFamily: 'sans-serif' }}>GLOBENT</span>
+              </div>
+            </div>
+
+            {/* RazorPay Payment Gateway Symbol */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Secured by</span>
+              <div style={{ background: '#FFFFFF', padding: '4px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', height: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                <img src="/razorpay.png" alt="Razorpay" width={60} height={16} className="h-4 w-auto object-contain"  loading="lazy" decoding="async" />
+              </div>
             </div>
           </div>
         </div>

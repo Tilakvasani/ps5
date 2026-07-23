@@ -121,7 +121,9 @@ export default function CertificationsPage() {
               <ShieldCheck size={20} className="text-[var(--or)]" /> Quality & Safety Commitment
             </h3>
             <p className="text-sm max-w-2xl mx-auto leading-relaxed" style={{ color: "#4A5568" }}>
-              Every single batch of Zupwell tablets undergoes strict internal laboratory testing and independent third-party microbiological validation before releasing to the market. We guarantee 100% authenticity and safety.
+              Every single batch of Zupwell tablets undergoes strict internal laboratory testing and independent third-party microbiological validation before releasing to the market.
+              <br />
+              <span className="font-semibold text-[#0C1E39]">Quality Tested • Safety Focused • Trusted Standards</span>
             </p>
           </div>
         </div>

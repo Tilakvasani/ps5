@@ -99,7 +99,7 @@ export default function ContactPage() {
               <>Got Questions?<br /><span style={{ color: "var(--or)" }}>We've Got Answers!</span></>
             )}
           </motion.h1>
-          <motion.p {...fadeUp(0.2)} className="text-lg" style={{ color: "#F8F8F8", opacity: 0.85 }}>
+          <motion.p {...fadeUp(0.2)} className="text-lg whitespace-pre-line" style={{ color: "#F8F8F8", opacity: 0.85 }}>
             {s(settings, "contact_hero_subtext") || "Reach out to us 9 AM to 6 PM — we're always happy to help."}
           </motion.p>
         </div>
@@ -172,7 +172,7 @@ export default function ContactPage() {
                 <>Distributor <span style={{ color: "var(--or)" }}>Inquiry</span></>
               )}
             </h2>
-            <p style={{ color: "#F8F8F8", opacity: 0.85 }}>
+            <p className="whitespace-pre-line" style={{ color: "#F8F8F8", opacity: 0.85 }}>
               {s(settings, "contact_form_subtext") || "Interested in partnering with us? Fill in your details and let's do business!"}
             </p>
           </motion.div>
@@ -186,7 +186,7 @@ export default function ContactPage() {
                 </label>
                 <input type="text" value={form.fullName} required
                   onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
-                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your full name" />
+                  className="zinp text-sm placeholder:text-gray-400" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12,30,57,0.2)", color: "#0C1E39" }} placeholder="Your full name" />
               </div>
 
               {/* Firm Name */}
@@ -196,7 +196,7 @@ export default function ContactPage() {
                 </label>
                 <input type="text" value={form.firmName}
                   onChange={e => setForm(f => ({ ...f, firmName: e.target.value }))}
-                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your firm / company name" />
+                  className="zinp text-sm placeholder:text-gray-400" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12,30,57,0.2)", color: "#0C1E39" }} placeholder="Your firm / company name" />
               </div>
 
               {/* City */}
@@ -206,7 +206,7 @@ export default function ContactPage() {
                 </label>
                 <input type="text" value={form.city} required
                   onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your city" />
+                  className="zinp text-sm placeholder:text-gray-400" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12,30,57,0.2)", color: "#0C1E39" }} placeholder="Your city" />
               </div>
 
               {/* State */}
@@ -216,7 +216,7 @@ export default function ContactPage() {
                 </label>
                 <input type="text" value={form.state}
                   onChange={e => setForm(f => ({ ...f, state: e.target.value }))}
-                  className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="Your state" />
+                  className="zinp text-sm placeholder:text-gray-400" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12,30,57,0.2)", color: "#0C1E39" }} placeholder="Your state" />
               </div>
             </div>
 
@@ -227,7 +227,7 @@ export default function ContactPage() {
               </label>
               <input type="text" value={form.experience}
                 onChange={e => setForm(f => ({ ...f, experience: e.target.value }))}
-                className="zinp text-sm" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }} placeholder="e.g. 3 years in FMCG, new to distribution, etc." />
+                className="zinp text-sm placeholder:text-gray-400" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12,30,57,0.2)", color: "#0C1E39" }} placeholder="e.g. 3 years in FMCG, new to distribution, etc." />
             </div>
 
             {/* Message */}
@@ -237,7 +237,7 @@ export default function ContactPage() {
               </label>
               <textarea value={form.message} required rows={4}
                 onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                className="zinp text-sm resize-none" style={{ background: "#0c1e39", border: "1.5px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }}
+                className="zinp text-sm resize-none placeholder:text-gray-400" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12,30,57,0.2)", color: "#0C1E39" }}
                 placeholder="Tell us about your distribution network, area of operation, and what you're looking for..." />
             </div>
 
@@ -248,7 +248,7 @@ export default function ContactPage() {
               {sending ? "Sending..." : "Send Inquiry"}
             </motion.button>
 
-            <p className="text-xs text-center" style={{ color: "#A0AEC0" }}>
+            <p className="text-xs text-center whitespace-pre-line" style={{ color: "#A0AEC0" }}>
               {s(settings, "contact_form_footer") || "We typically respond within 24 hours on business days."}
             </p>
           </motion.form>

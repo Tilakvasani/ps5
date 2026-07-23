@@ -145,7 +145,7 @@ export default function SciencePage() {
       <Navbar />
 
       {/* ── HERO ── */}
-      <section className="relative pt-32 pb-24 px-6 overflow-hidden" style={{ background: "linear-gradient(180deg, #051124 0%, #0C1E39 100%)" }}>
+      <section className="relative pt-32 pb-12 px-6 overflow-hidden" style={{ background: "linear-gradient(180deg, #051124 0%, #0C1E39 100%)" }}>
         <div className="relative mx-auto max-w-4xl text-center">
           <motion.div {...fadeUp(0)}>
             <span
@@ -172,7 +172,7 @@ export default function SciencePage() {
       </section>
 
       {/* ── LAB SHOWCASE GALLERY ── */}
-      <section className="pt-12 pb-6 px-6 mx-auto max-w-7xl">
+      <section className="pt-6 pb-6 px-6 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <motion.div 
             {...fadeUp(0.1)} 
@@ -233,8 +233,8 @@ export default function SciencePage() {
       </section>
 
       {/* ── MANUFACTURING EXCELLENCE ── */}
-      <section className="pt-10 pb-20 px-6 mx-auto max-w-7xl">
-        <motion.div {...fadeUp(0)} className="mb-14">
+      <section className="pt-10 pb-10 px-6 mx-auto max-w-7xl">
+        <motion.div {...fadeUp(0)} className="mb-8">
           <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "var(--or)" }}>
             {s(settings, "science_process_badge")}
           </p>
@@ -262,7 +262,7 @@ export default function SciencePage() {
 
       {/* ── CERTIFICATIONS ── */}
       <section
-        className="py-24 px-6"
+        className="py-12 px-6"
         style={{
           background: "var(--or)",
         }}
@@ -324,7 +324,7 @@ export default function SciencePage() {
       </section>
 
       {/* ── CLEAN LABEL ── */}
-      <section className="pt-24 pb-12 px-6 mx-auto max-w-7xl">
+      <section className="pt-12 pb-12 px-6 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div {...fadeUp(0)}>
             <p className="text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "var(--or)" }}>
@@ -333,7 +333,7 @@ export default function SciencePage() {
             <h2 className="font-black text-2xl sm:text-4xl md:text-5xl mb-6 whitespace-pre-line leading-tight" style={{ color: "#0C1E39" }}>
               {s(settings, "science_clean_title")}
             </h2>
-            <p className="text-lg leading-relaxed mb-8" style={{ color: "#4A5568", opacity: 0.85 }}>
+            <p className="text-lg leading-relaxed mb-8" style={{ color: "#0C1E39" }}>
               {s(settings, "science_clean_desc")}
             </p>
             <div className="space-y-4">
