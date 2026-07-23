@@ -13,7 +13,6 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "zupwell/products",
     allowed_formats: ["jpg", "jpeg", "png", "webp"],
-    transformation: [{ width: 800, height: 800, crop: "limit", quality: "auto" }],
   },
 });
 

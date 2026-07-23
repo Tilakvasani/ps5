@@ -132,21 +132,21 @@ const BLOG_POSTS = [
     tag: "Hydration",
     date: "",
     title: "Why Hydration is the #1 Performance Hack",
-    body: "Most people underestimate the power of hydration. Even a 2% drop in body water can reduce your physical performance by up to 20% and cloud your mental focus. Plain water alone doesn't cut it — your body also needs electrolytes like sodium, potassium, and magnesium to actually absorb and use that water at the cellular level. That's exactly why Zupwell's effervescent formula is built around rapid hydration science — giving your cells what they need in seconds, not hours.",
+    body: "Most people underestimate the power of hydration. Even a 2% drop in body water can reduce physical performance by up to 20% and affect mental focus. Plain water alone is not enough. Your body also needs electrolytes like sodium, potassium, and magnesium to absorb and utilize water effectively at the cellular level. That's why Zupwell's effervescent formula is designed for rapid hydration, giving your body the support it needs within minutes.",
   },
   {
     emoji: "🔍",
     tag: "Science",
     date: "",
     title: "Electrolytes vs Sports Drinks — What's the Difference?",
-    body: "Sports drinks are loaded with sugar, artificial colours, and calories you don't need. Electrolyte supplements like Zupwell deliver the same hydration benefits — sodium, potassium, magnesium, vitamin C — with less sugar and zero compromise. The effervescent technology ensures faster absorption compared to gulping down a sugary drink. If you're working out, commuting in the heat, or simply staying productivity all day, pure electrolytes beat sports drinks every single time.",
+    body: "Sports drinks often contain added sugar, artificial colours, and unnecessary calories. Electrolyte supplements like Zupwell provide essential minerals such as sodium, potassium, magnesium, and vitamin C to support hydration. The fast-dissolving effervescent formula is designed for quick absorption, making it a convenient choice for workouts, travel, busy workdays, and everyday hydration.",
   },
   {
     emoji: "💪",
     tag: "Performance",
     date: "",
     title: "Pre-Workout Nutrition: What Actually Works",
-    body: "Forget complicated pre-workout stacks. The most effective pre-workout routine is surprisingly simple: hydration + fast energy. Start with an electrolyte tablet in water 20–30 minutes before training. This primes your muscles with the minerals they need for contraction and recovery. Add a light carb source if you're doing heavy lifting. Skip the mega-dose caffeine powders — they spike and crash. Zupwell's clean formula gives you steady energy without the jitters or the inevitable afternoon crash.",
+    body: "A simple pre-workout routine can make a meaningful difference. Staying hydrated before exercise helps support normal muscle function and overall performance. Enjoy one Zupwell effervescent tablet in water 20–30 minutes before your workout for a convenient source of electrolytes. For longer or higher-intensity sessions, pairing it with a light carbohydrate snack can be a practical choice.",
   },
 ];
 

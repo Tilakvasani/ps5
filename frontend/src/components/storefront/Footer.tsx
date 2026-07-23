@@ -85,7 +85,8 @@ export default function Footer() {
               Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "#FF5C00", marginLeft: "2.5px", letterSpacing: "1px", verticalAlign: "super" }}>TM</sup>
             </div>
             <p style={{ color: "#F8F8F8", opacity: 0.8, fontSize: "12px", lineHeight: 1.7, marginBottom: "14px" }}>
-              Performance-Driven Nutrition — Science-backed, insanely delicious, and tailored for your 24/7 lifestyle.
+              Performance Driven Nutrition.<br />
+              Science backed, insanely delicious, and tailored for your 24/7 lifestyle.
             </p>
             <div style={{ fontSize: "10px", lineHeight: 1.8, color: "#6B7280", marginBottom: "14px" }}>
               {gstin  && <p>GSTIN: {gstin}</p>}
