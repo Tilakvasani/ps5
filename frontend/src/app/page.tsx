@@ -747,11 +747,11 @@ export default function HomePage() {
                   Sign In
                 </motion.button>
               </Link>
-              <Link href="/products">
+              <Link href="/register">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                   className="zbtn-out"
                   style={{ padding: "14px 36px", fontSize: "13px", borderRadius: "30px" }}>
-                  Upgrade Your Water
+                  Create Account
                 </motion.button>
               </Link>
             </div>

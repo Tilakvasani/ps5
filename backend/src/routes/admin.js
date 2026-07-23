@@ -462,13 +462,47 @@ router.put("/products/:id", sanitizeBody, authAdmin, requireRole("admin", "super
 
     const product = await prisma.product.update({ where: { id }, data });
     if (req.files?.length) {
+      const maxImg = await prisma.productImage.findFirst({
+        where: { productId: id },
+        orderBy: { sortOrder: "desc" }
+      });
+      const startOrder = maxImg ? maxImg.sortOrder + 1 : 1;
       for (let i = 0; i < req.files.length; i++) {
-        await prisma.productImage.create({ data: { productId: id, imageUrl: req.files[i].path, altText: name || product.name, isPrimary: false, sortOrder: 99 + i } });
+        await prisma.productImage.create({ data: { productId: id, imageUrl: req.files[i].path, altText: name || product.name, isPrimary: false, sortOrder: startOrder + i } });
       }
     }
     res.json(product);
   } catch (err) {
     res.status(500).json({ error: "Failed to update product" });
+  }
+});
+
+// UPDATE product image sortOrder or isPrimary
+router.put("/products/images/:imageId", authAdmin, requireRole("admin", "super_admin"), async (req, res) => {
+  try {
+    const imageId = Number(req.params.imageId);
+    const { sortOrder, isPrimary } = req.body;
+    const data = {};
+    if (sortOrder !== undefined) data.sortOrder = Number(sortOrder);
+    if (isPrimary !== undefined) data.isPrimary = Boolean(isPrimary);
+
+    if (data.isPrimary) {
+      const img = await prisma.productImage.findUnique({ where: { id: imageId } });
+      if (img) {
+        await prisma.productImage.updateMany({
+          where: { productId: img.productId, id: { not: imageId } },
+          data: { isPrimary: false }
+        });
+      }
+    }
+
+    const updated = await prisma.productImage.update({
+      where: { id: imageId },
+      data
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update image details" });
   }
 });
 

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, Eye, Star, ArrowRight, FlaskConical, Droplets, Zap, Sparkles, Target, HeartHandshake, Activity, Tag, Citrus, Shield, Leaf } from "lucide-react";
+import { Heart, Eye, Star, ArrowRight, FlaskConical, Droplets, Zap, Sparkles, Target, HeartHandshake, Activity, Tag, Citrus, Shield, Leaf, Backpack } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useSettings } from "@/lib/useSettings";
@@ -25,6 +25,8 @@ const D: Record<string, string> = {
   founder_title:     "Founder & CEO, Zupwell",
   founder_message:   "At Zupwell, I started with a simple observation: traditional supplements often feel like a chore — hard to swallow, slow to absorb, and difficult to integrate into a busy life. I founded Zupwell to bridge the gap between clinical effectiveness and modern convenience. Through Zupwell, my endeavor is to ensure that everyone can fulfil their dreams without compromising their health.",
   founder_photo:     "",
+  about_special_title:   "What Makes Zupwell Different?",
+  about_special_subtext: "Thoughtfully formulated with quality, convenience, and transparency.",
 };
 
 const s = (settings: Record<string, string>, key: string) =>
@@ -46,7 +48,7 @@ export default function AboutPage() {
   // Parse dynamic JSON settings or fallback
   let whyItems = [
     { icon: FlaskConical, title: "Scientific Formula", desc: "A fusion of science and taste." },
-    { icon: Activity,     title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
+    { icon: Leaf,         title: "Less Sugar",         desc: "There is sweetness, but no guilt." },
     { icon: Zap,          title: "Instant Absorption", desc: "Rocket-like speed, instant action." },
     { icon: Tag,          title: "Pocket Friendly",    desc: "It even fits in your jeans pocket." },
     { icon: Citrus,       title: "Best Flavour",       desc: "Absolutely fresh, as if straight from the garden." },
@@ -58,12 +60,13 @@ export default function AboutPage() {
         const titleLower = item.title?.toLowerCase() || "";
         let Icon = FlaskConical;
         if (titleLower.includes("science") || titleLower.includes("scientific")) Icon = FlaskConical;
-        else if (titleLower.includes("sugar")) Icon = Activity;
+        else if (titleLower.includes("sugar")) Icon = Leaf;
         else if (titleLower.includes("absorb") || titleLower.includes("instant")) Icon = Zap;
         else if (titleLower.includes("pocket") || titleLower.includes("price") || titleLower.includes("friendly")) Icon = Tag;
         else if (titleLower.includes("flavour") || titleLower.includes("taste")) Icon = Citrus;
+        else if (titleLower.includes("carry") || titleLower.includes("travel") || titleLower.includes("portable") || titleLower.includes("go") || titleLower.includes("easy")) Icon = Backpack;
         else {
-          const defaults = [FlaskConical, Activity, Zap, Tag, Citrus];
+          const defaults = [FlaskConical, Leaf, Zap, Tag, Citrus];
           Icon = defaults[idx % defaults.length];
         }
         return { icon: Icon, title: item.title, desc: item.desc };
@@ -216,9 +219,9 @@ export default function AboutPage() {
             <p style={{ color: "#4A5568", opacity: 0.85 }}>{s(settings, "about_why_subtitle") || "Our Core Pillars and Commitments to You."}</p>
           </motion.div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="flex flex-wrap justify-center gap-6">
             {pillarItems.map((pillar, i) => (
-              <div key={i} className="card p-8 rounded-2xl flex flex-col justify-between" 
+              <div key={i} className="card p-8 rounded-2xl flex flex-col justify-between w-full sm:w-[calc(50%-12px)] lg:flex-1 lg:min-w-[260px] lg:max-w-[320px]" 
                 style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
                 <div>
                   <div className="h-12 w-12 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(255,92,0,0.12)" }}>
@@ -238,13 +241,25 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-black mb-3" style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
-              Why is Our Product <span style={{ color: "var(--or)" }}>Special?</span>
+              {s(settings, "about_special_title") ? (
+                s(settings, "about_special_title").split(" ").map((w, idx, arr) => {
+                  return idx === arr.length - 1 ? (
+                    <span key={idx} style={{ color: "var(--or)" }}>{w} </span>
+                  ) : (
+                    w + " "
+                  );
+                })
+              ) : (
+                <>What Makes Zupwell <span style={{ color: "var(--or)" }}>Different?</span></>
+              )}
             </h2>
-            <p style={{ color: "#4A5568", opacity: 0.85 }}>Zero-Compromise Health Boosters. Crafted for Perfection.</p>
+            <p style={{ color: "#4A5568", opacity: 0.85 }}>
+              {s(settings, "about_special_subtext") || "Thoughtfully formulated with quality, convenience, and transparency."}
+            </p>
           </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+          <div className="flex flex-wrap justify-center gap-5">
             {whyItems.map((f, i) => (
-              <motion.div key={i} {...fadeUp(i * 0.1)} className="zcard text-center"
+              <motion.div key={i} {...fadeUp(i * 0.1)} className="zcard text-center w-full sm:w-[calc(50%-10px)] lg:flex-1 lg:min-w-[200px] lg:max-w-[240px]"
                 style={{ borderColor: "rgba(12, 30, 57, 0.08)", background: "#FFFFFF" }}>
                 <div className="h-14 w-14 mx-auto rounded-2xl flex items-center justify-center mb-4 transition-all"
                   style={{ background: "rgba(255, 92, 0, 0.1)" }}>
@@ -284,19 +299,49 @@ export default function AboutPage() {
                 {(() => {
                   const text = s(settings, "about_future");
                   if (!text) return null;
+
+                  // Parse pipeline list items from settings
+                  let pipelineItems = ["Daily multivitamins & immune boosters", "Energy and focus formulations", "Specialized recovery blends"];
+                  try {
+                    const parsed = JSON.parse(s(settings, "about_future_pipeline_json"));
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                      pipelineItems = parsed;
+                    }
+                  } catch (e) {}
+
                   const lines = text.split("\n");
+                  let renderedList = false;
+
                   return lines.map((line, idx) => {
-                    if (line.trim().startsWith("→")) {
-                      const itemText = line.replace(/^\s*→\s*/, "");
+                    const trimmed = line.trim();
+                    
+                    // Skip legacy hardcoded bullet points in raw text
+                    if (trimmed.startsWith("→")) {
+                      return null;
+                    }
+
+                    // Check if this line is the list header
+                    const isListHeader = trimmed.endsWith(":") || trimmed.toLowerCase().includes("including");
+                    
+                    if (isListHeader && !renderedList) {
+                      renderedList = true;
                       return (
-                        <div key={idx} className="flex items-start gap-2 my-2 pl-4">
-                          <span className="shrink-0 font-black text-lg" style={{ color: "var(--or)" }}>→</span>
-                          <span className="font-bold text-[#0C1E39]">{itemText}</span>
+                        <div key={idx}>
+                          <div className={trimmed === "" ? "h-4" : ""}>{line}</div>
+                          <div className="my-4 space-y-2">
+                            {pipelineItems.map((item, pIdx) => (
+                              <div key={pIdx} className="flex items-start gap-2 pl-4">
+                                <span className="shrink-0 font-black text-lg" style={{ color: "var(--or)" }}>→</span>
+                                <span className="font-bold text-[#0C1E39]">{item}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       );
                     }
+
                     return (
-                      <div key={idx} className={line.trim() === "" ? "h-4" : ""}>
+                      <div key={idx} className={trimmed === "" ? "h-4" : ""}>
                         {line}
                       </div>
                     );
@@ -321,7 +366,7 @@ export default function AboutPage() {
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   className="btn-primary w-full flex items-center justify-center gap-2 px-8 py-3 text-sm font-bold"
                   style={{ borderRadius: "30px" }}>
-                  Upgrade Now <ArrowRight size={16} />
+                  Explore Products <ArrowRight size={16} />
                 </motion.button>
               </Link>
               <Link href="/contact" className="w-full sm:w-auto">

@@ -505,6 +505,8 @@ const SETTING_GROUPS = [
       { key: "about_story_title",  label: "Story Section Title", type: "text" },
       { key: "about_why_title",    label: "Why Section Title", type: "text" },
       { key: "about_why_subtitle", label: "Why Section Subtitle", type: "text" },
+      { key: "about_special_title",   label: "Special Section Title", type: "text" },
+      { key: "about_special_subtext", label: "Special Section Subtitle", type: "text" },
       { key: "about_future_title", label: "Future Section Title", type: "text" },
       { key: "about_cta_title",    label: "CTA Section Title", type: "text" },
       { key: "about_why_special_json", label: "Product Special Features List", type: "special_list" },

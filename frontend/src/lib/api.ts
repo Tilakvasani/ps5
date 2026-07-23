@@ -211,6 +211,8 @@ export const adminApi = {
     api.delete(`/api/admin/products/${id}`).then((r) => r.data),
   deleteProductImage: (imageId: number) =>
     api.delete(`/api/admin/products/images/${imageId}`).then((r) => r.data),
+  updateProductImage: (imageId: number, data: { sortOrder?: number; isPrimary?: boolean }) =>
+    api.put(`/api/admin/products/images/${imageId}`, data).then((r) => r.data),
 
   // Categories
   getCategories: () => api.get("/api/admin/categories").then((r) => r.data),

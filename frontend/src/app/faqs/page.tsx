@@ -217,7 +217,7 @@ export default function FAQsPage() {
               <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer">
                 <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                   className="zbtn-or flex items-center gap-2 px-8 py-3 mx-auto">
-                  <MessageCircle size={16} /> WhatsApp Us
+                  <MessageCircle size={16} /> Chat on WhatsApp
                 </motion.button>
               </a>
             ) : (

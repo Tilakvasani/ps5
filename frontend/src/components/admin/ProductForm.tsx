@@ -49,7 +49,19 @@ export default function ProductForm({ productId }: Props) {
             metaTitle: p.metaTitle || "", metaDescription: p.metaDescription || "",
             flavors: p.flavors || "",
             isActive: p.isActive, isFeatured: p.isFeatured });
-          setExistingImages(p.images || []);
+          const sorted = (p.images || []).sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0));
+          const normalized = sorted.map((img: any, idx: number) => ({
+            ...img,
+            sortOrder: idx + 1
+          }));
+          setExistingImages(normalized);
+          
+          // Silently sync normalized orders to backend
+          normalized.forEach(async (img: any) => {
+            try {
+              await adminApi.updateProductImage(img.id, { sortOrder: img.sortOrder });
+            } catch (e) {}
+          });
           setVariants(p.variants?.map((v: any) => ({ variantName: v.variantName, sku: v.sku, price: v.price })) || []);
           if (p.nutritionFacts) {
             let loadedNutrition: { key: string; value: string; }[] = [];
@@ -199,10 +211,31 @@ export default function ProductForm({ productId }: Props) {
         <div className="card md:col-span-2" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
           <h2 className="font-bold mb-4" style={{ color: '#0C1E39' }}>Product Images</h2>
           <div className="flex flex-wrap gap-3 mb-3">
-            {existingImages.map(img => (
+            {[...existingImages].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((img, idx) => (
               <div key={img.id} className="relative h-20 w-20 rounded-xl overflow-hidden" style={{ border: '1.5px solid rgba(12, 30, 57, 0.08)' }}>
                 <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
-                {img.isPrimary && <span className="absolute bottom-0 left-0 right-0 text-[9px] text-white text-center py-0.5" style={{ background: 'rgba(255,92,0,0.85)' }}>Primary</span>}
+                
+                {/* Numeric Sort Input at Bottom-Left */}
+                <input
+                  type="number"
+                  value={img.sortOrder !== undefined ? img.sortOrder : idx + 1}
+                  onChange={async (e) => {
+                    const val = Number(e.target.value);
+                    setExistingImages(prev => prev.map(x => x.id === img.id ? { ...x, sortOrder: val } : x));
+                    try {
+                      await adminApi.updateProductImage(img.id, { sortOrder: val });
+                    } catch (err: any) {
+                      toast.error(err.message || "Failed to update image order");
+                    }
+                  }}
+                  onBlur={() => {
+                    setExistingImages(prev => [...prev].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)));
+                  }}
+                  className="absolute bottom-1 left-1 w-8 h-5 text-[10px] text-center font-bold bg-black/60 text-white border border-white/20 rounded outline-none z-10"
+                  title="Image Position Number"
+                />
+
+                {img.isPrimary && <span className="absolute top-1 left-1 text-[9px] text-white px-1 py-0.5 rounded bg-[#FF5C00] font-black uppercase">Main</span>}
                 <button type="button" onClick={async () => {
                   if (confirm("Are you sure you want to delete this image?")) {
                     try {
@@ -222,6 +255,9 @@ export default function ProductForm({ productId }: Props) {
             {images.map((img, i) => (
               <div key={i} className="relative h-20 w-20 rounded-xl overflow-hidden" style={{ border: '1.5px solid rgba(255,92,0,0.35)' }}>
                 <img src={URL.createObjectURL(img)} alt="" className="w-full h-full object-cover" />
+                <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                  #{existingImages.length + i + 1}
+                </span>
                 <button type="button" onClick={() => setImages(imgs => imgs.filter((_, j) => j !== i))}
                   className="absolute top-1 right-1 h-5 w-5 rounded-full flex items-center justify-center hover:bg-red-500/80 transition-colors" style={{ background: '#0C1E39', color: '#FFFFFF' }}>
                   <X size={10} />

@@ -68,6 +68,8 @@ const defaults = [
   { key: "about_mission",     value: "Health, which is not boring! We believe health supplements should be both effective and delicious.", group: "about" },
   { key: "about_vision",      value: "To be India's leading name in Health Supplements, recognized for quality, scientific integrity and commitment to well-being.", group: "about" },
   { key: "about_future",      value: "Our electrolyte formula is just the beginning. At Zupwell, we are committed to becoming a leader in health supplements. We are currently in the research and development phase for a diverse pipeline of wellness solutions.\\nIncluding,\\n\\n→ Daily multivitamins and immune boosters.\\n→ Energy and focus formulations.\\n→ Specialized recovery blends for post-operative care.\\n\\nWe are constantly looking for new ways to make high-quality nutrition more effective and easier to consume.", group: "about" },
+  { key: "about_special_title",   value: "What Makes Zupwell Different?", group: "about" },
+  { key: "about_special_subtext", value: "Thoughtfully formulated with quality, convenience, and transparency.", group: "about" },
 
   // About Static Backup (Obsolete - replaced by JSON lists in vertical settings redesign)
   { key: "about_why1_title",  value: "Science-Backed",   group: "about" },

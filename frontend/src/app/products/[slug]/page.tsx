@@ -168,6 +168,22 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const [stickyVisible, setStickyVisible] = useState(false);
   const [selectedFlavor, setSelectedFlavor] = useState("Orange");
   const [selectedPack, setSelectedPack] = useState(1);
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1);
+  const [panOrigin, setPanOrigin] = useState({ x: 0.5, y: 0.5 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (zoomScale === 1) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setPanOrigin({ x, y });
+  };
+
+  const handleImageClick = () => {
+    setZoomScale(zoomScale === 1 ? 2.5 : 1);
+  };
+
   const { addToCart, token } = useStore();
   const { cgstRate, sgstRate } = useSettings();
   const router = useRouter();
@@ -271,12 +287,12 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   };
 
   const TABS = [
-    { id: "desc",      label: "Description" },
-    { id: "howto",     label: "How to Use" },
-    { id: "nutrition", label: "Nutrition Facts" },
-    { id: "specs",     label: "Key Features" },
-    { id: "info",      label: "Additional Product Information" },
-    { id: "reviews",   label: `Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` },
+    { id: "desc",      label: "Product Overview" },
+    { id: "howto",     label: "Directions for Use" },
+    { id: "nutrition", label: "Nutrition Information" },
+    { id: "specs",     label: "Key Benefits" },
+    { id: "info",      label: "Product Details" },
+    { id: "reviews",   label: `Customer Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` },
   ] as const;
 
   const productJsonLd = {
@@ -382,16 +398,60 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
           {/* ── Images ── */}
           <div>
-            <div className="relative rounded-3xl overflow-hidden aspect-square mb-4 shadow-sm flex items-center justify-center p-6"
-              style={{ background: C.altBg, border: `1.5px solid ${C.border}` }}>
+            <div className="relative rounded-3xl overflow-hidden aspect-square mb-4 shadow-sm flex items-center justify-center p-6 cursor-zoom-in"
+              style={{ background: C.altBg }}
+              onClick={() => setIsZoomOpen(true)}>
               {images[activeImage]?.imageUrl ? (
-                <img src={cldOptimize(images[activeImage].imageUrl, 800)} alt={product.name} width={800} height={800}
-                  className="max-w-full max-h-full object-contain transition-transform duration-500 hover:scale-[1.03]" loading="eager" fetchPriority="high" decoding="async" />
+                <motion.div
+                  key={activeImage}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  onDragEnd={(event, info) => {
+                    const swipeThreshold = 50;
+                    if (info.offset.x < -swipeThreshold) {
+                      // Next image
+                      setActiveImage((prev) => (prev + 1) % images.length);
+                    } else if (info.offset.x > swipeThreshold) {
+                      // Previous image
+                      setActiveImage((prev) => (prev - 1 + images.length) % images.length);
+                    }
+                  }}
+                  className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing"
+                >
+                  <img src={cldOptimize(images[activeImage].imageUrl, 800)} alt={product.name} width={800} height={800}
+                    className="max-w-full max-h-full object-contain pointer-events-none select-none transition-transform duration-500 hover:scale-[1.03]" loading="eager" fetchPriority="high" decoding="async" />
+                </motion.div>
               ) : (
                 <div className="w-full h-full flex items-center justify-center" style={{ color: C.border }}><Package size={80}/></div>
               )}
 
-              {/* Discount badge removed */}
+              {/* Prev Button Overlay */}
+              {images.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImage((prev) => (prev - 1 + images.length) % images.length);
+                  }}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-md z-10 transition-colors"
+                  style={{ border: `1px solid ${C.border}` }}
+                >
+                  <ChevronLeft size={16} className="text-[#0C1E39]" />
+                </button>
+              )}
+
+              {/* Next Button Overlay */}
+              {images.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImage((prev) => (prev + 1) % images.length);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-md z-10 transition-colors"
+                  style={{ border: `1px solid ${C.border}` }}
+                >
+                  <ChevronRight size={16} className="text-[#0C1E39]" />
+                </button>
+              )}
             </div>
 
             {images.length > 1 && (
@@ -405,16 +465,6 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 ))}
               </div>
             )}
-
-            <div className="mt-5 grid grid-cols-4 gap-2">
-              {TRUST_BADGES.map((b, i) => (
-                <div key={i}
-                  className="flex flex-col items-center justify-center p-2 rounded-xl text-center h-[76px] overflow-hidden"
-                  style={{ background: C.surface, border: `1.5px solid ${C.border}` }}>
-                  <CertLogo label={b.logoLabel} className="h-12 w-auto object-contain shrink-0" />
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* ── Info ── */}
@@ -592,7 +642,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           {TABS.map((tab) => {
             const isOpen = activeTab === tab.id;
             const label = tab.id === "reviews" 
-              ? `Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` 
+              ? `Customer Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` 
               : tab.label;
             
             return (
@@ -621,18 +671,20 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                     >
                       <div className="px-6 py-3 md:px-8 md:py-4" style={{ background: "#0c1e39", borderTop: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
                         {tab.id === "desc" && (
-                          <div className="text-sm leading-relaxed" style={{ color: "#f8f8f8", opacity: 0.85 }}>
-                            <div dangerouslySetInnerHTML={{__html: sanitizeHtml(product.description || product.shortDescription || "No description available.")}}/>
+                          <div className="p-6 rounded-2xl shadow-sm" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
+                            <div className="text-sm leading-relaxed" style={{ color: "#4B5563" }}>
+                              <div dangerouslySetInnerHTML={{__html: sanitizeHtml(product.description || product.shortDescription || "No description available.")}}/>
+                            </div>
                           </div>
                         )}
 
                         {tab.id === "howto" && (
-                          <div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                               {HOW_TO_USE.map((step, i) => (
                                 <div key={i}
-                                  className="flex flex-col items-center text-center p-7 rounded-2xl"
-                                  style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.08)" }}>
+                                  className="flex flex-col items-center text-center p-7 rounded-2xl shadow-sm"
+                                  style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
                                   {/* Dark Orange Rounded-2xl Icon Container */}
                                   <div className="h-20 w-20 rounded-2xl flex items-center justify-center mb-5 shadow-lg select-none"
                                     style={{ background: "rgba(255, 92, 0, 0.04)", border: "1.5px solid rgba(255, 92, 0, 0.12)" }}>
@@ -645,16 +697,16 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                   </div>
 
                                   {/* Bold Title */}
-                                  <h4 className="font-bold text-lg mb-2 text-white">{step.title}</h4>
+                                  <h4 className="font-bold text-lg mb-2 text-[#0C1E39]">{step.title}</h4>
                                   
                                   {/* Description */}
-                                  <p className="text-sm text-white/80 leading-relaxed">{step.desc}</p>
+                                  <p className="text-sm text-[#4B5563] leading-relaxed">{step.desc}</p>
                                 </div>
                               ))}
                             </div>
-                            <div className="p-4 rounded-2xl" style={{ background: "rgba(255,92,0,0.1)", border: "1.5px solid rgba(255,92,0,0.25)" }}>
-                              <p className="text-sm" style={{ color: "#ffffff" }}>
-                                <span className="font-bold" style={{ color: "#ffb800" }}>Pro tip:</span> Use cold water for best fizz. One tablet per 200 ml glass. Take daily for best results.
+                            <div className="p-4 rounded-2xl shadow-sm" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
+                              <p className="text-sm" style={{ color: "#4B5563" }}>
+                                <span className="font-bold" style={{ color: "#ff5c00" }}>Pro tip:</span> Use cold water for best fizz. One tablet per 200 ml glass. Take daily for best results.
                               </p>
                             </div>
                           </div>
@@ -663,28 +715,28 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                         {tab.id === "nutrition" && (
                           <div className="space-y-6">
                             {/* Serving Info Headers */}
-                            <div className="flex flex-col sm:flex-row justify-between gap-4 p-5 rounded-2xl" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.08)" }}>
+                            <div className="flex flex-col sm:flex-row justify-between gap-4 p-5 rounded-2xl shadow-sm" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
                               <div>
-                                <span className="text-xs uppercase font-black text-gray-400 tracking-wider">Serving Size</span>
-                                <p className="text-lg font-bold text-white mt-0.5">1 Tablet</p>
+                                <span className="text-xs uppercase font-black text-gray-500 tracking-wider">Serving Size</span>
+                                <p className="text-lg font-bold text-[#0C1E39] mt-0.5">1 Tablet</p>
                               </div>
-                              <div className="hidden sm:block w-px bg-white/10" />
+                              <div className="hidden sm:block w-px bg-gray-200" />
                               <div>
-                                <span className="text-xs uppercase font-black text-gray-400 tracking-wider">Servings Per Pack</span>
-                                <p className="text-lg font-bold text-white mt-0.5">15 Effervescent Tablets</p>
+                                <span className="text-xs uppercase font-black text-gray-500 tracking-wider">Servings Per Pack</span>
+                                <p className="text-lg font-bold text-[#0C1E39] mt-0.5">15 Effervescent Tablets</p>
                               </div>
                             </div>
 
                             {/* Side-by-side Tables Grid */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                               {/* Left Table: Nutrients */}
-                              <div className="rounded-2xl overflow-hidden border border-white/10" style={{ background: "#051124" }}>
-                                <div className="grid grid-cols-3 p-4 font-bold text-xs uppercase tracking-wider text-white/90 border-b border-white/10" style={{ background: "#0c1e39" }}>
+                              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm" style={{ background: "#FFFFFF" }}>
+                                <div className="grid grid-cols-3 p-4 font-bold text-xs uppercase tracking-wider text-[#0C1E39] border-b border-gray-200" style={{ background: "#F8F8F8" }}>
                                   <span>Nutrients</span>
                                   <span className="text-right">Amount / Serving</span>
                                   <span className="text-right">%RDA</span>
                                 </div>
-                                <div className="divide-y divide-white/5">
+                                <div className="divide-y divide-gray-100">
                                   {[
                                     ["Energy", "1.08 kcal", "0.05%"],
                                     ["Protein", "0 g", "0%"],
@@ -693,7 +745,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                     ["Total Sugar", "0.3 g", "**"],
                                     ["Sodium", "335 mg", "16.75%"]
                                   ].map(([name, amt, rda]) => (
-                                    <div key={name} className="grid grid-cols-3 px-4 py-3 text-sm text-white/80">
+                                    <div key={name} className="grid grid-cols-3 px-4 py-3 text-sm text-[#4B5563]">
                                       <span className="font-semibold">{name}</span>
                                       <span className="text-right">{amt}</span>
                                       <span className="text-right font-semibold" style={{ color: rda.includes("0%") ? "inherit" : "var(--or)" }}>{rda}</span>
@@ -703,13 +755,13 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                               </div>
 
                               {/* Right Table: Ingredients */}
-                              <div className="rounded-2xl overflow-hidden border border-white/10" style={{ background: "#051124" }}>
-                                <div className="grid grid-cols-3 p-4 font-bold text-xs uppercase tracking-wider text-white/90 border-b border-white/10" style={{ background: "#0c1e39" }}>
+                              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm" style={{ background: "#FFFFFF" }}>
+                                <div className="grid grid-cols-3 p-4 font-bold text-xs uppercase tracking-wider text-[#0C1E39] border-b border-gray-200" style={{ background: "#F8F8F8" }}>
                                   <span>Ingredients</span>
                                   <span className="text-right">Amount / Serving</span>
                                   <span className="text-right">%RDA</span>
                                 </div>
-                                <div className="divide-y divide-white/5">
+                                <div className="divide-y divide-gray-100">
                                   {[
                                     ["Chloride", "220 mg", "9.56%"],
                                     ["Magnesium", "56 mg", "12.72%"],
@@ -718,7 +770,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                     ["Vitamin C", "40 mg", "50%"],
                                     ["Zinc", "5 mg", "29.4%"]
                                   ].map(([name, amt, rda]) => (
-                                    <div key={name} className="grid grid-cols-3 px-4 py-3 text-sm text-white/80">
+                                    <div key={name} className="grid grid-cols-3 px-4 py-3 text-sm text-[#4B5563]">
                                       <span className="font-semibold">{name}</span>
                                       <span className="text-right">{amt}</span>
                                       <span className="text-right font-semibold" style={{ color: "var(--or)" }}>{rda}</span>
@@ -729,15 +781,15 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                             </div>
 
                             {/* Ingredients list at bottom of the tables */}
-                            <div className="p-5 rounded-2xl border border-white/10" style={{ background: "#051124" }}>
-                              <p className="text-sm leading-relaxed text-white/80">
-                                <strong className="text-white font-bold block mb-1.5 text-xs uppercase tracking-wider text-gray-400">Ingredients:</strong>
+                            <div className="p-5 rounded-2xl border border-gray-200 shadow-sm" style={{ background: "#FFFFFF" }}>
+                              <p className="text-sm leading-relaxed text-[#4B5563]">
+                                <strong className="text-[#0C1E39] font-bold block mb-1.5 text-xs uppercase tracking-wider text-gray-500">Ingredients:</strong>
                                 Chloride, Magnesium, Potassium, Calcium, Vitamin C, Zinc, Acidity regulators (INS 330, INS 500(ii)), Malic Acid, Artificial sweetener (INS 955), Preservative (INS 211), Dextrose, Sodium Chloride, PVP K30 (Polyvinylpyrrolidone K30) (INS 1201), Natural food colour, Natural flavouring substance (Orange).
                               </p>
                             </div>
 
                             {/* RDA Disclaimer Footer */}
-                            <p className="text-[11px] leading-relaxed text-gray-400 mt-2">
+                            <p className="text-[11px] leading-relaxed text-gray-500 mt-2">
                               * % RDA calculated based on ICMR 2020 guidelines for moderate work men and labelling & display regulation.
                             </p>
                           </div>
@@ -758,10 +810,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                 { text: "Sugar Conscious Formula", emoji: "🍃" },
                                 { text: "Vegetarian", emoji: "🌱" }
                               ].map((feat) => (
-                                <div key={feat.text} className="flex items-center gap-3.5 p-4 rounded-xl"
-                                  style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.08)" }}>
+                                <div key={feat.text} className="flex items-center gap-3.5 p-4 rounded-xl shadow-sm"
+                                  style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
                                   <span className="text-lg shrink-0 select-none">{feat.emoji}</span>
-                                  <span className="text-sm font-semibold" style={{ color: "#ffffff" }}>{feat.text}</span>
+                                  <span className="text-sm font-semibold" style={{ color: "#0C1E39" }}>{feat.text}</span>
                                 </div>
                               ))}
                             </div>
@@ -818,44 +870,44 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                         {tab.id === "reviews" && (
                           <div className="space-y-8">
                             <div>
-                              <h3 className="font-bold text-2xl mb-6" style={{ color: "#ffffff" }}>Customer Reviews</h3>
+                              <h3 className="font-bold text-2xl mb-6" style={{ color: "#0C1E39" }}>Customer Reviews</h3>
                               {product.reviews?.length ? (
                                 <div className="space-y-4">
                                   {product.reviews.map((r: any) => (
-                                    <div key={r.id} className="p-5 rounded-2xl" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
+                                    <div key={r.id} className="p-5 rounded-2xl shadow-sm" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: "rgba(255, 255, 255, 0.2)"} : {}}/>)}</div>
-                                        <span className="font-semibold text-sm" style={{ color: "#ffffff" }}>{r.user?.name}</span>
+                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: "rgba(12, 30, 57, 0.15)"} : {}}/>)}</div>
+                                        <span className="font-semibold text-sm" style={{ color: "#0C1E39" }}>{r.user?.name}</span>
                                       </div>
-                                      {r.title && <p className="font-medium mb-1" style={{ color: "#ffffff" }}>{r.title}</p>}
-                                      <p className="text-sm" style={{ color: "#f8f8f8", opacity: 0.85 }}>{r.body}</p>
+                                      {r.title && <p className="font-medium mb-1" style={{ color: "#0C1E39" }}>{r.title}</p>}
+                                      <p className="text-sm" style={{ color: "#4B5563" }}>{r.body}</p>
                                     </div>
                                   ))}
                                 </div>
                               ) : (
                                 <div className="space-y-4">
                                   {FALLBACK_REVIEWS.map((r) => (
-                                    <div key={r.id} className="p-5 rounded-2xl" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
+                                    <div key={r.id} className="p-5 rounded-2xl shadow-sm" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: "rgba(255, 255, 255, 0.2)"} : {}}/>)}</div>
-                                        <span className="font-semibold text-sm" style={{ color: "#ffffff" }}>{r.name}</span>
+                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: "rgba(12, 30, 57, 0.15)"} : {}}/>)}</div>
+                                        <span className="font-semibold text-sm" style={{ color: "#0C1E39" }}>{r.name}</span>
                                       </div>
-                                      <p className="font-medium mb-1" style={{ color: "#ffffff" }}>{r.title}</p>
-                                      <p className="text-sm" style={{ color: "#f8f8f8", opacity: 0.85 }}>{r.body}</p>
+                                      <p className="font-medium mb-1" style={{ color: "#0C1E39" }}>{r.title}</p>
+                                      <p className="text-sm" style={{ color: "#4B5563" }}>{r.body}</p>
                                     </div>
                                   ))}
                                 </div>
                               )}
                             </div>
 
-                            <div className="rounded-3xl p-6" style={{ background: "#051124", border: "1.5px solid rgba(255, 255, 255, 0.1)" }}>
-                              <h3 className="font-bold text-xl mb-5" style={{ color: "#ffffff" }}>Write a Review</h3>
+                            <div className="rounded-3xl p-6 shadow-sm" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
+                              <h3 className="font-bold text-xl mb-5" style={{ color: "#0C1E39" }}>Write a Review</h3>
 
                               {reviewSuccess ? (
                                 <div className="text-center py-6">
                                   <CheckCircle size={40} className="mx-auto mb-3" style={{ color: C.mintHex }} />
-                                  <p className="font-bold" style={{ color: "#ffffff" }}>Thank you for your review!</p>
-                                  <p className="text-sm mt-1" style={{ color: "#f8f8f8", opacity: 0.85 }}>It will appear after approval.</p>
+                                  <p className="font-bold" style={{ color: "#0C1E39" }}>Thank you for your review!</p>
+                                  <p className="text-sm mt-1" style={{ color: "#4B5563" }}>It will appear after approval.</p>
                                 </div>
                               ) : (
                                 <div className="space-y-4" onClickCapture={() => {
@@ -865,7 +917,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                   }
                                 }}>
                                   <div>
-                                    <label className="text-sm font-semibold block mb-2" style={{ color: "#ffffff" }}>Your Rating</label>
+                                    <label className="text-sm font-semibold block mb-2" style={{ color: "#0C1E39" }}>Your Rating</label>
                                     <div className="flex gap-1">
                                       {Array.from({length:5}).map((_,i) => (
                                         <button key={i} type="button"
@@ -874,27 +926,27 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                           onClick={() => token && setReviewRating(i+1)}>
                                           <Star size={28}
                                             className={(reviewHover || reviewRating) > i ? "fill-yellow-400 text-yellow-400" : ""}
-                                            style={(reviewHover || reviewRating) > i ? {} : {color: "rgba(255, 255, 255, 0.2)"}} />
+                                            style={(reviewHover || reviewRating) > i ? {} : {color: "rgba(12, 30, 57, 0.15)"}} />
                                         </button>
                                       ))}
                                     </div>
                                   </div>
 
                                   <div>
-                                    <label className="text-sm font-semibold block mb-1" style={{ color: "#ffffff" }}>Review Title <span className="font-normal opacity-60">(optional)</span></label>
+                                    <label className="text-sm font-semibold block mb-1" style={{ color: "#0C1E39" }}>Review Title <span className="font-normal opacity-60">(optional)</span></label>
                                     <input value={reviewTitle} onChange={e => setReviewTitle(e.target.value)}
                                       placeholder="e.g. Great product!"
                                       className="w-full px-4 py-2.5 rounded-xl text-sm outline-none"
-                                      style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)", background: "#0c1e39", color: "#ffffff" }}
+                                      style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#FFFFFF", color: "#0C1E39" }}
                                       readOnly={!token} />
                                   </div>
 
                                   <div>
-                                    <label className="text-sm font-semibold block mb-1" style={{ color: "#ffffff" }}>Your Review</label>
+                                    <label className="text-sm font-semibold block mb-1" style={{ color: "#0C1E39" }}>Your Review</label>
                                     <textarea value={reviewBody} onChange={e => setReviewBody(e.target.value)}
                                       rows={4} placeholder="Share your experience with this product..."
                                       className="w-full px-4 py-2.5 rounded-xl text-sm outline-none resize-none"
-                                      style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)", background: "#0c1e39", color: "#ffffff" }}
+                                      style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#FFFFFF", color: "#0C1E39" }}
                                       readOnly={!token} />
                                   </div>
 
@@ -930,6 +982,107 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           })}
         </div>
       </div>
+      {/* ── Zoom Lightbox Modal ── */}
+      <AnimatePresence>
+        {isZoomOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex flex-col bg-black/95 select-none"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 text-white z-10">
+              <span className="text-sm font-semibold opacity-75">
+                Image {activeImage + 1} of {images.length}
+              </span>
+              <button 
+                onClick={() => { setIsZoomOpen(false); setZoomScale(1); }}
+                className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            {/* Main Interactive Zoom View */}
+            <div className="flex-1 w-full flex items-center justify-center relative overflow-hidden">
+              {/* Prev Button */}
+              {images.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setZoomScale(1);
+                    setActiveImage((prev) => (prev - 1 + images.length) % images.length);
+                  }}
+                  className="absolute left-4 h-10 w-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-[#0C1E39] z-10 transition-colors shadow-lg"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+              )}
+
+              {/* Next Button */}
+              {images.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setZoomScale(1);
+                    setActiveImage((prev) => (prev + 1) % images.length);
+                  }}
+                  className="absolute right-4 h-10 w-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-[#0C1E39] z-10 transition-colors shadow-lg"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              )}
+
+              <motion.div
+                className="w-full h-full flex items-center justify-center overflow-hidden"
+                style={{ cursor: zoomScale === 1 ? "zoom-in" : "zoom-out" }}
+                onMouseMove={handleMouseMove}
+                onClick={handleImageClick}
+                drag={zoomScale === 1 ? "x" : false}
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={(e, info) => {
+                  if (zoomScale > 1) return;
+                  const swipeThreshold = 50;
+                  if (info.offset.x < -swipeThreshold) {
+                    // Swipe Left -> Next
+                    setZoomScale(1);
+                    setActiveImage((prev) => (prev + 1) % images.length);
+                  } else if (info.offset.x > swipeThreshold) {
+                    // Swipe Right -> Prev
+                    setZoomScale(1);
+                    setActiveImage((prev) => (prev - 1 + images.length) % images.length);
+                  }
+                }}
+              >
+                {images[activeImage]?.imageUrl ? (
+                  <img
+                    src={cldOptimize(images[activeImage].imageUrl, 1200)}
+                    alt=""
+                    className="max-w-full max-h-[72vh] md:max-h-[85vh] object-contain transition-transform duration-200 select-none pointer-events-none"
+                    style={{
+                      transform: `scale(${zoomScale})`,
+                      transformOrigin: `${panOrigin.x * 100}% ${panOrigin.y * 100}%`,
+                    }}
+                  />
+                ) : (
+                  <Package size={80} className="text-white/20" />
+                )}
+              </motion.div>
+            </div>
+
+            {/* Instruction Footer */}
+            <div className="p-4 text-center text-xs text-white/50 z-10">
+              {zoomScale === 1 ? "Click the image to zoom in. Move mouse to pan." : "Click to zoom out."}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Footer />
     </main>
   );

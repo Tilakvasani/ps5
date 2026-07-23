@@ -195,7 +195,10 @@ export default function SciencePage() {
               >
                 R&D Facilities
               </span>
-              <h3 className="text-xl font-black leading-tight" style={{ color: "#FFFFFF" }}>Advanced Formulations Lab</h3>
+              <h3 className="text-xl font-black leading-tight mb-2" style={{ color: "#FFFFFF" }}>Innovation Through Research</h3>
+              <p className="text-sm leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.8 }}>
+                Every Zupwell formulation is thoughtfully developed through scientific research, ingredient evaluation, and quality-focused manufacturing.
+              </p>
             </div>
           </motion.div>
 
@@ -218,9 +221,12 @@ export default function SciencePage() {
                 className="text-[10px] font-black uppercase tracking-widest mb-2 self-start"
                 style={{ color: "#FF5C00" }}
               >
-                Collaborative Innovation
+                QUALITY ASSURANCE
               </span>
-              <h3 className="text-xl font-black leading-tight" style={{ color: "#FFFFFF" }}>Quality Assurance & Synergy</h3>
+              <h3 className="text-xl font-black leading-tight mb-2" style={{ color: "#FFFFFF" }}>Quality at Every Step</h3>
+              <p className="text-sm leading-relaxed" style={{ color: "#F8F8F8", opacity: 0.8 }}>
+                Our products undergo quality control processes throughout manufacturing to help ensure consistency, safety, and reliability.
+              </p>
             </div>
           </motion.div>
         </div>
