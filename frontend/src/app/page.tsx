@@ -341,13 +341,12 @@ export default function HomePage() {
           <div className="lg:col-span-7 flex flex-col items-start text-left">
             <motion.div {...fadeUp(0.0)} className="mb-6">
               <span 
-                className="inline-flex items-center gap-2 font-black uppercase tracking-wider px-4 py-2 rounded-full" 
+                className="inline-flex items-center gap-2 font-black uppercase tracking-wider px-4 py-2 rounded-full whitespace-nowrap text-[10px] sm:text-xs md:text-sm" 
                 style={{ 
                   background: "rgba(255, 92, 0, 0.12)", 
                   color: "var(--or)",
                   border: "1px solid rgba(255, 92, 0, 0.25)",
-                  boxShadow: "0 0 16px rgba(255, 92, 0, 0.15)",
-                  fontSize: "14px"
+                  boxShadow: "0 0 16px rgba(255, 92, 0, 0.15)"
                 }}
               >
                 {s(settings, "hero_badge") || "⚡ ELECTROLYTE EFFERVESCENT TABLET"}
