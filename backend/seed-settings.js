@@ -29,6 +29,8 @@ const defaults = [
   { key: "hero_title",       value: "A True Companion to Your Health",          group: "home" },
   { key: "hero_tagline",     value: "તમારા સ્વાસ્થ્ય સાથે ચાલો — ઝુપવેલ!", group: "home" },
   { key: "hero_subtext",     value: "Science-backed supplements. Quality is our mantra.", group: "home" },
+  { key: "hero_image",       value: "",                                                 group: "home" },
+  { key: "hero_image_link",  value: "/products",                                        group: "home" },
   { key: "hero_stat1_value", value: "200+",            group: "home" },
   { key: "hero_stat1_label", value: "Products",        group: "home" },
   { key: "hero_stat2_value", value: "50K+",            group: "home" },
