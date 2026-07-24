@@ -47,11 +47,16 @@ async function sendSMS(to, body) {
   }
 
   console.log(`Sending real SMS via Twilio to ${formattedTo} from ${fromNumber}...`);
-  return twilioClient.messages.create({
-    body,
-    from: fromNumber,
-    to: formattedTo
-  });
+  try {
+    return await twilioClient.messages.create({
+      body,
+      from: fromNumber,
+      to: formattedTo
+    });
+  } catch (err) {
+    console.error(`⚠️ Twilio SMS error for ${formattedTo}: ${err.message}`);
+    return { sid: "fallback-sid", status: "failed", error: err.message };
+  }
 }
 
 module.exports = {

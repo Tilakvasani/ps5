@@ -376,7 +376,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       variantId: selectedVariant?.id, 
       name: `${product.name} (Pack of ${selectedPack}) - ${selectedFlavor}`, 
       sku: product.sku, 
-      price: effectiveSellingUnitPrice, 
+      price: price, 
       qty, 
       imageUrl: primaryImage, 
       unit: product.unit,
