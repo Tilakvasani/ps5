@@ -6,6 +6,17 @@ import { Upload, X, Plus, Trash2 } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import toast from "react-hot-toast";
 
+const PACK_OPTIONS = [1, 2, 3, 4, 6, 8, 10];
+const DEFAULT_PACK_DISCOUNTS: Record<number, { enabled: boolean; discountPercent: number }> = {
+  1: { enabled: true, discountPercent: 0 },
+  2: { enabled: true, discountPercent: 5 },
+  3: { enabled: true, discountPercent: 8 },
+  4: { enabled: true, discountPercent: 12 },
+  6: { enabled: false, discountPercent: 15 },
+  8: { enabled: false, discountPercent: 18 },
+  10: { enabled: false, discountPercent: 20 },
+};
+
 interface Props { productId?: number; }
 
 export default function ProductForm({ productId }: Props) {
@@ -16,6 +27,7 @@ export default function ProductForm({ productId }: Props) {
   const [images, setImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<any[]>([]);
   const [variants, setVariants] = useState<{ variantName: string; sku: string; price: string; }[]>([]);
+  const [packDiscounts, setPackDiscounts] = useState<Record<number, { enabled: boolean; discountPercent: number }>>(DEFAULT_PACK_DISCOUNTS);
   const [nutritionFacts, setNutritionFacts] = useState<{ key: string; value: string; }[]>([
     { key: "Energy", value: "20 kcal" },
     { key: "Carbohydrates", value: "5g" },
@@ -63,6 +75,14 @@ export default function ProductForm({ productId }: Props) {
             } catch (e) {}
           });
           setVariants(p.variants?.map((v: any) => ({ variantName: v.variantName, sku: v.sku, price: v.price })) || []);
+          if (p.packDiscounts) {
+            try {
+              const loaded = typeof p.packDiscounts === "string" ? JSON.parse(p.packDiscounts) : p.packDiscounts;
+              if (loaded && typeof loaded === "object") {
+                setPackDiscounts(prev => ({ ...prev, ...loaded }));
+              }
+            } catch (e) {}
+          }
           if (p.nutritionFacts) {
             let loadedNutrition: { key: string; value: string; }[] = [];
             if (Array.isArray(p.nutritionFacts)) {
@@ -91,6 +111,7 @@ export default function ProductForm({ productId }: Props) {
     Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
     images.forEach(img => fd.append("images", img));
     if (variants.length) fd.append("variants", JSON.stringify(variants));
+    fd.append("packDiscounts", JSON.stringify(packDiscounts));
     
     const nutritionObj: Record<string, string> = {};
     nutritionFacts.forEach(row => {
@@ -174,6 +195,88 @@ export default function ProductForm({ productId }: Props) {
               <label className="label-text">Discount %</label>
               <input type="number" step="0.01" min="0" max="100" value={form.discountPercent} onChange={update("discountPercent")} className="input-field" />
             </div>
+          </div>
+        </div>
+
+        {/* Pack Options & Discounts (1, 2, 3, 4, 6, 8, 10) */}
+        <div className="card md:col-span-2" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="font-bold text-lg" style={{ color: '#0C1E39' }}>Pack Discounts &amp; Toggles</h2>
+              <p className="text-xs text-gray-500 mt-0.5">Toggle pack sizes (Pack of 1, 2, 3, 4, 6, 8, 10) available on store and set their discount %.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {PACK_OPTIONS.map((pack) => {
+              const item = packDiscounts[pack] || { enabled: false, discountPercent: 0 };
+              const baseMrp = parseFloat(form.basePrice) || 718;
+              const originalTotalPrice = Math.round(baseMrp * pack);
+              const discountedPrice = Math.round(originalTotalPrice * (1 - item.discountPercent / 100));
+
+              return (
+                <div 
+                  key={pack} 
+                  className={`p-4 rounded-2xl transition-all ${item.enabled ? "bg-orange-50/40 border-[#FF5C00]" : "bg-gray-50/70 border-gray-200"}`}
+                  style={{ border: `1.5px solid ${item.enabled ? "#FF5C00" : "rgba(12, 30, 57, 0.1)"}` }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-bold text-sm" style={{ color: '#0C1E39' }}>Pack of {pack}</span>
+                    <button
+                      type="button"
+                      onClick={() => setPackDiscounts(prev => ({
+                        ...prev,
+                        [pack]: { ...item, enabled: !item.enabled }
+                      }))}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${item.enabled ? "bg-[#FF5C00]" : "bg-gray-300"}`}
+                      style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)" }}
+                    >
+                      <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${item.enabled ? "translate-x-6" : "translate-x-1"}`} />
+                    </button>
+                  </div>
+
+                  {item.enabled ? (
+                    <div className="space-y-2">
+                      <div>
+                        <label className="text-[11px] font-semibold text-gray-600 block mb-1">Discount %</label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            value={item.discountPercent}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 0;
+                              setPackDiscounts(prev => ({
+                                ...prev,
+                                [pack]: { ...item, discountPercent: Math.max(0, Math.min(100, val)) }
+                              }));
+                            }}
+                            className="input-field text-sm pr-7 py-1.5"
+                            placeholder="0"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">%</span>
+                        </div>
+                      </div>
+                      <div className="text-[11px] pt-1 text-gray-600">
+                        <span>Preview: </span>
+                        {item.discountPercent > 0 ? (
+                          <span>
+                            <span className="line-through text-gray-400 mr-1">₹{originalTotalPrice}</span>
+                            <span className="font-bold text-[#FF5C00]">₹{discountedPrice}</span>
+                          </span>
+                        ) : (
+                          <span className="font-bold text-[#0C1E39]">₹{originalTotalPrice}</span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 italic">Disabled on store</p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

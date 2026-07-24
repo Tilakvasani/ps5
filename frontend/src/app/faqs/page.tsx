@@ -13,16 +13,77 @@ const FAQS = [
     emoji: "📦",
     questions: [
       {
-        q: "Can these tablets be chewed directly?",
-        a: "Absolutely not! These are 'Effervescent' tablets. Put them in water, watch the magic (fizz) and then drink. Eating them directly is not a good idea!",
+        q: "What are Zupwell Electrolyte Effervescent Tablets?",
+        a: "Zupwell Electrolyte Effervescent Tablets are fast-dissolving hydration tablets formulated with 5 essential electrolytes (Sodium, Potassium, Magnesium, Calcium, and Chloride) along with Vitamin C to support hydration, electrolyte balance, muscle function, and everyday wellness.",
       },
       {
-        q: "How much sugar is in this?",
-        a: "Less! We believe in taste, not in loads of sugar. Staying fit has now become delicious.",
+        q: "What are the benefits of electrolyte tablets?",
+        intro: "Electrolyte tablets help:",
+        bullets: [
+          "Maintain hydration",
+          "Replace electrolytes lost through sweat",
+          "Support muscle function",
+          "Help reduce fatigue",
+          "Support nerve function",
+          "Promote normal fluid balance",
+        ],
       },
       {
-        q: "How many tablets can be taken in a day?",
-        a: "Usually 1 tablet a day is enough. But if you are working out excessively, you can take it as per your doctor's advice.",
+        q: "How do I use these tablets?",
+        a: "Simply dissolve 1 tablet in 200–250 ml of drinking water. Wait until it fully dissolves before drinking.",
+      },
+      {
+        q: "Can I take these tablets every day?",
+        a: "Yes. When used as directed, Zupwell Electrolyte Effervescent Tablets can be consumed daily to support hydration and electrolyte balance.",
+      },
+      {
+        q: "When should I drink an electrolyte tablet?",
+        intro: "You can consume it:",
+        bullets: [
+          "Before exercise",
+          "During workouts",
+          "After exercise",
+          "During travel",
+          "In hot weather",
+          "After excessive sweating",
+          "Whenever you need hydration support",
+        ],
+      },
+      {
+        q: "Does this product contain sugar?",
+        a: "Yes. Each serving contains a small amount [0.3 grams] of sugar for improved taste.",
+      },
+      {
+        q: "Is it suitable for gym workouts?",
+        a: "Yes. It helps replenish electrolytes lost through sweat during exercise and supports hydration for an active lifestyle.",
+      },
+      {
+        q: "Is it suitable for both men and women?",
+        a: "Yes. It is suitable for healthy adults, including both men and women.",
+      },
+      {
+        q: "Does it contain Vitamin C?",
+        a: "Yes. Each tablet contains Vitamin C, which supports normal immune function and acts as an antioxidant.",
+      },
+      {
+        q: "Is it vegan?",
+        a: "Yes. It is suitable for vegetarians.",
+      },
+      {
+        q: "How many tablets are in one tube?",
+        a: "One tube contains 15 effervescent tablets.",
+      },
+      {
+        q: "Can I take more than one tablet a day?",
+        a: "Use only as directed on the label or as advised by your healthcare professional. Do not exceed the recommended daily usage.",
+      },
+      {
+        q: "Is this a medicine?",
+        a: "No. Zupwell Electrolyte Effervescent Tablets are a health supplement and should not be used as a substitute for a varied diet or prescribed medication.",
+      },
+      {
+        q: "Who should avoid this product?",
+        a: "Pregnant or breastfeeding women, children, or individuals with any medical condition should consult a healthcare professional before use.",
       },
     ],
   },
@@ -66,7 +127,7 @@ const FAQS = [
   },
 ];
 
-function FAQItem({ q, a }: { q: string; a: string }) {
+function FAQItem({ q, a, intro, bullets }: { q: string; a?: string; intro?: string; bullets?: string[] }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="zcard p-0 overflow-hidden" style={{ borderColor: open ? "var(--or)" : "rgba(12, 30, 57, 0.08)", background: "#FFFFFF", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
@@ -90,7 +151,20 @@ function FAQItem({ q, a }: { q: string; a: string }) {
             transition={{ duration: 0.25 }}
           >
             <div className="px-5 pb-5 text-sm leading-relaxed pt-3" style={{ color: "#4A5568", borderTop: "1px solid rgba(12, 30, 57, 0.08)" }}>
-              {a}
+              {a && <p>{a}</p>}
+              {intro && (
+                <div>
+                  <p className="font-medium text-[#0C1E39] mb-2">{intro}</p>
+                  <ul className="space-y-1.5 pl-1">
+                    {bullets?.map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="h-1.5 w-1.5 rounded-full mt-2 shrink-0" style={{ background: "var(--or)" }} />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -191,8 +265,8 @@ export default function FAQsPage() {
                 <h2 className="text-xl font-black" style={{ color: "#0C1E39", letterSpacing: "-0.03em" }}>{section.category}</h2>
               </div>
               <div className="space-y-3">
-                {section.questions.map(({ q, a }) => (
-                  <FAQItem key={q} q={q} a={a} />
+                {section.questions.map((item: any) => (
+                  <FAQItem key={item.q} q={item.q} a={item.a} intro={item.intro} bullets={item.bullets} />
                 ))}
               </div>
             </motion.div>

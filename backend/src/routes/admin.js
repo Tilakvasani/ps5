@@ -389,7 +389,7 @@ router.get("/products", validatePagination, authAdmin, async (req, res) => {
 
 router.post("/products", sanitizeBody, authAdmin, requireRole("admin", "super_admin"), upload.array("images", 10), async (req, res) => {
   try {
-    const { name, sku, hsnCode = "2106", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants, flavors, nutritionFacts } = req.body;
+    const { name, sku, hsnCode = "2106", brand, unit = "NOS", categoryId, basePrice, sellingPrice, discountPercent = 0, description, shortDescription, metaTitle, metaDescription, isActive = true, isFeatured = false, variants, flavors, nutritionFacts, packDiscounts } = req.body;
     const slug = slugify(name, { lower: true, strict: true });
 
     let parsedNutrition = null;
@@ -401,6 +401,15 @@ router.post("/products", sanitizeBody, authAdmin, requireRole("admin", "super_ad
       }
     }
 
+    let parsedPackDiscounts = null;
+    if (packDiscounts) {
+      try {
+        parsedPackDiscounts = typeof packDiscounts === "string" ? JSON.parse(packDiscounts) : packDiscounts;
+      } catch (e) {
+        console.error("Failed to parse packDiscounts in POST:", e);
+      }
+    }
+
     const product = await prisma.$transaction(async tx => {
       const p = await tx.product.create({
         data: {
@@ -409,6 +418,7 @@ router.post("/products", sanitizeBody, authAdmin, requireRole("admin", "super_ad
           basePrice: parseFloat(basePrice), sellingPrice: parseFloat(sellingPrice), discountPercent: parseFloat(discountPercent),
           description, shortDescription, metaTitle, metaDescription, flavors,
           nutritionFacts: parsedNutrition,
+          packDiscounts: parsedPackDiscounts,
           isActive: isActive === "true" || isActive === true,
           isFeatured: isFeatured === "true" || isFeatured === true,
         },
@@ -438,7 +448,7 @@ router.post("/products", sanitizeBody, authAdmin, requireRole("admin", "super_ad
 router.put("/products/:id", sanitizeBody, authAdmin, requireRole("admin", "super_admin"), upload.array("images", 10), async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, flavors, nutritionFacts, ...rest } = req.body;
+    const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, flavors, nutritionFacts, packDiscounts, ...rest } = req.body;
     const data = { ...rest };
     if (name)             { data.name = name; data.slug = slugify(name, { lower: true, strict: true }); }
     if (isActive !== undefined) data.isActive = isActive === "true" || isActive === true;
@@ -456,6 +466,17 @@ router.put("/products/:id", sanitizeBody, authAdmin, requireRole("admin", "super
           data.nutritionFacts = typeof nutritionFacts === "string" ? JSON.parse(nutritionFacts) : nutritionFacts;
         } catch (e) {
           console.error("Failed to parse nutritionFacts in PUT:", e);
+        }
+      }
+    }
+    if (packDiscounts !== undefined) {
+      if (packDiscounts === "" || packDiscounts === null) {
+        data.packDiscounts = null;
+      } else {
+        try {
+          data.packDiscounts = typeof packDiscounts === "string" ? JSON.parse(packDiscounts) : packDiscounts;
+        } catch (e) {
+          console.error("Failed to parse packDiscounts in PUT:", e);
         }
       }
     }

@@ -32,11 +32,21 @@ router.post("/", authUser, async (req, res) => {
       return res.status(400).json({ error: `Not enough stock for "${product.name}"` });
     }
 
-    const unitPrice = item.variantId
+    let packDiscountPercent = 0;
+    if (product.packDiscounts) {
+      try {
+        const pd = typeof product.packDiscounts === "string" ? JSON.parse(product.packDiscounts) : product.packDiscounts;
+        if (pd && pd[pack] && pd[pack].enabled) {
+          packDiscountPercent = Number(pd[pack].discountPercent) || 0;
+        }
+      } catch (e) {}
+    }
+
+    const baseUnitPrice = item.variantId
       ? product.variants.find(v => Number(v.id) === Number(item.variantId))?.price || product.sellingPrice
       : product.sellingPrice;
 
-    const finalUnitPrice = Number(unitPrice);
+    const finalUnitPrice = Number(baseUnitPrice) * (1 - packDiscountPercent / 100);
     subtotal += finalUnitPrice * pack * item.qty;
     orderItems.push({ 
       productId: item.productId, 

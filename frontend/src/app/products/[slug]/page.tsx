@@ -135,6 +135,82 @@ const DELIVERY_PERKS = [
   { icon: Truck,     label: "Order Now | Est. Delivery: 5–7 Days" },
 ];
 
+const PRODUCT_FAQS = [
+  {
+    q: "1. What are Zupwell Electrolyte Effervescent Tablets?",
+    a: "Zupwell Electrolyte Effervescent Tablets are fast-dissolving hydration tablets formulated with 5 essential electrolytes (Sodium, Potassium, Magnesium, Calcium, and Chloride) along with Vitamin C to support hydration, electrolyte balance, muscle function, and everyday wellness.",
+  },
+  {
+    q: "2. What are the benefits of electrolyte tablets?",
+    intro: "Electrolyte tablets help:",
+    bullets: [
+      "Maintain hydration",
+      "Replace electrolytes lost through sweat",
+      "Support muscle function",
+      "Help reduce fatigue",
+      "Support nerve function",
+      "Promote normal fluid balance",
+    ],
+  },
+  {
+    q: "3. How do I use these tablets?",
+    a: "Simply dissolve 1 tablet in 200–250 ml of drinking water. Wait until it fully dissolves before drinking.",
+  },
+  {
+    q: "4. Can I take these tablets every day?",
+    a: "Yes. When used as directed, Zupwell Electrolyte Effervescent Tablets can be consumed daily to support hydration and electrolyte balance.",
+  },
+  {
+    q: "5. When should I drink an electrolyte tablet?",
+    intro: "You can consume it:",
+    bullets: [
+      "Before exercise",
+      "During workouts",
+      "After exercise",
+      "During travel",
+      "In hot weather",
+      "After excessive sweating",
+      "Whenever you need hydration support",
+    ],
+  },
+  {
+    q: "6. Does this product contain sugar?",
+    a: "Yes. Each serving contains a small amount [0.3 grams] of sugar for improved taste.",
+  },
+  {
+    q: "7. Is it suitable for gym workouts?",
+    a: "Yes. It helps replenish electrolytes lost through sweat during exercise and supports hydration for an active lifestyle.",
+  },
+  {
+    q: "8. Is it suitable for both men and women?",
+    a: "Yes. It is suitable for healthy adults, including both men and women.",
+  },
+  {
+    q: "9. Does it contain Vitamin C?",
+    a: "Yes. Each tablet contains Vitamin C, which supports normal immune function and acts as an antioxidant.",
+  },
+  {
+    q: "10. Is it vegan?",
+    a: "Yes. It is suitable for vegetarians.",
+  },
+  {
+    q: "11. How many tablets are in one tube?",
+    a: "One tube contains 15 effervescent tablets.",
+  },
+  {
+    q: "12. Can I take more than one tablet a day?",
+    a: "Use only as directed on the label or as advised by your healthcare professional. Do not exceed the recommended daily usage.",
+  },
+  {
+    q: "13. Is this a medicine?",
+    a: "No. Zupwell Electrolyte Effervescent Tablets are a health supplement and should not be used as a substitute for a varied diet or prescribed medication.",
+  },
+  {
+    q: "14. Who should avoid this product?",
+    a: "Pregnant or breastfeeding women, children, or individuals with any medical condition should consult a healthcare professional before use.",
+  },
+];
+
 const GrowequalLogo = () => (
   <div className="flex items-center gap-2.5">
     <div className="relative shrink-0">
@@ -171,6 +247,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [zoomScale, setZoomScale] = useState(1);
   const [panOrigin, setPanOrigin] = useState({ x: 0.5, y: 0.5 });
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (zoomScale === 1) return;
@@ -224,12 +301,49 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     </main>
   );
 
-  const unitPrice    = selectedVariant ? Number(selectedVariant.price) : Number(product.sellingPrice);
-  const price        = unitPrice * selectedPack;
-  const cgst         = price * qty * cgstRate;
-  const sgst         = price * qty * sgstRate;
-  const rawTotal     = price * qty + cgst + sgst;
-  const total        = Math.round(rawTotal);
+  const ALL_PACK_NUMBERS = [1, 2, 3, 4, 6, 8, 10];
+  const availablePacks = (() => {
+    let pd: any = null;
+    if (product?.packDiscounts) {
+      try {
+        pd = typeof product.packDiscounts === "string" ? JSON.parse(product.packDiscounts) : product.packDiscounts;
+      } catch (e) {}
+    }
+    const list: { pack: number; label: string; sub: string; discountPercent: number }[] = [];
+    for (const p of ALL_PACK_NUMBERS) {
+      const info = pd?.[p] || (p <= 4 ? { enabled: true, discountPercent: p === 1 ? 0 : p === 2 ? 5 : p === 3 ? 8 : 12 } : { enabled: false, discountPercent: 0 });
+      if (info.enabled) {
+        list.push({
+          pack: p,
+          label: `Pack Of ${p}`,
+          sub: `${p * 15} Tablets`,
+          discountPercent: Number(info.discountPercent) || 0
+        });
+      }
+    }
+    return list.length ? list : [
+      { pack: 1, label: "Pack Of 1", sub: "15 Tablets", discountPercent: 0 },
+      { pack: 2, label: "Pack Of 2", sub: "30 Tablets", discountPercent: 5 },
+      { pack: 3, label: "Pack Of 3", sub: "45 Tablets", discountPercent: 8 },
+      { pack: 4, label: "Pack Of 4", sub: "60 Tablets", discountPercent: 12 },
+    ];
+  })();
+
+  const selectedPackInfo = availablePacks.find(p => p.pack === selectedPack) || availablePacks[0];
+  const packDiscountPercent = selectedPackInfo ? selectedPackInfo.discountPercent : 0;
+
+  const baseUnitPrice = selectedVariant ? Number(selectedVariant.price) : Number(product.sellingPrice);
+  const baseMrpWithGst = baseUnitPrice * (1 + cgstRate + sgstRate);
+
+  const originalPackMrp = Math.round(baseMrpWithGst * selectedPack);
+  const discountedPackPrice = Math.round(originalPackMrp * (1 - packDiscountPercent / 100));
+  const savingsAmount = originalPackMrp - discountedPackPrice;
+
+  const effectiveSellingUnitPrice = Number(product.sellingPrice) * (1 - packDiscountPercent / 100);
+  const price = effectiveSellingUnitPrice * selectedPack;
+  const rawTotal = discountedPackPrice * qty;
+  const total = Math.round(rawTotal);
+
   const primaryImage = product.images?.find((i: any) => i.isPrimary)?.imageUrl || product.images?.[0]?.imageUrl;
   const images       = product.images?.length ? product.images : [{ imageUrl: null }];
   const nutritionalFacts = product.nutritionFacts || null;
@@ -262,7 +376,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       variantId: selectedVariant?.id, 
       name: `${product.name} (Pack of ${selectedPack}) - ${selectedFlavor}`, 
       sku: product.sku, 
-      price, 
+      price: effectiveSellingUnitPrice, 
       qty, 
       imageUrl: primaryImage, 
       unit: product.unit,
@@ -292,7 +406,8 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     { id: "nutrition", label: "Nutrition Information" },
     { id: "specs",     label: "Key Benefits" },
     { id: "info",      label: "Product Details" },
-    { id: "reviews",   label: `Customer Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` },
+    { id: "faqs",      label: "Frequently Asked Questions" },
+    { id: "reviews",   label: "Customer Reviews" },
   ] as const;
 
   const productJsonLd = {
@@ -313,7 +428,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     offers: {
       "@type": "Offer",
       priceCurrency: "INR",
-      price: unitPrice,
+      price: baseUnitPrice,
       availability: isOutOfStock
         ? "https://schema.org/OutOfStock"
         : "https://schema.org/InStock",
@@ -351,7 +466,6 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 {primaryImage && <img src={cldOptimize(primaryImage, 80)} alt="" width={80} height={80} className="h-10 w-10 rounded-xl object-cover shrink-0" style={{ border: `1px solid ${C.border}` }}  loading="lazy" decoding="async" />}
                 <div className="min-w-0">
                   <p className="font-bold truncate text-sm" style={{ color: C.blue }}>{product.name}</p>
-                  <p className="text-xs" style={{ color: C.mid }}>₹{price.toFixed(0)} per unit</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
@@ -545,22 +659,22 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             <div className="mb-6">
               <p className="text-sm font-semibold mb-2" style={{ color: C.blue }}>Packs: Pack Of {selectedPack}</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[
-                  { pack: 1, label: "Pack Of 1", sub: "15 Tablets" },
-                  { pack: 2, label: "Pack Of 2", sub: "30 Tablets" },
-                  { pack: 3, label: "Pack Of 3", sub: "45 Tablets" },
-                  { pack: 4, label: "Pack Of 4", sub: "60 Tablets" }
-                ].map((item) => (
+                {availablePacks.map((item) => (
                   <button key={item.pack} onClick={() => setSelectedPack(item.pack)}
-                    className="flex flex-col items-center justify-center p-3 rounded-xl transition-colors duration-150 text-center"
+                    className="flex flex-col items-center justify-center p-3 rounded-xl transition-colors duration-150 text-center relative cursor-pointer overflow-hidden"
                     style={{
                       border: `1.5px solid ${selectedPack===item.pack ? "#ffb800" : C.border}`,
                       background: selectedPack===item.pack ? "#ffb800" : C.surface,
                       color: selectedPack===item.pack ? "#051124" : C.blue,
-                      minHeight: "72px"
+                      minHeight: "74px"
                     }}>
-                    <span className="text-xs font-bold leading-tight">{item.label}</span>
-                    <span className="text-[10px] opacity-75 mt-0.5">{item.sub}</span>
+                    {item.discountPercent > 0 && (
+                      <span className="absolute top-0 right-0 bg-[#FF5C00] text-white text-[9px] font-black px-1.5 py-0.5 rounded-bl">
+                        {item.discountPercent}% OFF
+                      </span>
+                    )}
+                    <span className="text-[14px] font-bold leading-tight">{item.label}</span>
+                    <span className="text-[12px] opacity-80 mt-0.5">{item.sub}</span>
                   </button>
                 ))}
               </div>
@@ -568,13 +682,27 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
             {/* Price card — dark surface */}
             <div className="rounded-2xl p-5 mb-5" style={{ background: "#0c1e39", border: `1.5px solid ${C.border}`, color: "#ffffff" }}>
-              <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-4xl font-bold" style={{ color: "#ffffff", letterSpacing: "-0.04em" }}>
-                  <span className="text-lg font-bold mr-1.5 uppercase" style={{ verticalAlign: "middle", color: "#ffffff" }}>mrp:</span>
-                  ₹{Math.round(price * (1 + cgstRate + sgstRate))}
-                </span>
+              <div className="flex items-baseline gap-3 mb-1.5 flex-wrap">
+                <span className="text-sm font-bold uppercase" style={{ color: "#ffffff", opacity: 0.9 }}>mrp:</span>
+                {packDiscountPercent > 0 ? (
+                  <>
+                    <span className="line-through text-gray-400 text-2xl font-bold">₹{originalPackMrp}</span>
+                    <span className="text-4xl font-black text-white" style={{ letterSpacing: "-0.04em" }}>
+                      ₹{discountedPackPrice}
+                    </span>
+                    <span className="bg-[#FF5C00] text-white text-xs font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      {packDiscountPercent}% OFF
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-4xl font-bold" style={{ color: "#ffffff", letterSpacing: "-0.04em" }}>
+                    ₹{originalPackMrp}
+                  </span>
+                )}
               </div>
-              <p className="text-xs mt-1.5" style={{ color: "#f8f8f8", opacity: 0.8 }}>includes all taxes</p>
+              <p className="text-xs mt-1" style={{ color: "#f8f8f8", opacity: 0.85 }}>
+                {packDiscountPercent > 0 ? `You save ₹${savingsAmount} · includes all taxes` : "includes all taxes"}
+              </p>
               {qty > 1 && (
                 <div className="text-sm mt-3 pt-3" style={{ color: "#f8f8f8", borderTop: `1.5px solid rgba(255, 255, 255, 0.1)` }}>
                   <div className="flex justify-between font-bold text-base" style={{ color: "#ffffff" }}>
@@ -642,9 +770,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
         <div className="mt-16 space-y-4">
           {TABS.map((tab) => {
             const isOpen = activeTab === tab.id;
-            const label = tab.id === "reviews" 
-              ? `Customer Reviews (${product.reviews?.length ? product._count?.reviews || product.reviews.length : FALLBACK_REVIEWS.length})` 
-              : tab.label;
+            const label = tab.label;
             
             return (
               <div key={tab.id} id={`accordion-${tab.id}`} className="rounded-2xl overflow-hidden" style={{ border: "1.5px solid rgba(255, 255, 255, 0.1)", background: "#0c1e39" }}>
@@ -868,17 +994,87 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                           </div>
                         )}
 
+                        {tab.id === "faqs" && (
+                          <div className="space-y-3 py-1">
+                            {PRODUCT_FAQS.map((faq, i) => {
+                              const isFaqOpen = openFaqIndex === i;
+                              return (
+                                <div 
+                                  key={i} 
+                                  className="rounded-2xl overflow-hidden shadow-sm transition-all duration-200"
+                                  style={{ 
+                                    background: "#FFFFFF", 
+                                    border: isFaqOpen ? "1.5px solid #FF5C00" : "1.5px solid rgba(12, 30, 57, 0.08)" 
+                                  }}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => setOpenFaqIndex(isFaqOpen ? null : i)}
+                                    className="w-full px-5 py-4 flex items-center justify-between gap-4 text-left transition-colors"
+                                  >
+                                    <span className="font-semibold text-sm md:text-base leading-snug" style={{ color: isFaqOpen ? "#FF5C00" : "#0C1E39" }}>
+                                      {faq.q}
+                                    </span>
+                                    <span 
+                                      className="shrink-0 transition-transform duration-200" 
+                                      style={{ transform: isFaqOpen ? "rotate(180deg)" : "rotate(0deg)", color: isFaqOpen ? "#FF5C00" : "#0C1E39" }}
+                                    >
+                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                      </svg>
+                                    </span>
+                                  </button>
+
+                                  <AnimatePresence initial={false}>
+                                    {isFaqOpen && (
+                                      <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: "auto", opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.2 }}
+                                        style={{ overflow: "hidden" }}
+                                      >
+                                        <div className="px-5 pb-5 pt-2 text-sm leading-relaxed" style={{ color: "#4B5563", borderTop: "1px solid rgba(12, 30, 57, 0.06)" }}>
+                                          {faq.a && <p>{faq.a}</p>}
+                                          {faq.intro && (
+                                            <div>
+                                              <p className="font-medium text-[#0C1E39] mb-2">{faq.intro}</p>
+                                              <ul className="space-y-2 pl-1">
+                                                {faq.bullets?.map((item, idx) => (
+                                                  <li key={idx} className="flex items-start gap-2.5">
+                                                    <span className="h-1.5 w-1.5 rounded-full mt-2 shrink-0" style={{ background: "#FF5C00" }} />
+                                                    <span>{item}</span>
+                                                  </li>
+                                                ))}
+                                              </ul>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
                         {tab.id === "reviews" && (
                           <div className="space-y-8">
                             <div>
-                              <h3 className="font-bold text-2xl mb-6" style={{ color: "#0C1E39" }}>Customer Reviews</h3>
                               {product.reviews?.length ? (
                                 <div className="space-y-4">
                                   {product.reviews.map((r: any) => (
                                     <div key={r.id} className="p-5 rounded-2xl shadow-sm" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: "rgba(12, 30, 57, 0.15)"} : {}}/>)}</div>
-                                        <span className="font-semibold text-sm" style={{ color: "#0C1E39" }}>{r.user?.name}</span>
+                                      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: "rgba(12, 30, 57, 0.15)"} : {}}/>)}</div>
+                                          <span className="font-semibold text-sm" style={{ color: "#0C1E39" }}>{r.user?.name || "Verified Buyer"}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/70">
+                                          <CheckCircle size={12} className="text-emerald-600" />
+                                          <span>Verified Purchaser</span>
+                                        </div>
                                       </div>
                                       {r.title && <p className="font-medium mb-1" style={{ color: "#0C1E39" }}>{r.title}</p>}
                                       <p className="text-sm" style={{ color: "#4B5563" }}>{r.body}</p>
@@ -889,9 +1085,15 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                                 <div className="space-y-4">
                                   {FALLBACK_REVIEWS.map((r) => (
                                     <div key={r.id} className="p-5 rounded-2xl shadow-sm" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: "rgba(12, 30, 57, 0.15)"} : {}}/>)}</div>
-                                        <span className="font-semibold text-sm" style={{ color: "#0C1E39" }}>{r.name}</span>
+                                      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex gap-0.5">{Array.from({length:5}).map((_,i) => <Star key={i} size={13} className={i < r.rating ? "fill-yellow-400 text-yellow-400" : ""} style={i >= r.rating ? {color: "rgba(12, 30, 57, 0.15)"} : {}}/>)}</div>
+                                          <span className="font-semibold text-sm" style={{ color: "#0C1E39" }}>{r.name}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/70">
+                                          <CheckCircle size={12} className="text-emerald-600" />
+                                          <span>Verified Purchaser</span>
+                                        </div>
                                       </div>
                                       <p className="font-medium mb-1" style={{ color: "#0C1E39" }}>{r.title}</p>
                                       <p className="text-sm" style={{ color: "#4B5563" }}>{r.body}</p>

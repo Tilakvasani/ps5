@@ -113,6 +113,7 @@ model Product {
   metaDescription  String?          @map("meta_description") @db.VarChar(300)
   flavors          String?          @db.VarChar(255)
   nutritionFacts   Json?            @map("nutrition_facts")
+  packDiscounts    Json?            @map("pack_discounts")
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
   category         Category?        @relation(fields: [categoryId], references: [id])

@@ -98,10 +98,6 @@ export default function CartPage() {
                           style={{ height: 28, width: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, color: "#0C1E39", transition: "background 0.15s" }}
                           className="hover:bg-[#0C1E39]/10 transition-colors"><Plus size={12} /></button>
                       </div>
-                      <div className="text-right">
-                        <div style={{ fontWeight: 700, color: "#0C1E39" }}>₹{(item.price * item.qty).toFixed(2)}</div>
-                        <div style={{ fontSize: "0.75rem", color: "#6B7280" }}>₹{item.price.toFixed(2)} each</div>
-                      </div>
                     </div>
                   </div>
 
