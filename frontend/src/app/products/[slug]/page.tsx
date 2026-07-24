@@ -332,8 +332,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const selectedPackInfo = availablePacks.find(p => p.pack === selectedPack) || availablePacks[0];
   const packDiscountPercent = selectedPackInfo ? selectedPackInfo.discountPercent : 0;
 
-  const baseMrpUnit = selectedVariant ? Number(selectedVariant.price) : Number(product.basePrice || product.sellingPrice);
-  const originalPackMrp = Math.round(baseMrpUnit * selectedPack);
+  const baseUnitPrice = selectedVariant ? Number(selectedVariant.price) : Number(product.sellingPrice);
+  const baseMrpWithGst = baseUnitPrice * (1 + cgstRate + sgstRate);
+
+  const originalPackMrp = Math.round(baseMrpWithGst * selectedPack);
   const discountedPackPrice = Math.round(originalPackMrp * (1 - packDiscountPercent / 100));
   const savingsAmount = originalPackMrp - discountedPackPrice;
 
@@ -426,7 +428,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     offers: {
       "@type": "Offer",
       priceCurrency: "INR",
-      price: baseMrpUnit,
+      price: baseUnitPrice,
       availability: isOutOfStock
         ? "https://schema.org/OutOfStock"
         : "https://schema.org/InStock",
