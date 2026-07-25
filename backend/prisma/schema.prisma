@@ -115,6 +115,7 @@ model Product {
   flavors          String?          @db.VarChar(255)
   nutritionFacts   Json?            @map("nutrition_facts")
   packDiscounts    Json?            @map("pack_discounts")
+  metadata         Json?            @map("metadata")
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
   category         Category?        @relation(fields: [categoryId], references: [id])

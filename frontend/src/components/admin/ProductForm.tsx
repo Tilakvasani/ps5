@@ -40,7 +40,7 @@ export default function ProductForm({ productId }: Props) {
     { key: "Zinc", value: "5mg" }
   ]);
   const [form, setForm] = useState({
-    name: "", sku: "", hsnCode: "2106", brand: "", unit: "NOS",
+    name: "", sku: "", hsnCode: "2106", ean: "", brand: "", unit: "NOS",
     categoryId: "", basePrice: "", sellingPrice: "", discountPercent: "0",
     description: "", shortDescription: "", metaTitle: "", metaDescription: "",
     flavors: "",
@@ -55,7 +55,13 @@ export default function ProductForm({ productId }: Props) {
       adminApi.getProducts({ id: productId }).then(data => {
         const p = data.products?.[0] || data;
         if (p) {
-          setForm({ name: p.name, sku: p.sku, hsnCode: p.hsnCode, brand: p.brand || "", unit: p.unit, categoryId: p.categoryId?.toString() || "",
+          let meta: any = {};
+          if (p.metadata) {
+            try {
+              meta = typeof p.metadata === "string" ? JSON.parse(p.metadata) : p.metadata;
+            } catch (e) {}
+          }
+          setForm({ name: p.name, sku: p.sku, hsnCode: meta.hsn || p.hsnCode || "2106", ean: meta.ean || "", brand: p.brand || "", unit: p.unit, categoryId: p.categoryId?.toString() || "",
             basePrice: p.basePrice, sellingPrice: p.sellingPrice, discountPercent: p.discountPercent,
             description: p.description || "", shortDescription: p.shortDescription || "",
             metaTitle: p.metaTitle || "", metaDescription: p.metaDescription || "",
@@ -112,6 +118,7 @@ export default function ProductForm({ productId }: Props) {
     images.forEach(img => fd.append("images", img));
     if (variants.length) fd.append("variants", JSON.stringify(variants));
     fd.append("packDiscounts", JSON.stringify(packDiscounts));
+    fd.append("metadata", JSON.stringify({ hsn: form.hsnCode, ean: form.ean }));
     
     const nutritionObj: Record<string, string> = {};
     nutritionFacts.forEach(row => {
@@ -178,10 +185,28 @@ export default function ProductForm({ productId }: Props) {
           <h2 className="font-bold mb-4" style={{ color: '#0C1E39' }}>Pricing &amp; GST</h2>
           <div className="space-y-3">
             <div>
-              <label className="label-text">HSN Code</label>
-              <select value={form.hsnCode} onChange={update("hsnCode")} className="input-field">
+              <label className="label-text">HSN Code (GST)</label>
+              <input
+                type="text"
+                list="hsn-options"
+                value={form.hsnCode}
+                onChange={update("hsnCode")}
+                className="input-field"
+                placeholder="e.g. 2106"
+              />
+              <datalist id="hsn-options">
                 {gstRates.map(g => <option key={g.hsnCode} value={g.hsnCode}>{g.hsnCode} — {g.description}</option>)}
-              </select>
+              </datalist>
+            </div>
+            <div>
+              <label className="label-text">EAN / Barcode</label>
+              <input
+                type="text"
+                value={form.ean}
+                onChange={update("ean")}
+                className="input-field"
+                placeholder="e.g. 8901234567890"
+              />
             </div>
             <div>
               <label className="label-text">Base / MRP (₹)</label>

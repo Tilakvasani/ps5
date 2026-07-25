@@ -135,7 +135,7 @@ export default function ProductCard({ product }: { product: Product }) {
               <span style={{ fontSize: "15px", fontWeight: 900, color: "#FF5C00", letterSpacing: "-0.5px" }}>
                 <span style={{ fontSize: "10px", fontWeight: 700, color: "#6B7280", marginRight: "3px", textTransform: "uppercase" }}>mrp</span>₹{finalPrice}
               </span>
-              <p style={{ fontSize: "9px", color: "#6B7280", marginTop: "1px" }}>includes all taxes</p>
+              <p style={{ fontSize: "9px", color: "#6B7280", marginTop: "1px" }}>Includes all taxes</p>
             </div>
             {isOutOfStock ? (
               <button

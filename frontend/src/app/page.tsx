@@ -706,6 +706,57 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Video Section ── */}
+      <section className="pt-12 sm:pt-16 pb-4 sm:pb-6 px-5" style={{ background: "var(--gy)" }}>
+        <div className="mx-auto max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8"
+          >
+            <span className="inline-block text-xs font-black uppercase tracking-[0.18em] px-4 py-1.5 rounded-full mb-4"
+              style={{ background: "rgba(255,92,0,0.08)", color: "#FF5C00", border: "1px solid rgba(255,92,0,0.18)" }}>
+              ▶ Watch
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight mb-3"
+              style={{ color: "#0C1E39", letterSpacing: "-0.04em" }}>
+              See Zupwell in{" "}
+              <span style={{ color: "#FF5C00" }}>Action</span>
+            </h2>
+            <p className="text-sm sm:text-base font-medium max-w-xs sm:max-w-md mx-auto text-center leading-relaxed" style={{ color: "#4A5568" }}>
+              Watch how easy it is to prepare <br className="block sm:hidden" />
+              your daily Zupwell drink.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="rounded-2xl overflow-hidden shadow-xl"
+            style={{ border: "1.5px solid rgba(12,30,57,0.08)", background: "#000" }}
+          >
+            <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+              <video
+                className="absolute inset-0 w-full h-full object-cover"
+                src="/how-to-use.mp4"
+                controls
+                controlsList="nodownload"
+                muted
+                playsInline
+                preload="metadata"
+                style={{ background: "#000" }}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ── Blog Section ── */}
       <BlogSection reviews={reviewsList} settings={settings} />
 

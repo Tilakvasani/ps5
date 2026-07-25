@@ -701,7 +701,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 )}
               </div>
               <p className="text-xs mt-1" style={{ color: "#f8f8f8", opacity: 0.85 }}>
-                {packDiscountPercent > 0 ? `You save ₹${savingsAmount} · includes all taxes` : "includes all taxes"}
+                {packDiscountPercent > 0 ? `You save ₹${savingsAmount} · Includes all taxes` : "Includes all taxes"}
               </p>
               {qty > 1 && (
                 <div className="text-sm mt-3 pt-3" style={{ color: "#f8f8f8", borderTop: `1.5px solid rgba(255, 255, 255, 0.1)` }}>
@@ -835,6 +835,28 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                               <p className="text-sm" style={{ color: "#4B5563" }}>
                                 <span className="font-bold" style={{ color: "#ff5c00" }}>Pro tip:</span> Use cold water for best fizz. One tablet per 200 ml glass. Take daily for best results.
                               </p>
+                            </div>
+
+                            {/* How to Use Video */}
+                            <div className="rounded-2xl overflow-hidden shadow-sm" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
+                              <div className="px-6 pt-5 pb-3 flex items-center gap-2">
+                                <span className="text-xs font-black uppercase tracking-widest" style={{ color: "#ff5c00", letterSpacing: "0.15em" }}>Watch</span>
+                                <h4 className="font-bold text-base text-[#0C1E39]">See How It Works</h4>
+                              </div>
+                              <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                                <video
+                                  className="absolute inset-0 w-full h-full object-cover"
+                                  src="/how-to-use.mp4"
+                                  controls
+                                  controlsList="nodownload"
+                                  muted
+                                  playsInline
+                                  preload="metadata"
+                                  style={{ background: "#000" }}
+                                >
+                                  Your browser does not support the video tag.
+                                </video>
+                              </div>
                             </div>
                           </div>
                         )}

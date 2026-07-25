@@ -393,7 +393,7 @@ export default function Navbar() {
                             <div className="flex-1">
                               <h4 className="font-bold text-sm text-[#0C1E39]">{product.name}</h4>
                               <p className="text-xs text-orange-500 mt-0.5" style={{ color: "var(--or)" }}>
-                                ₹{finalPrice} <span className="text-gray-400 text-[10px] ml-1">includes all taxes</span>
+                                ₹{finalPrice} <span className="text-gray-400 text-[10px] ml-1">Includes all taxes</span>
                               </p>
                             </div>
                             <span className="text-[10px] font-bold text-gray-500 group-hover:text-[#0C1E39] px-3 py-1 rounded-lg border border-gray-300">
