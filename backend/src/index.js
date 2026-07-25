@@ -372,7 +372,7 @@ app.listen(PORT, async () => {
       // Shop Page Settings
       { key: "shop_badge",              value: "⚡ FUEL YOUR HUSTLE",        group: "shop" },
       { key: "shop_title",              value: "Shop Product",               group: "shop" },
-      { key: "shop_subtext",            value: "Performance-driven nutrition.", group: "shop" },
+      { key: "shop_subtext",            value: "Convenient nutrition that fits your everyday routine.", group: "shop" },
 
       // Certifications Page Settings
       { key: "cert_fssai_title",        value: "Food Safety and Standards Authority of India", group: "certifications" },

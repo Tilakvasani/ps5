@@ -547,10 +547,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                     e.stopPropagation();
                     setActiveImage((prev) => (prev - 1 + images.length) % images.length);
                   }}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-md z-10 transition-colors"
-                  style={{ border: `1px solid ${C.border}` }}
+                  className="absolute left-1 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center z-10 text-[#0C1E39] hover:scale-110 transition-transform bg-transparent filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.9)] cursor-pointer"
+                  aria-label="Previous image"
                 >
-                  <ChevronLeft size={16} className="text-[#0C1E39]" />
+                  <ChevronLeft size={24} strokeWidth={2.5} />
                 </button>
               )}
 
@@ -561,10 +561,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                     e.stopPropagation();
                     setActiveImage((prev) => (prev + 1) % images.length);
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-md z-10 transition-colors"
-                  style={{ border: `1px solid ${C.border}` }}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center z-10 text-[#0C1E39] hover:scale-110 transition-transform bg-transparent filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.9)] cursor-pointer"
+                  aria-label="Next image"
                 >
-                  <ChevronRight size={16} className="text-[#0C1E39]" />
+                  <ChevronRight size={24} strokeWidth={2.5} />
                 </button>
               )}
             </div>
@@ -673,7 +673,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                         {item.discountPercent}% OFF
                       </span>
                     )}
-                    <span className="text-[14px] font-bold leading-tight">{item.label}</span>
+                    <span className="text-[13px] font-bold leading-tight">{item.label}</span>
                     <span className="text-[12px] opacity-80 mt-0.5">{item.sub}</span>
                   </button>
                 ))}
@@ -1193,10 +1193,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           className="fixed inset-0 z-50 flex flex-col bg-black/95 select-none"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 text-white z-10">
-            <span className="text-sm font-semibold opacity-75">
-              Image {activeImage + 1} of {images.length}
-            </span>
+          <div className="flex items-center justify-end p-4 text-white z-10">
             <button 
               onClick={() => { setIsZoomOpen(false); setZoomScale(1); }}
               className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
@@ -1218,9 +1215,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   setZoomScale(1);
                   setActiveImage((prev) => (prev - 1 + images.length) % images.length);
                 }}
-                className="absolute left-4 h-10 w-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-[#0C1E39] z-10 transition-colors shadow-lg"
+                className="absolute left-1 sm:left-4 h-12 w-12 flex items-center justify-center text-white z-10 hover:scale-110 transition-transform bg-transparent filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] cursor-pointer"
+                aria-label="Previous image"
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={32} strokeWidth={2.5} />
               </button>
             )}
 
@@ -1232,9 +1230,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   setZoomScale(1);
                   setActiveImage((prev) => (prev + 1) % images.length);
                 }}
-                className="absolute right-4 h-10 w-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-[#0C1E39] z-10 transition-colors shadow-lg"
+                className="absolute right-1 sm:right-4 h-12 w-12 flex items-center justify-center text-white z-10 hover:scale-110 transition-transform bg-transparent filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] cursor-pointer"
+                aria-label="Next image"
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={32} strokeWidth={2.5} />
               </button>
             )}
 

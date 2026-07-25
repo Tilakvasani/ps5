@@ -29,7 +29,7 @@ export default function ProductsPage() {
   const { raw: settingsRaw } = useSettings();
   const shopBadge = settingsRaw["shop_badge"] || "⚡ FUEL YOUR HUSTLE";
   const shopTitle = settingsRaw["shop_title"] || "Shop Product";
-  const shopSubtext = settingsRaw["shop_subtext"] || "Performance-driven nutrition.";
+  const shopSubtext = settingsRaw["shop_subtext"] || "Convenient nutrition that fits your everyday routine.";
 
   return (
     <main className="min-h-screen flex flex-col justify-between" style={{ background: "var(--gy)" }}>
@@ -50,7 +50,7 @@ export default function ProductsPage() {
                 )
               ))}
             </h1>
-            <p className="text-sm max-w-lg mx-auto" style={{ color: "#4A5568", fontWeight: 500 }}>
+            <p className="text-sm max-w-lg mx-auto" style={{ color: "#0C1E39", fontWeight: 500 }}>
               {shopSubtext}
             </p>
           </div>
