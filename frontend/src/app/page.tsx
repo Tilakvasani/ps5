@@ -328,10 +328,10 @@ export default function HomePage() {
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="relative min-h-screen flex items-center pt-28 pb-16 px-6 md:px-12 lg:px-20 overflow-hidden">
+      <section className="relative min-h-screen flex items-center pt-28 pb-16 px-6 md:px-12 lg:px-20 overflow-hidden" style={{ background: "#FFFFFF" }}>
         {/* Background glows */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 right-10 h-[600px] w-[600px] rounded-full filter blur-[120px] opacity-25" style={{ background: "radial-gradient(circle, var(--or) 0%, transparent 70%)" }} />
+          <div className="absolute top-1/4 right-10 h-[600px] w-[600px] rounded-full filter blur-[120px] opacity-15" style={{ background: "radial-gradient(circle, var(--or) 0%, transparent 70%)" }} />
           <div className="absolute bottom-10 left-10 h-[400px] w-[400px] rounded-full filter blur-[100px] opacity-10" style={{ background: "radial-gradient(circle, var(--lm) 0%, transparent 70%)" }} />
         </div>
 
@@ -343,10 +343,10 @@ export default function HomePage() {
               <span 
                 className="inline-flex items-center gap-2 font-black uppercase tracking-wider px-4 py-2 rounded-full whitespace-nowrap text-[13px]" 
                 style={{ 
-                  background: "rgba(255, 92, 0, 0.12)", 
+                  background: "rgba(255, 92, 0, 0.08)", 
                   color: "var(--or)",
-                  border: "1px solid rgba(255, 92, 0, 0.25)",
-                  boxShadow: "0 0 16px rgba(255, 92, 0, 0.15)"
+                  border: "1px solid rgba(255, 92, 0, 0.2)",
+                  boxShadow: "0 2px 10px rgba(255, 92, 0, 0.08)"
                 }}
               >
                 {s(settings, "hero_badge") || "⚡ ELECTROLYTE EFFERVESCENT TABLET"}
@@ -355,7 +355,7 @@ export default function HomePage() {
 
             <motion.h1 
               {...fadeUp(0.05)} 
-              className="text-4xl sm:text-6xl md:text-7xl font-black leading-[1.05] mb-6 text-white" 
+              className="text-4xl sm:text-6xl md:text-7xl font-black leading-[1.05] mb-6 text-[#0C1E39]" 
               style={{ letterSpacing: "-0.03em" }}
             >
               {s(settings, "hero_title").split("\n").map((line, idx, arr) => {
@@ -393,8 +393,8 @@ export default function HomePage() {
 
             <motion.p 
               {...fadeUp(0.12)} 
-              className="text-base sm:text-lg leading-relaxed mb-10 max-w-xl text-left" 
-              style={{ color: "#F8F8F8", opacity: 0.8 }}
+              className="text-base sm:text-lg leading-relaxed mb-10 max-w-xl text-left font-medium" 
+              style={{ color: "#4A5568" }}
             >
               {s(settings, "hero_subtext")}
             </motion.p>
@@ -725,7 +725,7 @@ export default function HomePage() {
               See Zupwell in{" "}
               <span style={{ color: "#FF5C00" }}>Action</span>
             </h2>
-            <p className="text-sm sm:text-base font-medium max-w-xs sm:max-w-md mx-auto text-center leading-relaxed" style={{ color: "#4A5568" }}>
+            <p className="text-sm sm:text-base font-medium max-w-xs sm:max-w-md mx-auto text-center leading-relaxed" style={{ color: "#0C1E39" }}>
               Watch how easy it is to prepare <br className="block sm:hidden" />
               your daily Zupwell drink.
             </p>
