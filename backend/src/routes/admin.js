@@ -460,8 +460,20 @@ router.post("/products", sanitizeBody, authAdmin, requireRole("admin", "super_ad
 router.put("/products/:id", sanitizeBody, authAdmin, requireRole("admin", "super_admin"), upload.array("images", 10), async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, flavors, nutritionFacts, packDiscounts, metadata, hsnCode, ...rest } = req.body;
+    const { name, isActive, isFeatured, basePrice, sellingPrice, discountPercent, categoryId, flavors, nutritionFacts, packDiscounts, metadata, hsnCode, ean, id: _id, createdAt, updatedAt, category, images, variants, inventory, stockMovements, orderItems, reviews, wishlist, ...rest } = req.body;
     const data = { ...rest };
+    delete data.ean;
+    delete data.id;
+    delete data.createdAt;
+    delete data.updatedAt;
+    delete data.category;
+    delete data.images;
+    delete data.variants;
+    delete data.inventory;
+    delete data.stockMovements;
+    delete data.orderItems;
+    delete data.reviews;
+    delete data.wishlist;
     if (name)             { data.name = name; data.slug = slugify(name, { lower: true, strict: true }); }
     if (isActive !== undefined) data.isActive = isActive === "true" || isActive === true;
     if (isFeatured !== undefined) data.isFeatured = isFeatured === "true" || isFeatured === true;

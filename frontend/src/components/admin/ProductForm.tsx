@@ -114,7 +114,11 @@ export default function ProductForm({ productId }: Props) {
     e.preventDefault();
     setLoading(true);
     const fd = new FormData();
-    Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
+    Object.entries(form).forEach(([k, v]) => {
+      if (k !== "ean") {
+        fd.append(k, String(v));
+      }
+    });
     images.forEach(img => fd.append("images", img));
     if (variants.length) fd.append("variants", JSON.stringify(variants));
     fd.append("packDiscounts", JSON.stringify(packDiscounts));
