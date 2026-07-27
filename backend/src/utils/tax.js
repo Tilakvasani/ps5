@@ -24,9 +24,11 @@ function calculateGst(subtotal, discountAmount, gstRatePct, shippingCharge = 0) 
   const taxableAmount = Math.max(0, Number(subtotal) - Number(discountAmount || 0));
   const cgstAmount = round2(taxableAmount * cgstRate / 100);
   const sgstAmount = round2(taxableAmount * sgstRate / 100);
-  const totalAmount = taxableAmount + cgstAmount + sgstAmount + Number(shippingCharge || 0);
+  const rawTotal = taxableAmount + cgstAmount + sgstAmount + Number(shippingCharge || 0);
+  const totalAmount = Math.round(rawTotal);
+  const roundOffDiff = +(totalAmount - rawTotal).toFixed(2);
 
-  return { cgstRate, sgstRate, taxableAmount, cgstAmount, sgstAmount, totalAmount };
+  return { cgstRate, sgstRate, taxableAmount, cgstAmount, sgstAmount, rawTotal, totalAmount, roundOffDiff };
 }
 
 module.exports = { calculateGst };

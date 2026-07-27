@@ -27,9 +27,8 @@ async function markOrderPaid(orderId, paymentId) {
   const subtotal = Number(order.subtotal);
   const discount = Number(order.discountAmount || 0);
   const shipping = Number(order.shippingCharge || 0);
-  const { cgstRate, sgstRate, cgstAmount, sgstAmount, totalAmount: rawTotal } =
+  const { cgstRate, sgstRate, cgstAmount, sgstAmount, totalAmount } =
     calculateGst(subtotal, discount, settings.gst_rate, shipping);
-  const totalAmount = Math.round(rawTotal);
 
   await prisma.$transaction(async (tx) => {
     // Mark order as paid
