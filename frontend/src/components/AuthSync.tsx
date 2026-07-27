@@ -9,9 +9,10 @@
 import { useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { setAuthCookie } from "@/lib/auth-cookie";
+import { authApi } from "@/lib/api";
 
 export default function AuthSync() {
-  const token = useStore((s) => s.token);
+  const { token, user, setUser } = useStore();
 
   useEffect(() => {
     if (!token) return;
@@ -22,7 +23,10 @@ export default function AuthSync() {
     if (!hasCookie) {
       setAuthCookie(token);
     }
-  }, [token]);
+    if (!user) {
+      authApi.me().then(setUser).catch(() => {});
+    }
+  }, [token, user, setUser]);
 
   return null;
 }

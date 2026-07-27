@@ -11,6 +11,8 @@ import { ordersApi, accountApi, paymentsApi } from "@/lib/api";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
+import { useHydrated } from "@/lib/useHydrated";
+
 const STEPS = ["Address", "Payment", "Review"];
 
 function loadRazorpay(): Promise<void> {
@@ -75,12 +77,18 @@ export default function CheckoutPage() {
     }
   };
 
+  const hydrated = useHydrated();
+  const token = useStore((s) => s.token);
+
   useEffect(() => {
-    if (!user) { router.push("/login"); return; }
-    accountApi.getAddresses()
-      .then(setAddresses)
-      .catch(() => toast.error("Could not load your addresses. Please refresh."));
-  }, [user, router]);
+    if (!hydrated) return;
+    if (!user && !token) { router.push("/login?next=/checkout"); return; }
+    if (user || token) {
+      accountApi.getAddresses()
+        .then(setAddresses)
+        .catch(() => toast.error("Could not load your addresses. Please refresh."));
+    }
+  }, [hydrated, user, token, router]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

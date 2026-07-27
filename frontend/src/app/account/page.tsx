@@ -13,13 +13,16 @@ import { useLogout } from "@/lib/useAuth";
 import toast from "react-hot-toast";
 
 
+import { useHydrated } from "@/lib/useHydrated";
+
 const STATUS_BADGE: Record<string, string> = {
   pending: "badge-warning", confirmed: "badge-info", processing: "badge-info",
   shipped: "badge-purple", delivered: "badge-success", cancelled: "badge-danger",
 };
 
 function AccountPageContent() {
-  const { user, setUser, logout } = useStore();
+  const { user, setUser, token } = useStore();
+  const hydrated = useHydrated();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [tab, setTab] = useState(searchParams.get("tab") || "profile");
@@ -29,7 +32,9 @@ function AccountPageContent() {
   const [addingAddr, setAddingAddr] = useState(false);
   const [newAddr, setNewAddr] = useState({ fullName: "", phone: "", addressLine1: "", city: "Ahmedabad", state: "Gujarat", pincode: "", gstin: "", label: "work" });
 
-  useEffect(() => { if (!user) router.push("/login"); }, [user, router]);
+  useEffect(() => {
+    if (hydrated && !user && !token) router.push("/login?next=/account");
+  }, [hydrated, user, token, router]);
 
   useEffect(() => {
     if (tab === "orders") ordersApi.list().then(setOrders).catch(() => {});
