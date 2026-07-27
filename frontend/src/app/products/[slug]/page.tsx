@@ -382,7 +382,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       unit: product.unit,
       pack: selectedPack
     });
-    toast.success("Added to cart! 🛒");
+    toast.success("Added to cart! 🛒", { duration: 1500 });
   };
 
   const handleShare = () => {

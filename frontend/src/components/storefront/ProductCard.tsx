@@ -44,7 +44,7 @@ export default function ProductCard({ product }: { product: Product }) {
       imageUrl: primaryImage,
       unit: product.unit,
     });
-    toast.success("Added to cart!");
+    toast.success("Added to cart!", { duration: 1500 });
   };
 
   return (

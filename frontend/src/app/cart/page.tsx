@@ -24,8 +24,8 @@ export default function CartPage() {
   const taxable = Math.max(0, subtotal - discount);
   const cgst = taxable * cgstRate;
   const sgst = taxable * sgstRate;
-  const shipping = calcShipping(subtotal, freeShippingThreshold, defaultShippingCharge);
-  const rawTotal = taxable + cgst + sgst + shipping;
+  // Shipping charges are calculated dynamically at checkout based on address & payment method
+  const rawTotal = taxable + cgst + sgst;
   const total = Math.round(rawTotal);
   const roundOffDiff = total - rawTotal;
 
@@ -99,7 +99,8 @@ export default function CartPage() {
                           className="hover:bg-[#0C1E39]/10 transition-colors"><Plus size={12} /></button>
                       </div>
                       <div className="text-right">
-                        <div style={{ fontWeight: 700, color: "#0C1E39" }}>₹{(item.price * item.qty).toFixed(2)}</div>
+                        <div style={{ fontWeight: 700, color: "#0C1E39" }}>₹{Math.round(item.price * (1 + cgstRate + sgstRate) * item.qty)}</div>
+                        <div style={{ fontSize: "0.7rem", color: "#6B7280" }}>Incl. GST</div>
                       </div>
                     </div>
                   </div>
@@ -136,9 +137,10 @@ export default function CartPage() {
                 <div className="flex justify-between" style={{ color: "#4A5568" }}><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>
                 <div className="flex justify-between" style={{ color: "#4A5568" }}><span>CGST @{(cgstRate * 100).toFixed(1)}%</span><span>₹{cgst.toFixed(2)}</span></div>
                 <div className="flex justify-between" style={{ color: "#4A5568" }}><span>SGST @{(sgstRate * 100).toFixed(1)}%</span><span>₹{sgst.toFixed(2)}</span></div>
-                <div className="flex justify-between" style={{ color: "#4A5568" }}>
-                  <span>Shipping</span>
-                  <span>{shipping === 0 ? <span style={{ color: "var(--or)" }}>FREE</span> : `₹${shipping.toFixed(2)}`}</span>
+                <p style={{ fontSize: "0.7rem", color: "#6B7280", fontStyle: "italic", marginTop: 2, marginBottom: 4 }}>Taxes calculated as per applicable regulations.</p>
+                <div className="flex justify-between items-center" style={{ color: "#4A5568" }}>
+                  <span>Shipping Charges</span>
+                  <span style={{ fontSize: "0.75rem", color: "#6B7280", fontStyle: "italic" }}>Calculated at checkout</span>
                 </div>
                 {discount > 0 && <div className="flex justify-between" style={{ color: "var(--or)" }}><span>Discount</span><span>-₹{discount.toFixed(2)}</span></div>}
                 {roundOffDiff !== 0 && (
@@ -149,7 +151,7 @@ export default function CartPage() {
                 <span style={{ fontWeight: 700, color: "#0C1E39" }}>Total</span>
                 <span className="text-2xl font-black gradient-text">₹{total.toFixed(0)}</span>
               </div>
-              <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 4, textAlign: "right" }}>Inclusive of GST</p>
+              <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 4, textAlign: "right" }}>Includes all applicable taxes</p>
 
               <Link 
                 href={user 
@@ -164,7 +166,7 @@ export default function CartPage() {
                 </motion.button>
               </Link>
               <Link href="/products">
-                <button className="mt-2 w-full btn-outline text-sm py-2" style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39", borderRadius: "30px" }}>Continue Shopping</button>
+                <button className="mt-2 w-full btn-outline text-sm py-2 flex items-center justify-center text-center" style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", color: "#0C1E39", borderRadius: "30px", textAlign: "center" }}>Continue Shopping</button>
               </Link>
             </div>
           </div>

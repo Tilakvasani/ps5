@@ -6,6 +6,7 @@ import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { ordersApi, invoicesApi } from "@/lib/api";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function OrderPage({ params }: { params: { orderNumber: string } }) {
   const [order, setOrder] = useState<any>(null);
@@ -90,11 +91,20 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
                   <p className="font-bold" style={{ color: '#0C1E39' }}>GST Invoice Ready</p>
                   <p className="text-sm" style={{ color: '#6B7280' }}>{order.invoice.invoiceNumber}</p>
                 </div>
-                <a href={invoicesApi.getPdf(order.invoice.invoiceNumber)} target="_blank" rel="noopener noreferrer">
-                  <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} className="btn-primary flex items-center gap-2 text-sm px-4 py-2">
-                    <Download size={14} /> Download PDF
-                  </motion.button>
-                </a>
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={async () => {
+                    try {
+                      await invoicesApi.downloadPdf(order.invoice.invoiceNumber);
+                    } catch (err: any) {
+                      toast.error(err.message || "Download failed");
+                    }
+                  }}
+                  className="btn-primary flex items-center gap-2 text-sm px-4 py-2"
+                >
+                  <Download size={14} /> Download PDF
+                </motion.button>
               </div>
             )}
 
