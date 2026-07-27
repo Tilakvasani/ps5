@@ -354,7 +354,6 @@ export default function CheckoutPage() {
                     border: paymentMethod === "razorpay" ? "1.5px solid var(--or)" : "1.5px solid rgba(12, 30, 57, 0.08)",
                     background: paymentMethod === "razorpay" ? "rgba(255,92,0,0.08)" : "transparent",
                   }}>
-                    <RazorpayWatermarkIcon className="absolute right-3 -bottom-2 h-16 w-16 text-[#0C2454]/10 pointer-events-none" />
                     <input type="radio" name="payment" checked={paymentMethod === "razorpay"} onChange={() => setPaymentMethod("razorpay")} className="mt-1 accent-[#FF5C00]" />
                     <div className="flex-1 z-10">
                       <div className="flex justify-between items-center">

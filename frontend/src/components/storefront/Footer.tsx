@@ -301,7 +301,7 @@ export default function Footer() {
             <div className="flex items-center gap-2">
               <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Secured by</span>
               <div style={{ background: '#FFFFFF', padding: '4px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', height: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                <img src="/razorpay.png" alt="Razorpay" width={60} height={16} className="h-4 w-auto object-contain"  loading="lazy" decoding="async" />
+                <img src="/razorpay.png" alt="Razorpay" width={60} height={16} className="h-4 w-auto object-contain" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
