@@ -361,6 +361,89 @@ router.get("/me", authUser, (req, res) => {
   res.json(publicUser(req.user));
 });
 
+// ── Razorpay Phone & OTP Auth Sync ────────────────────────────────────
+router.post("/razorpay-sync", async (req, res) => {
+  try {
+    const { phone: rawPhone, email: rawEmail, name: rawName } = req.body;
+    const phone = cleanPhone(rawPhone);
+    if (!phone || phone.length !== 10) {
+      return res.status(400).json({ error: "Valid 10-digit phone number required" });
+    }
+
+    // 1. Check if phone matches Admin table (e.g. 7984951482)
+    const admin = await prisma.admin.findFirst({
+      where: {
+        OR: [
+          { number: { contains: phone } },
+          rawEmail ? { email: { equals: rawEmail.toLowerCase().trim(), mode: "insensitive" } } : undefined
+        ].filter(Boolean)
+      }
+    });
+
+    if (admin && admin.isActive) {
+      const token = jwt.sign(
+        { id: admin.id, email: admin.email, role: admin.role || "super_admin", tokenVersion: admin.tokenVersion || 0 },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      return res.json({
+        token,
+        role: "ADMIN",
+        user: {
+          id: admin.id,
+          name: admin.name,
+          email: admin.email,
+          phone: admin.number || phone,
+          isAdmin: true
+        }
+      });
+    }
+
+    // 2. Customer user lookup or auto-creation
+    const cleanEmail = rawEmail && isEmailLike(rawEmail) ? rawEmail.toLowerCase().trim() : null;
+    let user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { phone: { endsWith: phone } },
+          cleanEmail ? { email: cleanEmail } : undefined
+        ].filter(Boolean)
+      }
+    });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          phone,
+          name: rawName?.trim() || "Zupwell Customer",
+          email: cleanEmail,
+          isVerified: true,
+          isActive: true
+        }
+      });
+    } else {
+      const updateData = {};
+      if (!user.email && cleanEmail) updateData.email = cleanEmail;
+      if ((!user.name || user.name === "User" || user.name === "Zupwell Customer") && rawName?.trim()) {
+        updateData.name = rawName.trim();
+      }
+      if (Object.keys(updateData).length > 0) {
+        user = await prisma.user.update({ where: { id: user.id }, data: updateData });
+      }
+    }
+
+    const token = signAccess({ id: user.id, role: "user" });
+    return res.json({
+      token,
+      accessToken: token,
+      role: "USER",
+      user: publicUser(user)
+    });
+  } catch (err) {
+    console.error("Razorpay Auth Sync Error:", err);
+    res.status(500).json({ error: "Failed to authenticate user via Razorpay" });
+  }
+});
+
 router.post("/logout", (req, res) => res.json({ message: "Logged out" }));
 
 module.exports = router;

@@ -202,6 +202,7 @@ export default function CheckoutPage() {
           currency: "INR",
           name: siteName || process.env.NEXT_PUBLIC_SITE_NAME || "Zupwell",
           description: `Order ${order.orderNumber}`,
+          image: "https://zupwell.com/zupwell-logo.png",
           order_id: rzp.razorpayOrderId,
           handler: async (response: any) => {
             try {

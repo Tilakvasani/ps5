@@ -21,6 +21,13 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://zupwell.com"),
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: "/apple-icon.png",
+  },
   title: {
     default:  "Zupwell — Premium Health & Wellness Supplements",
     template: "%s | Zupwell",
