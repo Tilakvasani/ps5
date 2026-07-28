@@ -549,7 +549,6 @@ export default function CheckoutPage() {
                     {cart.map((item) => (
                       <div key={`${item.productId}-${item.variantId}`} className="flex justify-between text-sm">
                         <span style={{ color: "#4A5568" }}>{item.name} × {item.qty}</span>
-                        <span style={{ color: "#0C1E39", fontWeight: 600 }}>₹{(Number(item.price) * Number(item.qty)).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
