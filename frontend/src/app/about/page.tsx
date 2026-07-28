@@ -221,14 +221,12 @@ export default function AboutPage() {
           
           <div className="flex flex-wrap justify-center gap-6">
             {pillarItems.map((pillar, i) => (
-              <div key={i} className="card p-8 rounded-2xl flex flex-col justify-between w-full sm:w-[calc(50%-12px)] lg:flex-1 lg:min-w-[260px] lg:max-w-[320px]" 
+              <div key={i} className="card p-8 rounded-2xl flex flex-col w-full sm:w-[calc(50%-12px)] lg:flex-1 lg:min-w-[260px] lg:max-w-[320px]" 
                 style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
-                <div>
-                  <div className="h-12 w-12 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(255,92,0,0.12)" }}>
-                    <pillar.icon size={22} style={{ color: "var(--or)" }} />
-                  </div>
-                  <h3 className="text-base font-black mb-3 leading-snug" style={{ color: "#0C1E39" }}>{pillar.title}</h3>
+                <div className="h-12 w-12 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(255,92,0,0.12)" }}>
+                  <pillar.icon size={22} style={{ color: "var(--or)" }} />
                 </div>
+                <h3 className="text-base font-black mb-3 leading-snug" style={{ color: "#0C1E39" }}>{pillar.title}</h3>
                 <p className="text-xs leading-relaxed text-[#4A5568]">{pillar.desc}</p>
               </div>
             ))}

@@ -134,9 +134,9 @@ export default function CartPage() {
             <div style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 20, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
               <h2 style={{ fontWeight: 700, color: "#0C1E39", marginBottom: 16 }}>Order Summary</h2>
               <div className="space-y-2 text-sm mb-4">
-                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>
-                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>CGST @{(cgstRate * 100).toFixed(1)}%</span><span>₹{cgst.toFixed(2)}</span></div>
-                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>SGST @{(sgstRate * 100).toFixed(1)}%</span><span>₹{sgst.toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>Subtotal ({cart.length} {cart.length !== 1 ? "Items" : "Item"})</span><span>₹{subtotal.toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>CGST ({(cgstRate * 100).toFixed(1)}%)</span><span>₹{cgst.toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>SGST ({(sgstRate * 100).toFixed(1)}%)</span><span>₹{sgst.toFixed(2)}</span></div>
                 <p style={{ fontSize: "0.7rem", color: "#6B7280", fontStyle: "italic", marginTop: 2, marginBottom: 4 }}>Taxes calculated as per applicable regulations.</p>
                 <div className="flex justify-between items-center" style={{ color: "#4A5568" }}>
                   <span>Shipping Charges</span>
@@ -148,7 +148,7 @@ export default function CartPage() {
                 )}
               </div>
               <div style={{ borderTop: "1.5px solid rgba(12, 30, 57, 0.08)", paddingTop: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontWeight: 700, color: "#0C1E39" }}>Total</span>
+                <span style={{ fontWeight: 700, color: "#0C1E39" }}>Total Payable</span>
                 <span className="text-2xl font-black gradient-text">₹{total.toFixed(0)}</span>
               </div>
               <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 4, textAlign: "right" }}>Includes all applicable taxes</p>

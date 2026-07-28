@@ -599,9 +599,9 @@ export default function CheckoutPage() {
             <div style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 20, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }} className="h-fit sticky top-24">
               <h2 style={{ fontWeight: 700, color: "#0C1E39", marginBottom: 16 }}>Order Summary</h2>
               <div className="space-y-2 text-sm mb-4">
-                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>Subtotal ({cart.length} item{cart.length !== 1 ? "s" : ""})</span><span>₹{subtotal.toFixed(2)}</span></div>
-                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>CGST @{cgstPct}%</span><span>₹{cgst.toFixed(2)}</span></div>
-                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>SGST @{sgstPct}%</span><span>₹{sgst.toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>Subtotal ({cart.length} {cart.length !== 1 ? "Items" : "Item"})</span><span>₹{subtotal.toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>CGST ({cgstPct}%)</span><span>₹{cgst.toFixed(2)}</span></div>
+                <div className="flex justify-between" style={{ color: "#4A5568" }}><span>SGST ({sgstPct}%)</span><span>₹{sgst.toFixed(2)}</span></div>
                 <p style={{ fontSize: "0.7rem", color: "#6B7280", fontStyle: "italic", marginTop: 2, marginBottom: 4 }}>Taxes calculated as per applicable regulations.</p>
                 <div className="flex justify-between" style={{ color: "#4A5568" }}>
                   <span>Shipping</span>
@@ -617,9 +617,9 @@ export default function CheckoutPage() {
                   <p style={{ fontSize: "0.75rem", color: "#10B981", fontWeight: 600 }}>Free shipping applied</p>
                 ) : (
                   shipping > 0 ? (
-                    <p style={{ fontSize: "0.75rem", color: "#10B981", fontWeight: 600, lineHeight: 1.5 }}>
-                      COD orders include a ₹{shipping} delivery fee.<br />
-                      Choose online payment to enjoy free shipping.
+                    <p style={{ fontSize: "0.75rem", fontWeight: 600, lineHeight: 1.5 }}>
+                      <span style={{ color: "#F43F5E" }}>COD orders include a ₹{shipping} delivery fee.</span><br />
+                      <span style={{ color: "#10B981" }}>Choose online payment to enjoy free shipping.</span>
                     </p>
                   ) : (
                     <p style={{ fontSize: "0.75rem", color: "#10B981", fontWeight: 600 }}>
@@ -632,10 +632,14 @@ export default function CheckoutPage() {
                 )}
               </div>
               <div style={{ borderTop: "1.5px solid rgba(12, 30, 57, 0.08)", paddingTop: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontWeight: 700, color: "#0C1E39" }}>Total</span>
+                <span style={{ fontWeight: 700, color: "#0C1E39" }}>Total Payable</span>
                 <span className="text-2xl font-black gradient-text">₹{total.toFixed(0)}</span>
               </div>
               <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 4 }}>Includes all applicable taxes</p>
+              
+              <div className="mt-5 pt-4 border-t border-gray-100 flex justify-center items-center">
+                <img src="/100-secure-payment.png" alt="100% Secure Payment" className="h-16 w-auto object-contain" />
+              </div>
             </div>
           )}
         </div>

@@ -231,8 +231,8 @@ router.get("/:invoiceNumber/pdf", async (req, res) => {
   const sumRows = [
     { label: "Subtotal",                     value: rs(subtotal) },
     ...(discountAmt > 0 ? [{ label: "Discount", value: "- " + rs(discountAmt), color: C.green }] : []),
-    { label: `CGST @ ${cgstRate}%`,           value: rs(cgstAmt) },
-    { label: `SGST @ ${sgstRate}%`,           value: rs(sgstAmt) },
+    { label: `CGST (${cgstRate}%)`,           value: rs(cgstAmt) },
+    { label: `SGST (${sgstRate}%)`,           value: rs(sgstAmt) },
     ...(shippingAmt > 0 ? [{ label: "Shipping", value: rs(shippingAmt) }] : []),
     ...(Math.abs(roundOffDiff) >= 0.01 ? [{ label: "Round Off", value: (roundOffDiff > 0 ? "+ " : "- ") + "Rs. " + Math.abs(roundOffDiff).toFixed(2), italic: true }] : []),
   ];
