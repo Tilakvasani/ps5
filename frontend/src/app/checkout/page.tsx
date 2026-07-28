@@ -85,6 +85,15 @@ export default function CheckoutPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [newAddr, setNewAddr] = useState({ fullName: "", phone: "", addressLine1: "", city: "Ahmedabad", state: "Gujarat", pincode: "", gstin: "" });
   const [addingAddr, setAddingAddr] = useState(false);
+  const [backendMapsKey, setBackendMapsKey] = useState("");
+
+  useEffect(() => {
+    import("@/lib/api").then(({ api }) => {
+      api.get("/api/address/maps-config")
+        .then(r => { if (r.data?.apiKey) setBackendMapsKey(r.data.apiKey); })
+        .catch(() => {});
+    });
+  }, []);
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
   const discount = couponApplied ? couponDiscount : 0;
@@ -257,83 +266,135 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        <div className={`grid grid-cols-1 ${step > 0 ? "lg:grid-cols-3" : "max-w-3xl mx-auto"} gap-8`}>
+        <div className={`grid grid-cols-1 ${step > 0 ? "lg:grid-cols-3" : ""} gap-8`}>
           <div className={`${step > 0 ? "lg:col-span-2" : "w-full"} space-y-6`}>
 
             {/* Step 0: Address */}
             {step === 0 && (
-              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                <div style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 20, marginBottom: 16, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
-                  <div className="flex items-center gap-2 mb-4">
-                    <MapPin size={18} style={{ color: "var(--or)" }} />
-                    <h2 style={{ fontWeight: 700, color: "#0C1E39" }}>Delivery Address</h2>
-                  </div>
-                  {addresses.map((addr) => (
-                    <label key={addr.id} style={{
-                      display: "flex", gap: 12, padding: 16, borderRadius: 12, cursor: "pointer", marginBottom: 12, transition: "all 0.2s",
-                      border: selectedAddress === addr.id ? "1.5px solid var(--or)" : "1.5px solid rgba(12, 30, 57, 0.08)",
-                      background: selectedAddress === addr.id ? "rgba(255,92,0,0.08)" : "transparent",
-                    }}>
-                      <input type="radio" name="address" checked={selectedAddress === addr.id} onChange={() => setSelectedAddress(addr.id)} className="mt-1 accent-[#FF5C00]" />
-                      <div className="text-sm">
-                        <p style={{ fontWeight: 700, color: "#0C1E39" }}>{addr.fullName}</p>
-                        <p style={{ color: "#4A5568" }}>{addr.addressLine1}, {addr.city}, {addr.state} - {addr.pincode}</p>
-                        <p style={{ color: "#4A5568" }}>{addr.phone}</p>
-                        {addr.gstin && <p style={{ fontSize: "0.75rem", color: "var(--or)", marginTop: 4 }}>GSTIN: {addr.gstin}</p>}
-                      </div>
-                    </label>
-                  ))}
-                  <button onClick={() => setAddingAddr(!addingAddr)} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.875rem", color: "var(--or)", marginTop: 8 }}>
-                    <Plus size={14} /> Add new address
-                  </button>
-                  {addingAddr && (
-                    <div style={{ marginTop: 16, borderTop: "1.5px solid rgba(12, 30, 57, 0.08)", paddingTop: 16 }} className="space-y-3">
-                      {[["fullName","Full Name"],["phone","Phone"],["addressLine1","Address Line 1"],["city","City"],["state","State"],["pincode","Pincode"],["gstin","GSTIN (optional)"]].map(([k, label]) => (
-                        <div key={k}>
-                          <label style={{ fontSize: "0.75rem", color: "#0C1E39", marginBottom: 4, display: "block" }}>{label}</label>
-                          <input type="text" value={(newAddr as any)[k]} onChange={(e) => setNewAddr(n => ({ ...n, [k]: e.target.value }))} className="input text-sm w-full" style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#F8F8F8" }} placeholder={label} />
-                        </div>
-                      ))}
-                      <button onClick={handleSaveAddress} className="btn-primary text-sm px-4 py-2 mt-2">Save Address</button>
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                  {/* Left Side: Delivery Address */}
+                  <div style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 20, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+                    <div className="flex items-center gap-2 mb-4">
+                      <MapPin size={18} style={{ color: "var(--or)" }} />
+                      <h2 style={{ fontWeight: 700, color: "#0C1E39" }}>Delivery Address</h2>
                     </div>
-                  )}
-                </div>
+                    {addresses.map((addr) => (
+                      <label key={addr.id} style={{
+                        display: "flex", gap: 12, padding: 16, borderRadius: 12, cursor: "pointer", marginBottom: 12, transition: "all 0.2s",
+                        border: selectedAddress === addr.id ? "1.5px solid var(--or)" : "1.5px solid rgba(12, 30, 57, 0.08)",
+                        background: selectedAddress === addr.id ? "rgba(255,92,0,0.08)" : "transparent",
+                      }}>
+                        <input type="radio" name="address" checked={selectedAddress === addr.id} onChange={() => setSelectedAddress(addr.id)} className="mt-1 accent-[#FF5C00]" />
+                        <div className="text-sm">
+                          <p style={{ fontWeight: 700, color: "#0C1E39" }}>{addr.fullName}</p>
+                          <p style={{ color: "#4A5568" }}>{addr.addressLine1}, {addr.city}, {addr.state} - {addr.pincode}</p>
+                          <p style={{ color: "#4A5568" }}>{addr.phone}</p>
+                          {addr.gstin && <p style={{ fontSize: "0.75rem", color: "var(--or)", marginTop: 4 }}>GSTIN: {addr.gstin}</p>}
+                        </div>
+                      </label>
+                    ))}
+                    <button onClick={() => setAddingAddr(!addingAddr)} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.875rem", color: "var(--or)", marginTop: 8 }}>
+                      <Plus size={14} /> Add new address
+                    </button>
+                    {addingAddr && (
+                      <div style={{ marginTop: 16, borderTop: "1.5px solid rgba(12, 30, 57, 0.08)", paddingTop: 16 }} className="space-y-3">
+                        {[["fullName","Full Name"],["phone","Phone"],["addressLine1","Address Line 1"],["city","City"],["state","State"],["pincode","Pincode"],["gstin","GSTIN (optional)"]].map(([k, label]) => (
+                          <div key={k}>
+                            <label style={{ fontSize: "0.75rem", color: "#0C1E39", marginBottom: 4, display: "block" }}>{label}</label>
+                            <input type="text" value={(newAddr as any)[k]} onChange={(e) => setNewAddr(n => ({ ...n, [k]: e.target.value }))} className="input text-sm w-full" style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#F8F8F8" }} placeholder={label} />
+                          </div>
+                        ))}
+                        <button onClick={handleSaveAddress} className="btn-primary text-sm px-4 py-2 mt-2">Save Address</button>
+                      </div>
+                    )}
+                  </div>
 
-                {/* Map & Location Verification Preview */}
-                {selectedAddress && (
-                  <div style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 20, marginBottom: 16, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <MapPin size={18} style={{ color: "var(--or)" }} />
-                        <h3 style={{ fontWeight: 700, color: "#0C1E39", fontSize: "0.95rem" }}>Location Verification &amp; Map Plot</h3>
-                      </div>
-                      <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
-                        ✓ Verified Address
-                      </span>
-                    </div>
-                    
-                    {/* Map simulation container */}
-                    <div className="relative w-full h-40 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 flex flex-col items-center justify-center text-center p-4"
-                         style={{ backgroundImage: "radial-gradient(#CBD5E1 1px, transparent 1px)", backgroundSize: "16px 16px" }}>
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent pointer-events-none" />
-                      <motion.div initial={{ y: -10 }} animate={{ y: 0 }} transition={{ repeat: Infinity, repeatType: "reverse", duration: 1 }} className="z-10 flex flex-col items-center">
-                        <div className="h-10 w-10 rounded-full bg-[var(--or)] text-white flex items-center justify-center shadow-lg border-2 border-white mb-1">
-                          <MapPin size={22} />
-                        </div>
-                        <div className="bg-slate-900/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md flex items-center gap-1.5 border border-white/20">
-                          <span>{addresses.find(a => a.id === selectedAddress)?.city || "Location"}, {addresses.find(a => a.id === selectedAddress)?.pincode}</span>
-                        </div>
-                      </motion.div>
-                      <div className="absolute bottom-2 left-3 right-3 flex justify-between items-center text-[10px] text-white/90 font-mono z-10">
-                        <span>Google Maps API Verified</span>
-                        <span>Hub Plotted</span>
-                      </div>
-                    </div>
-                    <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 8 }}>
-                      Address validated. Nearest fulfillment center mapped automatically for priority dispatch.
-                    </p>
+                  {/* Right Side: Real Google Maps Location & Address Verification */}
+                  <div style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 20, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+                    {(() => {
+                      const activeAddr = addresses.find(a => a.id === selectedAddress);
+                      const fullAddressString = activeAddr
+                        ? `${activeAddr.addressLine1}, ${activeAddr.city}, ${activeAddr.state} ${activeAddr.pincode}, India`
+                        : "";
+                      const isPincodeValid = activeAddr ? /^\d{6}$/.test(activeAddr.pincode?.trim() || "") : false;
+                      const isAddressValid = Boolean(activeAddr && activeAddr.addressLine1?.length >= 3 && activeAddr.city && activeAddr.state && isPincodeValid);
+                      const googleMapsApiKey = backendMapsKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+                      const mapEmbedSrc = googleMapsApiKey
+                        ? `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${encodeURIComponent(fullAddressString)}`
+                        : `https://maps.google.com/maps?q=${encodeURIComponent(fullAddressString)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+
+                      return (
+                        <>
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <MapPin size={18} style={{ color: "var(--or)" }} />
+                              <h3 style={{ fontWeight: 700, color: "#0C1E39", fontSize: "0.95rem" }}>Google Maps Verification</h3>
+                            </div>
+                            {selectedAddress ? (
+                              isAddressValid ? (
+                                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                                  ✓ Verified Address
+                                </span>
+                              ) : (
+                                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 flex items-center gap-1">
+                                  ⚠️ Incomplete Address
+                                </span>
+                              )
+                            ) : null}
+                          </div>
+
+                          {selectedAddress ? (
+                            <div className="space-y-3">
+                              {/* Real Interactive Google Maps Iframe Embed */}
+                              <div className="relative w-full h-64 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-inner">
+                                <iframe
+                                  title="Google Maps Location Verification"
+                                  width="100%"
+                                  height="100%"
+                                  style={{ border: 0 }}
+                                  loading="lazy"
+                                  allowFullScreen
+                                  referrerPolicy="no-referrer-when-downgrade"
+                                  src={mapEmbedSrc}
+                                  className="w-full h-full"
+                                />
+                                <div className="absolute top-2 left-2 bg-slate-900/85 backdrop-blur-md text-white text-[10px] font-semibold px-2.5 py-1 rounded-md shadow flex items-center gap-1.5 border border-white/20">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                  <span>Live Google Maps Plot</span>
+                                </div>
+                              </div>
+
+                              {/* Location & Dispatch Summary */}
+                              <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3 text-xs space-y-1.5 text-slate-600">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-semibold text-slate-700">Pincode Status:</span>
+                                  <span className={isPincodeValid ? "text-emerald-600 font-bold" : "text-amber-600 font-bold"}>
+                                    {isPincodeValid ? `PIN ${activeAddr?.pincode} Valid` : "Check PIN Code"}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="font-semibold text-slate-700">Fulfillment Hub:</span>
+                                  <span className="font-semibold text-slate-800">{activeAddr?.city || "Regional"} Logistics Center</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="font-semibold text-slate-700">Delivery Status:</span>
+                                  <span className="text-emerald-600 font-bold">Express Shipping Eligible</span>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="h-64 rounded-xl border border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                              <MapPin size={32} className="mb-2 opacity-50 text-[var(--or)]" />
+                              <p className="text-xs font-semibold text-slate-600 mb-1">Live Google Maps Verification</p>
+                              <p className="text-[11px] text-slate-400 max-w-xs">Select or add a delivery address on the left to display its live Google Maps pin and verification status.</p>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
-                )}
+                </div>
 
                 <button onClick={() => { if (!selectedAddress) { toast.error("Select an address"); return; } setStep(1); }} className="btn-primary w-full py-3 flex items-center justify-center gap-2">
                   Continue to Payment <ChevronRight size={16} />

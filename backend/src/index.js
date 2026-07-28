@@ -242,6 +242,12 @@ app.get("/api/reviews/public", async (req, res) => {
 });
 
 
+// ── Google Maps Config Endpoint ───────────────────────
+app.get("/api/address/maps-config", (req, res) => {
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+  res.json({ apiKey });
+});
+
 // ── Health Check ─────────────────────────────────────
 app.get("/health", (req, res) => res.json({ status: "ok", time: new Date().toISOString() }));
 
