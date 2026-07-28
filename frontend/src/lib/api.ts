@@ -281,6 +281,7 @@ export const adminApi = {
   getGstRates: () => api.get("/api/admin/gst-rates").then((r) => r.data),
 };
 
+export { api };
 export default api;
 // Public settings — no auth needed, used by storefront pages
 export const publicApi = {

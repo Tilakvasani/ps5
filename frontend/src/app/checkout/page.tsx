@@ -7,7 +7,7 @@ import { ChevronRight, MapPin, CreditCard, CheckCircle, Plus, Shield } from "luc
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useStore } from "@/lib/store";
-import { ordersApi, accountApi, paymentsApi } from "@/lib/api";
+import api, { ordersApi, accountApi, paymentsApi } from "@/lib/api";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
@@ -88,11 +88,9 @@ export default function CheckoutPage() {
   const [backendMapsKey, setBackendMapsKey] = useState("");
 
   useEffect(() => {
-    import("@/lib/api").then(({ api }) => {
-      api.get("/api/address/maps-config")
-        .then(r => { if (r.data?.apiKey) setBackendMapsKey(r.data.apiKey); })
-        .catch(() => {});
-    });
+    api.get("/api/address/maps-config")
+      .then(r => { if (r.data?.apiKey) setBackendMapsKey(r.data.apiKey); })
+      .catch(() => {});
   }, []);
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
