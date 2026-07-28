@@ -5,7 +5,10 @@ const bcrypt = require("bcryptjs");
 
 // GET /api/account/addresses
 router.get("/addresses", authUser, async (req, res) => {
-  const addresses = await prisma.userAddress.findMany({ where: { userId: req.user.id }, orderBy: { isDefault: "desc" } });
+  const addresses = await prisma.userAddress.findMany({
+    where: { userId: req.user.id, NOT: { label: "deleted" } },
+    orderBy: { isDefault: "desc" },
+  });
   res.json(addresses);
 });
 
@@ -32,11 +35,32 @@ router.put("/addresses/:id", authUser, async (req, res) => {
 
 // DELETE /api/account/addresses/:id
 router.delete("/addresses/:id", authUser, async (req, res) => {
-  const id = Number(req.params.id);
-  const existing = await prisma.userAddress.findFirst({ where: { id, userId: req.user.id } });
-  if (!existing) return res.status(404).json({ error: "Address not found" });
-  await prisma.userAddress.delete({ where: { id } });
-  res.json({ message: "Address deleted" });
+  try {
+    const id = Number(req.params.id);
+    const existing = await prisma.userAddress.findFirst({ where: { id, userId: req.user.id } });
+    if (!existing) return res.status(404).json({ error: "Address not found" });
+
+    const linkedOrders = await prisma.order.count({ where: { addressId: id } });
+    if (linkedOrders > 0) {
+      await prisma.userAddress.update({
+        where: { id },
+        data: { label: "deleted", isDefault: false },
+      });
+      return res.json({ message: "Address deleted" });
+    }
+
+    await prisma.userAddress.delete({ where: { id } });
+    res.json({ message: "Address deleted" });
+  } catch (err) {
+    if (err.code === "P2003") {
+      await prisma.userAddress.update({
+        where: { id: Number(req.params.id) },
+        data: { label: "deleted", isDefault: false },
+      }).catch(() => {});
+      return res.json({ message: "Address deleted" });
+    }
+    res.status(500).json({ error: "Failed to delete address" });
+  }
 });
 
 // PUT /api/account/profile
