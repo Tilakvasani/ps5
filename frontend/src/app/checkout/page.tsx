@@ -3,13 +3,14 @@ import { useSettings, calcShipping } from "@/lib/useSettings";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ChevronRight, MapPin, CreditCard, CheckCircle, Plus, Shield } from "lucide-react";
+import { ChevronRight, MapPin, CreditCard, CheckCircle, Plus, Shield, Trash2, X } from "lucide-react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useStore } from "@/lib/store";
 import api, { ordersApi, accountApi, paymentsApi } from "@/lib/api";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import AddressForm from "@/components/storefront/AddressForm";
 
 import { useHydrated } from "@/lib/useHydrated";
 
@@ -272,41 +273,114 @@ export default function CheckoutPage() {
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                   {/* Left Side: Delivery Address */}
-                  <div style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 20, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
-                    <div className="flex items-center gap-2 mb-4">
-                      <MapPin size={18} style={{ color: "var(--or)" }} />
-                      <h2 style={{ fontWeight: 700, color: "#0C1E39" }}>Delivery Address</h2>
-                    </div>
-                    {addresses.map((addr) => (
-                      <label key={addr.id} style={{
-                        display: "flex", gap: 12, padding: 16, borderRadius: 12, cursor: "pointer", marginBottom: 12, transition: "all 0.2s",
-                        border: selectedAddress === addr.id ? "1.5px solid var(--or)" : "1.5px solid rgba(12, 30, 57, 0.08)",
-                        background: selectedAddress === addr.id ? "rgba(255,92,0,0.08)" : "transparent",
-                      }}>
-                        <input type="radio" name="address" checked={selectedAddress === addr.id} onChange={() => setSelectedAddress(addr.id)} className="mt-1 accent-[#FF5C00]" />
-                        <div className="text-sm">
-                          <p style={{ fontWeight: 700, color: "#0C1E39" }}>{addr.fullName}</p>
-                          <p style={{ color: "#4A5568" }}>{addr.addressLine1}, {addr.city}, {addr.state} - {addr.pincode}</p>
-                          <p style={{ color: "#4A5568" }}>{addr.phone}</p>
-                          {addr.gstin && <p style={{ fontSize: "0.75rem", color: "var(--or)", marginTop: 4 }}>GSTIN: {addr.gstin}</p>}
-                        </div>
-                      </label>
-                    ))}
-                    <button onClick={() => setAddingAddr(!addingAddr)} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.875rem", color: "var(--or)", marginTop: 8 }}>
-                      <Plus size={14} /> Add new address
-                    </button>
-                    {addingAddr && (
-                      <div style={{ marginTop: 16, borderTop: "1.5px solid rgba(12, 30, 57, 0.08)", paddingTop: 16 }} className="space-y-3">
-                        {[["fullName","Full Name"],["phone","Phone"],["addressLine1","Address Line 1"],["city","City"],["state","State"],["pincode","Pincode"],["gstin","GSTIN (optional)"]].map(([k, label]) => (
-                          <div key={k}>
-                            <label style={{ fontSize: "0.75rem", color: "#0C1E39", marginBottom: 4, display: "block" }}>{label}</label>
-                            <input type="text" value={(newAddr as any)[k]} onChange={(e) => setNewAddr(n => ({ ...n, [k]: e.target.value }))} className="input text-sm w-full" style={{ border: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#F8F8F8" }} placeholder={label} />
-                          </div>
-                        ))}
-                        <button onClick={handleSaveAddress} className="btn-primary text-sm px-4 py-2 mt-2">Save Address</button>
+                  <div style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 12, padding: 20, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <MapPin size={18} style={{ color: "var(--or)" }} />
+                        <h2 style={{ fontWeight: 700, color: "#0C1E39", fontSize: "1.05rem" }}>Delivery Address</h2>
                       </div>
-                    )}
+                      <button
+                        type="button"
+                        onClick={() => setAddingAddr(true)}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF5C00] bg-[rgba(255,92,0,0.08)] hover:bg-[rgba(255,92,0,0.15)] border border-[rgba(255,92,0,0.2)] px-3 py-1.5 rounded-xl transition-all shadow-sm cursor-pointer shrink-0"
+                      >
+                        <Plus size={14} /> Add New Address
+                      </button>
+                    </div>
+
+                    {/* Scrollable Saved Addresses list */}
+                    <div className="max-h-[380px] overflow-y-auto pr-1 space-y-3 custom-scrollbar">
+                      {addresses.length === 0 ? (
+                        <div className="text-center py-8 text-slate-500">
+                          <MapPin size={32} className="mx-auto mb-2 opacity-30 text-[var(--or)]" />
+                          <p className="text-xs font-semibold">No saved addresses found</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Click "+ Add New Address" above to set your delivery location.</p>
+                        </div>
+                      ) : (
+                        addresses.map((addr) => (
+                          <div key={addr.id} className="relative group">
+                            <label style={{
+                              display: "flex", gap: 12, padding: 16, borderRadius: 12, cursor: "pointer", transition: "all 0.2s",
+                              border: selectedAddress === addr.id ? "1.5px solid var(--or)" : "1.5px solid rgba(12, 30, 57, 0.08)",
+                              background: selectedAddress === addr.id ? "rgba(255,92,0,0.08)" : "transparent",
+                            }}>
+                              <input type="radio" name="address" checked={selectedAddress === addr.id} onChange={() => setSelectedAddress(addr.id)} className="mt-1 accent-[#FF5C00]" />
+                              <div className="text-sm flex-1 pr-8">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <p style={{ fontWeight: 700, color: "#0C1E39" }}>{addr.fullName}</p>
+                                  {addr.label && <span className="text-[10px] uppercase font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{addr.label}</span>}
+                                </div>
+                                <p style={{ color: "#4A5568" }}>{addr.addressLine1}</p>
+                                {addr.addressLine2 ? <p className="text-xs text-slate-500">Landmark: {addr.addressLine2}</p> : null}
+                                <p style={{ color: "#4A5568" }}>{addr.city}, {addr.state} - {addr.pincode}</p>
+                                <p style={{ color: "#4A5568" }}>📞 {addr.phone}</p>
+                                {addr.gstin && <p style={{ fontSize: "0.75rem", color: "var(--or)", marginTop: 4 }}>GSTIN: {addr.gstin}</p>}
+                              </div>
+                            </label>
+                            <button
+                              type="button"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                if (confirm("Are you sure you want to delete this address?")) {
+                                  try {
+                                    await accountApi.deleteAddress(addr.id);
+                                    const updated = addresses.filter(a => a.id !== addr.id);
+                                    setAddresses(updated);
+                                    if (selectedAddress === addr.id) {
+                                      setSelectedAddress(updated[0]?.id || null);
+                                    }
+                                    toast.success("Address deleted");
+                                  } catch (err: any) {
+                                    toast.error(err.message || "Failed to delete address");
+                                  }
+                                }
+                              }}
+                              className="absolute top-3 right-3 p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all opacity-80 group-hover:opacity-100"
+                              title="Delete address"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
+
+                  {/* Add Address Modal Dialog */}
+                  {addingAddr && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+                      <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                          <div className="flex items-center gap-2">
+                            <MapPin size={20} className="text-[var(--or)]" />
+                            <h3 className="font-extrabold text-slate-900 text-base">Add Delivery Address</h3>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setAddingAddr(false)}
+                            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
+                          >
+                            <X size={18} />
+                          </button>
+                        </div>
+                        <AddressForm
+                          onSave={async (payload) => {
+                            try {
+                              const created = await accountApi.addAddress(payload);
+                              setAddresses(prev => [...prev, created]);
+                              setSelectedAddress(created.id);
+                              setAddingAddr(false);
+                              toast.success("Address saved successfully!");
+                            } catch (err: any) {
+                              toast.error(err.message || "Failed to save address");
+                            }
+                          }}
+                          onCancel={() => setAddingAddr(false)}
+                          submitText="Save Address & Continue"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Right Side: Real Google Maps Location & Address Verification */}
                   <div style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 20, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>

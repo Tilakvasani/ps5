@@ -11,6 +11,7 @@ import { useStore } from "@/lib/store";
 import { accountApi, ordersApi, invoicesApi } from "@/lib/api";
 import { useLogout } from "@/lib/useAuth";
 import toast from "react-hot-toast";
+import AddressForm from "@/components/storefront/AddressForm";
 
 
 import { useHydrated } from "@/lib/useHydrated";
@@ -196,43 +197,69 @@ function AccountPageContent() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-bold text-xl" style={{ color: '#FFFFFF' }}>Saved Addresses</h2>
                   <button onClick={() => setAddingAddr(!addingAddr)} className="btn-primary text-sm px-4 py-2 flex items-center gap-1.5">
-                    <Plus size={14} /> Add Address
+                    <Plus size={14} /> Add New Address
                   </button>
                 </div>
 
                 {addingAddr && (
-                  <div className="card mb-4 space-y-3">
-                    <h3 className="font-semibold text-sm" style={{ color: '#0C1E39' }}>New Address</h3>
-                    {[["fullName","Full Name"],["phone","Phone"],["addressLine1","Address Line 1"],["city","City"],["state","State"],["pincode","Pincode"],["gstin","GSTIN (optional)"]].map(([k, label]) => (
-                      <div key={k}>
-                        <label className="text-xs mb-1 block font-semibold" style={{ color: '#0C1E39' }}>{label}</label>
-                        <input value={(newAddr as any)[k]} onChange={e => setNewAddr(n => ({ ...n, [k]: e.target.value }))} className="input-field text-sm" placeholder={label} />
-                      </div>
-                    ))}
-                    <div className="flex gap-2">
-                      <button onClick={handleAddAddress} className="btn-primary text-sm px-4 py-2">Save</button>
-                      <button onClick={() => setAddingAddr(false)} className="btn-outline text-sm px-4 py-2">Cancel</button>
-                    </div>
+                  <div className="mb-6">
+                    <AddressForm
+                      onSave={async (data) => {
+                        try {
+                          const addr = await accountApi.addAddress(data);
+                          setAddresses([...addresses, addr]);
+                          setAddingAddr(false);
+                          toast.success("Address added successfully!");
+                        } catch (err: any) {
+                          toast.error(err.message || "Failed to save address");
+                        }
+                      }}
+                      onCancel={() => setAddingAddr(false)}
+                      submitText="Save New Address"
+                    />
                   </div>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {addresses.map(addr => (
-                    <div key={addr.id} className="card relative group">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="badge badge-info capitalize">{addr.label}</span>
-                        {addr.isDefault && <span className="badge badge-success">Default</span>}
-                      </div>
-                      <p className="font-bold text-sm" style={{ color: '#0C1E39' }}>{addr.fullName}</p>
-                      <p className="text-sm mt-1 leading-relaxed" style={{ color: '#4A5568' }}>{addr.addressLine1}<br />{addr.city}, {addr.state} - {addr.pincode}</p>
-                      <p className="text-sm mt-1" style={{ color: '#4A5568' }}>{addr.phone}</p>
-                      {addr.gstin && <p className="text-xs mt-1" style={{ color: 'var(--or)' }}>GSTIN: {addr.gstin}</p>}
-                      <button onClick={() => handleDeleteAddress(addr.id)}
-                        className="absolute top-4 right-4 h-8 w-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100">
-                        <Trash2 size={14} />
-                      </button>
+                  {addresses.length === 0 ? (
+                    <div className="col-span-full card text-center py-10" style={{ color: '#4A5568' }}>
+                      <MapPin size={36} className="mx-auto mb-2 opacity-40 text-[var(--or)]" />
+                      <p className="font-medium text-sm">No saved addresses yet</p>
+                      <p className="text-xs text-slate-500 mt-1">Click "Add New Address" above to save your delivery location.</p>
                     </div>
-                  ))}
+                  ) : (
+                    addresses.map(addr => (
+                      <div key={addr.id} className="card relative group flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="badge badge-info capitalize">{addr.label || "home"}</span>
+                              {addr.isDefault && <span className="badge badge-success">Default</span>}
+                            </div>
+                            <button
+                              onClick={() => {
+                                if (confirm("Are you sure you want to delete this address?")) {
+                                  handleDeleteAddress(addr.id);
+                                }
+                              }}
+                              className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-2.5 py-1 rounded-lg transition-all"
+                              title="Delete Address"
+                            >
+                              <Trash2 size={13} /> Delete
+                            </button>
+                          </div>
+                          <p className="font-bold text-sm" style={{ color: '#0C1E39' }}>{addr.fullName}</p>
+                          <p className="text-sm mt-1 leading-relaxed" style={{ color: '#4A5568' }}>
+                            {addr.addressLine1}
+                            {addr.addressLine2 ? <><br /><span className="text-xs text-slate-500">Landmark: {addr.addressLine2}</span></> : null}
+                            <br />{addr.city}, {addr.state} - {addr.pincode}
+                          </p>
+                          <p className="text-sm mt-1 font-medium" style={{ color: '#4A5568' }}>📞 {addr.phone}</p>
+                          {addr.gstin && <p className="text-xs mt-1 font-mono" style={{ color: 'var(--or)' }}>GSTIN: {addr.gstin}</p>}
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </motion.div>
             )}
