@@ -120,15 +120,33 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     }
   };
 
-  // Detect Current Location using Geolocation API + Reverse Geocoding
-  const handleDetectCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
-      return;
-    }
+  const fetchIPLocationFallback = async () => {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      if (data?.city || data?.region || data?.postal) {
+        setFormData(prev => ({
+          ...prev,
+          city: data.city || prev.city,
+          state: data.region || prev.state,
+          pincode: data.postal || prev.pincode,
+        }));
+        toast.success(`Location detected (${data.city}, ${data.region})`, { id: "geo-detect" });
+        return true;
+      }
+    } catch {}
+    return false;
+  };
 
+  // Detect Current Location using Geolocation API + IP Fallback + Reverse Geocoding
+  const handleDetectCurrentLocation = () => {
     setDetectingLocation(true);
     toast.loading("Detecting current location...", { id: "geo-detect" });
+
+    if (!navigator.geolocation) {
+      fetchIPLocationFallback().finally(() => setDetectingLocation(false));
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -176,16 +194,30 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
 
           toast.success("Location detected successfully!", { id: "geo-detect" });
         } catch (err) {
-          toast.error("Could not fetch address details for coordinates", { id: "geo-detect" });
+          const fallbackSuccess = await fetchIPLocationFallback();
+          if (!fallbackSuccess) {
+            toast.error("Could not fetch location details", { id: "geo-detect" });
+          }
         } finally {
           setDetectingLocation(false);
         }
       },
-      (err) => {
+      async (err) => {
+        if (err.code === 2 || err.code === 3) {
+          const ok = await fetchIPLocationFallback();
+          if (ok) {
+            setDetectingLocation(false);
+            return;
+          }
+        }
         setDetectingLocation(false);
-        toast.error("Please allow location access to auto-fill your address", { id: "geo-detect" });
+        if (err.code === 1) {
+          toast.error("Location permission denied in browser", { id: "geo-detect" });
+        } else {
+          toast.error("Could not detect GPS location. Please enter address manually.", { id: "geo-detect" });
+        }
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      { timeout: 15000, enableHighAccuracy: false, maximumAge: 60000 }
     );
   };
 

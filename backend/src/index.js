@@ -526,12 +526,15 @@ app.listen(PORT, async () => {
       });
     }
     console.log("✅ Settings initialized");
-    // Check if Razorpay is using a TEST key in production
+    // Check if Razorpay is using a TEST key or LIVE key
     const loadedSettings = await prisma.setting.findMany();
     const settingsMap = {};
     loadedSettings.forEach(s => { settingsMap[s.key] = s.value; });
-    if (settingsMap.razorpay_key_id?.startsWith("rzp_test_") && process.env.NODE_ENV === "production") {
-      console.warn("⚠️  WARNING: Razorpay is using a TEST key in production!");
+    const effectiveKeyId = process.env.RAZORPAY_KEY_ID || settingsMap.razorpay_key_id;
+    if (effectiveKeyId?.startsWith("rzp_live_")) {
+      console.log("💳 Razorpay: Configured in LIVE mode (" + effectiveKeyId.substring(0, 12) + "...)");
+    } else if (effectiveKeyId?.startsWith("rzp_test_")) {
+      console.warn("⚠️  WARNING: Razorpay is using a TEST key (" + effectiveKeyId.substring(0, 12) + "...)");
     }
   } catch (e) {
     console.error("⚠️  Settings seed failed:", e.message);

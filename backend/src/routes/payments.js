@@ -25,14 +25,9 @@ router.post("/create-razorpay-order", authUser, async (req, res) => {
   const settings = {};
   settingRows.forEach(r => { settings[r.key] = r.value; });
 
-  let keyId = settings.razorpay_key_id;
-  let keySecret = settings.razorpay_key_secret;
-
-  // If secret is not configured in database settings, use the env variables together to avoid key ID/secret mismatch
-  if (!keySecret) {
-    keyId = process.env.RAZORPAY_KEY_ID;
-    keySecret = process.env.RAZORPAY_KEY_SECRET;
-  }
+  // Prefer environment variables for Razorpay credentials in production, fallback to database settings
+  let keyId = process.env.RAZORPAY_KEY_ID || settings.razorpay_key_id;
+  let keySecret = process.env.RAZORPAY_KEY_SECRET || settings.razorpay_key_secret;
 
   if (!keyId || !keySecret) {
     return res.status(500).json({ error: "Razorpay credentials are not configured" });
