@@ -21,7 +21,7 @@ function getTwilioClient() {
  */
 async function sendSMS(to, body) {
   let formattedTo = to.trim();
-  
+
   // Format international number (default to +91 if length is 10)
   if (!formattedTo.startsWith("+")) {
     if (formattedTo.length === 10) {
@@ -31,9 +31,27 @@ async function sendSMS(to, body) {
     }
   }
 
-  // Log SMS to server console without making paid Twilio API calls
-  console.log(`\n📢 [SMS Log] SMS to ${formattedTo}: "${body}"\n`);
-  return { sid: "simulated-sid", status: "simulated" };
+  const twilioClient = getTwilioClient();
+
+  if (twilioClient) {
+    // Send real SMS via Twilio
+    const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+    if (!fromNumber) {
+      console.error("❌ TWILIO_PHONE_NUMBER env variable is not set");
+      throw new Error("SMS sender number not configured");
+    }
+    const message = await twilioClient.messages.create({
+      body,
+      from: fromNumber,
+      to: formattedTo,
+    });
+    console.log(`✅ SMS sent via Twilio to ${formattedTo} | SID: ${message.sid}`);
+    return message;
+  } else {
+    // No credentials — log to console (dev/test fallback)
+    console.log(`\n📢 [SMS Fallback] No Twilio credentials. SMS to ${formattedTo}: "${body}"\n`);
+    return { sid: "no-credentials", status: "logged-only" };
+  }
 }
 
 module.exports = {
