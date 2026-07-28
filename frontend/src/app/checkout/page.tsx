@@ -320,7 +320,7 @@ export default function CheckoutPage() {
                       const googleMapsApiKey = backendMapsKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
                       const mapEmbedSrc = googleMapsApiKey
                         ? `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${encodeURIComponent(fullAddressString)}`
-                        : `https://maps.google.com/maps?q=${encodeURIComponent(fullAddressString)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                        : `https://www.google.com/maps?q=${encodeURIComponent(fullAddressString)}&output=embed`;
 
                       return (
                         <>

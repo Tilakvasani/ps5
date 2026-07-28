@@ -18,10 +18,10 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      imgSrc: ["'self'", "https://res.cloudinary.com", "https://i.ibb.co", "data:"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com"],
-      connectSrc: ["'self'", "https://api.razorpay.com", "https://lumberjack-cx.razorpay.com"],
-      frameSrc: ["https://api.razorpay.com", "https://checkout.razorpay.com"],
+      imgSrc: ["'self'", "https://res.cloudinary.com", "https://i.ibb.co", "data:", "https://maps.googleapis.com", "https://maps.gstatic.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com", "https://maps.googleapis.com"],
+      connectSrc: ["'self'", "https://api.razorpay.com", "https://lumberjack-cx.razorpay.com", "https://maps.googleapis.com"],
+      frameSrc: ["'self'", "https://api.razorpay.com", "https://checkout.razorpay.com", "https://www.google.com", "https://maps.google.com"],
     },
   },
   hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
