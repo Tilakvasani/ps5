@@ -31,32 +31,9 @@ async function sendSMS(to, body) {
     }
   }
 
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const fromNumber = process.env.TWILIO_PHONE_NUMBER;
-
-  // Graceful simulation check
-  if (!accountSid || !authToken || !fromNumber) {
-    console.log(`\n📢 [SMS Simulator - Twilio not configured] SMS to ${formattedTo}: "${body}"\n`);
-    return { sid: "simulated-sid", status: "simulated" };
-  }
-
-  const twilioClient = getTwilioClient();
-  if (!twilioClient) {
-    throw new Error("Failed to initialize Twilio client with provided credentials.");
-  }
-
-  console.log(`Sending real SMS via Twilio to ${formattedTo} from ${fromNumber}...`);
-  try {
-    return await twilioClient.messages.create({
-      body,
-      from: fromNumber,
-      to: formattedTo
-    });
-  } catch (err) {
-    console.error(`⚠️ Twilio SMS error for ${formattedTo}: ${err.message}`);
-    return { sid: "fallback-sid", status: "failed", error: err.message };
-  }
+  // Log SMS to server console without making paid Twilio API calls
+  console.log(`\n📢 [SMS Log] SMS to ${formattedTo}: "${body}"\n`);
+  return { sid: "simulated-sid", status: "simulated" };
 }
 
 module.exports = {
