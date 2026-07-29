@@ -496,15 +496,6 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
             </button>
           ))}
         </div>
-        {formData.label === "other" && (
-          <input
-            type="text"
-            value={formData.customLabel}
-            onChange={e => setFormData(prev => ({ ...prev, customLabel: e.target.value }))}
-            className="w-full mt-2 px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
-            placeholder={`Save as (e.g. "Friend's House")`}
-          />
-        )}
       </div>
 
       {/* Type of Building */}
@@ -535,57 +526,31 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         </div>
       </div>
 
-      {/* Full Name & Phone */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs font-bold text-slate-700 mb-1 block">Full Name *</label>
-          <input
-            type="text"
-            required
-            value={formData.fullName}
-            onChange={e => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-            className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
-            placeholder="Recipient's full name"
-          />
-        </div>
-        <div>
-          <label className="text-xs font-bold text-slate-700 mb-1 block">Mobile Number (10 digits) *</label>
-          <input
-            type="tel"
-            required
-            value={formData.phone}
-            onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-            className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
-            placeholder="10-digit mobile number"
-          />
-        </div>
+      {/* Flat No. / Floor */}
+      <div>
+        <label className="text-xs font-bold text-slate-700 mb-1 block">Flat No. / Floor *</label>
+        <input
+          ref={flatInputRef}
+          type="text"
+          required
+          value={formData.flatBlockNo}
+          onChange={e => setFormData(prev => ({ ...prev, flatBlockNo: e.target.value }))}
+          className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
+          placeholder="e.g. Flat 402, 4th Floor"
+        />
       </div>
 
-      {/* Flat No. / Floor + Building Name */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs font-bold text-slate-700 mb-1 block">Flat No. / Floor *</label>
-          <input
-            ref={flatInputRef}
-            type="text"
-            required
-            value={formData.flatBlockNo}
-            onChange={e => setFormData(prev => ({ ...prev, flatBlockNo: e.target.value }))}
-            className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
-            placeholder="e.g. Flat 402, 4th Floor"
-          />
-        </div>
-        <div>
-          <label className="text-xs font-bold text-slate-700 mb-1 block">Building Name *</label>
-          <input
-            type="text"
-            required
-            value={formData.buildingName}
-            onChange={e => setFormData(prev => ({ ...prev, buildingName: e.target.value }))}
-            className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
-            placeholder="e.g. Pushkar Heights"
-          />
-        </div>
+      {/* Building Name */}
+      <div>
+        <label className="text-xs font-bold text-slate-700 mb-1 block">Building Name *</label>
+        <input
+          type="text"
+          required
+          value={formData.buildingName}
+          onChange={e => setFormData(prev => ({ ...prev, buildingName: e.target.value }))}
+          className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
+          placeholder="e.g. Pushkar Heights"
+        />
       </div>
 
       {/* Street / Area / Locality with Google Places Suggestions */}
@@ -628,6 +593,18 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         />
       </div>
 
+      {/* Save as — custom nickname for this address, e.g. "Friend's House" */}
+      <div>
+        <label className="text-xs font-bold text-slate-700 mb-1 block">Save As (Optional)</label>
+        <input
+          type="text"
+          value={formData.customLabel}
+          onChange={e => setFormData(prev => ({ ...prev, customLabel: e.target.value }))}
+          className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
+          placeholder={`e.g. "Friend's House"`}
+        />
+      </div>
+
       {/* City, State, Pincode */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
@@ -664,6 +641,32 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
             placeholder="382350"
           />
         </div>
+      </div>
+
+      {/* Receiver Name */}
+      <div>
+        <label className="text-xs font-bold text-slate-700 mb-1 block">Receiver Name *</label>
+        <input
+          type="text"
+          required
+          value={formData.fullName}
+          onChange={e => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+          className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
+          placeholder="Recipient's full name"
+        />
+      </div>
+
+      {/* Receiver Number */}
+      <div>
+        <label className="text-xs font-bold text-slate-700 mb-1 block">Receiver Number *</label>
+        <input
+          type="tel"
+          required
+          value={formData.phone}
+          onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+          className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
+          placeholder="10-digit mobile number"
+        />
       </div>
 
       {/* GSTIN (Optional) */}
