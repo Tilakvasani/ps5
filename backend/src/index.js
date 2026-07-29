@@ -248,6 +248,92 @@ app.get("/api/address/maps-config", (req, res) => {
   res.json({ apiKey });
 });
 
+// ── Server-Side Reverse Geocoding Endpoint ─────────────
+app.get("/api/address/reverse-geocode", async (req, res) => {
+  const { lat, lng } = req.query;
+  if (!lat || !lng) {
+    return res.status(400).json({ error: "Latitude and longitude required" });
+  }
+
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+  let streetArea = "";
+  let city = "";
+  let state = "";
+  let pincode = "";
+
+  // 1. Try Google Maps Geocoding API if key is available
+  if (apiKey) {
+    try {
+      const gRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`);
+      const gData = await gRes.json();
+      if (gData?.results?.length) {
+        const firstRes = gData.results[0];
+        let streetParts = [];
+
+        gData.results.forEach((resItem) => {
+          (resItem.address_components || []).forEach((c) => {
+            const types = c.types || [];
+            if (types.includes("route") || types.includes("sublocality") || types.includes("sublocality_level_1") || types.includes("sublocality_level_2") || types.includes("neighborhood")) {
+              if (!streetParts.includes(c.long_name)) {
+                streetParts.push(c.long_name);
+              }
+            }
+            if (!city && (types.includes("locality") || types.includes("administrative_area_level_2"))) {
+              city = c.long_name;
+            }
+            if (!state && types.includes("administrative_area_level_1")) {
+              state = c.long_name;
+            }
+            if (!pincode && types.includes("postal_code")) {
+              pincode = c.long_name;
+            }
+          });
+        });
+
+        if (streetParts.length === 0 && firstRes.formatted_address) {
+          let cleaned = firstRes.formatted_address.replace(/,\s*India$/i, "").replace(/,\s*Bharat$/i, "");
+          if (pincode) cleaned = cleaned.replace(new RegExp(`,\\s*${pincode}`, "g"), "");
+          if (state) cleaned = cleaned.replace(new RegExp(`,\\s*${state}`, "g"), "");
+          if (city) cleaned = cleaned.replace(new RegExp(`,\\s*${city}`, "g"), "");
+          streetParts.push(cleaned.trim());
+        }
+
+        streetArea = streetParts.join(", ");
+      }
+    } catch (gErr) {
+      console.error("Server-side Google Geocoding error:", gErr.message);
+    }
+  }
+
+  // 2. Server-side Fallback to BigDataCloud / OpenStreetMap if components are missing
+  if (!streetArea || !city) {
+    try {
+      const bdcRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+      const bdcData = await bdcRes.json();
+      if (bdcData) {
+        if (!city) city = bdcData.city || bdcData.locality || "";
+        if (!state) state = bdcData.principalSubdivision || "";
+        if (!pincode) pincode = bdcData.postcode || "";
+        if (!streetArea) {
+          streetArea = bdcData.locality
+            ? `${bdcData.locality}${bdcData.city ? ", " + bdcData.city : ""}`
+            : (bdcData.city || "");
+        }
+      }
+    } catch (bErr) {
+      console.error("Server-side BDC Geocoding error:", bErr.message);
+    }
+  }
+
+  return res.json({
+    success: true,
+    streetArea: streetArea || "",
+    city: city || "",
+    state: state || "",
+    pincode: pincode || "",
+  });
+});
+
 // ── Health Check ─────────────────────────────────────
 app.get("/health", (req, res) => res.json({ status: "ok", time: new Date().toISOString() }));
 

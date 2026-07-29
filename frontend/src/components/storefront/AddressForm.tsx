@@ -157,10 +157,10 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     return false;
   };
 
-  // Detect Current Location using Geolocation API + Real Reverse Geocoding
+  // Detect Current Location using Geolocation API + Server-Side Reverse Geocoding
   const handleDetectCurrentLocation = () => {
     setDetectingLocation(true);
-    toast.loading("Detecting current location via GPS...", { id: "geo-detect" });
+    toast.loading("Detecting GPS location...", { id: "geo-detect" });
 
     if (!navigator.geolocation) {
       fetchIPLocationFallback().finally(() => setDetectingLocation(false));
@@ -173,94 +173,30 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         const lng = pos.coords.longitude;
 
         try {
-          let streetParts: string[] = [];
-          let detectedCity = "";
-          let detectedState = "";
-          let detectedPincode = "";
+          // Call backend server-side reverse geocoding route
+          const res = await api.get(`/api/address/reverse-geocode?lat=${lat}&lng=${lng}`);
+          const data = res.data;
 
-          // 1. Try Google Maps Geocoding API if key is available
-          const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-          if (key) {
-            try {
-              const gRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${key}`);
-              const gData = await gRes.json();
-              if (gData?.results?.length) {
-                const firstRes = gData.results[0];
+          if (data && (data.streetArea || data.city || data.state || data.pincode)) {
+            setFormData(prev => ({
+              ...prev,
+              streetArea: data.streetArea || prev.streetArea,
+              city: data.city || prev.city,
+              state: data.state || prev.state,
+              pincode: data.pincode || prev.pincode,
+            }));
 
-                gData.results.forEach((resItem: any) => {
-                  (resItem.address_components || []).forEach((c: any) => {
-                    const types = c.types || [];
-                    if (types.includes("route") || types.includes("sublocality") || types.includes("sublocality_level_1") || types.includes("sublocality_level_2") || types.includes("neighborhood")) {
-                      if (!streetParts.includes(c.long_name)) {
-                        streetParts.push(c.long_name);
-                      }
-                    }
-                    if (!detectedCity && (types.includes("locality") || types.includes("administrative_area_level_2"))) {
-                      detectedCity = c.long_name;
-                    }
-                    if (!detectedState && types.includes("administrative_area_level_1")) {
-                      detectedState = c.long_name;
-                    }
-                    if (!detectedPincode && types.includes("postal_code")) {
-                      detectedPincode = c.long_name;
-                    }
-                  });
-                });
+            toast.success("GPS location detected! Enter your Flat/Building name.", { id: "geo-detect" });
 
-                if (streetParts.length === 0 && firstRes.formatted_address) {
-                  let cleaned = firstRes.formatted_address.replace(/,\s*India$/i, "").replace(/,\s*Bharat$/i, "");
-                  if (detectedPincode) cleaned = cleaned.replace(new RegExp(`,\\s*${detectedPincode}`, "g"), "");
-                  if (detectedState) cleaned = cleaned.replace(new RegExp(`,\\s*${detectedState}`, "g"), "");
-                  if (detectedCity) cleaned = cleaned.replace(new RegExp(`,\\s*${detectedCity}`, "g"), "");
-                  streetParts.push(cleaned.trim());
-                }
-              }
-            } catch (gErr) {
-              console.error("Google Geocoding error:", gErr);
-            }
+            // Focus flatBlockNo input field so user can type house/flat no
+            setTimeout(() => {
+              flatInputRef.current?.focus();
+            }, 300);
+          } else {
+            await fetchIPLocationFallback();
           }
-
-          let detectedStreetArea = streetParts.join(", ");
-
-          // 2. Fallback to BigDataCloud reverse geocoding if street or city is missing
-          if (!detectedStreetArea || !detectedCity) {
-            try {
-              const bdcRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
-              const bdcData = await bdcRes.json();
-              if (bdcData) {
-                if (!detectedCity) detectedCity = bdcData.city || bdcData.locality || "";
-                if (!detectedState) detectedState = bdcData.principalSubdivision || "";
-                if (!detectedPincode) detectedPincode = bdcData.postcode || "";
-                if (!detectedStreetArea) {
-                  detectedStreetArea = bdcData.locality
-                    ? `${bdcData.locality}${bdcData.city ? ", " + bdcData.city : ""}`
-                    : (bdcData.city || "");
-                }
-              }
-            } catch (bErr) {}
-          }
-
-          // Populate real GPS address fields (leave flatBlockNo for the user to type their building/flat)
-          setFormData(prev => ({
-            ...prev,
-            streetArea: detectedStreetArea || prev.streetArea,
-            city: detectedCity || prev.city,
-            state: detectedState || prev.state,
-            pincode: detectedPincode || prev.pincode,
-          }));
-
-          toast.success("GPS location detected! Enter your Flat/Building name.", { id: "geo-detect" });
-          
-          // Auto-focus flat/building input so user can quickly type building/house no
-          setTimeout(() => {
-            flatInputRef.current?.focus();
-          }, 300);
-
         } catch (err) {
-          const fallbackSuccess = await fetchIPLocationFallback();
-          if (!fallbackSuccess) {
-            toast.error("Could not fetch location details. Please enter address manually.", { id: "geo-detect" });
-          }
+          await fetchIPLocationFallback();
         } finally {
           setDetectingLocation(false);
         }
