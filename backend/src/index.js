@@ -248,6 +248,56 @@ app.get("/api/address/maps-config", (req, res) => {
   res.json({ apiKey });
 });
 
+// ── Helpers for landmark-based reverse geocoding ──────
+// Straight-line distance between two lat/lng points, in meters
+function distanceMeters(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Only these Google Place types count as a recognizable "landmark" —
+// keeps us from saying "Near XYZ General Store" like a random shop.
+const NOTABLE_LANDMARK_TYPES = [
+  "movie_theater", "shopping_mall", "hospital", "hindu_temple", "church",
+  "mosque", "synagogue", "school", "university", "train_station",
+  "bus_station", "subway_station", "stadium", "tourist_attraction",
+  "park", "airport", "library", "museum", "amusement_park", "zoo",
+  "city_hall", "courthouse", "stadium",
+];
+
+// Finds the closest well-known landmark within ~700m using Places Nearby
+// Search (rankby=distance already sorts results nearest-first). Returns ""
+// if nothing notable is close enough — we never invent a fake landmark.
+async function findNearestLandmark(lat, lng, apiKey) {
+  if (!apiKey) return "";
+  try {
+    const res = await fetch(
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&rankby=distance&key=${apiKey}`
+    );
+    const data = await res.json();
+    if (!data?.results?.length) return "";
+
+    for (const place of data.results) {
+      const types = place.types || [];
+      const isNotable = types.some((t) => NOTABLE_LANDMARK_TYPES.includes(t));
+      if (!isNotable) continue;
+      const pLoc = place.geometry?.location;
+      if (!pLoc) continue;
+      const dist = distanceMeters(Number(lat), Number(lng), pLoc.lat, pLoc.lng);
+      if (dist <= 700) return place.name; // results are nearest-first, so first hit wins
+    }
+  } catch (err) {
+    console.error("Server-side Places Nearby Search error:", err.message);
+  }
+  return "";
+}
+
 // ── Server-Side Reverse Geocoding Endpoint ─────────────
 app.get("/api/address/reverse-geocode", async (req, res) => {
   const { lat, lng } = req.query;
@@ -325,9 +375,16 @@ app.get("/api/address/reverse-geocode", async (req, res) => {
     }
   }
 
+  // 3. Find the nearest recognizable landmark (cinema, mall, hospital, etc.)
+  //    and prefix it, the way Swiggy/Zomato/Amazon do — "Near Mango Cinema, Nikol"
+  const landmarkName = await findNearestLandmark(lat, lng, apiKey);
+  const finalStreetArea = landmarkName
+    ? (streetArea ? `Near ${landmarkName}, ${streetArea}` : `Near ${landmarkName}`)
+    : streetArea;
+
   return res.json({
     success: true,
-    streetArea: streetArea || "",
+    streetArea: finalStreetArea || "",
     city: city || "",
     state: state || "",
     pincode: pincode || "",
