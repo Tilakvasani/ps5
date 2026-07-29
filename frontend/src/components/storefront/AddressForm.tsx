@@ -1,9 +1,36 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MapPin, Navigation, Building, Home, Briefcase, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { MapPin, Navigation, Building, Home, Briefcase, CheckCircle, AlertCircle, Loader2, X, Search } from "lucide-react";
 import { api } from "@/lib/api";
 import toast from "react-hot-toast";
+
+// Loads the Google Maps JS SDK once (for the drag-pin confirm map). Safe to
+// call multiple times — reuses the same <script> tag if already loading/loaded.
+let googleMapsScriptPromise: Promise<void> | null = null;
+function loadGoogleMapsScript(apiKey: string): Promise<void> {
+  if (typeof window !== "undefined" && (window as any).google?.maps) {
+    return Promise.resolve();
+  }
+  if (googleMapsScriptPromise) return googleMapsScriptPromise;
+
+  googleMapsScriptPromise = new Promise((resolve, reject) => {
+    const existing = document.getElementById("zw-google-maps-script");
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", () => reject(new Error("Failed to load Google Maps")));
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "zw-google-maps-script";
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Google Maps"));
+    document.head.appendChild(script);
+  });
+  return googleMapsScriptPromise;
+}
 
 interface AddressFormData {
   fullName: string;
@@ -59,9 +86,15 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mapsApiKey, setMapsApiKey] = useState("");
+  const [mapModal, setMapModal] = useState<{ open: boolean; lat: number; lng: number }>({ open: false, lat: 0, lng: 0 });
+  const [mapLoading, setMapLoading] = useState(false);
+  const [mapSearchQuery, setMapSearchQuery] = useState("");
+  const [mapSearchSuggestions, setMapSearchSuggestions] = useState<any[]>([]);
 
   const autocompleteContainerRef = useRef<HTMLDivElement>(null);
   const flatInputRef = useRef<HTMLInputElement>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const googleMapRef = useRef<any>(null);
 
   // Fetch Maps API Key from Backend
   useEffect(() => {
@@ -148,6 +181,33 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     );
   };
 
+  // Calls the backend reverse-geocode route for a given lat/lng and fills the
+  // form with the result. Used both right after GPS, and again if the user
+  // drags the confirm-map pin to correct the spot.
+  const applyReverseGeocodedAddress = async (lat: number, lng: number) => {
+    try {
+      const res = await api.get(`/api/address/reverse-geocode?lat=${lat}&lng=${lng}`);
+      const data = res.data;
+
+      if (data && (data.streetArea || data.city || data.state || data.pincode)) {
+        setFormData(prev => ({
+          ...prev,
+          streetArea: data.streetArea || prev.streetArea,
+          city: data.city || prev.city,
+          state: data.state || prev.state,
+          pincode: data.pincode || prev.pincode,
+        }));
+
+        toast.success("Location confirmed! Enter your Flat/Building name.", { id: "geo-detect" });
+        setTimeout(() => flatInputRef.current?.focus(), 300);
+      } else {
+        promptEnableGps("Couldn't detect an address at that spot. Please check your GPS is on and try again.");
+      }
+    } catch (err) {
+      promptEnableGps("Couldn't reach the location service. Please check your GPS is on and try again.");
+    }
+  };
+
   // Detect Current Location using Geolocation API + Server-Side Reverse Geocoding
   const handleDetectCurrentLocation = () => {
     setDetectingLocation(true);
@@ -160,38 +220,15 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     }
 
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
+      (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
-
-        try {
-          // Call backend server-side reverse geocoding route
-          const res = await api.get(`/api/address/reverse-geocode?lat=${lat}&lng=${lng}`);
-          const data = res.data;
-
-          if (data && (data.streetArea || data.city || data.state || data.pincode)) {
-            setFormData(prev => ({
-              ...prev,
-              streetArea: data.streetArea || prev.streetArea,
-              city: data.city || prev.city,
-              state: data.state || prev.state,
-              pincode: data.pincode || prev.pincode,
-            }));
-
-            toast.success("GPS location detected! Enter your Flat/Building name.", { id: "geo-detect" });
-
-            // Focus flatBlockNo input field so user can type house/flat no
-            setTimeout(() => {
-              flatInputRef.current?.focus();
-            }, 300);
-          } else {
-            promptEnableGps("Couldn't detect your address. Please check your GPS is on and try again.");
-          }
-        } catch (err) {
-          promptEnableGps("Couldn't reach the location service. Please check your GPS is on and try again.");
-        } finally {
-          setDetectingLocation(false);
-        }
+        toast.dismiss("geo-detect");
+        setDetectingLocation(false);
+        // Don't trust raw GPS text blindly — GPS can legitimately drift
+        // 60m-3km depending on device/signal. Show a pin the user can drag
+        // to their exact spot before we fill the form, same as Zomato/Swiggy.
+        setMapModal({ open: true, lat, lng });
       },
       (err) => {
         // Note: browsers report the SAME code (1) whether the site itself was
@@ -206,6 +243,107 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
       },
       { timeout: 12000, enableHighAccuracy: true, maximumAge: 30000 }
     );
+  };
+
+  // Init the Google Map for the confirm-location modal. Uses the "fixed pin
+  // at screen center, drag the map underneath" pattern (same as Zepto/Swiggy)
+  // — easier on touch than dragging a tiny marker icon.
+  useEffect(() => {
+    if (!mapModal.open) return;
+    const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+    if (!key) {
+      // No Maps key configured — fall back to using the raw GPS point directly
+      applyReverseGeocodedAddress(mapModal.lat, mapModal.lng);
+      setMapModal(m => ({ ...m, open: false }));
+      return;
+    }
+
+    let cancelled = false;
+    setMapLoading(true);
+    loadGoogleMapsScript(key)
+      .then(() => {
+        if (cancelled || !mapContainerRef.current) return;
+        const google = (window as any).google;
+        const map = new google.maps.Map(mapContainerRef.current, {
+          center: { lat: mapModal.lat, lng: mapModal.lng },
+          zoom: 17,
+          disableDefaultUI: true,
+          zoomControl: true,
+          clickableIcons: false,
+        });
+        googleMapRef.current = map;
+        setMapLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setMapLoading(false);
+        toast.error("Couldn't load the map. Using GPS location directly.");
+        applyReverseGeocodedAddress(mapModal.lat, mapModal.lng);
+        setMapModal(m => ({ ...m, open: false }));
+      });
+
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapModal.open]);
+
+  // Search box inside the map modal — lets the user jump the map to a typed
+  // place instead of relying purely on the dragged GPS pin.
+  const handleMapSearchChange = async (val: string) => {
+    setMapSearchQuery(val);
+    if (!val || val.length < 3) {
+      setMapSearchSuggestions([]);
+      return;
+    }
+    const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!key) return;
+    try {
+      const res = await fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(val)}&components=country:in&key=${key}`);
+      const data = await res.json();
+      if (data?.predictions?.length) setMapSearchSuggestions(data.predictions);
+    } catch {
+      // Ignore — user can still drag the map manually
+    }
+  };
+
+  const handleSelectMapSearchSuggestion = async (prediction: any) => {
+    setMapSearchSuggestions([]);
+    setMapSearchQuery(prediction.description || "");
+    const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!key || !prediction.place_id) return;
+    try {
+      const res = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=geometry&key=${key}`);
+      const data = await res.json();
+      const loc = data?.result?.geometry?.location;
+      if (loc && googleMapRef.current) {
+        googleMapRef.current.setCenter({ lat: loc.lat, lng: loc.lng });
+        googleMapRef.current.setZoom(17);
+      }
+    } catch {
+      // Ignore — user can still drag the map manually
+    }
+  };
+
+  // User confirmed the pin position — re-fetch the address for wherever the
+  // map is currently centered (may be the original GPS spot, or wherever
+  // they dragged/searched to) and fill the form.
+  const handleConfirmMapLocation = async () => {
+    const map = googleMapRef.current;
+    const center = map ? map.getCenter() : null;
+    const lat = center ? center.lat() : mapModal.lat;
+    const lng = center ? center.lng() : mapModal.lng;
+    setMapModal({ open: false, lat: 0, lng: 0 });
+    setMapSearchQuery("");
+    setMapSearchSuggestions([]);
+    setDetectingLocation(true);
+    await applyReverseGeocodedAddress(lat, lng);
+    setDetectingLocation(false);
+  };
+
+  const handleCancelMapLocation = () => {
+    setMapModal({ open: false, lat: 0, lng: 0 });
+    setMapSearchQuery("");
+    setMapSearchSuggestions([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -298,6 +436,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   };
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4">
       {/* Top Banner: Detect Location */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
@@ -492,5 +631,87 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         )}
       </div>
     </form>
+
+    {/* Confirm-Location Modal — Zepto/Swiggy-style: pin stays fixed at the
+        center of the screen, the user drags the MAP underneath it (easier
+        on touch than dragging a tiny marker), then confirms. */}
+    {mapModal.open && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+        <div className="w-full max-w-md bg-white rounded-2xl overflow-hidden shadow-2xl">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+            <span className="font-bold text-sm text-slate-800">Confirm Your Location</span>
+            <button type="button" onClick={handleCancelMapLocation} className="text-slate-400 hover:text-slate-600">
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Search a different spot */}
+          <div className="relative px-5 pt-4">
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={mapSearchQuery}
+                onChange={e => handleMapSearchChange(e.target.value)}
+                placeholder="Search a new address"
+                className="w-full pl-8 pr-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
+              />
+            </div>
+            {mapSearchSuggestions.length > 0 && (
+              <div className="absolute z-50 left-5 right-5 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-40 overflow-y-auto divide-y divide-slate-100">
+                {mapSearchSuggestions.map((p, idx) => (
+                  <button
+                    key={p.place_id || idx}
+                    type="button"
+                    onClick={() => handleSelectMapSearchSuggestion(p)}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-slate-50 flex items-start gap-2 text-slate-700 transition-colors"
+                  >
+                    <MapPin size={14} className="text-[var(--or)] shrink-0 mt-0.5" />
+                    <span>{p.description}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Map with a fixed center pin — drag the map to move the pin */}
+          <div className="relative mt-4 mx-5 rounded-xl overflow-hidden border border-slate-200" style={{ height: "260px" }}>
+            <div ref={mapContainerRef} className="w-full h-full bg-slate-100" />
+            {mapLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-50">
+                <Loader2 size={22} className="animate-spin text-slate-400" />
+              </div>
+            )}
+            {/* Fixed pin + label, sits above the map, ignores clicks so the map underneath is still draggable */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ marginTop: "-28px" }}>
+              <div className="bg-[#0C1E39] text-white text-[10px] font-semibold px-3 py-1.5 rounded-lg mb-1 text-center shadow-md max-w-[85%]">
+                Order will be delivered here<br />Drag the map to adjust the pin
+              </div>
+              <MapPin size={34} className="text-[var(--or)] drop-shadow-md" fill="currentColor" />
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 p-5">
+            <button
+              type="button"
+              onClick={handleConfirmMapLocation}
+              className="flex-1 inline-flex items-center justify-center gap-2 text-xs font-bold text-white bg-[var(--or)] hover:opacity-90 py-2.5 rounded-xl transition-all shadow-sm"
+            >
+              <CheckCircle size={14} /> Confirm This Location
+            </button>
+            <button
+              type="button"
+              onClick={handleCancelMapLocation}
+              className="px-4 py-2.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
