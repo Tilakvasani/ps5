@@ -88,9 +88,10 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
       return;
     }
 
-    if (mapsApiKey) {
+    const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (key) {
       try {
-        const res = await fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(val)}&components=country:in&key=${mapsApiKey}`);
+        const res = await fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(val)}&components=country:in&key=${key}`);
         const data = await res.json();
         if (data?.predictions?.length) {
           setSuggestions(data.predictions);
@@ -110,9 +111,9 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     setSuggestions([]);
     setShowSuggestions(false);
 
-    // Fetch place details for pincode / city if available
-    if (mapsApiKey && prediction.place_id) {
-      fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=address_components&key=${mapsApiKey}`)
+    const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (key && prediction.place_id) {
+      fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=address_components&key=${key}`)
         .then(r => r.json())
         .then(data => {
           const comps = data?.result?.address_components || [];
@@ -145,6 +146,8 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
           city: data.city || prev.city,
           state: data.region || prev.state,
           pincode: data.postal || prev.pincode,
+          flatBlockNo: prev.flatBlockNo || `Area: ${data.city || "Local"}`,
+          streetArea: prev.streetArea || `${data.city || "Local"}, ${data.region || ""}`,
         }));
         toast.success(`Location detected (${data.city || "Area"}, ${data.region || "State"})`, { id: "geo-detect" });
         return true;
@@ -153,7 +156,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     return false;
   };
 
-  // Detect Current Location using Geolocation API + IP Fallback + Reverse Geocoding
+  // Detect Current Location using Geolocation API + Google Geocoding + BigDataCloud + IP Fallback
   const handleDetectCurrentLocation = () => {
     setDetectingLocation(true);
     toast.loading("Detecting current location...", { id: "geo-detect" });
@@ -169,56 +172,75 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         const lng = pos.coords.longitude;
 
         try {
-          // Reverse geocode using Google Maps API or OpenStreetMap Geocoding
-          let reverseUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
-          if (mapsApiKey) {
-            reverseUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${mapsApiKey}`;
-          }
-
-          const res = await fetch(reverseUrl);
-          const data = await res.json();
-
           let detectedFlat = "";
           let detectedStreet = "";
           let detectedCity = "";
           let detectedState = "";
           let detectedPincode = "";
 
-          if (mapsApiKey && data?.results?.length) {
-            for (const result of data.results) {
-              const comps = result.address_components || [];
-              comps.forEach((c: any) => {
-                if (c.types.includes("premise") || c.types.includes("subpremise") || c.types.includes("building")) {
-                  if (!detectedFlat) detectedFlat = c.long_name;
-                }
-                if (c.types.includes("route") || c.types.includes("sublocality_level_1") || c.types.includes("neighborhood")) {
-                  if (!detectedStreet.includes(c.long_name)) {
-                    detectedStreet += (detectedStreet ? ", " : "") + c.long_name;
+          // 1. Try Google Maps Geocoding if API key exists
+          const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+          if (key) {
+            try {
+              const gRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${key}`);
+              const gData = await gRes.json();
+              if (gData?.results?.length) {
+                const mainResult = gData.results[0];
+                const fullFormatted = (mainResult.formatted_address || "").replace(/,\s*India$/i, "").replace(/,\s*Bharat$/i, "");
+
+                gData.results.forEach((resItem: any) => {
+                  (resItem.address_components || []).forEach((c: any) => {
+                    const types = c.types || [];
+                    if (!detectedCity && (types.includes("locality") || types.includes("administrative_area_level_2") || types.includes("city"))) {
+                      detectedCity = c.long_name;
+                    }
+                    if (!detectedState && (types.includes("administrative_area_level_1") || types.includes("state"))) {
+                      detectedState = c.long_name;
+                    }
+                    if (!detectedPincode && (types.includes("postal_code") || types.includes("pincode"))) {
+                      detectedPincode = c.long_name;
+                    }
+                    if (!detectedFlat && (types.includes("premise") || types.includes("subpremise") || types.includes("building"))) {
+                      detectedFlat = c.long_name;
+                    }
+                  });
+                });
+
+                if (fullFormatted) {
+                  const parts = fullFormatted.split(",").map(p => p.trim()).filter(Boolean);
+                  if (parts.length >= 3) {
+                    detectedFlat = detectedFlat || parts[0];
+                    detectedStreet = parts.slice(1, parts.length - 2).join(", ") || parts[1] || parts[0];
+                  } else if (parts.length === 2) {
+                    detectedFlat = detectedFlat || parts[0];
+                    detectedStreet = parts[1];
+                  } else {
+                    detectedStreet = parts[0];
+                    detectedFlat = detectedFlat || parts[0];
                   }
                 }
-                if (!detectedCity && (c.types.includes("locality") || c.types.includes("administrative_area_level_2"))) {
-                  detectedCity = c.long_name;
-                }
-                if (!detectedState && c.types.includes("administrative_area_level_1")) {
-                  detectedState = c.long_name;
-                }
-                if (!detectedPincode && c.types.includes("postal_code")) {
-                  detectedPincode = c.long_name;
-                }
-              });
+              }
+            } catch (gErr) {
+              console.error("Google Geocoding error:", gErr);
             }
-            if (!detectedStreet && data.results[0]?.formatted_address) {
-              detectedStreet = data.results[0].formatted_address;
-            }
-          } else if (data?.address) {
-            detectedFlat = data.address.building || data.address.house_number || "";
-            detectedStreet = data.address.road || data.address.neighbourhood || data.address.suburb || "";
-            detectedCity = data.address.city || data.address.town || data.address.village || data.address.county || "";
-            detectedState = data.address.state || "";
-            detectedPincode = data.address.postcode || "";
           }
 
-          // If detectedFlat is empty, split detectedStreet or fill intelligently so flatBlockNo is not blank
+          // 2. Fallback to BigDataCloud / OpenStreetMap if street or city is still missing
+          if (!detectedStreet || !detectedCity) {
+            try {
+              const bdcRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+              const bdcData = await bdcRes.json();
+              if (bdcData) {
+                if (!detectedCity) detectedCity = bdcData.city || bdcData.locality || "";
+                if (!detectedState) detectedState = bdcData.principalSubdivision || "";
+                if (!detectedPincode) detectedPincode = bdcData.postcode || "";
+                if (!detectedStreet) detectedStreet = bdcData.locality || bdcData.city || "";
+                if (!detectedFlat) detectedFlat = bdcData.locality ? `Locality: ${bdcData.locality}` : "";
+              }
+            } catch (bErr) {}
+          }
+
+          // 3. Final safety fallbacks to guarantee no empty required fields
           if (!detectedFlat && detectedStreet) {
             const parts = detectedStreet.split(",");
             if (parts.length > 1) {
@@ -228,6 +250,8 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
               detectedFlat = detectedStreet;
             }
           }
+          if (!detectedFlat) detectedFlat = "Near Location";
+          if (!detectedStreet) detectedStreet = detectedCity ? `${detectedCity} Area` : "Local Area";
 
           setFormData(prev => ({
             ...prev,
@@ -238,11 +262,11 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
             pincode: detectedPincode || prev.pincode,
           }));
 
-          toast.success("Location detected & fields auto-filled!", { id: "geo-detect" });
+          toast.success("Location detected & address fields auto-filled!", { id: "geo-detect" });
         } catch (err) {
           const fallbackSuccess = await fetchIPLocationFallback();
           if (!fallbackSuccess) {
-            toast.error("Could not fetch location details", { id: "geo-detect" });
+            toast.error("Could not fetch location details. Please enter address manually.", { id: "geo-detect" });
           }
         } finally {
           setDetectingLocation(false);
@@ -253,7 +277,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         if (!ok) {
           setDetectingLocation(false);
           if (err.code === 1) {
-            toast.error("Location permission denied in browser", { id: "geo-detect" });
+            toast.error("Location permission denied in browser settings", { id: "geo-detect" });
           } else {
             toast.error("Could not detect GPS location. Please enter address manually.", { id: "geo-detect" });
           }
@@ -261,7 +285,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
           setDetectingLocation(false);
         }
       },
-      { timeout: 15000, enableHighAccuracy: true, maximumAge: 30000 }
+      { timeout: 12000, enableHighAccuracy: true, maximumAge: 30000 }
     );
   };
 
