@@ -138,32 +138,14 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     }
   };
 
-  const fetchIPLocationFallback = async (reasonMsg?: string) => {
-    try {
-      const res = await api.get("/api/address/ip-location");
-      const data = res.data;
-      if (data && (data.city || data.state || data.pincode)) {
-        setFormData(prev => ({
-          ...prev,
-          city: data.city || prev.city,
-          state: data.state || prev.state,
-          pincode: data.pincode || prev.pincode,
-          streetArea: prev.streetArea || data.streetArea || "",
-        }));
-        toast.success(
-          reasonMsg ? `${reasonMsg} Auto-filled via network.` : `Location detected (${data.city || ""}, ${data.state || ""})`,
-          { id: "geo-detect", duration: 4000 }
-        );
-        setTimeout(() => flatInputRef.current?.focus(), 300);
-        return true;
-      }
-    } catch {}
-
+  // Shown whenever we can't get a real GPS fix — tells the user to turn GPS
+  // on rather than silently guessing their address from IP (which is only
+  // ever accurate to city-level and looked fake, e.g. "Ahmedabad Area").
+  const promptEnableGps = (reasonMsg?: string) => {
     toast.error(
-      reasonMsg || "GPS permission disabled in browser settings. Please allow location or enter address manually.",
-      { id: "geo-detect", duration: 5000 }
+      reasonMsg || "Please turn on Location/GPS on your device to auto-fill your address.",
+      { id: "geo-detect", duration: 6000 }
     );
-    return false;
   };
 
   // Detect Current Location using Geolocation API + Server-Side Reverse Geocoding
@@ -172,7 +154,8 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     toast.loading("Detecting GPS location...", { id: "geo-detect" });
 
     if (!navigator.geolocation) {
-      fetchIPLocationFallback("Browser does not support GPS.").finally(() => setDetectingLocation(false));
+      promptEnableGps("This browser does not support GPS location.");
+      setDetectingLocation(false);
       return;
     }
 
@@ -202,20 +185,23 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
               flatInputRef.current?.focus();
             }, 300);
           } else {
-            await fetchIPLocationFallback();
+            promptEnableGps("Couldn't detect your address. Please check your GPS is on and try again.");
           }
         } catch (err) {
-          await fetchIPLocationFallback();
+          promptEnableGps("Couldn't reach the location service. Please check your GPS is on and try again.");
         } finally {
           setDetectingLocation(false);
         }
       },
-      async (err) => {
-        let reason = "GPS permission denied in browser settings.";
-        if (err.code === 2) reason = "GPS position unavailable.";
-        if (err.code === 3) reason = "GPS request timed out.";
+      (err) => {
+        // Note: browsers report the SAME code (1) whether the site itself was
+        // blocked or the device's Location/GPS is simply switched off — so we
+        // point the user at both rather than guessing which one it is.
+        let reason = "Location access unavailable. Please turn on Location/GPS on your device, and make sure this site is allowed to use it, then try again.";
+        if (err.code === 2) reason = "Couldn't get a GPS fix. Please turn on Location/GPS on your device and make sure you have signal, then try again.";
+        if (err.code === 3) reason = "GPS request timed out. Please make sure Location/GPS is on and try again.";
 
-        await fetchIPLocationFallback(reason);
+        promptEnableGps(reason);
         setDetectingLocation(false);
       },
       { timeout: 12000, enableHighAccuracy: true, maximumAge: 30000 }

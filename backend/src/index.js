@@ -391,49 +391,6 @@ app.get("/api/address/reverse-geocode", async (req, res) => {
   });
 });
 
-// ── Server-Side IP Location Fallback Endpoint ─────────────
-app.get("/api/address/ip-location", async (req, res) => {
-  try {
-    const rawIp = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress || "";
-    const cleanIp = rawIp.replace(/^.*:/, ""); // strip IPv6 prefix if any
-
-    let ipUrl = "http://ip-api.com/json/?fields=status,regionName,city,zip";
-    if (cleanIp && cleanIp !== "127.0.0.1" && cleanIp !== "localhost") {
-      ipUrl = `http://ip-api.com/json/${cleanIp}?fields=status,regionName,city,zip`;
-    }
-
-    const ipRes = await fetch(ipUrl);
-    const ipData = await ipRes.json();
-
-    if (ipData && ipData.status === "success") {
-      return res.json({
-        success: true,
-        city: ipData.city || "",
-        state: ipData.regionName || "",
-        pincode: ipData.zip || "",
-        streetArea: ipData.city ? `${ipData.city} Area` : "",
-      });
-    }
-  } catch (err) {
-    console.error("IP location fallback error:", err.message);
-  }
-
-  // Backup fallback to ipapi.co
-  try {
-    const ipRes2 = await fetch("https://ipapi.co/json/");
-    const ipData2 = await ipRes2.json();
-    return res.json({
-      success: true,
-      city: ipData2.city || "",
-      state: ipData2.region || "",
-      pincode: ipData2.postal || "",
-      streetArea: ipData2.city ? `${ipData2.city} Area` : "",
-    });
-  } catch (e) {
-    return res.json({ success: false, city: "", state: "", pincode: "", streetArea: "" });
-  }
-});
-
 // ── Health Check ─────────────────────────────────────
 app.get("/health", (req, res) => res.json({ status: "ok", time: new Date().toISOString() }));
 
