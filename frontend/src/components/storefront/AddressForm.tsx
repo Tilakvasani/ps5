@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MapPin, Navigation, Building, Home, Briefcase, CheckCircle, AlertCircle, Loader2, X, Search } from "lucide-react";
+import { MapPin, Navigation, Building, Building2, Home, Briefcase, Hotel, MoreHorizontal, CheckCircle, AlertCircle, Loader2, X, Search } from "lucide-react";
 import { api } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -36,6 +36,7 @@ interface AddressFormData {
   fullName: string;
   phone: string;
   flatBlockNo: string;
+  buildingName: string;
   streetArea: string;
   landmark: string;
   city: string;
@@ -43,6 +44,8 @@ interface AddressFormData {
   pincode: string;
   gstin?: string;
   label: string;
+  customLabel: string;
+  buildingType: string;
 }
 
 interface AddressFormProps {
@@ -56,21 +59,28 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   // Initialize form state without any hardcoded default city/state/dummy text
   const [formData, setFormData] = useState<AddressFormData>(() => {
     let flat = initialData?.flatBlockNo || "";
+    let building = initialData?.buildingName || "";
     let street = initialData?.streetArea || "";
     if (!flat && !street && initialData?.addressLine1) {
-      const line1 = initialData.addressLine1;
-      const commaIdx = line1.indexOf(",");
-      if (commaIdx > -1) {
-        flat = line1.substring(0, commaIdx).trim();
-        street = line1.substring(commaIdx + 1).trim();
-      } else {
-        street = line1;
+      // Older saved addresses only have "flat, street" (2 parts). Newer ones
+      // saved from this form will have "flat, building, street" (3 parts).
+      const parts = initialData.addressLine1.split(",").map(p => p.trim()).filter(Boolean);
+      if (parts.length >= 3) {
+        flat = parts[0];
+        building = parts[1];
+        street = parts.slice(2).join(", ");
+      } else if (parts.length === 2) {
+        flat = parts[0];
+        street = parts[1];
+      } else if (parts.length === 1) {
+        street = parts[0];
       }
     }
     return {
       fullName: initialData?.fullName || "",
       phone: initialData?.phone || "",
       flatBlockNo: flat,
+      buildingName: building,
       streetArea: street,
       landmark: initialData?.landmark || initialData?.addressLine2 || "",
       city: initialData?.city || "",
@@ -78,6 +88,8 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
       pincode: initialData?.pincode || "",
       gstin: initialData?.gstin || "",
       label: initialData?.label || "home",
+      customLabel: initialData?.customLabel || "",
+      buildingType: initialData?.buildingType || "",
     };
   });
 
@@ -367,10 +379,14 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
       return toast.error("Please enter a valid 10-digit mobile number");
     }
 
-    // 3. Flat / House / Building Validation
+    // 3. Flat / Floor / Building Validation
     const flatClean = formData.flatBlockNo.trim();
-    if (!flatClean || flatClean.length < 2) {
-      return toast.error("Please enter House / Flat / Block No. & Building Name");
+    if (!flatClean || flatClean.length < 1) {
+      return toast.error("Please enter Flat No. / Floor");
+    }
+    const buildingClean = formData.buildingName.trim();
+    if (!buildingClean || buildingClean.length < 2) {
+      return toast.error("Please enter Building / Society Name");
     }
 
     // 4. Area / Street / Locality Validation
@@ -412,8 +428,8 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
       // Offline fallback: continue if PIN code format is valid
     }
 
-    // Combine flat/building and street into addressLine1, landmark into addressLine2
-    const combinedLine1 = `${flatClean}, ${streetClean}`;
+    // Combine flat, building name, and street into addressLine1, landmark into addressLine2
+    const combinedLine1 = `${flatClean}, ${buildingClean}, ${streetClean}`;
     const payload = {
       fullName: nameClean,
       phone: cleanPhone,
@@ -424,6 +440,8 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
       pincode: pincodeClean,
       gstin: formData.gstin?.trim() || null,
       label: formData.label,
+      customLabel: formData.customLabel.trim() || null,
+      buildingType: formData.buildingType || null,
     };
 
     try {
@@ -478,6 +496,43 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
             </button>
           ))}
         </div>
+        {formData.label === "other" && (
+          <input
+            type="text"
+            value={formData.customLabel}
+            onChange={e => setFormData(prev => ({ ...prev, customLabel: e.target.value }))}
+            className="w-full mt-2 px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
+            placeholder={`Save as (e.g. "Friend's House")`}
+          />
+        )}
+      </div>
+
+      {/* Type of Building */}
+      <div>
+        <label className="text-xs font-bold text-slate-700 mb-1.5 block">Type of Building</label>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { id: "society", label: "Society", icon: Building },
+            { id: "independent_house", label: "Independent House", icon: Home },
+            { id: "standalone", label: "Standalone", icon: Building2 },
+            { id: "office", label: "Office", icon: Briefcase },
+            { id: "hotel", label: "Hotel", icon: Hotel },
+            { id: "others", label: "Others", icon: MoreHorizontal },
+          ].map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, buildingType: prev.buildingType === id ? "" : id }))}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                formData.buildingType === id
+                  ? "bg-[var(--or)]/10 text-[var(--or)] border-[var(--or)]"
+                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              <Icon size={14} /> {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Full Name & Phone */}
@@ -506,18 +561,31 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         </div>
       </div>
 
-      {/* Flat, House No, Building Name */}
-      <div>
-        <label className="text-xs font-bold text-slate-700 mb-1 block">Flat / House No. / Building Name *</label>
-        <input
-          ref={flatInputRef}
-          type="text"
-          required
-          value={formData.flatBlockNo}
-          onChange={e => setFormData(prev => ({ ...prev, flatBlockNo: e.target.value }))}
-          className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
-          placeholder="e.g. Flat 402, Block B, Pushkar Heights"
-        />
+      {/* Flat No. / Floor + Building Name */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-bold text-slate-700 mb-1 block">Flat No. / Floor *</label>
+          <input
+            ref={flatInputRef}
+            type="text"
+            required
+            value={formData.flatBlockNo}
+            onChange={e => setFormData(prev => ({ ...prev, flatBlockNo: e.target.value }))}
+            className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
+            placeholder="e.g. Flat 402, 4th Floor"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-bold text-slate-700 mb-1 block">Building Name *</label>
+          <input
+            type="text"
+            required
+            value={formData.buildingName}
+            onChange={e => setFormData(prev => ({ ...prev, buildingName: e.target.value }))}
+            className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
+            placeholder="e.g. Pushkar Heights"
+          />
+        </div>
       </div>
 
       {/* Street / Area / Locality with Google Places Suggestions */}

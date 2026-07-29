@@ -14,12 +14,12 @@ router.get("/addresses", authUser, async (req, res) => {
 
 // POST /api/account/addresses
 router.post("/addresses", authUser, async (req, res) => {
-  const { fullName, phone, addressLine1, addressLine2, city, state, pincode, gstin, label } = req.body;
+  const { fullName, phone, addressLine1, addressLine2, city, state, pincode, gstin, label, customLabel, buildingType } = req.body;
   if (!fullName || !phone || !addressLine1 || !city || !pincode) {
     return res.status(400).json({ error: "Required fields missing" });
   }
   const address = await prisma.userAddress.create({
-    data: { userId: req.user.id, fullName, phone, addressLine1, addressLine2, city, state: state || "Gujarat", pincode, gstin, label: label || "home" },
+    data: { userId: req.user.id, fullName, phone, addressLine1, addressLine2, city, state: state || "Gujarat", pincode, gstin, label: label || "home", customLabel: customLabel || null, buildingType: buildingType || null },
   });
   res.status(201).json(address);
 });

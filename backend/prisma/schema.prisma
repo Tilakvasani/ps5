@@ -52,6 +52,8 @@ model UserAddress {
   id           Int     @id @default(autoincrement())
   userId       Int     @map("user_id")
   label        String  @default("home") @db.VarChar(20)
+  customLabel  String? @map("custom_label") @db.VarChar(60)
+  buildingType String? @map("building_type") @db.VarChar(30)
   fullName     String  @map("full_name") @db.VarChar(120)
   phone        String  @db.VarChar(15)
   addressLine1 String  @map("address_line1")
