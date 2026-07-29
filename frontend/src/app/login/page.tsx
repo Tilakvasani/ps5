@@ -150,13 +150,33 @@ function LoginPageInner() {
   // ── LOGIN TAB: one-shot phone/email + password ────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identifier || !password) {
-      toast.error("Please enter your number/email and password");
-      return;
+    const cleanIdentifier = identifier.trim();
+    if (!cleanIdentifier) {
+      return toast.error("Please enter your mobile number or email address");
     }
+    if (!password) {
+      return toast.error("Please enter your password");
+    }
+
+    if (cleanIdentifier.includes("@")) {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(cleanIdentifier)) {
+        return toast.error("Please enter a valid email address (e.g. name@domain.com)");
+      }
+    } else {
+      const cleanPhone = cleanIdentifier.replace(/\D/g, "").slice(-10);
+      if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+        return toast.error("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9");
+      }
+    }
+
+    if (password.length < 6) {
+      return toast.error("Password must be at least 6 characters long");
+    }
+
     setLoading(true);
     try {
-      const res = await authApi.login(identifier, password);
+      const res = await authApi.login(cleanIdentifier, password);
       if (res.step === "admin-otp-required") {
         setAdminPhone(res.phone);
         setOtp("");
@@ -197,13 +217,16 @@ function LoginPageInner() {
 
   const handleAdminCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      toast.error("Email and password are required");
-      return;
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(cleanEmail)) {
+      return toast.error("Please enter a valid admin email address");
+    }
+    if (!password) {
+      return toast.error("Password is required");
     }
     setLoading(true);
     try {
-      const data = await adminApi.login(email, password, gateToken);
+      const data = await adminApi.login(cleanEmail, password, gateToken);
       finishAdminLogin(data);
     } catch (err: any) {
       toast.error(err.message || "Authentication failed. Try again.");
@@ -216,9 +239,8 @@ function LoginPageInner() {
   const handleForgotRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanPhone = phone.replace(/\D/g, "").slice(-10);
-    if (cleanPhone.length !== 10) {
-      toast.error("Please enter a valid 10-digit mobile number");
-      return;
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      return toast.error("Please enter a valid 10-digit Indian mobile number");
     }
     setLoading(true);
     try {
@@ -234,13 +256,11 @@ function LoginPageInner() {
 
   const handleForgotReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
     if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
+      return toast.error("New password must be at least 8 characters long");
+    }
+    if (password !== confirmPassword) {
+      return toast.error("Passwords do not match");
     }
     const cleanPhone = phone.replace(/\D/g, "").slice(-10);
     setLoading(true);
@@ -258,9 +278,11 @@ function LoginPageInner() {
   const handleRegisterPhone = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const cleanPhone = phone.replace(/\D/g, "").slice(-10);
-    if (cleanPhone.length !== 10) {
-      toast.error("Please enter a valid 10-digit mobile number");
-      return;
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      return toast.error("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9");
+    }
+    if (/^(\d)\1{9}$/.test(cleanPhone) || cleanPhone === "1234567890") {
+      return toast.error("Please enter a valid mobile number");
     }
     setLoading(true);
     try {
@@ -298,7 +320,6 @@ function LoginPageInner() {
         setRegisterStep("setPassword");
         toast.success("Verified! Please set a password for your account.");
       } else if (res.step === "admin-gate") {
-        // Rare: someone registered an admin's number — route into the login tab's admin flow.
         setGateToken(res.gateToken);
         setAdminPhone(cleanPhone);
         switchTab("login");
@@ -315,22 +336,33 @@ function LoginPageInner() {
 
   const handleCompleteRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      toast.error("Full name is required");
-      return;
+    const cleanName = name.trim();
+    if (!cleanName || cleanName.length < 2) {
+      return toast.error("Please enter your full name (at least 2 letters)");
+    }
+    if (!/^[a-zA-Z\s'.]{2,50}$/.test(cleanName)) {
+      return toast.error("Full name should only contain letters and spaces");
+    }
+
+    const cleanEmail = email.trim();
+    if (cleanEmail) {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(cleanEmail)) {
+        return toast.error("Please enter a valid email address (e.g. name@domain.com)");
+      }
+    }
+
+    if (password.length < 8) {
+      return toast.error("Password must be at least 8 characters long");
     }
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
+      return toast.error("Passwords do not match");
     }
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
+
     setLoading(true);
     try {
       const data = await authApi.completeRegistration({
-        setupToken, name: name.trim(), email: email.trim() || undefined, password, confirmPassword, notified: notifyOffers,
+        setupToken, name: cleanName, email: cleanEmail || undefined, password, confirmPassword, notified: notifyOffers,
       });
       finishUserLogin(data);
     } catch (err: any) {

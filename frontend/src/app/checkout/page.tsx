@@ -636,8 +636,8 @@ export default function CheckoutPage() {
               </div>
               <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 4 }}>Includes all applicable taxes</p>
               
-              <div className="mt-5 pt-4 border-t border-gray-100 flex justify-center items-center">
-                <img src="/100-secure-payment.png" alt="100% Secure Payment" className="h-16 w-auto object-contain" />
+              <div className="mt-5 pt-4 border-t border-gray-100 flex flex-col items-center justify-center">
+                <img src="/100-secure-payment.png" alt="100% Secure Payment" className="h-24 sm:h-28 w-auto max-w-[240px] object-contain mx-auto" />
               </div>
             </div>
           )}

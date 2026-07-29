@@ -21,22 +21,37 @@ interface AddressFormData {
 interface AddressFormProps {
   onSave: (data: any) => Promise<void> | void;
   onCancel?: () => void;
-  initialData?: Partial<AddressFormData>;
+  initialData?: Partial<AddressFormData> & { addressLine1?: string; addressLine2?: string };
   submitText?: string;
 }
 
 export default function AddressForm({ onSave, onCancel, initialData, submitText = "Save Address" }: AddressFormProps) {
-  const [formData, setFormData] = useState<AddressFormData>({
-    fullName: initialData?.fullName || "",
-    phone: initialData?.phone || "",
-    flatBlockNo: initialData?.flatBlockNo || "",
-    streetArea: initialData?.streetArea || "",
-    landmark: initialData?.landmark || "",
-    city: initialData?.city || "Ahmedabad",
-    state: initialData?.state || "Gujarat",
-    pincode: initialData?.pincode || "",
-    gstin: initialData?.gstin || "",
-    label: initialData?.label || "home",
+  // Parse initial addressLine1 if flatBlockNo / streetArea are missing
+  const [formData, setFormData] = useState<AddressFormData>(() => {
+    let flat = initialData?.flatBlockNo || "";
+    let street = initialData?.streetArea || "";
+    if (!flat && !street && initialData?.addressLine1) {
+      const line1 = initialData.addressLine1;
+      const commaIdx = line1.indexOf(",");
+      if (commaIdx > -1) {
+        flat = line1.substring(0, commaIdx).trim();
+        street = line1.substring(commaIdx + 1).trim();
+      } else {
+        flat = line1;
+      }
+    }
+    return {
+      fullName: initialData?.fullName || "",
+      phone: initialData?.phone || "",
+      flatBlockNo: flat,
+      streetArea: street,
+      landmark: initialData?.landmark || initialData?.addressLine2 || "",
+      city: initialData?.city || "Ahmedabad",
+      state: initialData?.state || "Gujarat",
+      pincode: initialData?.pincode || "",
+      gstin: initialData?.gstin || "",
+      label: initialData?.label || "home",
+    };
   });
 
   const [detectingLocation, setDetectingLocation] = useState(false);
@@ -105,7 +120,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
           let state = "";
           let pincode = "";
           comps.forEach((c: any) => {
-            if (c.types.includes("locality")) city = c.long_name;
+            if (c.types.includes("locality") || c.types.includes("administrative_area_level_2")) city = c.long_name;
             if (c.types.includes("administrative_area_level_1")) state = c.long_name;
             if (c.types.includes("postal_code")) pincode = c.long_name;
           });
@@ -131,7 +146,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
           state: data.region || prev.state,
           pincode: data.postal || prev.pincode,
         }));
-        toast.success(`Location detected (${data.city}, ${data.region})`, { id: "geo-detect" });
+        toast.success(`Location detected (${data.city || "Area"}, ${data.region || "State"})`, { id: "geo-detect" });
         return true;
       }
     } catch {}
@@ -163,36 +178,67 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
           const res = await fetch(reverseUrl);
           const data = await res.json();
 
+          let detectedFlat = "";
           let detectedStreet = "";
           let detectedCity = "";
           let detectedState = "";
           let detectedPincode = "";
 
-          if (mapsApiKey && data?.results?.[0]) {
-            const comps = data.results[0].address_components || [];
-            comps.forEach((c: any) => {
-              if (c.types.includes("route") || c.types.includes("sublocality")) detectedStreet += c.long_name + ", ";
-              if (c.types.includes("locality")) detectedCity = c.long_name;
-              if (c.types.includes("administrative_area_level_1")) detectedState = c.long_name;
-              if (c.types.includes("postal_code")) detectedPincode = c.long_name;
-            });
-            detectedStreet = data.results[0].formatted_address || detectedStreet;
+          if (mapsApiKey && data?.results?.length) {
+            for (const result of data.results) {
+              const comps = result.address_components || [];
+              comps.forEach((c: any) => {
+                if (c.types.includes("premise") || c.types.includes("subpremise") || c.types.includes("building")) {
+                  if (!detectedFlat) detectedFlat = c.long_name;
+                }
+                if (c.types.includes("route") || c.types.includes("sublocality_level_1") || c.types.includes("neighborhood")) {
+                  if (!detectedStreet.includes(c.long_name)) {
+                    detectedStreet += (detectedStreet ? ", " : "") + c.long_name;
+                  }
+                }
+                if (!detectedCity && (c.types.includes("locality") || c.types.includes("administrative_area_level_2"))) {
+                  detectedCity = c.long_name;
+                }
+                if (!detectedState && c.types.includes("administrative_area_level_1")) {
+                  detectedState = c.long_name;
+                }
+                if (!detectedPincode && c.types.includes("postal_code")) {
+                  detectedPincode = c.long_name;
+                }
+              });
+            }
+            if (!detectedStreet && data.results[0]?.formatted_address) {
+              detectedStreet = data.results[0].formatted_address;
+            }
           } else if (data?.address) {
-            detectedStreet = data.address.road || data.address.suburb || data.address.neighbourhood || "";
-            detectedCity = data.address.city || data.address.town || data.address.village || "Ahmedabad";
-            detectedState = data.address.state || "Gujarat";
+            detectedFlat = data.address.building || data.address.house_number || "";
+            detectedStreet = data.address.road || data.address.neighbourhood || data.address.suburb || "";
+            detectedCity = data.address.city || data.address.town || data.address.village || data.address.county || "";
+            detectedState = data.address.state || "";
             detectedPincode = data.address.postcode || "";
+          }
+
+          // If detectedFlat is empty, split detectedStreet or fill intelligently so flatBlockNo is not blank
+          if (!detectedFlat && detectedStreet) {
+            const parts = detectedStreet.split(",");
+            if (parts.length > 1) {
+              detectedFlat = parts[0].trim();
+              detectedStreet = parts.slice(1).join(",").trim();
+            } else {
+              detectedFlat = detectedStreet;
+            }
           }
 
           setFormData(prev => ({
             ...prev,
+            flatBlockNo: detectedFlat || prev.flatBlockNo,
             streetArea: detectedStreet || prev.streetArea,
-            city: detectedCity || prev.city,
-            state: detectedState || prev.state,
+            city: detectedCity || prev.city || "Ahmedabad",
+            state: detectedState || prev.state || "Gujarat",
             pincode: detectedPincode || prev.pincode,
           }));
 
-          toast.success("Location detected successfully!", { id: "geo-detect" });
+          toast.success("Location detected & fields auto-filled!", { id: "geo-detect" });
         } catch (err) {
           const fallbackSuccess = await fetchIPLocationFallback();
           if (!fallbackSuccess) {
@@ -203,50 +249,98 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         }
       },
       async (err) => {
-        if (err.code === 2 || err.code === 3) {
-          const ok = await fetchIPLocationFallback();
-          if (ok) {
-            setDetectingLocation(false);
-            return;
+        const ok = await fetchIPLocationFallback();
+        if (!ok) {
+          setDetectingLocation(false);
+          if (err.code === 1) {
+            toast.error("Location permission denied in browser", { id: "geo-detect" });
+          } else {
+            toast.error("Could not detect GPS location. Please enter address manually.", { id: "geo-detect" });
           }
-        }
-        setDetectingLocation(false);
-        if (err.code === 1) {
-          toast.error("Location permission denied in browser", { id: "geo-detect" });
         } else {
-          toast.error("Could not detect GPS location. Please enter address manually.", { id: "geo-detect" });
+          setDetectingLocation(false);
         }
       },
-      { timeout: 15000, enableHighAccuracy: false, maximumAge: 60000 }
+      { timeout: 15000, enableHighAccuracy: true, maximumAge: 30000 }
     );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validations
-    if (!formData.fullName.trim()) return toast.error("Enter your full name");
-    if (!/^\+?\d{10,12}$/.test(formData.phone.replace(/[\s-]/g, ""))) {
-      return toast.error("Enter a valid 10-digit phone number");
+    // 1. Full Name Validation
+    const nameClean = formData.fullName.trim();
+    if (!nameClean || nameClean.length < 2) {
+      return toast.error("Please enter a valid recipient full name");
     }
-    if (!formData.flatBlockNo.trim()) return toast.error("Enter House / Flat / Block No. & Building Name");
-    if (!formData.streetArea.trim()) return toast.error("Enter Street / Area / Locality");
-    if (!/^\d{6}$/.test(formData.pincode.trim())) {
-      return toast.error("Enter a valid 6-digit PIN code");
+    if (!/^[a-zA-Z\s'.]{2,50}$/.test(nameClean)) {
+      return toast.error("Full name should only contain letters and spaces");
+    }
+
+    // 2. Mobile Phone Validation
+    const cleanPhone = formData.phone.replace(/[\s-]/g, "");
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      return toast.error("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9");
+    }
+    if (/^(\d)\1{9}$/.test(cleanPhone) || cleanPhone === "1234567890") {
+      return toast.error("Please enter a valid 10-digit mobile number");
+    }
+
+    // 3. Flat / House / Building Validation
+    const flatClean = formData.flatBlockNo.trim();
+    if (!flatClean || flatClean.length < 2) {
+      return toast.error("Please enter House / Flat / Block No. & Building Name");
+    }
+
+    // 4. Area / Street / Locality Validation
+    const streetClean = formData.streetArea.trim();
+    if (!streetClean || streetClean.length < 3) {
+      return toast.error("Please enter Area / Street / Locality");
+    }
+
+    // 5. City & State Validation
+    const cityClean = formData.city.trim();
+    const stateClean = formData.state.trim();
+    if (!cityClean || cityClean.length < 2) {
+      return toast.error("Please enter a valid City name");
+    }
+    if (!stateClean || stateClean.length < 2) {
+      return toast.error("Please enter a valid State name");
+    }
+
+    // 6. PIN Code Format Validation
+    const pincodeClean = formData.pincode.trim();
+    if (!/^[1-9][0-9]{5}$/.test(pincodeClean)) {
+      return toast.error("Please enter a valid 6-digit Indian PIN code (e.g. 380001)");
+    }
+    if (["123456", "000000", "111111", "999999", "654321"].includes(pincodeClean)) {
+      return toast.error("The PIN code entered is invalid. Please check and try again.");
     }
 
     setSaving(true);
 
+    // 7. Live PIN Code Verification against India Post API
+    try {
+      const pinCheckRes = await fetch(`https://api.postalpincode.in/pincode/${pincodeClean}`);
+      const pinCheckData = await pinCheckRes.json();
+      if (Array.isArray(pinCheckData) && pinCheckData[0]?.Status === "Error") {
+        setSaving(false);
+        return toast.error(`PIN Code ${pincodeClean} does not exist in India. Please enter a valid PIN code.`);
+      }
+    } catch (e) {
+      // Offline fallback: continue if PIN code format is valid
+    }
+
     // Combine flat/building and street into addressLine1, landmark into addressLine2
-    const combinedLine1 = `${formData.flatBlockNo.trim()}, ${formData.streetArea.trim()}`;
+    const combinedLine1 = `${flatClean}, ${streetClean}`;
     const payload = {
-      fullName: formData.fullName.trim(),
-      phone: formData.phone.trim(),
+      fullName: nameClean,
+      phone: cleanPhone,
       addressLine1: combinedLine1,
       addressLine2: formData.landmark.trim() || null,
-      city: formData.city.trim(),
-      state: formData.state.trim(),
-      pincode: formData.pincode.trim(),
+      city: cityClean,
+      state: stateClean,
+      pincode: pincodeClean,
       gstin: formData.gstin?.trim() || null,
       label: formData.label,
     };
@@ -441,7 +535,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
           className="flex-1 inline-flex items-center justify-center gap-2 text-xs font-bold text-white bg-[var(--or)] hover:opacity-90 py-2.5 rounded-xl transition-all shadow-sm"
         >
           {saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
-          {saving ? "Saving..." : submitText}
+          {saving ? "Validating & Saving..." : submitText}
         </button>
         {onCancel && (
           <button
