@@ -138,22 +138,31 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     }
   };
 
-  const fetchIPLocationFallback = async () => {
+  const fetchIPLocationFallback = async (reasonMsg?: string) => {
     try {
-      const res = await fetch("https://ipapi.co/json/");
-      const data = await res.json();
-      if (data?.city || data?.region || data?.postal) {
+      const res = await api.get("/api/address/ip-location");
+      const data = res.data;
+      if (data && (data.city || data.state || data.pincode)) {
         setFormData(prev => ({
           ...prev,
           city: data.city || prev.city,
-          state: data.region || prev.state,
-          pincode: data.postal || prev.pincode,
-          streetArea: prev.streetArea || data.city || "",
+          state: data.state || prev.state,
+          pincode: data.pincode || prev.pincode,
+          streetArea: prev.streetArea || data.streetArea || "",
         }));
-        toast.success(`Location detected (${data.city || ""}, ${data.region || ""})`, { id: "geo-detect" });
+        toast.success(
+          reasonMsg ? `${reasonMsg} Auto-filled via network.` : `Location detected (${data.city || ""}, ${data.state || ""})`,
+          { id: "geo-detect", duration: 4000 }
+        );
+        setTimeout(() => flatInputRef.current?.focus(), 300);
         return true;
       }
     } catch {}
+
+    toast.error(
+      reasonMsg || "GPS permission disabled in browser settings. Please allow location or enter address manually.",
+      { id: "geo-detect", duration: 5000 }
+    );
     return false;
   };
 
@@ -163,7 +172,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     toast.loading("Detecting GPS location...", { id: "geo-detect" });
 
     if (!navigator.geolocation) {
-      fetchIPLocationFallback().finally(() => setDetectingLocation(false));
+      fetchIPLocationFallback("Browser does not support GPS.").finally(() => setDetectingLocation(false));
       return;
     }
 
@@ -202,17 +211,12 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         }
       },
       async (err) => {
-        const ok = await fetchIPLocationFallback();
-        if (!ok) {
-          setDetectingLocation(false);
-          if (err.code === 1) {
-            toast.error("Location permission denied in browser settings", { id: "geo-detect" });
-          } else {
-            toast.error("Could not detect GPS location. Please enter address manually.", { id: "geo-detect" });
-          }
-        } else {
-          setDetectingLocation(false);
-        }
+        let reason = "GPS permission denied in browser settings.";
+        if (err.code === 2) reason = "GPS position unavailable.";
+        if (err.code === 3) reason = "GPS request timed out.";
+
+        await fetchIPLocationFallback(reason);
+        setDetectingLocation(false);
       },
       { timeout: 12000, enableHighAccuracy: true, maximumAge: 30000 }
     );
