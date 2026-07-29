@@ -53,9 +53,8 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
               {/* Items */}
               <div className="border-t pt-4 space-y-2" style={{ borderColor: 'rgba(12, 30, 57, 0.08)' }}>
                 {order.items?.map((item: any) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span style={{ color: '#4A5568' }}>{item.product?.name} × {item.qty}</span>
-                    <span className="font-semibold" style={{ color: '#0C1E39' }}>₹{Number(item.unitPrice * item.qty).toFixed(2)}</span>
+                  <div key={item.id} className="text-sm" style={{ color: '#4A5568' }}>
+                    {item.product?.name} × {item.qty}
                   </div>
                 ))}
               </div>
@@ -65,6 +64,9 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
                 <div className="flex justify-between" style={{ color: '#4A5568' }}><span>Subtotal</span><span>₹{Number(order.subtotal).toFixed(2)}</span></div>
                 <div className="flex justify-between" style={{ color: '#4A5568' }}><span>CGST</span><span>₹{Number(order.cgstAmount).toFixed(2)}</span></div>
                 <div className="flex justify-between" style={{ color: '#4A5568' }}><span>SGST</span><span>₹{Number(order.sgstAmount).toFixed(2)}</span></div>
+                {order.paymentMethod === "cod" && Number(order.shippingCharge) > 0 && (
+                  <div className="flex justify-between" style={{ color: '#4A5568' }}><span>COD Delivery Charge</span><span>₹{Number(order.shippingCharge).toFixed(2)}</span></div>
+                )}
                 <div className="flex justify-between font-bold border-t pt-2 mt-1" style={{ color: '#0C1E39', borderColor: 'rgba(12, 30, 57, 0.08)' }}>
                   <span>Total Paid</span><span className="gradient-text text-lg">₹{Number(order.totalAmount).toFixed(2)}</span>
                 </div>

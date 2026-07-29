@@ -59,6 +59,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mapsApiKey, setMapsApiKey] = useState("");
+  const [locationPrompt, setLocationPrompt] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
 
   const autocompleteContainerRef = useRef<HTMLDivElement>(null);
   const flatInputRef = useRef<HTMLInputElement>(null);
@@ -138,14 +139,20 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     }
   };
 
+  // Detect phone/tablet vs laptop/desktop — a device's Location toggle only
+  // exists on mobile; on a laptop the fix is the browser's own site-permission
+  // setting, so the popup needs to say something different for each.
+  const isMobileDevice = () => {
+    if (typeof navigator === "undefined") return true;
+    return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  };
+
   // Shown whenever we can't get a real GPS fix — tells the user to turn GPS
   // on rather than silently guessing their address from IP (which is only
   // ever accurate to city-level and looked fake, e.g. "Ahmedabad Area").
   const promptEnableGps = (reasonMsg?: string) => {
-    toast.error(
-      reasonMsg || "Please turn on Location/GPS on your device to auto-fill your address.",
-      { id: "geo-detect", duration: 6000 }
-    );
+    toast.dismiss("geo-detect");
+    setLocationPrompt({ open: true, message: reasonMsg || "" });
   };
 
   // Detect Current Location using Geolocation API + Server-Side Reverse Geocoding
@@ -298,6 +305,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   };
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4">
       {/* Top Banner: Detect Location */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
@@ -492,5 +500,74 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         )}
       </div>
     </form>
+
+    {/* Turn-on-Location Popup — mirrors the native "enable location" prompt
+        phones show, since a website can't trigger that system dialog itself.
+        Shows different instructions for phone vs laptop. */}
+    {locationPrompt.open && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+        <div className="w-full max-w-sm bg-white rounded-2xl overflow-hidden shadow-2xl">
+          <div className="px-5 py-4" style={{ background: "var(--or)" }}>
+            <div className="flex items-center gap-2 text-white">
+              <MapPin size={18} />
+              <span className="font-bold text-sm">Turn on Location</span>
+            </div>
+          </div>
+          <div className="p-5 space-y-3">
+            {isMobileDevice() ? (
+              <>
+                <p className="text-sm font-semibold text-slate-800">
+                  For a better experience, this site needs your device's Location turned on.
+                </p>
+                {locationPrompt.message && (
+                  <p className="text-xs text-slate-500">{locationPrompt.message}</p>
+                )}
+                <div className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
+                  <p className="font-bold text-slate-700">To turn it on:</p>
+                  <p>1. Open your phone's <span className="font-semibold">Settings</span></p>
+                  <p>2. Tap <span className="font-semibold">Location</span> and switch it On</p>
+                  <p>3. Come back here and tap "Try Again"</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-semibold text-slate-800">
+                  This site needs location access from your browser.
+                </p>
+                {locationPrompt.message && (
+                  <p className="text-xs text-slate-500">{locationPrompt.message}</p>
+                )}
+                <div className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
+                  <p className="font-bold text-slate-700">To turn it on:</p>
+                  <p>1. Click the 🔒 / ⓘ icon next to the website address in your browser</p>
+                  <p>2. Set <span className="font-semibold">Location</span> to "Allow"</p>
+                  <p>3. Come back here and click "Try Again"</p>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="flex gap-2 p-4 pt-0">
+            <button
+              type="button"
+              onClick={() => {
+                setLocationPrompt({ open: false, message: "" });
+                handleDetectCurrentLocation();
+              }}
+              className="flex-1 text-xs font-bold text-white bg-[var(--or)] hover:opacity-90 py-2.5 rounded-xl transition-all"
+            >
+              Try Again
+            </button>
+            <button
+              type="button"
+              onClick={() => setLocationPrompt({ open: false, message: "" })}
+              className="px-4 py-2.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+            >
+              Not Now
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
