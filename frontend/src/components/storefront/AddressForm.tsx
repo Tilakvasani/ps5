@@ -94,6 +94,8 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   });
 
   const [detectingLocation, setDetectingLocation] = useState(false);
+  const [locationSearchQuery, setLocationSearchQuery] = useState("");
+  const [editingLocation, setEditingLocation] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -107,6 +109,13 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   const flatInputRef = useRef<HTMLInputElement>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any>(null);
+
+  // Once street/city/pincode exist, the user has been through the location
+  // step at least once — show the compact Zepto-style summary card instead
+  // of the search/GPS entry UI. (Deliberately lenient: we don't require ALL
+  // three, since we show inline fallback inputs below for whichever piece
+  // reverse-geocoding couldn't fill in.)
+  const locationConfirmed = Boolean(formData.streetArea || formData.city || formData.pincode);
 
   // Fetch Maps API Key from Backend
   useEffect(() => {
@@ -126,15 +135,16 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch Google Places Autocomplete Suggestions
-  const handleStreetChange = async (val: string) => {
-    setFormData(prev => ({ ...prev, streetArea: val }));
+  // Top "Your Location" search box — Zepto-style. Typing here searches
+  // places; picking one opens the same drag-pin confirm map used for GPS,
+  // so every address (typed or detected) gets the same final confirm step.
+  const handleLocationSearchChange = async (val: string) => {
+    setLocationSearchQuery(val);
     if (!val || val.length < 3) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
     }
-
     const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (key) {
       try {
@@ -150,36 +160,52 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     }
   };
 
-  const handleSelectSuggestion = (prediction: any) => {
-    setFormData(prev => ({
-      ...prev,
-      streetArea: prediction.description || prediction.structured_formatting?.main_text || "",
-    }));
+  const handleSelectLocationSearchSuggestion = async (prediction: any) => {
+    setLocationSearchQuery(prediction.description || "");
     setSuggestions([]);
     setShowSuggestions(false);
 
     const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (key && prediction.place_id) {
-      fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=address_components&key=${key}`)
-        .then(r => r.json())
-        .then(data => {
-          const comps = data?.result?.address_components || [];
-          let city = "";
-          let state = "";
-          let pincode = "";
-          comps.forEach((c: any) => {
-            if (c.types.includes("locality") || c.types.includes("administrative_area_level_2")) city = c.long_name;
-            if (c.types.includes("administrative_area_level_1")) state = c.long_name;
-            if (c.types.includes("postal_code")) pincode = c.long_name;
-          });
-          setFormData(prev => ({
-            ...prev,
-            ...(city ? { city } : {}),
-            ...(state ? { state } : {}),
-            ...(pincode ? { pincode } : {}),
-          }));
-        })
-        .catch(() => {});
+      try {
+        const res = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=geometry&key=${key}`);
+        const data = await res.json();
+        const loc = data?.result?.geometry?.location;
+        if (loc) {
+          // Open the same confirm-pin map used for GPS, centered on the
+          // picked place, so the user can fine-tune before we lock it in.
+          setMapModal({ open: true, lat: loc.lat, lng: loc.lng });
+          return;
+        }
+      } catch {
+        // fall through to the no-map fallback below
+      }
+    }
+
+    // No Maps key / geometry lookup failed — fall back to filling the
+    // address straight from the Place Details components, no map step.
+    try {
+      const res2 = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=address_components&key=${key}`);
+      const data2 = await res2.json();
+      const comps = data2?.result?.address_components || [];
+      let city = "", state = "", pincode = "";
+      comps.forEach((c: any) => {
+        if (c.types.includes("locality") || c.types.includes("administrative_area_level_2")) city = c.long_name;
+        if (c.types.includes("administrative_area_level_1")) state = c.long_name;
+        if (c.types.includes("postal_code")) pincode = c.long_name;
+      });
+      setFormData(prev => ({
+        ...prev,
+        streetArea: prediction.description || prediction.structured_formatting?.main_text || prev.streetArea,
+        ...(city ? { city } : {}),
+        ...(state ? { state } : {}),
+        ...(pincode ? { pincode } : {}),
+      }));
+      setEditingLocation(false);
+      setTimeout(() => flatInputRef.current?.focus(), 300);
+    } catch {
+      // Nothing more we can do automatically — user can still type it in
+      // via the inline fallback fields that appear below.
     }
   };
 
@@ -211,6 +237,8 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         }));
 
         toast.success("Location confirmed! Enter your Flat/Building name.", { id: "geo-detect" });
+        setEditingLocation(false);
+        setLocationSearchQuery("");
         setTimeout(() => flatInputRef.current?.focus(), 300);
       } else {
         promptEnableGps("Couldn't detect an address at that spot. Please check your GPS is on and try again.");
@@ -456,22 +484,81 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   return (
     <>
     <form onSubmit={handleSubmit} className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4">
-      {/* Top Banner: Detect Location */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
-        <div className="flex items-center gap-2">
-          <MapPin size={18} className="text-[var(--or)] shrink-0" />
-          <span className="text-xs font-semibold text-slate-700">Quick Auto-Fill using GPS Location</span>
+      {/* Location — Zepto-style: search or GPS first (drag-pin map confirms
+          it), then collapse into a compact summary card with an Edit link.
+          Everything below (street/city/state/pincode) is auto-filled and
+          hidden — only Flat No./Floor + Building Name need typing. */}
+      {(!locationConfirmed || editingLocation) ? (
+        <div className="space-y-2.5 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+          <label className="text-xs font-bold text-slate-700 block">Your Location</label>
+          <div className="relative" ref={autocompleteContainerRef}>
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={locationSearchQuery}
+                onChange={e => handleLocationSearchChange(e.target.value)}
+                className="w-full pl-8 pr-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-white"
+                placeholder="Search for area, street name..."
+              />
+            </div>
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100">
+                {suggestions.map((p, idx) => (
+                  <button
+                    key={p.place_id || idx}
+                    type="button"
+                    onClick={() => handleSelectLocationSearchSuggestion(p)}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-slate-50 flex items-start gap-2 text-slate-700 transition-colors"
+                  >
+                    <MapPin size={14} className="text-[var(--or)] shrink-0 mt-0.5" />
+                    <span>{p.description}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={handleDetectCurrentLocation}
+            disabled={detectingLocation}
+            className="w-full inline-flex items-center justify-center gap-2 text-xs font-bold text-white bg-[var(--or)] hover:opacity-90 py-2.5 rounded-lg transition-all shadow-sm"
+          >
+            {detectingLocation ? <Loader2 size={14} className="animate-spin" /> : <Navigation size={14} />}
+            {detectingLocation ? "Detecting..." : "📍 Use Current Location"}
+          </button>
+          {editingLocation && (
+            <button
+              type="button"
+              onClick={() => setEditingLocation(false)}
+              className="w-full text-center text-[11px] font-semibold text-slate-500 hover:text-slate-700"
+            >
+              Cancel
+            </button>
+          )}
         </div>
-        <button
-          type="button"
-          onClick={handleDetectCurrentLocation}
-          disabled={detectingLocation}
-          className="inline-flex items-center justify-center gap-2 text-xs font-bold text-white bg-[var(--or)] hover:opacity-90 px-3.5 py-2 rounded-lg transition-all shadow-sm shrink-0"
-        >
-          {detectingLocation ? <Loader2 size={14} className="animate-spin" /> : <Navigation size={14} />}
-          {detectingLocation ? "Detecting..." : "📍 Use Current Location"}
-        </button>
-      </div>
+      ) : (
+        <div className="flex items-start justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+          <div className="flex items-start gap-2 min-w-0">
+            <MapPin size={16} className="text-[var(--or)] shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-800 truncate">
+                {[formData.streetArea, formData.city].filter(Boolean).join(", ") || "Location set"}
+              </p>
+              <p className="text-[11px] text-slate-500 truncate">
+                {[formData.state, formData.pincode].filter(Boolean).join(" - ")}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => { setLocationSearchQuery(""); setEditingLocation(true); }}
+            className="text-xs font-bold text-[var(--or)] shrink-0 hover:underline"
+          >
+            Edit
+          </button>
+        </div>
+      )}
 
       {/* Address Type Tag */}
       <div>
@@ -553,34 +640,6 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         />
       </div>
 
-      {/* Street / Area / Locality with Google Places Suggestions */}
-      <div className="relative" ref={autocompleteContainerRef}>
-        <label className="text-xs font-bold text-slate-700 mb-1 block">Area / Street / Locality *</label>
-        <input
-          type="text"
-          required
-          value={formData.streetArea}
-          onChange={e => handleStreetChange(e.target.value)}
-          className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
-          placeholder="e.g. Nikol Road, Near Devashya School"
-        />
-        {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100">
-            {suggestions.map((p, idx) => (
-              <button
-                key={p.place_id || idx}
-                type="button"
-                onClick={() => handleSelectSuggestion(p)}
-                className="w-full text-left px-3 py-2 text-xs hover:bg-slate-50 flex items-start gap-2 text-slate-700 transition-colors"
-              >
-                <MapPin size={14} className="text-[var(--or)] shrink-0 mt-0.5" />
-                <span>{p.description}</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* Landmark */}
       <div>
         <label className="text-xs font-bold text-slate-700 mb-1 block">Landmark (Optional)</label>
@@ -605,43 +664,53 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         />
       </div>
 
-      {/* City, State, Pincode */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div>
-          <label className="text-xs font-bold text-slate-700 mb-1 block">City *</label>
-          <input
-            type="text"
-            required
-            value={formData.city}
-            onChange={e => setFormData(prev => ({ ...prev, city: e.target.value }))}
-            className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
-            placeholder="City"
-          />
+      {/* City, State, Pincode — auto-filled by the location step above and
+          hidden in the normal case (matches Zepto). Only shown if geocoding
+          couldn't fill one of them, so the user always has a way to fix it. */}
+      {locationConfirmed && (!formData.city || !formData.state || !formData.pincode) && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {!formData.city && (
+            <div>
+              <label className="text-xs font-bold text-slate-700 mb-1 block">City *</label>
+              <input
+                type="text"
+                required
+                value={formData.city}
+                onChange={e => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
+                placeholder="City"
+              />
+            </div>
+          )}
+          {!formData.state && (
+            <div>
+              <label className="text-xs font-bold text-slate-700 mb-1 block">State *</label>
+              <input
+                type="text"
+                required
+                value={formData.state}
+                onChange={e => setFormData(prev => ({ ...prev, state: e.target.value }))}
+                className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
+                placeholder="State"
+              />
+            </div>
+          )}
+          {!formData.pincode && (
+            <div>
+              <label className="text-xs font-bold text-slate-700 mb-1 block">Pincode (6 digits) *</label>
+              <input
+                type="text"
+                required
+                maxLength={6}
+                value={formData.pincode}
+                onChange={e => setFormData(prev => ({ ...prev, pincode: e.target.value.replace(/\D/g, "") }))}
+                className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50 font-mono"
+                placeholder="382350"
+              />
+            </div>
+          )}
         </div>
-        <div>
-          <label className="text-xs font-bold text-slate-700 mb-1 block">State *</label>
-          <input
-            type="text"
-            required
-            value={formData.state}
-            onChange={e => setFormData(prev => ({ ...prev, state: e.target.value }))}
-            className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
-            placeholder="State"
-          />
-        </div>
-        <div>
-          <label className="text-xs font-bold text-slate-700 mb-1 block">Pincode (6 digits) *</label>
-          <input
-            type="text"
-            required
-            maxLength={6}
-            value={formData.pincode}
-            onChange={e => setFormData(prev => ({ ...prev, pincode: e.target.value.replace(/\D/g, "") }))}
-            className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50 font-mono"
-            placeholder="382350"
-          />
-        </div>
-      </div>
+      )}
 
       {/* Receiver Name */}
       <div>
