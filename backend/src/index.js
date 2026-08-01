@@ -356,7 +356,7 @@ app.get("/api/address/reverse-geocode", async (req, res) => {
   }
 
   // 2. Server-side Fallback to BigDataCloud / OpenStreetMap if components are missing
-  if (!streetArea || !city || !pincode) {
+  if (!streetArea || !city) {
     try {
       const bdcRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
       const bdcData = await bdcRes.json();
@@ -375,24 +375,7 @@ app.get("/api/address/reverse-geocode", async (req, res) => {
     }
   }
 
-  // 3. Last-resort fallback for pincode alone — OpenStreetMap Nominatim tends
-  //    to have better Indian postal-code coverage than BigDataCloud.
-  if (!pincode) {
-    try {
-      const nomRes = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
-        { headers: { "User-Agent": "Zupwell-AddressLookup/1.0" } }
-      );
-      const nomData = await nomRes.json();
-      if (nomData?.address?.postcode) {
-        pincode = nomData.address.postcode;
-      }
-    } catch (nErr) {
-      console.error("Server-side Nominatim pincode fallback error:", nErr.message);
-    }
-  }
-
-  // 4. Find the nearest recognizable landmark (cinema, mall, hospital, etc.)
+  // 3. Find the nearest recognizable landmark (cinema, mall, hospital, etc.)
   //    and prefix it, the way Swiggy/Zomato/Amazon do — "Near Mango Cinema, Nikol"
   const landmarkName = await findNearestLandmark(lat, lng, apiKey);
   const finalStreetArea = landmarkName

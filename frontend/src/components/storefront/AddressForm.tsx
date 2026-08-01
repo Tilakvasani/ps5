@@ -115,7 +115,15 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   // of the search/GPS entry UI. (Deliberately lenient: we don't require ALL
   // three, since we show inline fallback inputs below for whichever piece
   // reverse-geocoding couldn't fill in.)
-  const locationConfirmed = Boolean(formData.streetArea || formData.city || formData.pincode);
+  const [locationStepDone, setLocationStepDone] = useState(false);
+
+  // A location is "confirmed" either because we have real geocoded data, OR
+  // because the user has been through the GPS/search + confirm-pin step at
+  // least once — even if reverse-geocoding itself came back empty. Without
+  // the second half of this OR, a failed geocode lookup would permanently
+  // hide the rest of the form (including the manual City/State/Pincode
+  // fallback fields) with literally no way for the user to proceed.
+  const locationConfirmed = locationStepDone || Boolean(formData.streetArea || formData.city || formData.pincode);
 
   // Fetch Maps API Key from Backend
   useEffect(() => {
@@ -145,18 +153,15 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
       setShowSuggestions(false);
       return;
     }
-    const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (key) {
-      try {
-        const res = await fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(val)}&components=country:in&key=${key}`);
-        const data = await res.json();
-        if (data?.predictions?.length) {
-          setSuggestions(data.predictions);
-          setShowSuggestions(true);
-        }
-      } catch (err) {
-        // Fallback without blocking UI
-      }
+    try {
+      const res = await api.get(`/api/address/autocomplete?input=${encodeURIComponent(val)}`);
+      const predictions = res.data?.predictions || [];
+      setSuggestions(predictions);
+      setShowSuggestions(predictions.length > 0);
+    } catch (err) {
+      // Fallback without blocking UI — user can still use GPS instead
+      setSuggestions([]);
+      setShowSuggestions(false);
     }
   };
 
@@ -165,41 +170,26 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
     setSuggestions([]);
     setShowSuggestions(false);
 
-    const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (key && prediction.place_id) {
-      try {
-        const res = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=geometry&key=${key}`);
-        const data = await res.json();
-        const loc = data?.result?.geometry?.location;
-        if (loc) {
-          // Open the same confirm-pin map used for GPS, centered on the
-          // picked place, so the user can fine-tune before we lock it in.
-          setMapModal({ open: true, lat: loc.lat, lng: loc.lng });
-          return;
-        }
-      } catch {
-        // fall through to the no-map fallback below
-      }
-    }
-
-    // No Maps key / geometry lookup failed — fall back to filling the
-    // address straight from the Place Details components, no map step.
+    if (!prediction.place_id) return;
     try {
-      const res2 = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=address_components&key=${key}`);
-      const data2 = await res2.json();
-      const comps = data2?.result?.address_components || [];
-      let city = "", state = "", pincode = "";
-      comps.forEach((c: any) => {
-        if (c.types.includes("locality") || c.types.includes("administrative_area_level_2")) city = c.long_name;
-        if (c.types.includes("administrative_area_level_1")) state = c.long_name;
-        if (c.types.includes("postal_code")) pincode = c.long_name;
-      });
+      const res = await api.get(`/api/address/place-details?place_id=${prediction.place_id}`);
+      const data = res.data;
+
+      if (data?.lat != null && data?.lng != null) {
+        // Open the same confirm-pin map used for GPS, centered on the
+        // picked place, so the user can fine-tune before we lock it in.
+        setMapModal({ open: true, lat: data.lat, lng: data.lng });
+        return;
+      }
+
+      // No geocode available — fall back to filling straight from the
+      // parsed address components.
       setFormData(prev => ({
         ...prev,
         streetArea: prediction.description || prediction.structured_formatting?.main_text || prev.streetArea,
-        ...(city ? { city } : {}),
-        ...(state ? { state } : {}),
-        ...(pincode ? { pincode } : {}),
+        ...(data?.city ? { city: data.city } : {}),
+        ...(data?.state ? { state: data.state } : {}),
+        ...(data?.pincode ? { pincode: data.pincode } : {}),
       }));
       setEditingLocation(false);
       setTimeout(() => flatInputRef.current?.focus(), 300);
@@ -224,8 +214,9 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   // drags the confirm-map pin to correct the spot.
   const applyReverseGeocodedAddress = async (lat: number, lng: number) => {
     try {
-      const res = await api.get(`/api/address/reverse-geocode?lat=${lat}&lng=${lng}`);
+      const res = await api.get(`/api/address/reverse-geocode`, { params: { lat, lng } });
       const data = res.data;
+      console.log("[Zupwell] reverse-geocode response:", data);
 
       if (data && (data.streetArea || data.city || data.state || data.pincode)) {
         setFormData(prev => ({
@@ -235,16 +226,27 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
           state: data.state || prev.state,
           pincode: data.pincode || prev.pincode,
         }));
-
         toast.success("Location confirmed! Enter your Flat/Building name.", { id: "geo-detect" });
-        setEditingLocation(false);
-        setLocationSearchQuery("");
-        setTimeout(() => flatInputRef.current?.focus(), 300);
       } else {
-        promptEnableGps("Couldn't detect an address at that spot. Please check your GPS is on and try again.");
+        console.warn("[Zupwell] reverse-geocode returned no usable fields for", lat, lng, data);
+        promptEnableGps("Couldn't detect the exact address at that spot. Please fill in City/State/Pincode manually below.");
       }
-    } catch (err) {
-      promptEnableGps("Couldn't reach the location service. Please check your GPS is on and try again.");
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const serverMsg = err?.response?.data?.error;
+      console.error("[Zupwell] reverse-geocode request failed:", status, serverMsg, err?.message);
+      promptEnableGps(
+        status
+          ? `Location service error (${status}${serverMsg ? ": " + serverMsg : ""}). Please fill the address manually below.`
+          : "Couldn't reach the location service (network error). Please fill the address manually below."
+      );
+    } finally {
+      // Always unlock the rest of the form after this step — even a failed
+      // lookup shouldn't trap the user with no way to enter an address.
+      setLocationStepDone(true);
+      setEditingLocation(false);
+      setLocationSearchQuery("");
+      setTimeout(() => flatInputRef.current?.focus(), 300);
     }
   };
 
@@ -335,12 +337,9 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
       setMapSearchSuggestions([]);
       return;
     }
-    const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!key) return;
     try {
-      const res = await fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(val)}&components=country:in&key=${key}`);
-      const data = await res.json();
-      if (data?.predictions?.length) setMapSearchSuggestions(data.predictions);
+      const res = await api.get(`/api/address/autocomplete?input=${encodeURIComponent(val)}`);
+      setMapSearchSuggestions(res.data?.predictions || []);
     } catch {
       // Ignore — user can still drag the map manually
     }
@@ -349,14 +348,12 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   const handleSelectMapSearchSuggestion = async (prediction: any) => {
     setMapSearchSuggestions([]);
     setMapSearchQuery(prediction.description || "");
-    const key = mapsApiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!key || !prediction.place_id) return;
+    if (!prediction.place_id) return;
     try {
-      const res = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=geometry&key=${key}`);
-      const data = await res.json();
-      const loc = data?.result?.geometry?.location;
-      if (loc && googleMapRef.current) {
-        googleMapRef.current.setCenter({ lat: loc.lat, lng: loc.lng });
+      const res = await api.get(`/api/address/place-details?place_id=${prediction.place_id}`);
+      const data = res.data;
+      if (data?.lat != null && data?.lng != null && googleMapRef.current) {
+        googleMapRef.current.setCenter({ lat: data.lat, lng: data.lng });
         googleMapRef.current.setZoom(17);
       }
     } catch {
@@ -560,6 +557,12 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         </div>
       )}
 
+      {/* Everything below only appears once a real location has been
+          confirmed (via GPS+pin or search+pin) — this is the "zero mistake"
+          guarantee: it's physically impossible to type Flat/Building/etc.
+          for an address that was never actually located on the map. */}
+      {locationConfirmed && !editingLocation ? (
+        <>
       {/* Address Type Tag */}
       <div>
         <label className="text-xs font-bold text-slate-700 mb-1.5 block">Save Address As</label>
@@ -667,7 +670,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
       {/* City, State, Pincode — auto-filled by the location step above and
           hidden in the normal case (matches Zepto). Only shown if geocoding
           couldn't fill one of them, so the user always has a way to fix it. */}
-      {locationConfirmed && (!formData.city || !formData.state || !formData.pincode) && (
+      {(!formData.city || !formData.state || !formData.pincode) && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {!formData.city && (
             <div>
@@ -770,6 +773,12 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
           </button>
         )}
       </div>
+        </>
+      ) : (
+        <p className="text-center text-[11px] font-semibold text-slate-400 py-1">
+          Select or detect your delivery location above to continue
+        </p>
+      )}
     </form>
 
     {/* Confirm-Location Modal — Zepto/Swiggy-style: pin stays fixed at the
