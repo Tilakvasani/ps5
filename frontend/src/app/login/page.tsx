@@ -238,12 +238,7 @@ function LoginPageInner() {
   const triggerMsg91Otp = (mobileNumber: string, onSuccessCallback: (msg91Data: any) => void) => {
     const cleanNum = mobileNumber.replace(/\D/g, "").slice(-10);
     const widgetId = process.env.NEXT_PUBLIC_MSG91_WIDGET_ID || "366863697379393934343932";
-    const tokenAuth = (process.env.NEXT_PUBLIC_MSG91_TOKEN_AUTH || "").trim();
-
-    if (!tokenAuth) {
-      toast.error("MSG91 Token Auth is missing. Please set NEXT_PUBLIC_MSG91_TOKEN_AUTH in Vercel.");
-      return;
-    }
+    const tokenAuth = (process.env.NEXT_PUBLIC_MSG91_TOKEN_AUTH || "556895TdKKE2YUKQGb6a705e43P1").trim();
 
     const configuration: any = {
       widgetId,
