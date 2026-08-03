@@ -1,5 +1,5 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -236,75 +236,74 @@ function LoginPageInner() {
     }
   };
 
-  const triggerMsg91Otp = (mobileNumber: string, onSuccessCallback: (msg91Data: any) => void) => {
-    const cleanNum = mobileNumber.replace(/\D/g, "").slice(-10);
+  // ── MSG91 OTP: load script once, use exposed methods ──────────────
+  const msg91Ready = useRef(false);
+  const msg91SuccessCb = useRef<((data: any) => void) | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || msg91Ready.current) return;
+
     const widgetId = process.env.NEXT_PUBLIC_MSG91_WIDGET_ID || "366863697379393934343932";
     const tokenAuth = (process.env.NEXT_PUBLIC_MSG91_TOKEN_AUTH || "556895TdKKE2YUKQGb6a705e43P1").trim();
 
     const configuration: any = {
       widgetId,
       tokenAuth,
-      identifier: `91${cleanNum}`,
       exposeMethods: true,
       captchaRenderId: "msg91-captcha-container",
       success: (data: any) => {
         console.log("MSG91 Success Response", data);
-        onSuccessCallback(data);
+        if (msg91SuccessCb.current) {
+          msg91SuccessCb.current(data);
+          msg91SuccessCb.current = null;
+        }
       },
       failure: (error: any) => {
         console.error("MSG91 Failure Response", error);
-        if (error?.message === "AuthenticationFailure" || error?.code === "401") {
-          toast.error("MSG91 Token Auth invalid. Please check your MSG91 dashboard Token Auth.");
-        } else {
-          toast.error(error?.message || "OTP verification failed. Please try again.");
-        }
+        toast.error(error?.message || "OTP verification failed. Please try again.");
       },
     };
 
-    if (typeof window !== "undefined") {
-      // ── Full cleanup of previous MSG91 / hCaptcha state ──
+    (window as any).configuration = configuration;
+    const script = document.createElement("script");
+    script.src = "https://verify.msg91.com/otp-provider.js";
+    script.type = "text/javascript";
+    script.onload = () => {
       try {
-        // 1. Reset hCaptcha globally
-        if ((window as any).hcaptcha) {
-          try { (window as any).hcaptcha.reset(); } catch {}
-          try {
-            const ids = (window as any).hcaptcha.getAllWidgetIds?.();
-            if (ids?.length) ids.forEach((id: any) => { try { (window as any).hcaptcha.remove(id); } catch {} });
-          } catch {}
+        if ((window as any).initSendOTP) {
+          (window as any).initSendOTP(configuration);
+          msg91Ready.current = true;
+          console.log("MSG91 widget initialized successfully");
         }
-        // 2. Remove all sendotp-widget custom elements
-        document.querySelectorAll("sendotp-widget").forEach((el) => el.remove());
-        // 3. Remove all hCaptcha iframes and containers
-        document.querySelectorAll("iframe[src*='hcaptcha'], iframe[src*='newassets.hcaptcha']").forEach((el) => el.remove());
-        document.querySelectorAll("[class*='h-captcha'], .hcaptcha-box").forEach((el) => el.remove());
-        // 4. Remove old hCaptcha and MSG91 scripts
-        document.querySelectorAll("script[src*='hcaptcha.com'], script[src*='otp-provider.js']").forEach((el) => el.remove());
-        // 5. Clear the captcha container
-        const captchaEl = document.getElementById("msg91-captcha-container");
-        if (captchaEl) captchaEl.innerHTML = "";
-        // 6. Clear stale global refs so MSG91 re-creates fresh
-        delete (window as any).hcaptcha;
-        delete (window as any).initSendOTP;
-        delete (window as any).configuration;
-      } catch (cleanupErr) {
-        console.warn("MSG91 cleanup warning:", cleanupErr);
+      } catch (err) {
+        console.error("MSG91 init error:", err);
       }
+    };
+    document.body.appendChild(script);
+  }, []);
 
-      // ── Load fresh MSG91 script ──
-      (window as any).configuration = configuration;
-      const script = document.createElement("script");
-      script.src = "https://verify.msg91.com/otp-provider.js";
-      script.type = "text/javascript";
-      script.onload = () => {
-        try {
-          if ((window as any).initSendOTP) {
-            (window as any).initSendOTP(configuration);
-          }
-        } catch (err: any) {
-          console.error("MSG91 initSendOTP error:", err);
+  const triggerMsg91Otp = (mobileNumber: string, onSuccessCallback: (msg91Data: any) => void) => {
+    const cleanNum = mobileNumber.replace(/\D/g, "").slice(-10);
+    const identifier = `91${cleanNum}`;
+
+    // Store callback ref for when MSG91 fires success
+    msg91SuccessCb.current = onSuccessCallback;
+
+    if ((window as any).sendOtp) {
+      (window as any).sendOtp(
+        identifier,
+        (data: any) => {
+          console.log("OTP sent successfully", data);
+          toast.success("OTP sent to your mobile number!");
+        },
+        (error: any) => {
+          console.error("SendOTP error:", error);
+          toast.error(error?.message || "Failed to send OTP. Please try again.");
         }
-      };
-      document.body.appendChild(script);
+      );
+    } else {
+      console.error("MSG91 sendOtp method not available yet");
+      toast.error("OTP service is loading, please try again in a moment.");
     }
   };
 
