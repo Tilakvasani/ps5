@@ -238,11 +238,10 @@ function LoginPageInner() {
   const triggerMsg91Otp = (mobileNumber: string, onSuccessCallback: (msg91Data: any) => void) => {
     const cleanNum = mobileNumber.replace(/\D/g, "").slice(-10);
     const widgetId = process.env.NEXT_PUBLIC_MSG91_WIDGET_ID || "366863697379393934343932";
-    const tokenAuth = process.env.NEXT_PUBLIC_MSG91_TOKEN_AUTH || widgetId;
+    const tokenAuth = process.env.NEXT_PUBLIC_MSG91_TOKEN_AUTH;
 
     const configuration: any = {
       widgetId,
-      tokenAuth,
       identifier: `91${cleanNum}`,
       exposeMethods: true,
       success: (data: any) => {
@@ -251,9 +250,17 @@ function LoginPageInner() {
       },
       failure: (error: any) => {
         console.error("MSG91 Failure Response", error);
-        toast.error(error?.message || "OTP verification failed. Please try again.");
+        if (error?.message === "AuthenticationFailure" || error?.code === "401") {
+          toast.error("MSG91 Token Auth invalid. You can enter the OTP received via SMS below.");
+        } else {
+          toast.error(error?.message || "OTP verification failed. Please try again.");
+        }
       },
     };
+
+    if (tokenAuth && tokenAuth.trim()) {
+      configuration.tokenAuth = tokenAuth.trim();
+    }
 
     if (typeof window !== "undefined") {
       (window as any).configuration = configuration;
