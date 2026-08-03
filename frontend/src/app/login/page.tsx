@@ -262,6 +262,14 @@ function LoginPageInner() {
     };
 
     if (typeof window !== "undefined") {
+      try {
+        if ((window as any).hcaptcha?.reset) {
+          (window as any).hcaptcha.reset();
+        }
+      } catch {}
+      const captchaEl = document.getElementById("msg91-captcha-container");
+      if (captchaEl) captchaEl.innerHTML = "";
+
       (window as any).configuration = configuration;
       try {
         if ((window as any).initSendOTP) {
