@@ -52,35 +52,36 @@ async function consumeOtp(phone, otpOrToken) {
     return { ok: true };
   }
 
+  const axios = require("axios");
+  const formattedPhone = phone.replace(/\D/g, "").slice(-10);
+  // A raw 4-8 digit code is a manually-typed OTP -> verify with /otp/verify.
+  // Anything else (a JWT-ish string) is the widget's access token -> verify
+  // with /widget/verifyAccessToken. Either way we trust ONLY what MSG91
+  // actually tells us — never a blanket ok:true.
+  const isNumericOtp = /^\d{4,8}$/.test(String(otpOrToken));
+
   try {
-    const axios = require("axios");
-    const formattedPhone = phone.replace(/\D/g, "").slice(-10);
-
-    const res = await axios.get("https://control.msg91.com/api/v5/otp/verify", {
-      params: {
-        authkey: authKey,
-        mobile: `91${formattedPhone}`,
-        otp: otpOrToken
-      }
-    }).catch(() => null);
-
-    if (res && res.data && (res.data.type === "success" || res.data.message === "OTP verified success")) {
-      return { ok: true };
+    if (isNumericOtp) {
+      const res = await axios.get("https://control.msg91.com/api/v5/otp/verify", {
+        params: {
+          authkey: authKey,
+          mobile: `91${formattedPhone}`,
+          otp: otpOrToken
+        }
+      });
+      if (res?.data?.type === "success") return { ok: true };
+      return { ok: false, status: 400, error: res?.data?.message || "Invalid or expired OTP." };
     }
 
     const tokenRes = await axios.post("https://control.msg91.com/api/v5/widget/verifyAccessToken", {
-      "auth-key": authKey,
+      authkey: authKey,
       "access-token": otpOrToken
-    }).catch(() => null);
-
-    if (tokenRes && tokenRes.data && (tokenRes.data.type === "success" || tokenRes.data.message === "SUCCESS")) {
-      return { ok: true };
-    }
-
-    return { ok: true };
+    });
+    if (tokenRes?.data?.type === "success") return { ok: true };
+    return { ok: false, status: 400, error: tokenRes?.data?.message || "Invalid or expired OTP." };
   } catch (err) {
-    console.error("MSG91 verification error:", err?.message || err);
-    return { ok: true };
+    console.error("MSG91 verification error:", err?.response?.data || err?.message || err);
+    return { ok: false, status: 502, error: "Could not verify OTP right now. Please try again." };
   }
 }
 
