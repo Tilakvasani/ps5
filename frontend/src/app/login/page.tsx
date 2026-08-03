@@ -262,36 +262,49 @@ function LoginPageInner() {
     };
 
     if (typeof window !== "undefined") {
+      // ── Full cleanup of previous MSG91 / hCaptcha state ──
       try {
-        if ((window as any).hcaptcha?.reset) {
-          (window as any).hcaptcha.reset();
+        // 1. Reset hCaptcha globally
+        if ((window as any).hcaptcha) {
+          try { (window as any).hcaptcha.reset(); } catch {}
+          try {
+            const ids = (window as any).hcaptcha.getAllWidgetIds?.();
+            if (ids?.length) ids.forEach((id: any) => { try { (window as any).hcaptcha.remove(id); } catch {} });
+          } catch {}
         }
-      } catch {}
-      const captchaEl = document.getElementById("msg91-captcha-container");
-      if (captchaEl) captchaEl.innerHTML = "";
-
-      (window as any).configuration = configuration;
-      try {
-        if ((window as any).initSendOTP) {
-          (window as any).initSendOTP(configuration);
-        } else {
-          const script = document.createElement("script");
-          script.src = "https://verify.msg91.com/otp-provider.js";
-          script.type = "text/javascript";
-          script.onload = () => {
-            try {
-              if ((window as any).initSendOTP) {
-                (window as any).initSendOTP(configuration);
-              }
-            } catch (err: any) {
-              console.error("MSG91 initSendOTP load error:", err);
-            }
-          };
-          document.body.appendChild(script);
-        }
-      } catch (err: any) {
-        console.error("MSG91 trigger error:", err);
+        // 2. Remove all sendotp-widget custom elements
+        document.querySelectorAll("sendotp-widget").forEach((el) => el.remove());
+        // 3. Remove all hCaptcha iframes and containers
+        document.querySelectorAll("iframe[src*='hcaptcha'], iframe[src*='newassets.hcaptcha']").forEach((el) => el.remove());
+        document.querySelectorAll("[class*='h-captcha'], .hcaptcha-box").forEach((el) => el.remove());
+        // 4. Remove old hCaptcha and MSG91 scripts
+        document.querySelectorAll("script[src*='hcaptcha.com'], script[src*='otp-provider.js']").forEach((el) => el.remove());
+        // 5. Clear the captcha container
+        const captchaEl = document.getElementById("msg91-captcha-container");
+        if (captchaEl) captchaEl.innerHTML = "";
+        // 6. Clear stale global refs so MSG91 re-creates fresh
+        delete (window as any).hcaptcha;
+        delete (window as any).initSendOTP;
+        delete (window as any).configuration;
+      } catch (cleanupErr) {
+        console.warn("MSG91 cleanup warning:", cleanupErr);
       }
+
+      // ── Load fresh MSG91 script ──
+      (window as any).configuration = configuration;
+      const script = document.createElement("script");
+      script.src = "https://verify.msg91.com/otp-provider.js";
+      script.type = "text/javascript";
+      script.onload = () => {
+        try {
+          if ((window as any).initSendOTP) {
+            (window as any).initSendOTP(configuration);
+          }
+        } catch (err: any) {
+          console.error("MSG91 initSendOTP error:", err);
+        }
+      };
+      document.body.appendChild(script);
     }
   };
 
