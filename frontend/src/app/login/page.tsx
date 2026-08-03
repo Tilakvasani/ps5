@@ -235,6 +235,41 @@ function LoginPageInner() {
     }
   };
 
+  const triggerMsg91Otp = (mobileNumber: string, onSuccessCallback: (msg91Data: any) => void) => {
+    const cleanNum = mobileNumber.replace(/\D/g, "").slice(-10);
+    const configuration = {
+      widgetId: process.env.NEXT_PUBLIC_MSG91_WIDGET_ID || "366863697379393934343932",
+      tokenAuth: process.env.NEXT_PUBLIC_MSG91_TOKEN_AUTH || "",
+      identifier: `91${cleanNum}`,
+      exposeMethods: true,
+      captchaRenderId: '',
+      success: (data: any) => {
+        console.log("MSG91 Success Response", data);
+        onSuccessCallback(data);
+      },
+      failure: (error: any) => {
+        console.error("MSG91 Failure Response", error);
+        toast.error(error?.message || "OTP verification failed. Please try again.");
+      },
+    };
+
+    if (typeof window !== "undefined") {
+      if ((window as any).initSendOTP) {
+        (window as any).initSendOTP(configuration);
+      } else {
+        const script = document.createElement("script");
+        script.src = "https://verify.msg91.com/otp-provider.js";
+        script.type = "text/javascript";
+        script.onload = () => {
+          if ((window as any).initSendOTP) {
+            (window as any).initSendOTP(configuration);
+          }
+        };
+        document.body.appendChild(script);
+      }
+    }
+  };
+
   // ── LOGIN TAB: forgot password (OTP-based) ─────────────────────────
   const handleForgotRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -245,8 +280,12 @@ function LoginPageInner() {
     setLoading(true);
     try {
       await authApi.forgotPasswordRequest(cleanPhone);
-      toast.success("If this number is registered, an OTP has been sent.");
       setLoginStep("forgotReset");
+      triggerMsg91Otp(cleanPhone, (msg91Data) => {
+        const verifiedToken = msg91Data?.jwt || msg91Data?.access_token || msg91Data?.reqNo || "msg91_verified";
+        setOtp(verifiedToken);
+        toast.success("OTP verified! Now enter your new password.");
+      });
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {
@@ -292,8 +331,27 @@ function LoginPageInner() {
         setIdentifier(cleanPhone);
         switchTab("login");
       } else {
-        toast.success("OTP sent to your mobile number!");
         setRegisterStep("otp");
+        triggerMsg91Otp(cleanPhone, async (msg91Data) => {
+          const verifiedToken = msg91Data?.jwt || msg91Data?.access_token || msg91Data?.reqNo || "msg91_verified";
+          setOtp(verifiedToken);
+          try {
+            const verifyRes = await authApi.verifyIdentifyOtp(cleanPhone, verifiedToken);
+            if (verifyRes.step === "register") {
+              setSetupToken(verifyRes.setupToken);
+              setRegisterStep("details");
+              toast.success("Phone verified! Enter your details.");
+            } else if (verifyRes.step === "set-password") {
+              setSetupToken(verifyRes.setupToken);
+              setRegisterStep("setPassword");
+              toast.success("Verified! Please set a password for your account.");
+            } else if (verifyRes.step === "logged-in") {
+              finishUserLogin(verifyRes);
+            }
+          } catch (err: any) {
+            toast.error(err.message || "OTP verification failed");
+          }
+        });
       }
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
