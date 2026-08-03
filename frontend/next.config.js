@@ -20,14 +20,14 @@ const nextConfig = {
     // browser will silently block it.
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://checkout.razorpay.com https://maps.googleapis.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://checkout.razorpay.com https://maps.googleapis.com https://verify.msg91.com https://*.msg91.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https://res.cloudinary.com https://placehold.co https://i.ibb.co https://www.googletagmanager.com https://maps.googleapis.com https://maps.gstatic.com https://*.google.com https://*.gstatic.com",
+      "img-src 'self' data: https://res.cloudinary.com https://placehold.co https://i.ibb.co https://www.googletagmanager.com https://maps.googleapis.com https://maps.gstatic.com https://*.google.com https://*.gstatic.com https://*.msg91.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://www.google-analytics.com https://api.razorpay.com https://lumberjack-cx.razorpay.com https://maps.googleapis.com " +
+      "connect-src 'self' https://www.google-analytics.com https://api.razorpay.com https://lumberjack-cx.razorpay.com https://maps.googleapis.com https://verify.msg91.com https://control.msg91.com https://*.msg91.com " +
         (process.env.NEXT_PUBLIC_API_URL || "https://ps5-ufm2.onrender.com") + " " +
         (process.env.NEXT_PUBLIC_CHAT_API_URL || "https://whatsappchatbot-jfki.onrender.com"),
-      "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://www.google.com https://maps.google.com https://www.google.co.in",
+      "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://www.google.com https://maps.google.com https://www.google.co.in https://verify.msg91.com https://*.msg91.com",
       "object-src 'none'",
       "base-uri 'self'",
     ].join("; ");
