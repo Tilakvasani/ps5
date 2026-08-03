@@ -257,10 +257,20 @@ app.get("/api/address/pincode-lookup", (req, res) => {
     const matches = pincodeDirectory.lookup(Number(pincode));
     if (Array.isArray(matches) && matches.length > 0) {
       const first = matches[0];
+      // Each match is a distinct post office / locality under this pincode
+      // (e.g. pincode 382350 covers "T B Nagar", "Khodiyarnagar", "Nikol").
+      // Strip the "S.O"/"B.O"/"H.O" post-office-type suffix so we're left
+      // with just the area name, and dedupe.
+      const areas = [...new Set(
+        matches
+          .map(m => (m.officeName || "").replace(/\s+(S\.?O|B\.?O|H\.?O)\.?\s*(\([^)]*\))?$/i, "").trim())
+          .filter(Boolean)
+      )];
       return res.json({
         valid: true,
         city: first.districtName || first.taluk || "",
         state: first.stateName || "",
+        areas,
       });
     }
     return res.json({ valid: false });

@@ -82,6 +82,10 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
   // lookup to succeed, so a flaky network never traps the user with no way
   // to type their address.
   const [pincodeStepDone, setPincodeStepDone] = useState(Boolean(initialData?.pincode));
+  // Localities/post-office areas that fall under the entered pincode (e.g.
+  // pincode 382350 → ["T B Nagar", "Khodiyarnagar", "Nikol"]) — shown as
+  // quick-pick chips for the Area/Street/Locality field below.
+  const [areaSuggestions, setAreaSuggestions] = useState<string[]>([]);
 
   const flatInputRef = useRef<HTMLInputElement>(null);
   const pincodeInputRef = useRef<HTMLInputElement>(null);
@@ -109,8 +113,10 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
             city: data.city || prev.city,
             state: data.state || prev.state,
           }));
+          setAreaSuggestions(Array.isArray(data.areas) ? data.areas : []);
         } else {
           setPincodeError("Couldn't find this PIN code. Please double-check it, or enter City/State manually below.");
+          setAreaSuggestions([]);
         }
       })
       .catch(() => {
@@ -118,6 +124,7 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
           // Backend unreachable — don't block the user, just let them
           // fill City/State manually via the fallback fields.
           setPincodeError("Couldn't auto-detect City/State right now. Please fill them in manually below.");
+          setAreaSuggestions([]);
         }
       })
       .finally(() => {
@@ -382,6 +389,27 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
           className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
           placeholder="e.g. New India Colony"
         />
+        {/* Localities that fall under the entered pincode — tap one to fill
+            it in instantly instead of typing (e.g. pincode 382350 shows
+            "T B Nagar", "Khodiyarnagar", "Nikol"). */}
+        {areaSuggestions.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {areaSuggestions.map(area => (
+              <button
+                key={area}
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, streetArea: area }))}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${
+                  formData.streetArea === area
+                    ? "bg-[var(--or)]/10 text-[var(--or)] border-[var(--or)]"
+                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                }`}
+              >
+                {area}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Landmark */}
