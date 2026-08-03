@@ -34,11 +34,11 @@ export default function AdminUsersPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left" style={{ borderBottom: "1.5px solid rgba(12, 30, 57, 0.08)", background: "#0C1E39", color: "#F8F8F8" }}>
-              {["User", "Phone", "Orders", "Total Spent", "Verified", "Joined"].map(h => <th key={h} className="px-4 py-3 font-semibold">{h}</th>)}
+              {["User", "Phone", "Address", "Orders", "Total Spent", "Verified", "Joined"].map(h => <th key={h} className="px-4 py-3 font-semibold">{h}</th>)}
             </tr>
           </thead>
           <tbody className="divide-y divide-[rgba(12,30,57,0.08)]">
-            {loading ? Array.from({ length: 8 }).map((_, i) => <tr key={i}><td colSpan={6} className="px-4 py-3"><div className="h-4 rounded animate-pulse" style={{ background: "rgba(12, 30, 57, 0.08)" }} /></td></tr>)
+            {loading ? Array.from({ length: 8 }).map((_, i) => <tr key={i}><td colSpan={7} className="px-4 py-3"><div className="h-4 rounded animate-pulse" style={{ background: "rgba(12, 30, 57, 0.08)" }} /></td></tr>)
               : users.map(u => (
               <tr key={u.id} className="transition-colors border-b" style={{ color: "#0C1E39", borderColor: "rgba(12, 30, 57, 0.08)" }}
                 onMouseEnter={e => (e.currentTarget.style.background = "#F8F8F8")}
@@ -56,6 +56,20 @@ export default function AdminUsersPage() {
                   </div>
                 </td>
                 <td className="px-4 py-3" style={{ color: "#4A5568" }}>{u.phone || "—"}</td>
+                <td className="px-4 py-3 max-w-[260px]" style={{ color: "#4A5568" }}>
+                  {u.addresses && u.addresses.length > 0 ? (
+                    <div className="text-xs leading-snug">
+                      <p className="truncate" title={[u.addresses[0].addressLine1, u.addresses[0].addressLine2].filter(Boolean).join(", ")}>
+                        {[u.addresses[0].addressLine1, u.addresses[0].addressLine2].filter(Boolean).join(", ")}
+                      </p>
+                      <p className="text-[11px]" style={{ color: "#6B7280" }}>
+                        {[u.addresses[0].city, u.addresses[0].state, u.addresses[0].pincode].filter(Boolean).join(", ")}
+                      </p>
+                    </div>
+                  ) : (
+                    <span className="text-xs" style={{ color: "#6B7280" }}>No address saved</span>
+                  )}
+                </td>
                 <td className="px-4 py-3" style={{ color: "#4A5568" }}>{u._count?.orders ?? 0}</td>
                 <td className="px-4 py-3 font-bold" style={{ color: "#0C1E39" }}>₹{Number(u.totalSpent || 0).toFixed(2)}</td>
                 <td className="px-4 py-3"><span className={`badge ${u.isVerified ? "badge-success" : "badge-warning"}`}>{u.isVerified ? "Yes" : "No"}</span></td>

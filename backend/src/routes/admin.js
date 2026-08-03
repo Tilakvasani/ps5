@@ -778,7 +778,22 @@ router.get("/users", authAdmin, async (req, res) => {
     const { page = 1, perPage = 20, search } = req.query;
     const where = search ? { OR: [{ name: { contains: search, mode: "insensitive" } }, { email: { contains: search, mode: "insensitive" } }, { phone: { contains: search } }] } : {};
     const [users, total] = await Promise.all([
-      prisma.user.findMany({ where, skip: (Number(page) - 1) * Number(perPage), take: Number(perPage), orderBy: { createdAt: "desc" }, select: { id: true, name: true, email: true, phone: true, isVerified: true, isActive: true, createdAt: true, _count: { select: { orders: true } } } }),
+      prisma.user.findMany({
+        where,
+        skip: (Number(page) - 1) * Number(perPage),
+        take: Number(perPage),
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true, name: true, email: true, phone: true, isVerified: true, isActive: true, createdAt: true,
+          _count: { select: { orders: true } },
+          // Pull the addresses too so the admin Users table can show each
+          // user's saved address without a separate lookup per row.
+          addresses: {
+            orderBy: [{ isDefault: "desc" }, { id: "desc" }],
+            select: { addressLine1: true, addressLine2: true, city: true, state: true, pincode: true, label: true, isDefault: true },
+          },
+        },
+      }),
       prisma.user.count({ where }),
     ]);
     res.json({ users, total });

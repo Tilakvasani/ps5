@@ -7,7 +7,7 @@ import { ChevronRight, MapPin, CreditCard, CheckCircle, Plus, Shield, Trash2, X 
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useStore } from "@/lib/store";
-import api, { ordersApi, accountApi, paymentsApi } from "@/lib/api";
+import { ordersApi, accountApi, paymentsApi } from "@/lib/api";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import AddressForm from "@/components/storefront/AddressForm";
@@ -86,13 +86,6 @@ export default function CheckoutPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [newAddr, setNewAddr] = useState({ fullName: "", phone: "", addressLine1: "", city: "Ahmedabad", state: "Gujarat", pincode: "", gstin: "" });
   const [addingAddr, setAddingAddr] = useState(false);
-  const [backendMapsKey, setBackendMapsKey] = useState("");
-
-  useEffect(() => {
-    api.get("/api/address/maps-config")
-      .then(r => { if (r.data?.apiKey) setBackendMapsKey(r.data.apiKey); })
-      .catch(() => {});
-  }, []);
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
   const discount = couponApplied ? couponDiscount : 0;
@@ -272,8 +265,8 @@ export default function CheckoutPage() {
             {/* Step 0: Address */}
             {step === 0 && (
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                  {/* Left Side: Delivery Address */}
+                <div className="grid grid-cols-1 gap-6 items-start max-w-xl">
+                  {/* Delivery Address */}
                   <div style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 12, padding: 20, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
                     <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
                       <div className="flex items-center gap-2">
@@ -383,90 +376,6 @@ export default function CheckoutPage() {
                     </div>
                   )}
 
-                  {/* Right Side: Real Google Maps Location & Address Verification */}
-                  <div style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)", borderRadius: 10, padding: 20, boxShadow: "0 10px 30px rgba(12, 30, 57, 0.02)" }}>
-                    {(() => {
-                      const activeAddr = addresses.find(a => a.id === selectedAddress);
-                      const fullAddressString = activeAddr
-                        ? `${activeAddr.addressLine1}, ${activeAddr.city}, ${activeAddr.state} ${activeAddr.pincode}, India`
-                        : "";
-                      const isPincodeValid = activeAddr ? /^\d{6}$/.test(activeAddr.pincode?.trim() || "") : false;
-                      const isAddressValid = Boolean(activeAddr && activeAddr.addressLine1?.length >= 3 && activeAddr.city && activeAddr.state && isPincodeValid);
-                      const googleMapsApiKey = backendMapsKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-                      const mapEmbedSrc = googleMapsApiKey
-                        ? `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${encodeURIComponent(fullAddressString)}`
-                        : `https://www.google.com/maps?q=${encodeURIComponent(fullAddressString)}&output=embed`;
-
-                      return (
-                        <>
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              <MapPin size={18} style={{ color: "var(--or)" }} />
-                              <h3 style={{ fontWeight: 700, color: "#0C1E39", fontSize: "0.95rem" }}>Google Maps Verification</h3>
-                            </div>
-                            {selectedAddress ? (
-                              isAddressValid ? (
-                                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
-                                  ✓ Verified Address
-                                </span>
-                              ) : (
-                                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 flex items-center gap-1">
-                                  ⚠️ Incomplete Address
-                                </span>
-                              )
-                            ) : null}
-                          </div>
-
-                          {selectedAddress ? (
-                            <div className="space-y-3">
-                              {/* Real Interactive Google Maps Iframe Embed */}
-                              <div className="relative w-full h-64 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-inner">
-                                <iframe
-                                  title="Google Maps Location Verification"
-                                  width="100%"
-                                  height="100%"
-                                  style={{ border: 0 }}
-                                  loading="lazy"
-                                  allowFullScreen
-                                  referrerPolicy="no-referrer-when-downgrade"
-                                  src={mapEmbedSrc}
-                                  className="w-full h-full"
-                                />
-                                <div className="absolute top-2 left-2 bg-slate-900/85 backdrop-blur-md text-white text-[10px] font-semibold px-2.5 py-1 rounded-md shadow flex items-center gap-1.5 border border-white/20">
-                                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                  <span>Live Google Maps Plot</span>
-                                </div>
-                              </div>
-
-                              {/* Location & Dispatch Summary */}
-                              <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3 text-xs space-y-1.5 text-slate-600">
-                                <div className="flex justify-between items-center">
-                                  <span className="font-semibold text-slate-700">Pincode Status:</span>
-                                  <span className={isPincodeValid ? "text-emerald-600 font-bold" : "text-amber-600 font-bold"}>
-                                    {isPincodeValid ? `PIN ${activeAddr?.pincode} Valid` : "Check PIN Code"}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="font-semibold text-slate-700">Fulfillment Hub:</span>
-                                  <span className="font-semibold text-slate-800">{activeAddr?.city || "Regional"} Logistics Center</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="font-semibold text-slate-700">Delivery Status:</span>
-                                  <span className="text-emerald-600 font-bold">Express Shipping Eligible</span>
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="h-64 rounded-xl border border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                              <MapPin size={32} className="mb-2 opacity-50 text-[var(--or)]" />
-                              <p className="text-xs font-semibold text-slate-600 mb-1">Live Google Maps Verification</p>
-                              <p className="text-[11px] text-slate-400 max-w-xs">Select or add a delivery address on the left to display its live Google Maps pin and verification status.</p>
-                            </div>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
                 </div>
 
                 <button onClick={() => { if (!selectedAddress) { toast.error("Select an address"); return; } setStep(1); }} className="btn-primary w-full py-3 flex items-center justify-center gap-2">

@@ -248,6 +248,36 @@ app.get("/api/address/maps-config", (req, res) => {
   res.json({ apiKey });
 });
 
+// ── Pincode → City/State Lookup (server-side proxy) ───
+// The frontend used to call api.postalpincode.in directly from the
+// browser, but that API doesn't return CORS headers reliably from all
+// networks/browsers, so the lookup would silently fail and leave
+// City/State blank. Proxying it through our own backend avoids that —
+// server-to-server requests aren't subject to CORS at all.
+app.get("/api/address/pincode-lookup", async (req, res) => {
+  const pincode = String(req.query.pincode || "").trim();
+  if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+    return res.status(400).json({ error: "Invalid pincode" });
+  }
+  try {
+    const r = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+    const data = await r.json();
+    const result = Array.isArray(data) ? data[0] : null;
+    const postOffice = result?.PostOffice?.[0];
+    if (result?.Status === "Success" && postOffice) {
+      return res.json({
+        valid: true,
+        city: postOffice.District || postOffice.Block || "",
+        state: postOffice.State || "",
+      });
+    }
+    return res.json({ valid: false });
+  } catch (err) {
+    console.error("Pincode lookup failed:", err.message);
+    return res.status(502).json({ error: "Pincode lookup service unavailable" });
+  }
+});
+
 // ── Helpers for landmark-based reverse geocoding ──────
 // Straight-line distance between two lat/lng points, in meters
 function distanceMeters(lat1, lng1, lat2, lng2) {
