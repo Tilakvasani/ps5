@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const pincodeDirectory = require("india-pincode-lookup");
 const { startCleanupJobs } = require("./utils/cleanupJobs");
 
 const app = express();
@@ -242,183 +243,31 @@ app.get("/api/reviews/public", async (req, res) => {
 });
 
 
-// ── Google Maps Config Endpoint ───────────────────────
-app.get("/api/address/maps-config", (req, res) => {
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
-  res.json({ apiKey });
-});
-
-// ── Pincode → City/State Lookup (server-side proxy) ───
-// The frontend used to call api.postalpincode.in directly from the
-// browser, but that API doesn't return CORS headers reliably from all
-// networks/browsers, so the lookup would silently fail and leave
-// City/State blank. Proxying it through our own backend avoids that —
-// server-to-server requests aren't subject to CORS at all.
-app.get("/api/address/pincode-lookup", async (req, res) => {
+// ── Pincode → City/State Lookup (offline, no API key needed) ──
+// Previously this called api.postalpincode.in over the network, which was
+// unreliable (CORS/downtime). Now it's answered instantly from the
+// india-pincode-lookup package's bundled data.gov.in dataset — no external
+// request, no Google/India-Post API key required at all.
+app.get("/api/address/pincode-lookup", (req, res) => {
   const pincode = String(req.query.pincode || "").trim();
   if (!/^[1-9][0-9]{5}$/.test(pincode)) {
     return res.status(400).json({ error: "Invalid pincode" });
   }
   try {
-    const r = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
-    const data = await r.json();
-    const result = Array.isArray(data) ? data[0] : null;
-    const postOffice = result?.PostOffice?.[0];
-    if (result?.Status === "Success" && postOffice) {
+    const matches = pincodeDirectory.lookup(Number(pincode));
+    if (Array.isArray(matches) && matches.length > 0) {
+      const first = matches[0];
       return res.json({
         valid: true,
-        city: postOffice.District || postOffice.Block || "",
-        state: postOffice.State || "",
+        city: first.districtName || first.taluk || "",
+        state: first.stateName || "",
       });
     }
     return res.json({ valid: false });
   } catch (err) {
     console.error("Pincode lookup failed:", err.message);
-    return res.status(502).json({ error: "Pincode lookup service unavailable" });
+    return res.status(500).json({ error: "Pincode lookup failed" });
   }
-});
-
-// ── Helpers for landmark-based reverse geocoding ──────
-// Straight-line distance between two lat/lng points, in meters
-function distanceMeters(lat1, lng1, lat2, lng2) {
-  const R = 6371000;
-  const toRad = (d) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-// Only these Google Place types count as a recognizable "landmark" —
-// keeps us from saying "Near XYZ General Store" like a random shop.
-const NOTABLE_LANDMARK_TYPES = [
-  "movie_theater", "shopping_mall", "hospital", "hindu_temple", "church",
-  "mosque", "synagogue", "school", "university", "train_station",
-  "bus_station", "subway_station", "stadium", "tourist_attraction",
-  "park", "airport", "library", "museum", "amusement_park", "zoo",
-  "city_hall", "courthouse", "stadium",
-];
-
-// Finds the closest well-known landmark within ~700m using Places Nearby
-// Search (rankby=distance already sorts results nearest-first). Returns ""
-// if nothing notable is close enough — we never invent a fake landmark.
-async function findNearestLandmark(lat, lng, apiKey) {
-  if (!apiKey) return "";
-  try {
-    const res = await fetch(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&rankby=distance&key=${apiKey}`
-    );
-    const data = await res.json();
-    if (!data?.results?.length) return "";
-
-    for (const place of data.results) {
-      const types = place.types || [];
-      const isNotable = types.some((t) => NOTABLE_LANDMARK_TYPES.includes(t));
-      if (!isNotable) continue;
-      const pLoc = place.geometry?.location;
-      if (!pLoc) continue;
-      const dist = distanceMeters(Number(lat), Number(lng), pLoc.lat, pLoc.lng);
-      if (dist <= 700) return place.name; // results are nearest-first, so first hit wins
-    }
-  } catch (err) {
-    console.error("Server-side Places Nearby Search error:", err.message);
-  }
-  return "";
-}
-
-// ── Server-Side Reverse Geocoding Endpoint ─────────────
-app.get("/api/address/reverse-geocode", async (req, res) => {
-  const { lat, lng } = req.query;
-  if (!lat || !lng) {
-    return res.status(400).json({ error: "Latitude and longitude required" });
-  }
-
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
-  let streetArea = "";
-  let city = "";
-  let state = "";
-  let pincode = "";
-
-  // 1. Try Google Maps Geocoding API if key is available
-  if (apiKey) {
-    try {
-      const gRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`);
-      const gData = await gRes.json();
-      if (gData?.results?.length) {
-        const firstRes = gData.results[0];
-        let streetParts = [];
-
-        gData.results.forEach((resItem) => {
-          (resItem.address_components || []).forEach((c) => {
-            const types = c.types || [];
-            if (types.includes("route") || types.includes("sublocality") || types.includes("sublocality_level_1") || types.includes("sublocality_level_2") || types.includes("neighborhood")) {
-              if (!streetParts.includes(c.long_name)) {
-                streetParts.push(c.long_name);
-              }
-            }
-            if (!city && (types.includes("locality") || types.includes("administrative_area_level_2"))) {
-              city = c.long_name;
-            }
-            if (!state && types.includes("administrative_area_level_1")) {
-              state = c.long_name;
-            }
-            if (!pincode && types.includes("postal_code")) {
-              pincode = c.long_name;
-            }
-          });
-        });
-
-        if (streetParts.length === 0 && firstRes.formatted_address) {
-          let cleaned = firstRes.formatted_address.replace(/,\s*India$/i, "").replace(/,\s*Bharat$/i, "");
-          if (pincode) cleaned = cleaned.replace(new RegExp(`,\\s*${pincode}`, "g"), "");
-          if (state) cleaned = cleaned.replace(new RegExp(`,\\s*${state}`, "g"), "");
-          if (city) cleaned = cleaned.replace(new RegExp(`,\\s*${city}`, "g"), "");
-          streetParts.push(cleaned.trim());
-        }
-
-        streetArea = streetParts.join(", ");
-      }
-    } catch (gErr) {
-      console.error("Server-side Google Geocoding error:", gErr.message);
-    }
-  }
-
-  // 2. Server-side Fallback to BigDataCloud / OpenStreetMap if components are missing
-  if (!streetArea || !city) {
-    try {
-      const bdcRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
-      const bdcData = await bdcRes.json();
-      if (bdcData) {
-        if (!city) city = bdcData.city || bdcData.locality || "";
-        if (!state) state = bdcData.principalSubdivision || "";
-        if (!pincode) pincode = bdcData.postcode || "";
-        if (!streetArea) {
-          streetArea = bdcData.locality
-            ? `${bdcData.locality}${bdcData.city ? ", " + bdcData.city : ""}`
-            : (bdcData.city || "");
-        }
-      }
-    } catch (bErr) {
-      console.error("Server-side BDC Geocoding error:", bErr.message);
-    }
-  }
-
-  // 3. Find the nearest recognizable landmark (cinema, mall, hospital, etc.)
-  //    and prefix it, the way Swiggy/Zomato/Amazon do — "Near Mango Cinema, Nikol"
-  const landmarkName = await findNearestLandmark(lat, lng, apiKey);
-  const finalStreetArea = landmarkName
-    ? (streetArea ? `Near ${landmarkName}, ${streetArea}` : `Near ${landmarkName}`)
-    : streetArea;
-
-  return res.json({
-    success: true,
-    streetArea: finalStreetArea || "",
-    city: city || "",
-    state: state || "",
-    pincode: pincode || "",
-  });
 });
 
 // ── Health Check ─────────────────────────────────────
