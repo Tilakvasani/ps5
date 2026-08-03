@@ -238,10 +238,16 @@ function LoginPageInner() {
   const triggerMsg91Otp = (mobileNumber: string, onSuccessCallback: (msg91Data: any) => void) => {
     const cleanNum = mobileNumber.replace(/\D/g, "").slice(-10);
     const widgetId = process.env.NEXT_PUBLIC_MSG91_WIDGET_ID || "366863697379393934343932";
-    const tokenAuth = process.env.NEXT_PUBLIC_MSG91_TOKEN_AUTH;
+    const tokenAuth = (process.env.NEXT_PUBLIC_MSG91_TOKEN_AUTH || "").trim();
+
+    if (!tokenAuth) {
+      toast.error("MSG91 Token Auth is missing. Please set NEXT_PUBLIC_MSG91_TOKEN_AUTH in Vercel.");
+      return;
+    }
 
     const configuration: any = {
       widgetId,
+      tokenAuth,
       identifier: `91${cleanNum}`,
       exposeMethods: true,
       success: (data: any) => {
@@ -251,31 +257,35 @@ function LoginPageInner() {
       failure: (error: any) => {
         console.error("MSG91 Failure Response", error);
         if (error?.message === "AuthenticationFailure" || error?.code === "401") {
-          toast.error("MSG91 Token Auth invalid. You can enter the OTP received via SMS below.");
+          toast.error("MSG91 Token Auth invalid. Please check your MSG91 dashboard Token Auth.");
         } else {
           toast.error(error?.message || "OTP verification failed. Please try again.");
         }
       },
     };
 
-    if (tokenAuth && tokenAuth.trim()) {
-      configuration.tokenAuth = tokenAuth.trim();
-    }
-
     if (typeof window !== "undefined") {
       (window as any).configuration = configuration;
-      if ((window as any).initSendOTP) {
-        (window as any).initSendOTP(configuration);
-      } else {
-        const script = document.createElement("script");
-        script.src = "https://verify.msg91.com/otp-provider.js";
-        script.type = "text/javascript";
-        script.onload = () => {
-          if ((window as any).initSendOTP) {
-            (window as any).initSendOTP(configuration);
-          }
-        };
-        document.body.appendChild(script);
+      try {
+        if ((window as any).initSendOTP) {
+          (window as any).initSendOTP(configuration);
+        } else {
+          const script = document.createElement("script");
+          script.src = "https://verify.msg91.com/otp-provider.js";
+          script.type = "text/javascript";
+          script.onload = () => {
+            try {
+              if ((window as any).initSendOTP) {
+                (window as any).initSendOTP(configuration);
+              }
+            } catch (err: any) {
+              console.error("MSG91 initSendOTP load error:", err);
+            }
+          };
+          document.body.appendChild(script);
+        }
+      } catch (err: any) {
+        console.error("MSG91 trigger error:", err);
       }
     }
   };
