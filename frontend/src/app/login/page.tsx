@@ -86,6 +86,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
         <div className="w-full bg-white rounded-3xl shadow-2xl p-8 border border-white/10">{children}</div>
+        <div id="msg91-captcha-container" className="flex justify-center mt-4"></div>
       </div>
     </main>
   );
@@ -245,6 +246,7 @@ function LoginPageInner() {
       tokenAuth,
       identifier: `91${cleanNum}`,
       exposeMethods: true,
+      captchaRenderId: "msg91-captcha-container",
       success: (data: any) => {
         console.log("MSG91 Success Response", data);
         onSuccessCallback(data);
