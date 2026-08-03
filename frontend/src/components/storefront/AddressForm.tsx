@@ -329,8 +329,9 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         <div className="flex flex-wrap gap-2">
           {[
             { id: "society", label: "Society", icon: Building },
-            { id: "independent_house", label: "Independent House", icon: Home },
-            { id: "standalone", label: "Standalone", icon: Building2 },
+            { id: "apartment", label: "Apartment", icon: Building2 },
+            { id: "bungalow", label: "Bungalow", icon: Home },
+            { id: "commercial", label: "Commercial", icon: Briefcase },
             { id: "office", label: "Office", icon: Briefcase },
             { id: "hotel", label: "Hotel", icon: Hotel },
             { id: "others", label: "Others", icon: MoreHorizontal },
