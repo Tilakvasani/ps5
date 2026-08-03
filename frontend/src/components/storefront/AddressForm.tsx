@@ -424,17 +424,6 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         />
       </div>
 
-      {/* Save as — custom nickname for this address, e.g. "Friend's House" */}
-      <div>
-        <label className="text-xs font-bold text-slate-700 mb-1 block">Save As (Optional)</label>
-        <input
-          type="text"
-          value={formData.customLabel}
-          onChange={e => setFormData(prev => ({ ...prev, customLabel: e.target.value }))}
-          className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50"
-          placeholder={`e.g. "Friend's House"`}
-        />
-      </div>
 
       {/* City & State — auto-filled from the pincode lookup above, but
           always editable in case India Post got it wrong. */}
@@ -489,17 +478,6 @@ export default function AddressForm({ onSave, onCancel, initialData, submitText 
         />
       </div>
 
-      {/* GSTIN (Optional) */}
-      <div>
-        <label className="text-xs font-bold text-slate-700 mb-1 block">GSTIN (Optional for Tax Invoice)</label>
-        <input
-          type="text"
-          value={formData.gstin}
-          onChange={e => setFormData(prev => ({ ...prev, gstin: e.target.value.toUpperCase() }))}
-          className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--or)] bg-slate-50/50 font-mono"
-          placeholder="24ABCDE1234F1Z5"
-        />
-      </div>
 
       {/* Buttons */}
       <div className="flex gap-2 pt-2">
