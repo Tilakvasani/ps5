@@ -3,8 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const prisma = require("../utils/prisma");
 const { signAccess } = require("../utils/jwt");
-const { authUser } = require("../middleware/auth");
-const { sendSMS } = require("../utils/sms");
+const { sendWhatsAppText, sendWhatsAppOtp } = require("../utils/whatsapp");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const PASSWORD_MIN_LENGTH = 8;
@@ -32,8 +31,6 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function fail(res, status, message) {
   return res.status(status).json({ error: message });
 }
-
-const { sendWhatsAppOtp } = require("../utils/whatsapp");
 
 async function createAndSendOtp(phone, label = "verification code") {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
