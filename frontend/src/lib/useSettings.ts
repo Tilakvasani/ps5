@@ -59,11 +59,6 @@ export function invalidateSettingsCache() {
   }
 }
 
-/** Read the current in-memory/localStorage cache synchronously — use as useState initializer. */
-export function getSettingsCache(): Record<string, string> {
-  return _cache ?? {};
-}
-
 interface SiteSettings {
   // Store info
   siteName:    string;

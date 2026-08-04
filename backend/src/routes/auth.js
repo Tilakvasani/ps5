@@ -33,57 +33,43 @@ function fail(res, status, message) {
   return res.status(status).json({ error: message });
 }
 
-async function throttleOtp(phone) {
-  return false;
-}
+const { sendWhatsAppOtp } = require("../utils/whatsapp");
 
 async function createAndSendOtp(phone, label = "verification code") {
-  console.log(`\n🔑 [MSG91 OTP Triggered] For mobile: +91 ${phone} (${label})\n`);
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  await prisma.otpCode.upsert({
+    where: { phone },
+    update: { code, expiresAt },
+    create: { phone, code, expiresAt },
+  });
+
+  console.log(`🔑 [WhatsApp OTP Generated] For mobile: +91 ${phone} (${label}) — Code: ${code}`);
+  await sendWhatsAppOtp(phone, code);
+  return code;
 }
 
-/** Validates MSG91 OTP verification response or token */
-async function consumeOtp(phone, otpOrToken) {
-  if (!otpOrToken) return { ok: false, status: 400, error: "OTP or verification token is required." };
+/** Validates WhatsApp OTP code against stored database OTP */
+async function consumeOtp(phone, otpCode) {
+  if (!otpCode) return { ok: false, status: 400, error: "OTP code is required." };
 
-  const authKey = process.env.MSG91_AUTH_KEY;
-  if (!authKey) {
-    // If no MSG91_AUTH_KEY set, accept widget verification
-    console.log(`🔑 [MSG91 Direct Verification] Mobile: +91 ${phone} | Token/Code: ${otpOrToken}`);
-    return { ok: true };
+  const record = await prisma.otpCode.findUnique({ where: { phone } });
+
+  if (!record || record.code !== String(otpCode).trim()) {
+    return { ok: false, status: 400, error: "Invalid OTP verification code." };
   }
 
-  const axios = require("axios");
-  const formattedPhone = phone.replace(/\D/g, "").slice(-10);
-  // A raw 4-8 digit code is a manually-typed OTP -> verify with /otp/verify.
-  // Anything else (a JWT-ish string) is the widget's access token -> verify
-  // with /widget/verifyAccessToken. Either way we trust ONLY what MSG91
-  // actually tells us — never a blanket ok:true.
-  const isNumericOtp = /^\d{4,8}$/.test(String(otpOrToken));
-
-  try {
-    if (isNumericOtp) {
-      const res = await axios.get("https://control.msg91.com/api/v5/otp/verify", {
-        params: {
-          authkey: authKey,
-          mobile: `91${formattedPhone}`,
-          otp: otpOrToken
-        }
-      });
-      if (res?.data?.type === "success") return { ok: true };
-      return { ok: false, status: 400, error: res?.data?.message || "Invalid or expired OTP." };
-    }
-
-    const tokenRes = await axios.post("https://control.msg91.com/api/v5/widget/verifyAccessToken", {
-      authkey: authKey,
-      "access-token": otpOrToken
-    });
-    if (tokenRes?.data?.type === "success") return { ok: true };
-    return { ok: false, status: 400, error: tokenRes?.data?.message || "Invalid or expired OTP." };
-  } catch (err) {
-    console.error("MSG91 verification error:", err?.response?.data || err?.message || err);
-    return { ok: false, status: 502, error: "Could not verify OTP right now. Please try again." };
+  if (record.expiresAt < new Date()) {
+    await prisma.otpCode.delete({ where: { phone } }).catch(() => {});
+    return { ok: false, status: 400, error: "OTP verification code has expired." };
   }
+
+  // Delete used OTP code
+  await prisma.otpCode.delete({ where: { phone } }).catch(() => {});
+  return { ok: true };
 }
+
 
 
 function signShortToken(payload, scope, expiresIn) {
@@ -118,10 +104,6 @@ router.post("/identify", async (req, res) => {
   try {
     const phone = cleanPhone(req.body.phone);
     if (phone.length !== 10) return fail(res, 400, "Please enter a valid 10-digit mobile number");
-
-    if (await throttleOtp(phone)) {
-      return fail(res, 429, "Too many requests for this number. Try again in an hour.");
-    }
 
     const admin = await prisma.admin.findFirst({ where: { number: { contains: phone } } });
     if (admin && admin.isActive) {
@@ -161,9 +143,6 @@ router.post("/login", async (req, res) => {
 
     if (admin && admin.isActive && admin.number) {
       const adminPhone = cleanPhone(admin.number);
-      if (await throttleOtp(adminPhone)) {
-        return fail(res, 429, "Too many requests. Try again in an hour.");
-      }
       await createAndSendOtp(adminPhone, "access code");
       return res.json({ step: "admin-otp-required", phone: adminPhone });
     }
@@ -326,10 +305,6 @@ router.post("/forgot-password-request", async (req, res) => {
   try {
     const phone = cleanPhone(req.body.phone);
     if (phone.length !== 10) return fail(res, 400, "Please enter a valid 10-digit mobile number");
-
-    if (await throttleOtp(phone)) {
-      return fail(res, 429, "Too many requests for this number. Try again in an hour.");
-    }
 
     const user = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
     // Always respond identically whether or not the number is registered,

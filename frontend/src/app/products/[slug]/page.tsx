@@ -16,15 +16,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CertLogo } from "@/components/storefront/CertLogos";
-import { cldOptimize } from "@/lib/utils";
-
-/* ── Simple HTML sanitizer (strips script/iframe tags) ── */
-function sanitizeHtml(html: string): string {
-  return html.replace(/<script[\s\S]*?<\/script>/gi, "")
-             .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
-             .replace(/on\w+="[^"]*"/gi, "")
-             .replace(/on\w+='[^']*'/gi, "");
-}
+import { cldOptimize, sanitizeHtml } from "@/lib/utils";
 
 /* ── Dark navy/orange palette ── */
 const C = {

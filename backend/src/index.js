@@ -149,6 +149,7 @@ app.use("/api/admin/auth/login", adminAuthLimiter);
 
 // ── Routes ───────────────────────────────────────────
 app.use("/api/auth",       require("./routes/auth"));
+app.use("/api/webhooks",   require("./routes/webhooks"));
 app.use("/api/products",   require("./routes/products"));
 app.use("/api/categories", require("./routes/categories"));
 app.use("/api/orders",     require("./routes/orders"));
@@ -157,6 +158,7 @@ app.use("/api/invoices",   require("./routes/invoices"));
 app.use("/api/account",    require("./routes/account"));
 app.use("/api/cart",       require("./routes/cart"));
 app.use("/api/admin",      require("./routes/admin"));
+
 
 // Any admin route that doesn't match a known endpoint (or fails auth
 // inside authAdmin) should look identical to a route that doesn't
@@ -468,15 +470,6 @@ app.listen(PORT, async () => {
       { key: "science_cta_subtext", value: "Premium ingredients. Certified quality. Unbeatable absorption. Your wellness upgrade starts here.", group: "science" },
       { key: "science_cta_btn", value: "Shop Zupwell →", group: "science" },
 
-      // Contact Page Settings
-      { key: "contact_hero_badge", value: "Contact Us", group: "contact" },
-      { key: "contact_hero_title", value: "Got Questions?\nWe've Got Answers!", group: "contact" },
-      { key: "contact_hero_subtext", value: "Reach out to us anytime — we're always happy to help.", group: "contact" },
-      { key: "contact_form_badge", value: "Grow with Zupwell", group: "contact" },
-      { key: "contact_form_title", value: "Distributor Inquiry", group: "contact" },
-      { key: "contact_form_subtext", value: "Interested in partnering with us? Fill in your details and let's do business!", group: "contact" },
-      { key: "contact_form_footer", value: "We typically respond within 24 hours on business days.", group: "contact" },
-
       // FAQs Page Settings
       { key: "faqs_hero_badge", value: "FAQs", group: "faqs" },
       { key: "faqs_hero_title", value: "Got Questions?", group: "faqs" },
@@ -492,8 +485,6 @@ app.listen(PORT, async () => {
       { key: "about_why_subtitle", value: "Three reasons our customers never look back", group: "about" },
       { key: "about_future_title", value: "The Future of Zupwell", group: "about" },
       { key: "about_cta_title", value: "Ready to fuel your hustle?", group: "about" },
-      { key: "about_punchline",         value: "We don't just sell supplements; we fuel your hustle.", group: "about" },
-      { key: "about_description",       value: "Zupwell was born with the aim of maintaining health and strength in the modern lifestyle. We create health supplements that are easy to take and effective through the fusion of science and taste. Quality is our mantra.", group: "about" },
       { key: "about_why_special_json", value: "[{\"title\":\"Scientific Formula\",\"desc\":\"A fusion of science and taste.\"},{\"title\":\"Less Sugar\",\"desc\":\"There is sweetness, but no guilt.\"},{\"title\":\"Instant Absorption\",\"desc\":\"Rocket-like speed, instant action.\"},{\"title\":\"Pocket Friendly\",\"desc\":\"It even fits in your jeans pocket.\"},{\"title\":\"Best Flavour\",\"desc\":\"Absolutely fresh, as if straight from the garden.\"}]", group: "about" },
       { key: "about_pillars_json", value: "[{\"title\":\"Daily Wellness Support\",\"desc\":\"Helps support hydration, immunity, and overall well-being so you can perform at your best every day.\"},{\"title\":\"Fast Performance\",\"desc\":\"Quick-dissolving, fast-absorbing formula built for modern, active lifestyles.\"},{\"title\":\"Science-Backed Formula\",\"desc\":\"Powered by clinically researched ingredients for trusted daily nutrition.\"},{\"title\":\"Clean & Pure\",\"desc\":\"No unnecessary fillers or artificial junk—only quality ingredients your body needs.\"}]", group: "about" },
       { key: "about_future_pipeline_json", value: "[\"Daily multivitamins & immune boosters\",\"Energy and focus formulations\",\"Specialized recovery blends\"]", group: "about" },
@@ -575,18 +566,3 @@ app.listen(PORT, async () => {
   // Start background cleanup — auto-cancels stale pending Razorpay orders
   startCleanupJobs();
 });
-
-// One-time fix: update shipping settings that were seeded as 0
-(async () => {
-  try {
-    const prisma = require("./utils/prisma");
-    const threshold = await prisma.setting.findUnique({ where: { key: "free_shipping_threshold" } });
-    if (threshold && (threshold.value === "0" || threshold.value === "")) {
-      await prisma.setting.update({ where: { key: "free_shipping_threshold" }, data: { value: "500" } });
-    }
-    const charge = await prisma.setting.findUnique({ where: { key: "default_shipping_charge" } });
-    if (charge && (charge.value === "0" || charge.value === "")) {
-      await prisma.setting.update({ where: { key: "default_shipping_charge" }, data: { value: "50" } });
-    }
-  } catch {}
-})();

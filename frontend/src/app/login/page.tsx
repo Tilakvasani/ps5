@@ -13,6 +13,31 @@ type Tab = "login" | "register";
 type LoginStep = "credentials" | "adminOtp" | "adminCreds" | "forgotPhone" | "forgotReset";
 type RegisterStep = "phone" | "otp" | "details" | "setPassword";
 
+// ── Shared constants & helpers ──────────────────────────────────────────────
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const PASSWORD_MIN_LENGTH = 8;
+
+/** Strip non-digits and return last 10 digits of a phone number */
+function cleanPhoneNumber(raw: string): string {
+  return raw.replace(/\D/g, "").slice(-10);
+}
+
+/** Reusable 6-digit OTP input field */
+function OtpInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 6))}
+      required
+      placeholder="Enter 6-digit OTP"
+      autoFocus
+      autoComplete="one-time-code"
+      className="w-full tracking-[8px] text-center border-2 border-indigo-600/80 rounded-2xl py-3.5 text-xl font-bold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-300 placeholder:tracking-normal"
+    />
+  );
+}
+
 export default function LoginPage() {
   return (
     <Suspense
@@ -160,19 +185,18 @@ function LoginPageInner() {
     }
 
     if (cleanIdentifier.includes("@")) {
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(cleanIdentifier)) {
+      if (!EMAIL_REGEX.test(cleanIdentifier)) {
         return toast.error("Please enter a valid email address (e.g. name@domain.com)");
       }
     } else {
-      const cleanPhone = cleanIdentifier.replace(/\D/g, "").slice(-10);
+      const cleanPhone = cleanPhoneNumber(cleanIdentifier);
       if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
         return toast.error("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9");
       }
     }
 
-    if (password.length < 6) {
-      return toast.error("Password must be at least 6 characters long");
+    if (password.length < PASSWORD_MIN_LENGTH) {
+      return toast.error(`Password must be at least ${PASSWORD_MIN_LENGTH} characters long`);
     }
 
     setLoading(true);
@@ -219,7 +243,7 @@ function LoginPageInner() {
   const handleAdminCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanEmail = email.trim();
-    if (!cleanEmail || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(cleanEmail)) {
+    if (!cleanEmail || !EMAIL_REGEX.test(cleanEmail)) {
       return toast.error("Please enter a valid admin email address");
     }
     if (!password) {
@@ -236,81 +260,10 @@ function LoginPageInner() {
     }
   };
 
-  // ── MSG91 OTP: load script once, use exposed methods ──────────────
-  const msg91Ready = useRef(false);
-  const msg91SuccessCb = useRef<((data: any) => void) | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || msg91Ready.current) return;
-
-    const widgetId = process.env.NEXT_PUBLIC_MSG91_WIDGET_ID || "366863697379393934343932";
-    const tokenAuth = (process.env.NEXT_PUBLIC_MSG91_TOKEN_AUTH || "556895TdKKE2YUKQGb6a705e43P1").trim();
-
-    const configuration: any = {
-      widgetId,
-      tokenAuth,
-      exposeMethods: true,
-      captchaRenderId: "msg91-captcha-container",
-      success: (data: any) => {
-        console.log("MSG91 Success Response", data);
-        if (msg91SuccessCb.current) {
-          msg91SuccessCb.current(data);
-          msg91SuccessCb.current = null;
-        }
-      },
-      failure: (error: any) => {
-        console.error("MSG91 Failure Response", error);
-        toast.error(error?.message || "OTP verification failed. Please try again.");
-      },
-    };
-
-    (window as any).configuration = configuration;
-    const script = document.createElement("script");
-    script.src = "https://verify.msg91.com/otp-provider.js";
-    script.type = "text/javascript";
-    script.onload = () => {
-      try {
-        if ((window as any).initSendOTP) {
-          (window as any).initSendOTP(configuration);
-          msg91Ready.current = true;
-          console.log("MSG91 widget initialized successfully");
-        }
-      } catch (err) {
-        console.error("MSG91 init error:", err);
-      }
-    };
-    document.body.appendChild(script);
-  }, []);
-
-  const triggerMsg91Otp = (mobileNumber: string, onSuccessCallback: (msg91Data: any) => void) => {
-    const cleanNum = mobileNumber.replace(/\D/g, "").slice(-10);
-    const identifier = `91${cleanNum}`;
-
-    // Store callback ref for when MSG91 fires success
-    msg91SuccessCb.current = onSuccessCallback;
-
-    if ((window as any).sendOtp) {
-      (window as any).sendOtp(
-        identifier,
-        (data: any) => {
-          console.log("OTP sent successfully", data);
-          toast.success("OTP sent to your mobile number!");
-        },
-        (error: any) => {
-          console.error("SendOTP error:", error);
-          toast.error(error?.message || "Failed to send OTP. Please try again.");
-        }
-      );
-    } else {
-      console.error("MSG91 sendOtp method not available yet");
-      toast.error("OTP service is loading, please try again in a moment.");
-    }
-  };
-
   // ── LOGIN TAB: forgot password (OTP-based) ─────────────────────────
   const handleForgotRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    const cleanPhone = cleanPhoneNumber(phone);
     if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       return toast.error("Please enter a valid 10-digit Indian mobile number");
     }
@@ -318,11 +271,7 @@ function LoginPageInner() {
     try {
       await authApi.forgotPasswordRequest(cleanPhone);
       setLoginStep("forgotReset");
-      triggerMsg91Otp(cleanPhone, (msg91Data) => {
-        const verifiedToken = msg91Data?.jwt || msg91Data?.access_token || msg91Data?.reqNo || "msg91_verified";
-        setOtp(verifiedToken);
-        toast.success("OTP verified! Now enter your new password.");
-      });
+      toast.success("Verification code sent to your WhatsApp number!");
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {
@@ -338,7 +287,7 @@ function LoginPageInner() {
     if (password !== confirmPassword) {
       return toast.error("Passwords do not match");
     }
-    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    const cleanPhone = cleanPhoneNumber(phone);
     setLoading(true);
     try {
       const data = await authApi.forgotPasswordVerify({ phone: cleanPhone, otp, password, confirmPassword });
@@ -353,7 +302,7 @@ function LoginPageInner() {
   // ── REGISTER TAB: phone -> OTP -> details ─────────────────────────
   const handleRegisterPhone = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    const cleanPhone = cleanPhoneNumber(phone);
     if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       return toast.error("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9");
     }
@@ -369,26 +318,7 @@ function LoginPageInner() {
         switchTab("login");
       } else {
         setRegisterStep("otp");
-        triggerMsg91Otp(cleanPhone, async (msg91Data) => {
-          const verifiedToken = msg91Data?.jwt || msg91Data?.access_token || msg91Data?.reqNo || "msg91_verified";
-          setOtp(verifiedToken);
-          try {
-            const verifyRes = await authApi.verifyIdentifyOtp(cleanPhone, verifiedToken);
-            if (verifyRes.step === "register") {
-              setSetupToken(verifyRes.setupToken);
-              setRegisterStep("details");
-              toast.success("Phone verified! Enter your details.");
-            } else if (verifyRes.step === "set-password") {
-              setSetupToken(verifyRes.setupToken);
-              setRegisterStep("setPassword");
-              toast.success("Verified! Please set a password for your account.");
-            } else if (verifyRes.step === "logged-in") {
-              finishUserLogin(verifyRes);
-            }
-          } catch (err: any) {
-            toast.error(err.message || "OTP verification failed");
-          }
-        });
+        toast.success("Verification code sent to your WhatsApp!");
       }
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
@@ -397,13 +327,14 @@ function LoginPageInner() {
     }
   };
 
+
   const handleRegisterOtpVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.length < 4) {
       toast.error("Please enter the OTP");
       return;
     }
-    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    const cleanPhone = cleanPhoneNumber(phone);
     setLoading(true);
     try {
       const res = await authApi.verifyIdentifyOtp(cleanPhone, otp);
@@ -441,8 +372,7 @@ function LoginPageInner() {
 
     const cleanEmail = email.trim();
     if (cleanEmail) {
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(cleanEmail)) {
+      if (!EMAIL_REGEX.test(cleanEmail)) {
         return toast.error("Please enter a valid email address (e.g. name@domain.com)");
       }
     }
@@ -551,16 +481,7 @@ function LoginPageInner() {
             <h3 className="text-xl font-bold text-gray-900 mb-1">Verify OTP</h3>
             <p className="text-sm text-gray-500 mb-6">A verification code has been sent to the registered number</p>
             <form onSubmit={handleAdminOtpVerify} className="space-y-4">
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                required
-                placeholder="Enter 6-digit OTP"
-                autoFocus
-                autoComplete="one-time-code"
-                className="w-full tracking-[8px] text-center border-2 border-indigo-600/80 rounded-2xl py-3.5 text-xl font-bold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-300 placeholder:tracking-normal"
-              />
+              <OtpInput value={otp} onChange={setOtp} />
               <button type="submit" disabled={loading || otp.length < 4} className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer">
                 {loading ? "Verifying..." : "Verify & Proceed"}
               </button>
@@ -625,16 +546,7 @@ function LoginPageInner() {
               </p>
             </div>
             <form onSubmit={handleForgotReset} className="space-y-3.5">
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                required
-                placeholder="Enter 6-digit OTP"
-                autoFocus
-                autoComplete="one-time-code"
-                className="w-full tracking-[8px] text-center border-2 border-indigo-600/80 rounded-2xl py-3.5 text-xl font-bold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-300 placeholder:tracking-normal"
-              />
+              <OtpInput value={otp} onChange={setOtp} />
               <PasswordInput value={password} onChange={setPassword} placeholder="New password (min 8 chars)" autoComplete="new-password" />
               <PasswordInput value={confirmPassword} onChange={setConfirmPassword} placeholder="Confirm new password" autoComplete="new-password" />
               <button type="submit" disabled={loading || otp.length < 4} className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer">
@@ -704,16 +616,7 @@ function LoginPageInner() {
               We have sent a verification code to <span className="font-semibold text-gray-800">+91 {phone}</span>
             </p>
             <form onSubmit={handleRegisterOtpVerify} className="space-y-4">
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                required
-                placeholder="Enter 6-digit OTP"
-                autoFocus
-                autoComplete="one-time-code"
-                className="w-full tracking-[8px] text-center border-2 border-indigo-600/80 rounded-2xl py-3.5 text-xl font-bold text-gray-800 focus:outline-none focus:ring-4 focus:ring-indigo-100 bg-white placeholder:text-gray-300 placeholder:tracking-normal mb-1"
-              />
+              <OtpInput value={otp} onChange={setOtp} />
               <button type="submit" disabled={loading || otp.length < 4} className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer mt-2">
                 {loading ? "Verifying..." : "Verify & Proceed"}
               </button>

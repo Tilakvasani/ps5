@@ -5,8 +5,7 @@ const prisma = require("../utils/prisma");
 const { signAccess } = require("../utils/jwt");
 const { authAdmin, requireRole } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
-const { sanitizeBody, validatePagination, validateProductBody, validateOrderStatus, validateIdParam, VALID_ORDER_STATUSES } = require("../middleware/validate");
-const { sendSMS } = require("../utils/sms");
+const { sendWhatsAppText } = require("../utils/whatsapp");
 const jwt = require("jsonwebtoken");
 
 function cleanPhone(phone) {
@@ -133,11 +132,11 @@ router.post("/auth/login", async (req, res) => {
       data: { lastLoginAt: new Date(), failedLoginAttempts: 0, lockedUntil: null }
     });
 
-    // Send SMS Notification Alert
+    // Send WhatsApp Notification Alert
     if (admin.number) {
       const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-      sendSMS(admin.number, `Zupwell alert: Successful login to admin panel detected at ${timestamp}.`).catch(err => {
-        console.error("⚠️ Failed to send admin login SMS notification:", err.message);
+      sendWhatsAppText(admin.number, `Zupwell alert: Successful login to admin panel detected at ${timestamp}.`).catch(err => {
+        console.error("⚠️ Failed to send admin login WhatsApp notification:", err.message);
       });
     }
 

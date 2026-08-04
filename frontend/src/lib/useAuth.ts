@@ -2,16 +2,12 @@
  * useAuth.ts — Shared Auth Hook
  * ==============================
  * Single source of truth for auth actions used across the app.
- * 
- * Previously duplicated in:
- *   - components/storefront/Navbar.tsx
- *   - app/account/page.tsx
- *   - app/admin/layout.tsx (admin version)
  */
 "use client";
 import { useRouter } from "next/navigation";
 import { useStore } from "./store";
 import { authApi } from "./api";
+import { clearAdminAuthCookie } from "./auth-cookie";
 
 // ── Storefront Auth ───────────────────────────────────────────────────────────
 
@@ -32,8 +28,6 @@ export function useLogout() {
 
 // ── Admin Auth ────────────────────────────────────────────────────────────────
 
-import { clearAdminAuthCookie } from "./auth-cookie";
-
 /**
  * useAdminLogout — handles admin logout.
  * Clears localStorage admin token, redirects to the single unified login page.
@@ -43,23 +37,10 @@ export function useAdminLogout() {
 
   return () => {
     localStorage.removeItem("zupwell-admin");
-    try {
-      clearAdminAuthCookie();
-    } catch (e) {}
-    router.push("/login");
   };
 }
 
 // ── Token Helpers ─────────────────────────────────────────────────────────────
-
-/** Get current user token from Zustand store (localStorage) */
-export function getUserToken(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem("zupwell-store");
-    return raw ? JSON.parse(raw)?.state?.token ?? null : null;
-  } catch { return null; }
-}
 
 /** Get current admin token from localStorage */
 export function getAdminToken(): string | null {
@@ -69,3 +50,5 @@ export function getAdminToken(): string | null {
     return raw ? JSON.parse(raw)?.token ?? null : null;
   } catch { return null; }
 }
+
+
