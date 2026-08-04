@@ -107,6 +107,11 @@ async function sendWhatsAppTemplate(to, templateName = "hello_world", languageCo
  * Tries template message if WHATSAPP_OTP_TEMPLATE is configured, otherwise sends direct text message.
  */
 async function sendWhatsAppOtp(to, otpCode) {
+  const recipient = cleanPhoneNumber(to);
+  console.log(`\n=======================================================`);
+  console.log(`🔑 [RENDER SERVER LOG] OTP FOR +${recipient}: ===> ${otpCode} <===`);
+  console.log(`=======================================================\n`);
+
   const templateName = process.env.WHATSAPP_OTP_TEMPLATE;
   const body = `Your Zupwell verification code is: ${otpCode}. Valid for 10 minutes. Do not share this code with anyone.`;
 
