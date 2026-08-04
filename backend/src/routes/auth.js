@@ -37,10 +37,12 @@ async function createAndSendOtp(phone, label = "verification code") {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-  await prisma.otpCode.upsert({
-    where: { phone },
-    update: { code, expiresAt },
-    create: { phone, code, expiresAt },
+  // Remove existing OTPs for this phone number
+  await prisma.otpCode.deleteMany({ where: { phone } });
+
+  // Store new OTP code
+  await prisma.otpCode.create({
+    data: { phone, codeHash: code, expiresAt },
   });
 
   console.log(`🔑 [WhatsApp OTP Generated] For mobile: +91 ${phone} (${label}) — Code: ${code}`);
@@ -52,21 +54,25 @@ async function createAndSendOtp(phone, label = "verification code") {
 async function consumeOtp(phone, otpCode) {
   if (!otpCode) return { ok: false, status: 400, error: "OTP code is required." };
 
-  const record = await prisma.otpCode.findUnique({ where: { phone } });
+  const record = await prisma.otpCode.findFirst({
+    where: { phone },
+    orderBy: { createdAt: "desc" },
+  });
 
-  if (!record || record.code !== String(otpCode).trim()) {
+  if (!record || record.codeHash !== String(otpCode).trim()) {
     return { ok: false, status: 400, error: "Invalid OTP verification code." };
   }
 
   if (record.expiresAt < new Date()) {
-    await prisma.otpCode.delete({ where: { phone } }).catch(() => {});
+    await prisma.otpCode.deleteMany({ where: { phone } }).catch(() => {});
     return { ok: false, status: 400, error: "OTP verification code has expired." };
   }
 
-  // Delete used OTP code
-  await prisma.otpCode.delete({ where: { phone } }).catch(() => {});
+  // Delete used OTP code(s)
+  await prisma.otpCode.deleteMany({ where: { phone } }).catch(() => {});
   return { ok: true };
 }
+
 
 
 
