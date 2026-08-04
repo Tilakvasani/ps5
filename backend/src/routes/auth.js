@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const prisma = require("../utils/prisma");
 const { signAccess } = require("../utils/jwt");
+const { authUser } = require("../middleware/auth");
 const { sendWhatsAppText, sendWhatsAppOtp } = require("../utils/whatsapp");
 
 const JWT_SECRET = process.env.JWT_SECRET;
