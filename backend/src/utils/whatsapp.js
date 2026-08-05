@@ -115,18 +115,12 @@ async function sendWhatsAppOtp(to, otpCode) {
   console.log(`=======================================================\n`);
 
   const templateName = process.env.WHATSAPP_OTP_TEMPLATE;
-  const body = `Your Zupwell verification code is: ${otpCode}. Valid for 10 minutes. Do not share this code with anyone.`;
+  const body = `🔒 Your Zupwell verification code is: ${otpCode}\n\nValid for 10 minutes. Do not share this code with anyone.`;
 
   if (templateName) {
     const components = [
       {
         type: "body",
-        parameters: [{ type: "text", text: String(otpCode) }],
-      },
-      {
-        type: "button",
-        sub_type: "url",
-        index: "0",
         parameters: [{ type: "text", text: String(otpCode) }],
       },
     ];
@@ -136,16 +130,7 @@ async function sendWhatsAppOtp(to, otpCode) {
     } catch {}
   }
 
-  // Meta Cloud API requires an initial template message (like jaspers_market_plain_text_v1 or hello_world)
-  // to open the conversation window before freeform text messages can be delivered.
-  try {
-    await sendWhatsAppTemplate(to, "jaspers_market_plain_text_v1", "en_US");
-  } catch {}
-  try {
-    await sendWhatsAppTemplate(to, "hello_world", "en_US");
-  } catch {}
-
-  // Follow up with direct text message
+  // Send direct OTP text message into open WhatsApp conversation window
   return await sendWhatsAppText(to, body);
 }
 
