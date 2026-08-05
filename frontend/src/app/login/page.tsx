@@ -608,21 +608,23 @@ function LoginPageInner() {
 
         {tab === "register" && registerStep === "otp" && (
           <motion.div key="regOtp" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="text-center">
-            <div className="inline-flex p-3 bg-indigo-50 rounded-2xl mb-4 text-indigo-600">
-              <ShieldCheck size={28} />
+            <div className="inline-flex p-3.5 bg-emerald-50 text-emerald-600 rounded-2xl mb-3 shadow-sm border border-emerald-100">
+              <svg className="w-7 h-7 fill-current" viewBox="0 0 24 24">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.705 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-1.149 4.197 4.292-1.059z" />
+              </svg>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-1">Verify OTP</h3>
-            <p className="text-sm text-gray-500 mb-6">
-              We have sent a verification code to <span className="font-semibold text-gray-800">+91 {phone}</span>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">Verify WhatsApp OTP</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              A 6-digit verification code was sent to your WhatsApp at <span className="font-bold text-gray-900">+91 {phone}</span>
             </p>
             <form onSubmit={handleRegisterOtpVerify} className="space-y-4">
               <OtpInput value={otp} onChange={setOtp} />
-              <button type="submit" disabled={loading || otp.length < 4} className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer mt-2">
+              <button type="submit" disabled={loading || otp.length < 4} className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold py-3.5 rounded-2xl transition-all cursor-pointer mt-2 shadow-sm">
                 {loading ? "Verifying..." : "Verify & Proceed"}
               </button>
               <div className="flex items-center justify-between text-xs font-semibold pt-4">
                 <button type="button" onClick={() => setRegisterStep("phone")} className="text-gray-500 hover:text-indigo-600">Change Number</button>
-                <button type="button" onClick={() => handleRegisterPhone()} className="text-indigo-600 hover:text-indigo-700">Resend OTP</button>
+                <button type="button" onClick={() => handleRegisterPhone()} className="text-emerald-600 hover:text-emerald-700">Resend WhatsApp OTP</button>
               </div>
             </form>
           </motion.div>
