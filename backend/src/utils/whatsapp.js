@@ -131,13 +131,18 @@ async function sendWhatsAppOtp(to, otpCode) {
       },
     ];
     try {
-      return await sendWhatsAppTemplate(to, templateName, "en", components);
-    } catch {
-      // Fallback to text message
-      return await sendWhatsAppText(to, body);
-    }
+      const templateRes = await sendWhatsAppTemplate(to, templateName, "en", components);
+      if (templateRes?.status !== "failed") return templateRes;
+    } catch {}
   }
 
+  // Meta Cloud API requires an initial template message (like hello_world)
+  // to open the conversation window before freeform text messages can be delivered.
+  try {
+    await sendWhatsAppTemplate(to, "hello_world", "en_US");
+  } catch {}
+
+  // Follow up with direct text message
   return await sendWhatsAppText(to, body);
 }
 
