@@ -8,19 +8,15 @@ import { authApi, adminApi } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import { setAuthCookie, setAdminAuthCookie } from "@/lib/auth-cookie";
 import toast from "react-hot-toast";
+import { EMAIL_REGEX, cleanPhoneNumber } from "@/lib/utils";
 
 type Tab = "login" | "register";
 type LoginStep = "credentials" | "adminOtp" | "adminCreds" | "forgotPhone" | "forgotReset";
 type RegisterStep = "phone" | "otp" | "details" | "setPassword";
 
-// ── Shared constants & helpers ──────────────────────────────────────────────
-const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PASSWORD_MIN_LENGTH = 8;
 
-/** Strip non-digits and return last 10 digits of a phone number */
-function cleanPhoneNumber(raw: string): string {
-  return raw.replace(/\D/g, "").slice(-10);
-}
+
 
 /** Reusable 6-digit OTP input field */
 function OtpInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {

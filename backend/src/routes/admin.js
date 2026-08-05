@@ -9,9 +9,8 @@ const { sanitizeBody, validatePagination, validateProductBody, validateOrderStat
 const { sendWhatsAppText } = require("../utils/whatsapp");
 const jwt = require("jsonwebtoken");
 
-function cleanPhone(phone) {
-  return String(phone || "").replace(/\D/g, "").slice(-10);
-}
+const { cleanPhone } = require("../utils/phone");
+
 
 // ── Admin Auth ────────────────────────────────────────
 // NOTE: the phone-number gate for admin login issues a short-lived token

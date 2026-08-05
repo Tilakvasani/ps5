@@ -9,11 +9,8 @@ const { sendWhatsAppText, sendWhatsAppOtp } = require("../utils/whatsapp");
 const JWT_SECRET = process.env.JWT_SECRET;
 const PASSWORD_MIN_LENGTH = 8;
 
-// ── Helpers ──────────────────────────────────────────────────────────
+const { cleanPhone } = require("../utils/phone");
 
-function cleanPhone(phone) {
-  return String(phone || "").replace(/\D/g, "").slice(-10);
-}
 
 function isEmailLike(identifier) {
   return typeof identifier === "string" && identifier.includes("@");

@@ -7,13 +7,8 @@ const axios = require("axios");
  * API Endpoint: https://graph.facebook.com/v23.0/<PHONE_NUMBER_ID>/messages
  */
 
-function cleanPhoneNumber(phone) {
-  let cleaned = String(phone || "").replace(/\D/g, "");
-  if (cleaned.length === 10) {
-    cleaned = `91${cleaned}`;
-  }
-  return cleaned;
-}
+const { cleanPhone: cleanPhoneNumber } = require("./phone");
+
 
 /**
  * sendWhatsAppText

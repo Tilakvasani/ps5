@@ -68,3 +68,19 @@ export function sanitizeHtml(dirty: string): string {
 
   return div.innerHTML;
 }
+
+// ── Shared Validation & Formatting Helpers ────────────────────────────────────
+
+export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+/** Strip non-digits and return last 10 digits of a phone number */
+export function cleanPhoneNumber(raw: string): string {
+  return (raw || "").replace(/\D/g, "").slice(-10);
+}
+
+/** Validate 10-digit Indian mobile number */
+export function isValidIndianMobile(phone: string): boolean {
+  const cleaned = cleanPhoneNumber(phone);
+  return /^[6-9]\d{9}$/.test(cleaned) && !/^(\d)\1{9}$/.test(cleaned) && cleaned !== "1234567890";
+}
+
