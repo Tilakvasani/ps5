@@ -136,8 +136,11 @@ async function sendWhatsAppOtp(to, otpCode) {
     } catch {}
   }
 
-  // Meta Cloud API requires an initial template message (like hello_world)
+  // Meta Cloud API requires an initial template message (like jaspers_market_plain_text_v1 or hello_world)
   // to open the conversation window before freeform text messages can be delivered.
+  try {
+    await sendWhatsAppTemplate(to, "jaspers_market_plain_text_v1", "en_US");
+  } catch {}
   try {
     await sendWhatsAppTemplate(to, "hello_world", "en_US");
   } catch {}
