@@ -102,8 +102,9 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   const referer = req.headers.referer;
   const isApiRoute = req.path.startsWith("/api/");
+  const isWebhookRoute = req.path.startsWith("/api/webhooks");
   const isHealthCheck = req.path === "/health";
-  if (isApiRoute && !isHealthCheck && !origin && !referer) {
+  if (isApiRoute && !isHealthCheck && !isWebhookRoute && !origin && !referer) {
     return res.status(403).json({ error: "Access denied" });
   }
   next();
