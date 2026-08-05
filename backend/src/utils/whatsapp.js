@@ -51,8 +51,9 @@ async function sendWhatsAppText(to, textBody) {
     console.log(`✅ [WhatsApp Cloud API] Text message sent to +${recipient} | ID: ${response.data?.messages?.[0]?.id}`);
     return response.data;
   } catch (error) {
-    console.error("❌ [WhatsApp Cloud API Error]:", error?.response?.data || error.message);
-    throw new Error(error?.response?.data?.error?.message || "Failed to send WhatsApp message");
+    const errMsg = error?.response?.data?.error?.message || error.message || "Failed to send WhatsApp message";
+    console.error("⚠️ [WhatsApp Cloud API Error]:", errMsg);
+    return { status: "failed", error: errMsg };
   }
 }
 
@@ -96,8 +97,9 @@ async function sendWhatsAppTemplate(to, templateName = "hello_world", languageCo
     console.log(`✅ [WhatsApp Cloud API] Template '${templateName}' sent to +${recipient} | ID: ${response.data?.messages?.[0]?.id}`);
     return response.data;
   } catch (error) {
-    console.error("❌ [WhatsApp Template Error]:", error?.response?.data || error.message);
-    throw new Error(error?.response?.data?.error?.message || "Failed to send WhatsApp template");
+    const errMsg = error?.response?.data?.error?.message || error.message || "Failed to send WhatsApp template";
+    console.error("⚠️ [WhatsApp Template Error]:", errMsg);
+    return { status: "failed", error: errMsg };
   }
 }
 
