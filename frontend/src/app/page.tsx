@@ -298,7 +298,7 @@ export default function HomePage() {
     [s(settings, "hero_stat1_value"), s(settings, "hero_stat1_label")],
     [s(settings, "hero_stat2_value"), s(settings, "hero_stat2_label")],
     [s(settings, "hero_stat3_value"), s(settings, "hero_stat3_label")],
-  ];
+  ].filter(([val, label]) => val && label && !label.toLowerCase().includes("authentic"));
 
   const certEntries = [
     { key: "cert_fssai_logo", label: "FSSAI" },

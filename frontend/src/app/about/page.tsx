@@ -163,13 +163,12 @@ export default function AboutPage() {
             </p>
           </motion.div>
           {/* Visual block */}
-          <motion.div {...fadeUp(0.1)} className="grid grid-cols-2 gap-4">
+          <motion.div {...fadeUp(0.1)} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { val: s(settings, "hero_stat1_value") || "200+", label: s(settings, "hero_stat1_label") || "Product" },
               { val: s(settings, "hero_stat2_value") || "50K+", label: s(settings, "hero_stat2_label") || "Customers" },
-              { val: s(settings, "hero_stat3_value") || "100%", label: s(settings, "hero_stat3_label") || "Authentic" },
-              { val: "5-7",  label: "Days Delivery" },
-            ].map(({ val, label }) => (
+              { val: s(settings, "hero_stat3_value") || "5-7",  label: s(settings, "hero_stat3_label") || "Days Delivery" },
+            ].filter(item => item.label && !item.label.toLowerCase().includes("authentic")).map(({ val, label }) => (
               <div key={label} className="card text-center py-8" style={{ background: "#FFFFFF", border: "1.5px solid rgba(12, 30, 57, 0.08)" }}>
                 <p className="text-3xl font-black gradient-text">{val}</p>
                 <p className="text-sm mt-1" style={{ color: "#4A5568", opacity: 0.75 }}>{label}</p>
