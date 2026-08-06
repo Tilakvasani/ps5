@@ -125,6 +125,12 @@ async function sendWhatsAppOtp(to, otpCode) {
     } catch {}
   }
 
+  // Meta Cloud API requires sending a template message (like hello_world) to open/renew
+  // the 24-hour contact window before freeform text messages can be delivered.
+  try {
+    await sendWhatsAppTemplate(to, "hello_world", "en_US");
+  } catch {}
+
   // Send direct OTP text message into open WhatsApp conversation window
   return await sendWhatsAppText(to, body);
 }
