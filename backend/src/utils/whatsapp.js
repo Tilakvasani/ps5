@@ -7,7 +7,8 @@ const axios = require("axios");
  * API Endpoint: https://graph.facebook.com/v23.0/<PHONE_NUMBER_ID>/messages
  */
 
-const { cleanPhone: cleanPhoneNumber } = require("./phone");
+const { formatWhatsAppNumber: cleanPhoneNumber } = require("./phone");
+
 
 
 /**
