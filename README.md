@@ -29,6 +29,8 @@ Full-stack e-commerce platform for Zupwell, Ahmedabad. Built with Next.js 14 + E
 
 ### 1. Database Setup
 
+
+
 ```bash
 # Create PostgreSQL database
 psql -U postgres
