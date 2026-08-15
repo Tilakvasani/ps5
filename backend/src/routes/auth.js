@@ -1,77 +1,51 @@
-const router = require("express").Router();
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const prisma = require("../utils/prisma");
-const { signAccess } = require("../utils/jwt");
-const { authUser } = require("../middleware/auth");
-const { sendWhatsAppText, sendWhatsAppOtp } = require("../utils/whatsapp");
+/**
+ * Auth routes – Shiprocket Login & Address Vault edition
+ *
+ * User flow  → phone → Shiprocket OTP → verify → JWT issued by us
+ * Admin flow → same login page but detects admin phone → WhatsApp OTP
+ *              → admin email+password second factor (unchanged from before)
+ *
+ * Removed (replaced by Shiprocket):
+ *   POST /identify          – old OTP/password branch gate
+ *   POST /login             – password-based login
+ *   POST /verify-identify-otp
+ *   POST /complete-registration
+ *   POST /complete-password-setup
+ *   POST /forgot-password-request
+ *   POST /forgot-password-verify
+ *
+ * Added:
+ *   POST /sr-send-otp       – proxy: send OTP via Shiprocket
+ *   POST /sr-verify-otp     – proxy: verify OTP, sync user, issue JWT
+ */
+
+const router  = require("express").Router();
+const jwt     = require("jsonwebtoken");
+const prisma  = require("../utils/prisma");
+const { signAccess }                      = require("../utils/jwt");
+const { authUser }                        = require("../middleware/auth");
+const { sendWhatsAppOtp }                 = require("../utils/whatsapp");
+const { sendOtp, verifyOtp }              = require("../utils/shiprocket");
+const { cleanPhone }                      = require("../utils/phone");
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const PASSWORD_MIN_LENGTH = 8;
 
-const { cleanPhone } = require("../utils/phone");
-
-
-function isEmailLike(identifier) {
-  return typeof identifier === "string" && identifier.includes("@");
-}
-
-// Reject anything that isn't actually a string of sane length — closes off
-// type-confusion payloads (objects/arrays passed where a string is expected)
-// before they ever reach Prisma or bcrypt.
-function isSafeString(value, maxLen = 255) {
-  return typeof value === "string" && value.length > 0 && value.length <= maxLen;
-}
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// Never leak internal error details to the client.
 function fail(res, status, message) {
   return res.status(status).json({ error: message });
 }
 
-async function createAndSendOtp(phone, label = "verification code") {
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-  // Remove existing OTPs for this phone number
-  await prisma.otpCode.deleteMany({ where: { phone } });
-
-  // Store new OTP code
-  await prisma.otpCode.create({
-    data: { phone, codeHash: code, expiresAt },
-  });
-
-  console.log(`🔑 [WhatsApp OTP Generated] For mobile: +91 ${phone} (${label}) — Code: ${code}`);
-  await sendWhatsAppOtp(phone, code);
-  return code;
+function publicUser(user) {
+  return {
+    id    : user.id,
+    name  : user.name,
+    email : user.email || "",
+    phone : user.phone || "",
+  };
 }
 
-/** Validates WhatsApp OTP code against stored database OTP */
-async function consumeOtp(phone, otpCode) {
-  if (!otpCode) return { ok: false, status: 400, error: "OTP code is required." };
-
-  const record = await prisma.otpCode.findFirst({
-    where: { phone },
-    orderBy: { createdAt: "desc" },
-  });
-
-  if (!record || record.codeHash !== String(otpCode).trim()) {
-    return { ok: false, status: 400, error: "Invalid OTP verification code." };
-  }
-
-  if (record.expiresAt < new Date()) {
-    await prisma.otpCode.deleteMany({ where: { phone } }).catch(() => {});
-    return { ok: false, status: 400, error: "OTP verification code has expired." };
-  }
-
-  // Delete used OTP code(s)
-  await prisma.otpCode.deleteMany({ where: { phone } }).catch(() => {});
-  return { ok: true };
+function isEmailLike(v) {
+  return typeof v === "string" && v.includes("@");
 }
-
-
-
 
 function signShortToken(payload, scope, expiresIn) {
   return jwt.sign({ ...payload, scope }, JWT_SECRET, { expiresIn });
@@ -83,294 +57,171 @@ function verifyShortToken(token, expectedScope) {
   return payload;
 }
 
-function validatePasswordPair(password, confirmPassword) {
-  if (!isSafeString(password, 128) || !isSafeString(confirmPassword, 128)) {
-    return "Password and confirmation are required";
+
+// ── OTP helpers (still used for admin flow) ──────────────────────────────────
+async function createAndSendAdminOtp(phone) {
+  const code      = Math.floor(100_000 + Math.random() * 900_000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  await prisma.otpCode.deleteMany({ where: { phone } });
+  await prisma.otpCode.create({ data: { phone, codeHash: code, expiresAt } });
+  console.log(`🔑 [Admin OTP] +91 ${phone} — Code: ${code}`);
+  await sendWhatsAppOtp(phone, code);
+}
+
+async function consumeOtp(phone, otpCode) {
+  if (!otpCode) return { ok: false, status: 400, error: "OTP code is required." };
+
+  const record = await prisma.otpCode.findFirst({
+    where    : { phone },
+    orderBy  : { createdAt: "desc" },
+  });
+
+  if (!record || record.codeHash !== String(otpCode).trim())
+    return { ok: false, status: 400, error: "Invalid OTP verification code." };
+
+  if (record.expiresAt < new Date()) {
+    await prisma.otpCode.deleteMany({ where: { phone } }).catch(() => {});
+    return { ok: false, status: 400, error: "OTP verification code has expired." };
   }
-  if (password !== confirmPassword) return "Passwords do not match";
-  if (password.length < PASSWORD_MIN_LENGTH) return `Password must be at least ${PASSWORD_MIN_LENGTH} characters`;
-  return null;
+
+  await prisma.otpCode.deleteMany({ where: { phone } }).catch(() => {});
+  return { ok: true };
 }
 
-function publicUser(user) {
-  return { id: user.id, name: user.name, email: user.email || "", phone: user.phone || "" };
-}
 
-// ── STEP 1: Identify — single entry point for everyone ───────────────
-// Given a phone number, decide the next step without revealing whether
-// the number belongs to an admin: admin numbers and brand-new numbers
-// both simply receive an OTP, so the response can't be used to enumerate
-// admin accounts.
-router.post("/identify", async (req, res) => {
+// ── ① Shiprocket: Send OTP to buyer phone ────────────────────────────────────
+// POST /api/auth/sr-send-otp
+// Body: { phone: "9876543210" }
+//
+// For admin phone numbers we fall back to our own WhatsApp OTP so the admin
+// flow continues to work without a Shiprocket account.
+router.post("/sr-send-otp", async (req, res) => {
   try {
     const phone = cleanPhone(req.body.phone);
-    if (phone.length !== 10) return fail(res, 400, "Please enter a valid 10-digit mobile number");
+    if (phone.length !== 10)
+      return fail(res, 400, "Please enter a valid 10-digit mobile number");
 
-    const admin = await prisma.admin.findFirst({ where: { number: { contains: phone } } });
+    // Admin gate: use our own OTP so admin flow is unchanged
+    const admin = await prisma.admin.findFirst({
+      where: { number: { contains: phone } },
+    });
     if (admin && admin.isActive) {
-      await createAndSendOtp(phone, "access code");
-      return res.json({ step: "otp" });
+      await createAndSendAdminOtp(phone);
+      return res.json({ step: "admin-otp", message: "OTP sent" });
     }
 
-    const user = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
-    if (user && user.passwordHash) {
-      return res.json({ step: "password" });
-    }
-
-    // Either a brand-new number, or an existing legacy (OTP-only) user
-    // who has never set a password yet — both need OTP verification next.
-    await createAndSendOtp(phone);
-    return res.json({ step: "otp" });
+    // Regular buyer: delegate to Shiprocket
+    await sendOtp(phone);
+    res.json({ step: "otp", message: "OTP sent via Shiprocket" });
   } catch (err) {
-    console.error("identify error:", err);
-    fail(res, 500, "Something went wrong. Please try again.");
+    console.error("sr-send-otp error:", err.message);
+    fail(res, 500, err.message || "Failed to send OTP. Please try again.");
   }
 });
 
-// ── STEP 2a (existing user w/ password): direct login, no OTP ────────
-router.post("/login", async (req, res) => {
-  try {
-    const { identifier, password } = req.body;
-    if (!isSafeString(identifier, 255) || !isSafeString(password, 128)) {
-      return fail(res, 400, "Please enter your credentials");
-    }
 
-    // If this identifier belongs to an admin, never authenticate them here
-    // directly — silently kick off the phone-OTP gate instead (2nd factor
-    // credentials are checked afterwards via /api/admin/auth/login).
-    const admin = isEmailLike(identifier)
-      ? await prisma.admin.findFirst({ where: { email: { equals: identifier.toLowerCase().trim(), mode: "insensitive" } } })
-      : await prisma.admin.findFirst({ where: { number: { contains: cleanPhone(identifier) } } });
-
-    if (admin && admin.isActive && admin.number) {
-      const adminPhone = cleanPhone(admin.number);
-      await createAndSendOtp(adminPhone, "access code");
-      return res.json({ step: "admin-otp-required", phone: adminPhone });
-    }
-
-    const user = isEmailLike(identifier)
-      ? await prisma.user.findUnique({ where: { email: identifier.toLowerCase().trim() } })
-      : await prisma.user.findFirst({ where: { phone: { endsWith: cleanPhone(identifier) } } });
-
-    if (!user || !user.isActive) return fail(res, 401, "Invalid credentials");
-    if (!user.passwordHash) {
-      return fail(res, 400, "No password set for this account yet. Use 'Forgot password?' below to set one via OTP.");
-    }
-
-    if (user.lockedUntil && user.lockedUntil > new Date()) {
-      const mins = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
-      return fail(res, 423, `Account temporarily locked. Try again in ${mins} minute(s).`);
-    }
-
-    const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) {
-      const attempts = user.failedLoginAttempts + 1;
-      let lockedUntil = null;
-      if (attempts >= 5) lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
-      else if (attempts >= 3) lockedUntil = new Date(Date.now() + 5 * 60 * 1000);
-      await prisma.user.update({ where: { id: user.id }, data: { failedLoginAttempts: attempts, lockedUntil } });
-      if (attempts >= 5) return fail(res, 423, "Account temporarily locked. Try again in 30 minutes.");
-      if (attempts >= 3) return fail(res, 429, "Too many failed attempts. Try again in 5 minutes.");
-      return fail(res, 401, "Invalid credentials");
-    }
-
-    await prisma.user.update({ where: { id: user.id }, data: { failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() } });
-
-    const token = signAccess({ id: user.id, role: "user" });
-    res.json({ step: "logged-in", accessToken: token, user: publicUser(user) });
-  } catch (err) {
-    console.error("login error:", err);
-    fail(res, 500, "Login failed. Please try again.");
-  }
-});
-
-// ── STEP 2b: Verify the identify OTP, branch into the right next step ─
-router.post("/verify-identify-otp", async (req, res) => {
+// ── ② Shiprocket: Verify OTP, sync user, issue JWT ───────────────────────────
+// POST /api/auth/sr-verify-otp
+// Body: { phone: "9876543210", otp: "123456" }
+// Response: { accessToken, user, srAddresses }
+router.post("/sr-verify-otp", async (req, res) => {
   try {
     const phone = cleanPhone(req.body.phone);
-    const otp = req.body.otp;
-    if (phone.length !== 10 || !otp) return fail(res, 400, "Phone number and OTP code/token are required");
+    const otp   = String(req.body.otp || "").trim();
 
-    const result = await consumeOtp(phone, otp);
-    if (!result.ok) return fail(res, result.status, result.error);
+    if (phone.length !== 10 || !otp)
+      return fail(res, 400, "Phone number and OTP are required");
 
-    const admin = await prisma.admin.findFirst({ where: { number: { contains: phone } } });
+    // ─ Admin path: verify with our own OTP store ─────────────────────────────
+    const admin = await prisma.admin.findFirst({
+      where: { number: { contains: phone } },
+    });
     if (admin && admin.isActive) {
+      const result = await consumeOtp(phone, otp);
+      if (!result.ok) return fail(res, result.status, result.error);
+
+      // Issue a short-lived gate token; admin must still enter email+password
       const gateToken = signShortToken({ adminId: admin.id }, "admin-gate", "5m");
       return res.json({ step: "admin-credentials", gateToken });
     }
 
-    const user = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
-    if (user && !user.passwordHash) {
-      const setupToken = signShortToken({ phone }, "otp-setup", "10m");
-      return res.json({ step: "set-password", setupToken });
-    }
-    if (user && user.passwordHash) {
-      // Edge case: password already set between identify() and here — just log them in.
-      const token = signAccess({ id: user.id, role: "user" });
-      return res.json({ step: "logged-in", accessToken: token, user: publicUser(user) });
-    }
-
-    const setupToken = signShortToken({ phone }, "otp-register", "10m");
-    res.json({ step: "register", setupToken });
-  } catch (err) {
-    console.error("verify-identify-otp error:", err);
-    fail(res, 500, "Something went wrong. Please try again.");
-  }
-});
-
-// ── STEP 3a: Brand-new user completes registration ────────────────────
-router.post("/complete-registration", async (req, res) => {
-  try {
-    const { setupToken, name, email, password, confirmPassword, notified } = req.body;
-    if (!isSafeString(setupToken, 2000)) return fail(res, 400, "Session expired. Please start again.");
-
-    let payload;
+    // ─ Customer path: verify via Shiprocket ──────────────────────────────────
+    let srBuyer;
     try {
-      payload = verifyShortToken(setupToken, "otp-register");
-    } catch {
-      return fail(res, 400, "Session expired. Please verify your number again.");
+      srBuyer = await verifyOtp(phone, otp);
+    } catch (err) {
+      return fail(res, 400, err.message || "Invalid or expired OTP");
     }
 
-    if (!isSafeString(name, 120) || !name.trim()) return fail(res, 400, "Full name is required");
-    const pwError = validatePasswordPair(password, confirmPassword);
-    if (pwError) return fail(res, 400, pwError);
-
-    const phone = payload.phone;
-    const existing = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
-    if (existing) return fail(res, 409, "An account with this number already exists. Please log in instead.");
-
-    const cleanEmail = isSafeString(email, 255) && email.trim() ? email.toLowerCase().trim() : null;
-    if (cleanEmail && !EMAIL_RE.test(cleanEmail)) return fail(res, 400, "Please enter a valid email address.");
-    if (cleanEmail) {
-      const emailExists = await prisma.user.findUnique({ where: { email: cleanEmail } });
-      if (emailExists) return fail(res, 400, "Email is already in use by another account.");
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: {
-        phone,
-        name: name.trim(),
-        email: cleanEmail,
-        passwordHash,
-        notified: notified === true || notified === "true",
-        isVerified: true,
-        lastLoginAt: new Date(),
-      },
+    // Sync buyer into our User table (upsert by phone)
+    let user = await prisma.user.findFirst({
+      where: { phone: { endsWith: phone } },
     });
+
+    if (!user) {
+      // New buyer – create a minimal user record
+      user = await prisma.user.create({
+        data: {
+          phone      : phone,
+          name       : srBuyer.name?.trim()  || "Zupwell Customer",
+          email      : srBuyer.email?.trim() || null,
+          isVerified : true,
+          isActive   : true,
+          lastLoginAt: new Date(),
+        },
+      });
+    } else {
+      // Existing buyer – update name/email if Shiprocket returned richer data
+      const updates = { lastLoginAt: new Date() };
+      if (srBuyer.name?.trim()  && (!user.name  || user.name  === "Zupwell Customer" || user.name === "User"))
+        updates.name  = srBuyer.name.trim();
+      if (srBuyer.email?.trim() && !user.email)
+        updates.email = srBuyer.email.trim();
+
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data : updates,
+      });
+    }
 
     const token = signAccess({ id: user.id, role: "user" });
-    res.json({ accessToken: token, user: publicUser(user) });
-  } catch (err) {
-    console.error("complete-registration error:", err);
-    fail(res, 500, "Registration failed. Please try again.");
-  }
-});
-
-// ── STEP 3b: Legacy (OTP-only) user sets their first password ─────────
-router.post("/complete-password-setup", async (req, res) => {
-  try {
-    const { setupToken, password, confirmPassword } = req.body;
-    if (!isSafeString(setupToken, 2000)) return fail(res, 400, "Session expired. Please start again.");
-
-    let payload;
-    try {
-      payload = verifyShortToken(setupToken, "otp-setup");
-    } catch {
-      return fail(res, 400, "Session expired. Please verify your number again.");
-    }
-
-    const pwError = validatePasswordPair(password, confirmPassword);
-    if (pwError) return fail(res, 400, pwError);
-
-    const user = await prisma.user.findFirst({ where: { phone: { endsWith: payload.phone } } });
-    if (!user) return fail(res, 404, "Account not found");
-
-    const passwordHash = await bcrypt.hash(password, 10);
-    const updated = await prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash, failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() },
+    res.json({
+      step         : "logged-in",
+      accessToken  : token,
+      user         : publicUser(user),
+      srAddresses  : srBuyer.addresses || [],   // Shiprocket vault addresses
     });
-
-    const token = signAccess({ id: updated.id, role: "user" });
-    res.json({ accessToken: token, user: publicUser(updated) });
   } catch (err) {
-    console.error("complete-password-setup error:", err);
+    console.error("sr-verify-otp error:", err);
     fail(res, 500, "Something went wrong. Please try again.");
   }
 });
 
-// ── Forgot password (OTP-based) ────────────────────────────────────────
-router.post("/forgot-password-request", async (req, res) => {
-  try {
-    const phone = cleanPhone(req.body.phone);
-    if (phone.length !== 10) return fail(res, 400, "Please enter a valid 10-digit mobile number");
 
-    const user = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
-    // Always respond identically whether or not the number is registered,
-    // to avoid leaking account existence — only actually send an OTP if found.
-    if (user && user.isActive) {
-      await createAndSendOtp(phone, "password reset code");
-    }
-    res.json({ message: "If this number is registered, an OTP has been sent." });
-  } catch (err) {
-    console.error("forgot-password-request error:", err);
-    fail(res, 500, "Something went wrong. Please try again.");
-  }
-});
+// ── Admin second-factor: email + password ────────────────────────────────────
+// (unchanged — still wired to /api/admin/auth/login in routes/admin.js)
+// This route just exists so the frontend can reach the admin login path.
 
-router.post("/forgot-password-verify", async (req, res) => {
-  try {
-    const phone = cleanPhone(req.body.phone);
-    const { otp, password, confirmPassword } = req.body;
-    if (phone.length !== 10 || !otp) return fail(res, 400, "Phone number and OTP code/token are required");
 
-    const pwError = validatePasswordPair(password, confirmPassword);
-    if (pwError) return fail(res, 400, pwError);
-
-    const result = await consumeOtp(phone, otp);
-    if (!result.ok) return fail(res, result.status, result.error);
-
-    const user = await prisma.user.findFirst({ where: { phone: { endsWith: phone } } });
-    if (!user) return fail(res, 400, "Invalid request");
-
-    const passwordHash = await bcrypt.hash(password, 10);
-    const updated = await prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash, failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() },
-    });
-
-    const token = signAccess({ id: updated.id, role: "user" });
-    res.json({ accessToken: token, user: publicUser(updated) });
-  } catch (err) {
-    console.error("forgot-password-verify error:", err);
-    fail(res, 500, "Something went wrong. Please try again.");
-  }
-});
-
-// ── Session ─────────────────────────────────────────────────────────
-router.get("/me", authUser, (req, res) => {
-  res.json(publicUser(req.user));
-});
-
-// ── Razorpay Phone & OTP Auth Sync ────────────────────────────────────
+// ── Razorpay phone sync (kept for compatibility) ─────────────────────────────
 router.post("/razorpay-sync", async (req, res) => {
   try {
     const { phone: rawPhone, email: rawEmail, name: rawName } = req.body;
     const phone = cleanPhone(rawPhone);
-    if (!phone || phone.length !== 10) {
+    if (!phone || phone.length !== 10)
       return res.status(400).json({ error: "Valid 10-digit phone number required" });
-    }
 
-    // 1. Check if phone matches Admin table (e.g. 7984951482)
+    // Check if admin
     const admin = await prisma.admin.findFirst({
       where: {
         OR: [
           { number: { contains: phone } },
-          rawEmail ? { email: { equals: rawEmail.toLowerCase().trim(), mode: "insensitive" } } : undefined
-        ].filter(Boolean)
-      }
+          rawEmail
+            ? { email: { equals: rawEmail.toLowerCase().trim(), mode: "insensitive" } }
+            : undefined,
+        ].filter(Boolean),
+      },
     });
 
     if (admin && admin.isActive) {
@@ -382,61 +233,46 @@ router.post("/razorpay-sync", async (req, res) => {
       return res.json({
         token,
         role: "ADMIN",
-        user: {
-          id: admin.id,
-          name: admin.name,
-          email: admin.email,
-          phone: admin.number || phone,
-          isAdmin: true
-        }
+        user: { id: admin.id, name: admin.name, email: admin.email, phone: admin.number || phone, isAdmin: true },
       });
     }
 
-    // 2. Customer user lookup or auto-creation
     const cleanEmail = rawEmail && isEmailLike(rawEmail) ? rawEmail.toLowerCase().trim() : null;
     let user = await prisma.user.findFirst({
       where: {
         OR: [
           { phone: { endsWith: phone } },
-          cleanEmail ? { email: cleanEmail } : undefined
-        ].filter(Boolean)
-      }
+          cleanEmail ? { email: cleanEmail } : undefined,
+        ].filter(Boolean),
+      },
     });
 
     if (!user) {
       user = await prisma.user.create({
-        data: {
-          phone,
-          name: rawName?.trim() || "Zupwell Customer",
-          email: cleanEmail,
-          isVerified: true,
-          isActive: true
-        }
+        data: { phone, name: rawName?.trim() || "Zupwell Customer", email: cleanEmail, isVerified: true, isActive: true },
       });
     } else {
-      const updateData = {};
-      if (!user.email && cleanEmail) updateData.email = cleanEmail;
-      if ((!user.name || user.name === "User" || user.name === "Zupwell Customer") && rawName?.trim()) {
-        updateData.name = rawName.trim();
-      }
-      if (Object.keys(updateData).length > 0) {
-        user = await prisma.user.update({ where: { id: user.id }, data: updateData });
-      }
+      const up = {};
+      if (!user.email && cleanEmail) up.email = cleanEmail;
+      if ((!user.name || user.name === "User" || user.name === "Zupwell Customer") && rawName?.trim())
+        up.name = rawName.trim();
+      if (Object.keys(up).length > 0)
+        user = await prisma.user.update({ where: { id: user.id }, data: up });
     }
 
     const token = signAccess({ id: user.id, role: "user" });
-    return res.json({
-      token,
-      accessToken: token,
-      role: "USER",
-      user: publicUser(user)
-    });
+    return res.json({ token, accessToken: token, role: "USER", user: publicUser(user) });
   } catch (err) {
-    console.error("Razorpay Auth Sync Error:", err);
-    res.status(500).json({ error: "Failed to authenticate user via Razorpay" });
+    console.error("Razorpay sync error:", err);
+    res.status(500).json({ error: "Failed to authenticate via Razorpay" });
   }
 });
 
+
+// ── Session / logout ─────────────────────────────────────────────────────────
+router.get("/me", authUser, (req, res) => res.json(publicUser(req.user)));
+
 router.post("/logout", (req, res) => res.json({ message: "Logged out" }));
+
 
 module.exports = router;

@@ -6,14 +6,14 @@ Full-stack e-commerce platform for Zupwell, Ahmedabad. Built with Next.js 14 + E
 
 ## 🏗️ Tech Stack
 
-| Layer     | Tech                                         |
-|-----------|----------------------------------------------|
+| Layer     | Tech                                                         |
+|-----------|--------------------------------------------------------------|
 | Frontend  | Next.js 14, TypeScript, Tailwind CSS, Framer Motion, Zustand |
-| Backend   | Node.js, Express.js, Prisma ORM              |
-| Database  | PostgreSQL                                   |
-| Storage   | Cloudinary (product images)                  |
-| Payments  | Razorpay (UPI, Card, Netbanking)            |
-| PDF       | PDFKit (GST tax invoices)                   |
+| Backend   | Node.js, Express.js, Prisma ORM                              |
+| Database  | PostgreSQL                                                   |
+| Storage   | Cloudinary (product images)                                  |
+| Payments  | Razorpay (UPI, Card, Netbanking)                             |
+| PDF       | PDFKit (GST tax invoices)                                    |
 
 ---
 
