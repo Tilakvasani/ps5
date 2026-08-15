@@ -285,5 +285,4 @@ export const publicApi = {
     api.post("/api/reviews", data).then((r) => r.data),
 };
 
-export { api };
 export default api;
