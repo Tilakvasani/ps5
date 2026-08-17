@@ -1,415 +1,327 @@
 "use client";
-import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Menu, X, HeartPulse, User, LogOut, Search } from "lucide-react";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import { ShoppingCart, Menu, X, User, Package, LogOut, ChevronDown } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useLogout } from "@/lib/useAuth";
-import { productsApi } from "@/lib/api";
-import { cldOptimize } from "@/lib/utils";
-import { useSettings } from "@/lib/useSettings";
+import { setAuthCookie } from "@/lib/auth-cookie";
+import toast from "react-hot-toast";
 
-export default function Navbar() {
-  const pathname = usePathname();
-  const { user, cart } = useStore();
-  const { cgstRate, sgstRate } = useSettings();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [userDropOpen, setUserDropOpen] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const dropRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const cartCount = cart.reduce((s, i) => s + i.qty, 0);
-
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
-    const timer = setTimeout(() => {
-      productsApi
-        .list({ search: searchQuery, page: 1, perPage: 8 })
-        .then((data) => {
-          setSearchResults(data?.products || []);
-        })
-        .catch(() => {});
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  useEffect(() => {
-    if (showSearch) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
-      setSearchQuery("");
-      setSearchResults([]);
-    }
-  }, [showSearch]);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (dropRef.current && !dropRef.current.contains(e.target as Node))
-        setUserDropOpen(false);
+// ── HeadlessCheckout type (from Shiprocket docs) ──────────────────────────────
+declare global {
+  interface Window {
+    HeadlessCheckout?: {
+      buyNow: (
+        event     : MouseEvent,
+        token     : string,
+        options   : { amount: number; themecolor: string; image?: string },
+        callback  : (response: SRPopupResponse) => void
+      ) => void;
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+  }
+}
+
+interface SRPopupResponse {
+  status: "success" | "failure" | "cancelled";
+  result?: {
+    authorised_customer_token: string;
+    expires_at               : string;
+  };
+  data?: {
+    phone              : string;
+    country_code       : string;
+    user_address_consent: boolean;
+    fastrr_cart_id     : string;
+    addresses          : SRRawAddress[];
+  };
+}
+
+interface SRRawAddress {
+  phone      : string;
+  line1      : string;
+  line2      : string;
+  city       : string;
+  pincode    : string;
+  state      : string;
+  country    : string;
+  country_code: string;
+  landmark   : string | null;
+  first_name : string;
+  last_name  : string;
+  email      : string;
+  is_new     : boolean;
+  address_id : string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+export default function Navbar() {
+  const { cart, user, setUser, setToken, setSRAddresses } = useStore();
+  const pathname = usePathname();
+  const router   = useRouter();
+  const logout   = useLogout();
+
+  const [menuOpen, setMenuOpen]     = useState(false);
+  const [userMenuOpen, setUserMenu] = useState(false);
+  const [categoriesOpen, setCatOpen]= useState(false);
+  const [categories, setCategories] = useState<{ id: number; name: string; slug: string }[]>([]);
+  const [scrolled, setScrolled]     = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+  const API_URL   = process.env.NEXT_PUBLIC_API_URL || "";
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const handleLogout = useLogout();
+  useEffect(() => {
+    const onOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setUserMenu(false);
+        setCatOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onOutside);
+    return () => document.removeEventListener("mousedown", onOutside);
+  }, []);
 
-  const NAV_LINKS = [
-    ["SHOP",        "/products"],
-    ["SCIENCE",     "/science"],
-    ["ABOUT",       "/about"],
-    ["TRACK ORDER", "/track-order"],
-    ["FAQs",        "/faqs"],
-    ["CONTACT",     "/contact"],
-  ];
+  useEffect(() => {
+    import("@/lib/api").then(({ productsApi }) =>
+      productsApi.categories().then(setCategories).catch(() => {})
+    );
+  }, []);
+
+  // ── After Shiprocket popup succeeds ──────────────────────────────────────────
+  const handlePopupSuccess = async (response: SRPopupResponse) => {
+    if (response.status !== "success" || !response.result?.authorised_customer_token) {
+      toast.error("Login cancelled or failed. Please try again.");
+      setLoginLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/api/auth/sr-buyer-login`, {
+        method : "POST",
+        headers: { "Content-Type": "application/json" },
+        body   : JSON.stringify({
+          authorisedToken: response.result.authorised_customer_token,
+          phone          : response.data?.phone,
+          addresses      : response.data?.addresses || [],
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Login failed");
+
+      setUser(data.user);
+      setToken(data.accessToken);
+      setAuthCookie(data.accessToken);
+      if (data.srAddresses?.length) setSRAddresses(data.srAddresses);
+
+      toast.success(`Welcome, ${data.user.name || "there"}! 🎉`);
+
+      // Redirect to ?next= if present, otherwise stay on page
+      const next = new URLSearchParams(window.location.search).get("next");
+      if (next) router.push(next);
+    } catch (err: any) {
+      toast.error(err.message || "Login failed. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  // ── Main login button click → get token → show Shiprocket popup ─────────────
+  const handleLoginClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (user) { router.push("/account"); return; }
+
+    setLoginLoading(true);
+
+    try {
+      // Step 1: Get a fresh popup token from our backend
+      const tokenRes = await fetch(`${API_URL}/api/auth/sr-get-token`);
+      const tokenData = await tokenRes.json();
+      if (!tokenRes.ok || !tokenData.token) throw new Error(tokenData.error || "Could not initialise login");
+
+      // Step 2: Check SDK is loaded
+      if (!window.HeadlessCheckout?.buyNow) {
+        throw new Error("Login service not ready. Please refresh the page.");
+      }
+
+      // Step 3: Open the official Shiprocket popup
+      // Amount = 0 for login-only (no cart), themecolor = brand colour without #
+      window.HeadlessCheckout.buyNow(
+        e.nativeEvent,          // the raw MouseEvent (required by SDK)
+        tokenData.token,        // from our backend → Shiprocket
+        {
+          amount    : 0,        // 0 = login/address-only flow, no payment
+          themecolor: "FF5C00", // Zupwell orange without #
+          image     : "https://zupwell.com/zupwell-logo.png",
+        },
+        handlePopupSuccess
+      );
+    } catch (err: any) {
+      toast.error(err.message || "Login failed. Please try again.");
+      setLoginLoading(false);
+    }
+  };
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <nav className="fixed top-0 z-50 w-full">
-      {/* ── Main Nav ── */}
-      <div
-        style={{
-          background: "#FFFFFF",
-          borderBottom: "1.5px solid #EAEAEA",
-        }}
-      >
-        <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300`}
+      style={{
+        background    : scrolled ? "rgba(12,30,57,0.97)" : "rgba(12,30,57,0.92)",
+        backdropFilter: "blur(12px)",
+        borderBottom  : scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
+        boxShadow     : scrolled ? "0 4px 24px rgba(0,0,0,0.18)" : "none",
+      }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link
-            href="/"
-            style={{
-              fontSize: "22px",
-              fontWeight: 900,
-              letterSpacing: "-1.5px",
-              color: "#0C1E39",
-              textDecoration: "none",
-            }}
-          >
-            Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, color: "#FF5C00", marginLeft: "2.5px", letterSpacing: "1px", verticalAlign: "super" }}>TM</sup>
+          <Link href="/" className="flex items-center shrink-0">
+            <span className="text-3xl font-black text-white" style={{ letterSpacing: "-1.5px", fontWeight: 900 }}>
+              Zupwell<sup style={{ fontSize: "10px", fontWeight: 700, marginLeft: "2px", verticalAlign: "super" }}>TM</sup>
+            </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-7">
-            {NAV_LINKS.map(([label, href]) => {
-              const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
-              return (
-                <Link
-                  key={label}
-                  href={href}
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: 700,
-                    color: isActive ? "#FF5C00" : "#0C1E39",
-                    letterSpacing: "0.5px",
-                    transition: "color 0.15s",
-                    textDecoration: "none",
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#FF5C00")}
-                  onMouseLeave={e => (e.currentTarget.style.color = isActive ? "#FF5C00" : "#0C1E39")}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Right side */}
-          <div className="flex items-center gap-3">
-
-            {/* Search icon */}
-            <button
-              onClick={() => setShowSearch(true)}
-              className="hidden md:flex p-2 transition-colors"
-              style={{ color: "#0C1E39" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#FF5C00")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#0C1E39")}
-              aria-label="Search"
-            >
-              <Search size={18} />
-            </button>
-
-            {/* Cart */}
-            <Link
-              href="/cart"
-              className="relative p-2 transition-colors"
-              style={{ color: "#0C1E39" }}
-              aria-label={`Cart${cartCount > 0 ? ` (${cartCount} items)` : ""}`}
-              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = "#FF5C00"}
-              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = "#0C1E39"}
-            >
-              <ShoppingCart size={20} />
-              <AnimatePresence>
-                {cartCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full text-[10px] font-black text-white flex items-center justify-center"
-                    style={{
-                      background: "var(--or)",
-                      boxShadow: "0 0 8px rgba(255,92,0,0.45)",
-                    }}
-                  >
-                    {cartCount}
-                  </motion.span>
-                )}
-              </AnimatePresence>
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-1" ref={dropdownRef}>
+            <Link href="/products" className={`nav-link ${isActive("/products") ? "text-white" : "text-white/70 hover:text-white"}`}>
+              Shop All
             </Link>
 
-            {/* Auth */}
-            {user ? (
-              <div className="relative" ref={dropRef}>
-                <button
-                  onClick={() => setUserDropOpen(!userDropOpen)}
-                  className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors"
-                  style={{
-                    border: "1.5px solid #EAEAEA",
-                    color: "#0C1E39",
-                    background: "#FFFFFF",
-                  }}
-                >
-                  <div
-                    className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-black text-white"
-                    style={{ background: "var(--or)" }}
-                  >
-                    {user.name[0].toUpperCase()}
-                  </div>
-                  <span className="hidden md:inline" style={{ color: "#0C1E39", fontSize: "12px", fontWeight: 700 }}>
-                    {user.name.split(" ")[0]}
-                  </span>
-                </button>
-                <AnimatePresence>
-                  {userDropOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-12 w-48 overflow-hidden"
-                      style={{
-                        background: "#FFFFFF",
-                        border: "1.5px solid #EAEAEA",
-                        borderRadius: "16px",
-                        boxShadow: "0 12px 32px rgba(0,0,0,0.08)",
-                      }}
+            <div className="relative">
+              <button
+                onClick={() => setCatOpen(!categoriesOpen)}
+                className="nav-link flex items-center gap-1 text-white/70 hover:text-white"
+              >
+                Categories
+                <ChevronDown size={14} className={`transition-transform ${categoriesOpen ? "rotate-180" : ""}`} />
+              </button>
+              {categoriesOpen && categories.length > 0 && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50">
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat.id}
+                      href={`/products?category=${cat.slug}`}
+                      className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#FF5C00] transition-colors"
+                      onClick={() => setCatOpen(false)}
                     >
-                      <Link
-                        href="/account"
-                        onClick={() => setUserDropOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-sm transition-colors"
-                        style={{ color: "#0C1E39", fontSize: "12px", fontWeight: 700 }}
-                        onMouseEnter={e => (e.currentTarget.style.background = "#F8F8F8")}
-                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                      >
-                        <User size={14} style={{ color: "#6B7280" }} /> My Account
-                      </Link>
-                      <Link
-                        href="/account?tab=orders"
-                        onClick={() => setUserDropOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-sm transition-colors"
-                        style={{ color: "#0C1E39", fontSize: "12px", fontWeight: 700 }}
-                        onMouseEnter={e => (e.currentTarget.style.background = "#F8F8F8")}
-                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                      >
-                        <HeartPulse size={14} style={{ color: "#6B7280" }} /> My Orders
-                      </Link>
-                      <div style={{ height: "1px", background: "#EAEAEA" }} />
-                      <button
-                        onClick={handleLogout}
-                        className="flex w-full items-center gap-3 px-4 py-3 text-sm transition-colors"
-                        style={{ color: "#FF5C00", fontSize: "12px", fontWeight: 700 }}
-                        onMouseEnter={e => (e.currentTarget.style.background = "#F8F8F8")}
-                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                      >
-                        <LogOut size={14} /> Sign Out
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      {cat.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Link href="/track-order" className={`nav-link ${isActive("/track-order") ? "text-white" : "text-white/70 hover:text-white"}`}>
+              Track Order
+            </Link>
+          </nav>
+
+          {/* Right: cart + login */}
+          <div className="flex items-center gap-2" ref={dropdownRef}>
+
+            {/* Cart */}
+            <Link href="/cart" className="relative p-2 text-white/80 hover:text-white transition-colors">
+              <ShoppingCart size={20} />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-[#FF5C00] text-white text-[10px] font-black rounded-full flex items-center justify-center">
+                  {cartCount > 9 ? "9+" : cartCount}
+                </span>
+              )}
+            </Link>
+
+            {/* Logged in → user dropdown */}
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setUserMenu(!userMenuOpen)}
+                  className="flex items-center gap-1.5 text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-all"
+                >
+                  <div className="h-7 w-7 rounded-lg bg-[#FF5C00] flex items-center justify-center text-xs font-bold text-white">
+                    {user.name?.[0]?.toUpperCase()}
+                  </div>
+                  <ChevronDown size={12} className={`transition-transform ${userMenuOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50">
+                    <div className="px-4 py-2 border-b border-slate-100">
+                      <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        {user.phone ? `+91 ${user.phone}` : user.email}
+                      </p>
+                    </div>
+                    <Link href="/account" onClick={() => setUserMenu(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                      <User size={14} /> My Account
+                    </Link>
+                    <Link href="/account?tab=orders" onClick={() => setUserMenu(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                      <Package size={14} /> My Orders
+                    </Link>
+                    <button
+                      onClick={() => { setUserMenu(false); logout(); }}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 w-full text-left"
+                    >
+                      <LogOut size={14} /> Sign Out
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="hidden md:flex items-center">
-                <Link
-                  href="/login"
-                  className="zbtn-or"
-                  style={{ borderRadius: "30px", fontSize: "11px", padding: "8px 18px" }}
-                >
-                  SIGN IN
-                </Link>
-              </div>
+              /* ── Not logged in: triggers Shiprocket popup ─────────────────── */
+              <button
+                onClick={handleLoginClick}
+                disabled={loginLoading}
+                className="flex items-center gap-1.5 text-sm font-bold text-white bg-[#FF5C00] hover:bg-[#E04B00] disabled:opacity-70 px-3 py-1.5 rounded-xl transition-all"
+              >
+                {loginLoading ? (
+                  <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                ) : (
+                  <User size={15} />
+                )}
+                {loginLoading ? "Loading..." : "Login"}
+              </button>
             )}
 
-            {/* Mobile search */}
-            <button
-              className="md:hidden p-1 transition-colors"
-              style={{ color: "#0C1E39" }}
-              onClick={() => setShowSearch(true)}
-              aria-label="Search"
-            >
-              <Search size={20} />
-            </button>
-
-            {/* Mobile hamburger */}
-            <button
-              className="md:hidden transition-colors p-1"
-              style={{ color: "#0C1E39" }}
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-            >
-              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+            {/* Mobile menu toggle */}
+            <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden text-white/80 hover:text-white p-2">
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {menuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden overflow-hidden"
-              style={{ background: "#FFFFFF", borderTop: "1.5px solid #EAEAEA" }}
-            >
-              <div className="px-6 py-4 flex flex-col gap-1">
-                {NAV_LINKS.map(([label, href]) => (
-                  <Link
-                    key={label}
-                    href={href}
-                    className="py-3 font-bold border-b transition-colors"
-                    style={{
-                      color: "#0C1E39",
-                      borderColor: "#EAEAEA",
-                      fontSize: "11px",
-                      letterSpacing: "0.5px",
-                      textDecoration: "none",
-                    }}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {label}
-                  </Link>
-                ))}
-                <Link
-                  href="/cart"
-                  className="py-3 font-bold border-b"
-                  style={{ color: "#0C1E39", borderColor: "#EAEAEA", fontSize: "11px" }}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  CART ({cartCount})
-                </Link>
-                {user ? (
-                  <>
-                    <Link href="/account" className="py-2 font-bold" style={{ color: "#0C1E39", fontSize: "11px" }} onClick={() => setMenuOpen(false)}>ACCOUNT</Link>
-                    <button onClick={handleLogout} className="text-left py-2 font-bold" style={{ color: "var(--or)", fontSize: "11px" }}>SIGN OUT</button>
-                  </>
-                ) : (
-                  <div className="flex flex-col pt-3">
-                    <Link
-                      href="/login"
-                      className="zbtn-or text-center"
-                      style={{ borderRadius: "30px", justifyContent: "center" }}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      SIGN IN
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        {/* Search Modal Overlay */}
-        <AnimatePresence>
-          {showSearch && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex flex-col pt-24 px-6 md:px-12 pb-6"
-              style={{ background: "rgba(248, 248, 248, 0.98)", backdropFilter: "blur(8px)" }}
-            >
-              <div className="mx-auto w-full max-w-2xl flex flex-col h-full">
-                {/* Search Bar Input Row */}
-                <div className="flex items-center gap-3 pb-4 border-b" style={{ borderColor: "#EAEAEA" }}>
-                  <Search size={22} className="text-orange-500 shrink-0" style={{ color: "var(--or)" }} />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="Search for product (e.g. Electrolytes)..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-transparent text-xl font-bold border-none outline-none text-[#0C1E39] placeholder-gray-400"
-                  />
-                  <button
-                    onClick={() => setShowSearch(false)}
-                    className="p-2 rounded-full hover:bg-black/5 transition-colors text-gray-500 hover:text-[#0C1E39]"
-                    aria-label="Close search"
-                  >
-                    <X size={22} />
-                  </button>
-                </div>
-
-                {/* Results Container */}
-                <div className="flex-1 overflow-y-auto mt-6 pr-2 custom-scrollbar">
-                  {searchQuery.trim() === "" ? (
-                    <div className="text-center py-12 text-sm text-gray-500">
-                      Type name of the product above to search.
-                    </div>
-                  ) : searchResults.length === 0 ? (
-                    <div className="text-center py-12 text-sm text-gray-500">
-                      No products found matching &quot;{searchQuery}&quot;.
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {searchResults.map((product) => {
-                        const primaryImage = product.images?.find((i: any) => i.isPrimary)?.imageUrl || product.images?.[0]?.imageUrl;
-                        const finalPrice = Math.round(Number(product.sellingPrice) * (1 + cgstRate + sgstRate));
-                        return (
-                          <Link
-                            key={product.id}
-                            href={`/products/${product.slug}`}
-                            onClick={() => setShowSearch(false)}
-                            className="flex items-center gap-4 p-3 rounded-2xl border transition-all hover:bg-black/5"
-                            style={{ borderColor: "#EAEAEA", background: "#FFFFFF" }}
-                          >
-                            {primaryImage ? (
-                              <img
-                                src={cldOptimize(primaryImage, 112)}
-                                alt={product.name}
-                                width={112}
-                                height={112}
-                                loading="lazy"
-                                decoding="async"
-                                className="h-14 w-14 rounded-xl object-cover bg-black/5"
-                              />
-                            ) : (
-                              <div className="h-14 w-14 rounded-xl flex items-center justify-center bg-black/5 text-gray-500">
-                                💊
-                              </div>
-                            )}
-                            <div className="flex-1">
-                              <h4 className="font-bold text-sm text-[#0C1E39]">{product.name}</h4>
-                              <p className="text-xs text-orange-500 mt-0.5" style={{ color: "var(--or)" }}>
-                                ₹{finalPrice} <span className="text-gray-400 text-[10px] ml-1">Includes all taxes</span>
-                              </p>
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-500 group-hover:text-[#0C1E39] px-3 py-1 rounded-lg border border-gray-300">
-                              VIEW
-                            </span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-white/10 py-3 space-y-1">
+            <Link href="/products"    onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm font-medium text-white/80 hover:text-white">Shop All</Link>
+            <Link href="/track-order" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm font-medium text-white/80 hover:text-white">Track Order</Link>
+            {!user && (
+              <button
+                onClick={(e) => { setMenuOpen(false); handleLoginClick(e as any); }}
+                className="block w-full text-left px-3 py-2 text-sm font-bold text-[#FF5C00]"
+              >
+                Login
+              </button>
+            )}
+            {user && (
+              <>
+                <Link href="/account"            onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-white/80 hover:text-white">My Account</Link>
+                <Link href="/account?tab=orders" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-white/80 hover:text-white">My Orders</Link>
+                <button onClick={() => { setMenuOpen(false); logout(); }} className="block w-full text-left px-3 py-2 text-sm text-red-400">Sign Out</button>
+              </>
+            )}
+          </div>
+        )}
       </div>
-    </nav>
+    </header>
   );
 }
